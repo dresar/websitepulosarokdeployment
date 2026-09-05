@@ -1,0 +1,260 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    .form-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .age-range-info {
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .code-preview {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Form Header -->
+    <div class="form-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-2">
+                    <i class="fas fa-{% if patient_type %}edit{% else %}plus{% endif %} mr-3"></i>
+                    {{ page_title }}
+                </h2>
+                <p class="mb-0 opacity-75">{{ page_subtitle }}</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{% url 'admin_panel:posyandu:patient_types' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="patientTypeForm">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h5 class="mb-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                Informasi Dasar
+            </h5>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name" class="required-field">Nama Jenis Pasien</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{% if form_data.name %}{{ form_data.name }}{% elif patient_type %}{{ patient_type.name }}{% endif %}" 
+                               required placeholder="Contoh: Balita, Ibu Hamil, Lansia">
+                        <div class="form-help">Nama lengkap jenis pasien yang akan ditampilkan</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="code" class="required-field">Kode</label>
+                        <input type="text" class="form-control" id="code" name="code" 
+                               value="{% if form_data.code %}{{ form_data.code }}{% elif patient_type %}{{ patient_type.code }}{% endif %}" 
+                               required placeholder="Contoh: balita, ibu_hamil, lansia">
+                        <div class="form-help">Kode unik untuk jenis pasien (huruf kecil, underscore)</div>
+                        <div class="code-preview mt-2" id="codePreview" style="display: none;">
+                            Kode: <span id="codeValue"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="description">Deskripsi</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Deskripsi singkat tentang jenis pasien ini">{% if form_data.description %}{{ form_data.description }}{% elif patient_type %}{{ patient_type.description }}{% endif %}</textarea>
+                        <div class="form-help">Penjelasan tambahan tentang jenis pasien ini</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Age Range -->
+        <div class="form-section">
+            <h5 class="mb-4">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                Rentang Usia (Opsional)
+            </h5>
+            
+            <div class="age-range-info">
+                <p class="mb-2"><strong>Informasi:</strong> Rentang usia membantu mengkategorikan pasien berdasarkan umur</p>
+                <ul class="mb-0 small">
+                    <li>Kosongkan jika tidak ada batasan usia</li>
+                    <li>Usia minimum: batas bawah usia</li>
+                    <li>Usia maksimum: batas atas usia</li>
+                </ul>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="age_min">Usia Minimum (tahun)</label>
+                        <input type="number" class="form-control" id="age_min" name="age_min" 
+                               value="{% if form_data.age_min %}{{ form_data.age_min }}{% elif patient_type.age_min %}{{ patient_type.age_min }}{% endif %}" 
+                               min="0" placeholder="0">
+                        <div class="form-help">Usia minimum untuk jenis pasien ini</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="age_max">Usia Maksimum (tahun)</label>
+                        <input type="number" class="form-control" id="age_max" name="age_max" 
+                               value="{% if form_data.age_max %}{{ form_data.age_max }}{% elif patient_type.age_max %}{{ patient_type.age_max }}{% endif %}" 
+                               min="0" placeholder="100">
+                        <div class="form-help">Usia maksimum untuk jenis pasien ini</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-section">
+            <h5 class="mb-4">
+                <i class="fas fa-toggle-on mr-2"></i>
+                Status
+            </h5>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                           {% if form_data.is_active or patient_type.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">
+                        Aktif
+                    </label>
+                </div>
+                <div class="form-help">Jenis pasien aktif akan tersedia untuk dipilih dalam form rekam kesehatan</div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-section">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'admin_panel:posyandu:patient_types' %}" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>
+                            Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-2"></i>
+                            {% if patient_type %}Perbarui{% else %}Simpan{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-format code input
+    $('#code').on('input', function() {
+        let value = $(this).val();
+        // Convert to lowercase and replace spaces/special chars with underscore
+        value = value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+        $(this).val(value);
+        
+        // Show code preview
+        if (value) {
+            $('#codeValue').text(value);
+            $('#codePreview').show();
+        } else {
+            $('#codePreview').hide();
+        }
+    });
+    
+    // Validate age range
+    $('#age_min, #age_max').on('change', function() {
+        const ageMin = parseInt($('#age_min').val()) || 0;
+        const ageMax = parseInt($('#age_max').val()) || 0;
+        
+        if (ageMin > 0 && ageMax > 0 && ageMin > ageMax) {
+            alert('Usia minimum tidak boleh lebih besar dari usia maksimum!');
+            $(this).val('');
+        }
+    });
+    
+    // Form validation
+    $('#patientTypeForm').on('submit', function(e) {
+        const name = $('#name').val().trim();
+        const code = $('#code').val().trim();
+        
+        if (!name || !code) {
+            e.preventDefault();
+            alert('Nama dan kode jenis pasien harus diisi!');
+            return false;
+        }
+        
+        // Validate code format
+        if (!/^[a-z_]+$/.test(code)) {
+            e.preventDefault();
+            alert('Kode harus menggunakan huruf kecil dan underscore saja!');
+            return false;
+        }
+        
+        // Validate age range
+        const ageMin = parseInt($('#age_min').val()) || 0;
+        const ageMax = parseInt($('#age_max').val()) || 0;
+        
+        if (ageMin > 0 && ageMax > 0 && ageMin > ageMax) {
+            e.preventDefault();
+            alert('Usia minimum tidak boleh lebih besar dari usia maksimum!');
+            return false;
+        }
+    });
+    
+    // Initialize code preview if editing
+    {% if patient_type %}
+        $('#code').trigger('input');
+    {% endif %}
+});
+</script>
+{% endblock %}
+

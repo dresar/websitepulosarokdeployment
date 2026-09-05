@@ -1,0 +1,86 @@
+[
+  {
+    "model": "references.dusun",
+    "pk": 1,
+    "fields": {
+      "name": "Dusun Mawar",
+      "code": "DSN001",
+      "description": "Dusun Mawar terletak di bagian utara desa",
+      "area_size": "25.50",
+      "population_count": 150,
+      "is_active": true,
+      "created_at": "2024-01-01 08:00:00",
+      "updated_at": "2024-01-01 08:00:00"
+    }
+  },
+  {
+    "model": "references.dusun",
+    "pk": 2,
+    "fields": {
+      "name": "Dusun Melati",
+      "code": "DSN002",
+      "description": "Dusun Melati terletak di bagian selatan desa",
+      "area_size": "30.75",
+      "population_count": 200,
+      "is_active": true,
+      "created_at": "2024-01-01 08:00:00",
+      "updated_at": "2024-01-01 08:00:00"
+    }
+  },
+  {
+    "model": "references.dusun",
+    "pk": 3,
+    "fields": {
+      "name": "Dusun Kenanga",
+      "code": "DSN003",
+      "description": "Dusun Kenanga terletak di bagian timur desa",
+      "area_size": "22.25",
+      "population_count": 175,
+      "is_active": true,
+      "created_at": "2024-01-01 08:00:00",
+      "updated_at": "2024-01-01 08:00:00"
+    }
+  },
+  {
+    "model": "documents.documenttype",
+    "pk": 1,
+    "fields": {
+      "name": "Surat Keterangan Domisili",
+      "description": "Surat keterangan yang menyatakan bahwa seseorang berdomisili di wilayah desa",
+      "required_fields": "[\"nama\", \"nik\", \"alamat\", \"keperluan\"]",
+      "processing_time_days": 3,
+      "fee": "5000.00",
+      "is_active": true,
+      "created_at": "2024-01-01 08:00:00",
+      "updated_at": "2024-01-01 08:00:00"
+    }
+  },
+  {
+    "model": "documents.documenttype",
+    "pk": 2,
+    "fields": {
+      "name": "Surat Keterangan Tidak Mampu",
+      "description": "Surat keterangan yang menyatakan bahwa seseorang termasuk keluarga tidak mampu",
+      "required_fields": "[\"nama\", \"nik\", \"alamat\", \"pekerjaan\", \"penghasilan\"]",
+      "processing_time_days": 5,
+      "fee": "0.00",
+      "is_active": true,
+      "created_at": "2024-01-01 08:00:00",
+      "updated_at": "2024-01-01 08:00:00"
+    }
+  },
+  {
+    "model": "documents.documenttype",
+    "pk": 3,
+    "fields": {
+      "name": "Surat Pengantar Nikah",
+      "description": "Surat pengantar untuk keperluan pernikahan",
+      "required_fields": "[\"nama_pria\", \"nama_wanita\", \"alamat\", \"tanggal_nikah\"]",
+      "processing_time_days": 7,
+      "fee": "10000.00",
+      "is_active": true,
+      "created_at": "2024-01-01 08:00:00",
+      "updated_at": "2024-01-01 08:00:00"
+    }
+  }
+]

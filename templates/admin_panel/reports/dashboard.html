@@ -1,0 +1,532 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Laporan dan Statistik{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .stats-card.success {
+        border-left-color: #28a745;
+    }
+    
+    .stats-card.warning {
+        border-left-color: #ffc107;
+    }
+    
+    .stats-card.danger {
+        border-left-color: #dc3545;
+    }
+    
+    .stats-card.info {
+        border-left-color: #17a2b8;
+    }
+    
+    .stats-card.primary {
+        border-left-color: #007bff;
+    }
+    
+    .stats-card.secondary {
+        border-left-color: #6c757d;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .date-filter {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .export-buttons {
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-export {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-chart-bar text-primary mr-2"></i>
+            Laporan dan Statistik
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2" role="group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshReports()">
+                    <i class="fas fa-sync-alt mr-1"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportAllReports()">
+                    <i class="fas fa-download mr-1"></i> Export Semua
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="date-filter">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="date_from" class="form-label">Dari Tanggal</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-4">
+                <label for="date_to" class="form-label">Sampai Tanggal</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter mr-1"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="export-buttons">
+        <button class="btn btn-success btn-export" onclick="exportData('beneficiaries')">
+            <i class="fas fa-users mr-1"></i> Export Penerima Bantuan
+        </button>
+        <button class="btn btn-info btn-export" onclick="exportData('businesses')">
+            <i class="fas fa-store mr-1"></i> Export Bisnis
+        </button>
+        <button class="btn btn-warning btn-export" onclick="exportData('complaints')">
+            <i class="fas fa-exclamation-triangle mr-1"></i> Export Pengaduan
+        </button>
+        <button class="btn btn-secondary btn-export" onclick="exportData('documents')">
+            <i class="fas fa-file-alt mr-1"></i> Export Dokumen
+        </button>
+        <button class="btn btn-primary btn-export" onclick="exportData('tourism')">
+            <i class="fas fa-map-marker-alt mr-1"></i> Export Pariwisata
+        </button>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row">
+        <!-- Beneficiaries Stats -->
+        <div class="col-md-4">
+            <div class="stats-card success">
+                <div class="stats-number">{{ beneficiaries_stats.total }}</div>
+                <div class="stats-label">Total Penerima Bantuan</div>
+                <div class="mt-2">
+                    <small class="text-success">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        {{ beneficiaries_stats.active }} Aktif
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Stats -->
+        <div class="col-md-4">
+            <div class="stats-card info">
+                <div class="stats-number">{{ business_stats.total }}</div>
+                <div class="stats-label">Total Bisnis</div>
+                <div class="mt-2">
+                    <small class="text-info">
+                        <i class="fas fa-store mr-1"></i>
+                        {{ business_stats.active }} Aktif
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complaints Stats -->
+        <div class="col-md-4">
+            <div class="stats-card warning">
+                <div class="stats-number">{{ complaints_stats.total }}</div>
+                <div class="stats-label">Total Pengaduan</div>
+                <div class="mt-2">
+                    <small class="text-warning">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        {{ complaints_stats.pending }} Pending
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Documents Stats -->
+        <div class="col-md-4">
+            <div class="stats-card primary">
+                <div class="stats-number">{{ documents_stats.total_requests }}</div>
+                <div class="stats-label">Permintaan Dokumen</div>
+                <div class="mt-2">
+                    <small class="text-primary">
+                        <i class="fas fa-file-alt mr-1"></i>
+                        {{ documents_stats.approved }} Disetujui
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tourism Stats -->
+        <div class="col-md-4">
+            <div class="stats-card secondary">
+                <div class="stats-number">{{ tourism_stats.locations }}</div>
+                <div class="stats-label">Lokasi Wisata</div>
+                <div class="mt-2">
+                    <small class="text-secondary">
+                        <i class="fas fa-map-marker-alt mr-1"></i>
+                        {{ tourism_stats.published }} Dipublikasi
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Population Stats -->
+        <div class="col-md-4">
+            <div class="stats-card danger">
+                <div class="stats-number">{{ population_stats.total }}</div>
+                <div class="stats-label">Total Penduduk</div>
+                <div class="mt-2">
+                    <small class="text-danger">
+                        <i class="fas fa-users mr-1"></i>
+                        {{ population_stats.male }} L, {{ population_stats.female }} P
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="row">
+        <!-- Beneficiaries by Category -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-users text-success mr-2"></i>
+                    Penerima Bantuan per Kategori
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th class="text-right">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in beneficiaries_stats.by_category|slice:":10" %}
+                            <tr>
+                                <td>{{ category.name }}</td>
+                                <td class="text-right">
+                                    <span class="badge badge-success">{{ category.count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Tidak ada data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business by Category -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-store text-info mr-2"></i>
+                    Bisnis per Kategori
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th class="text-right">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in business_stats.by_category|slice:":10" %}
+                            <tr>
+                                <td>{{ category.name }}</td>
+                                <td class="text-right">
+                                    <span class="badge badge-info">{{ category.count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Tidak ada data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Complaints by Category -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                    Pengaduan per Kategori
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th class="text-right">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in complaints_stats.by_category|slice:":10" %}
+                            <tr>
+                                <td>{{ category.name }}</td>
+                                <td class="text-right">
+                                    <span class="badge badge-warning">{{ category.count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Tidak ada data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents by Type -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-file-alt text-primary mr-2"></i>
+                    Dokumen per Jenis
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Jenis Dokumen</th>
+                                <th class="text-right">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc_type in documents_stats.by_type|slice:":10" %}
+                            <tr>
+                                <td>{{ doc_type.name }}</td>
+                                <td class="text-right">
+                                    <span class="badge badge-primary">{{ doc_type.count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Tidak ada data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Population by Dusun -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-map-marker-alt text-danger mr-2"></i>
+                    Populasi per Dusun
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Dusun</th>
+                                <th class="text-right">Jumlah Keluarga</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dusun in population_stats.by_dusun|slice:":10" %}
+                            <tr>
+                                <td>{{ dusun.name }}</td>
+                                <td class="text-right">
+                                    <span class="badge badge-danger">{{ dusun.count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">Tidak ada data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tourism Statistics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-star text-warning mr-2"></i>
+                    Statistik Pariwisata
+                </h5>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-warning">{{ tourism_stats.events }}</div>
+                            <div class="stats-label">Event</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-info">{{ tourism_stats.packages }}</div>
+                            <div class="stats-label">Paket Wisata</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-success">{{ tourism_stats.reviews }}</div>
+                            <div class="stats-label">Review</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-primary">{{ tourism_stats.avg_rating|floatformat:1 }}</div>
+                            <div class="stats-label">Rating Rata-rata</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="section-title">
+                    <i class="fas fa-chart-pie text-secondary mr-2"></i>
+                    Status Pengaduan
+                </h5>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-warning">{{ complaints_stats.pending }}</div>
+                            <div class="stats-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-info">{{ complaints_stats.in_progress }}</div>
+                            <div class="stats-label">Diproses</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-success">{{ complaints_stats.resolved }}</div>
+                            <div class="stats-label">Selesai</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="stats-number text-danger">{{ documents_stats.rejected }}</div>
+                            <div class="stats-label">Dokumen Ditolak</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function refreshReports() {
+    location.reload();
+}
+
+function exportAllReports() {
+    if (confirm('Apakah Anda yakin ingin mengexport semua data?')) {
+        // Export all data
+        window.open('{% url "admin_panel:export_data" %}?type=all', '_blank');
+    }
+}
+
+function exportData(type) {
+    const format = prompt('Pilih format export:\n1. CSV\n2. Excel\n3. PDF', '1');
+    let formatParam = 'csv';
+    
+    switch(format) {
+        case '1':
+            formatParam = 'csv';
+            break;
+        case '2':
+            formatParam = 'excel';
+            break;
+        case '3':
+            formatParam = 'pdf';
+            break;
+        default:
+            formatParam = 'csv';
+    }
+    
+    window.open(`{% url "admin_panel:export_data" %}?type=${type}&format=${formatParam}`, '_blank');
+}
+
+// Auto refresh every 5 minutes
+setInterval(function() {
+    // Optional: Auto refresh functionality
+}, 300000);
+</script>
+{% endblock %}

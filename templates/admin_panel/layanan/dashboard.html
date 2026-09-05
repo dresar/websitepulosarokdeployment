@@ -1,0 +1,582 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .layanan-dashboard {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .dashboard-header {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .stat-card.feedback::before {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .stat-card.faq::before {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    }
+
+    .stat-card.contact::before {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+    }
+
+    .stat-card.service::before {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-icon.feedback {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .stat-icon.faq {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    }
+
+    .stat-icon.contact {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+    }
+
+    .stat-icon.service {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .stat-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .quick-actions {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .quick-actions h5 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        border-color: #007bff;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .action-btn i {
+        font-size: 1.25rem;
+        color: #007bff;
+    }
+
+    .recent-activity {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .recent-activity h5 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1rem;
+        color: white;
+    }
+
+    .activity-icon.feedback {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .activity-icon.faq {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    }
+
+    .activity-icon.contact {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+    }
+
+    .activity-icon.service {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 2px solid #e9ecef;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .layanan-dashboard {
+            padding: 0.5rem 0;
+        }
+        
+        .dashboard-header {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-header h4 {
+            font-size: 1.25rem;
+        }
+        
+        .dashboard-header .btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 1.2rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+        }
+        
+        .stat-details {
+            font-size: 0.75rem;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .action-btn {
+            padding: 1rem;
+        }
+        
+        .action-btn i {
+            font-size: 1rem;
+        }
+        
+        .quick-actions,
+        .recent-activity {
+            padding: 1rem;
+        }
+        
+        .activity-item {
+            padding: 0.75rem 0;
+        }
+        
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 0.9rem;
+        }
+        
+        .activity-title {
+            font-size: 0.9rem;
+        }
+        
+        .activity-description {
+            font-size: 0.8rem;
+        }
+        
+        .activity-time {
+            font-size: 0.75rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .dashboard-header .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .dashboard-header .d-flex > div {
+            width: 100%;
+        }
+        
+        .dashboard-header .d-flex .d-flex {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .dashboard-header .btn {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.75rem;
+            padding: 0.375rem 0.5rem;
+        }
+        
+        .stat-card {
+            padding: 0.75rem;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.75rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem;
+        }
+        
+        .action-btn strong {
+            font-size: 0.9rem;
+        }
+        
+        .action-btn small {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="layanan-dashboard">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Dashboard Layanan</h4>
+                            <p class="text-muted mb-0">Kelola semua layanan desa</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_panel:layanan:feedback_form' %}" class="btn btn-primary">
+                                <i class="fas fa-comments mr-1"></i>Feedback
+                            </a>
+                            <a href="{% url 'admin_panel:layanan:faq_form' %}" class="btn btn-primary">
+                                <i class="fas fa-question-circle mr-1"></i>FAQ
+                            </a>
+                            <a href="{% url 'admin_panel:layanan:contact_form' %}" class="btn btn-primary">
+                                <i class="fas fa-phone mr-1"></i>Kontak
+                            </a>
+                            <a href="{% url 'admin_panel:layanan:service_form' %}" class="btn btn-primary">
+                                <i class="fas fa-cogs mr-1"></i>Layanan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card feedback">
+                        <div class="stat-icon feedback">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-number">{{ total_feedback }}</div>
+                        <div class="stat-label">Total Feedback</div>
+                        <div class="stat-details">
+                            <span>Bulan ini: {{ monthly_feedback }}</span>
+                            <span class="text-warning">Belum dibaca: {{ unread_feedback }}</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card faq">
+                        <div class="stat-icon faq">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="stat-number">{{ total_faq }}</div>
+                        <div class="stat-label">Total FAQ</div>
+                        <div class="stat-details">
+                            <span>Aktif: {{ active_faq }}</span>
+                            <span>Kategori: {{ faq_categories }}</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card contact">
+                        <div class="stat-icon contact">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="stat-number">{{ total_contacts }}</div>
+                        <div class="stat-label">Kontak Layanan</div>
+                        <div class="stat-details">
+                            <span>Aktif: {{ active_contacts }}</span>
+                            <span>Departemen: {{ contact_departments }}</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card service">
+                        <div class="stat-icon service">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div class="stat-number">{{ total_services }}</div>
+                        <div class="stat-label">Layanan</div>
+                        <div class="stat-details">
+                            <span>Aktif: {{ active_services }}</span>
+                            <span>Kategori: {{ service_categories }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h5><i class="fas fa-bolt mr-2"></i>Aksi Cepat</h5>
+                    <div class="action-buttons">
+                        <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="action-btn">
+                            <i class="fas fa-comments"></i>
+                            <div>
+                                <strong>Kelola Feedback</strong>
+                                <small>Lihat dan kelola feedback</small>
+                            </div>
+                        </a>
+                        <a href="{% url 'admin_panel:layanan:faq_list' %}" class="action-btn">
+                            <i class="fas fa-question-circle"></i>
+                            <div>
+                                <strong>Kelola FAQ</strong>
+                                <small>Tambah dan edit FAQ</small>
+                            </div>
+                        </a>
+                        <a href="{% url 'admin_panel:layanan:contact_list' %}" class="action-btn">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <strong>Kelola Kontak</strong>
+                                <small>Kelola informasi kontak</small>
+                            </div>
+                        </a>
+                        <a href="{% url 'admin_panel:layanan:service_list' %}" class="action-btn">
+                            <i class="fas fa-cogs"></i>
+                            <div>
+                                <strong>Kelola Layanan</strong>
+                                <small>Tambah dan edit layanan</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <h5><i class="fas fa-clock mr-2"></i>Aktivitas Terbaru</h5>
+                    {% for activity in recent_activities %}
+                    <div class="activity-item">
+                        <div class="activity-icon {{ activity.type }}">
+                            <i class="fas fa-{{ activity.icon }}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ activity.title }}</div>
+                            <div class="activity-description">{{ activity.description }}</div>
+                            <div class="activity-time">{{ activity.time }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>Belum ada aktivitas terbaru</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Dashboard is now simplified - no modal forms needed
+    // All actions are handled by direct navigation to form pages
+});
+</script>
+{% endblock extra_js %}

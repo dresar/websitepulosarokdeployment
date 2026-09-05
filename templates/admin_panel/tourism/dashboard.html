@@ -1,0 +1,338 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard Wisata{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center tourism-mb-4">
+        <div>
+            <h1 class="tourism-title">Dashboard Wisata</h1>
+            <p class="tourism-text-muted">Kelola dan pantau semua aspek wisata Desa Pulosarok</p>
+        </div>
+        <div class="tourism-actions">
+            <a href="{% url 'admin_panel:tourism_location_create' %}" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                <i class="fas fa-plus"></i>
+                Tambah Lokasi
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="tourism-stats-grid">
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-primary">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_locations|default:"0" }}</div>
+                <div class="tourism-stat-label">Total Lokasi Wisata</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ active_locations|default:"0" }}</div>
+                <div class="tourism-stat-label">Lokasi Aktif</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-info">
+                <i class="fas fa-tags"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_categories|default:"0" }}</div>
+                <div class="tourism-stat-label">Total Kategori</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-warning">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_reviews|default:"0" }}</div>
+                <div class="tourism-stat-label">Total Review</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-info">
+                <i class="fas fa-box"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_packages|default:"0" }}</div>
+                <div class="tourism-stat-label">Total Paket</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-danger">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_events|default:"0" }}</div>
+                <div class="tourism-stat-label">Total Event</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-warning">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ pending_reviews|default:"0" }}</div>
+                <div class="tourism-stat-label">Review Pending</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-success">
+                <i class="fas fa-star-half-alt"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ avg_rating|floatformat:1|default:"0.0" }}</div>
+                <div class="tourism-stat-label">Rating Rata-rata</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="tourism-card tourism-mb-4">
+        <div class="tourism-card-header">
+            <h6 class="tourism-subtitle">Aksi Cepat</h6>
+        </div>
+        <div class="tourism-card-body">
+            <div class="tourism-grid tourism-grid-4">
+                <a href="{% url 'admin_panel:tourism_locations_list' %}" class="tourism-btn tourism-btn-outline tourism-btn-sm">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Kelola Lokasi
+                </a>
+                <a href="{% url 'admin_panel:tourism_packages_list' %}" class="tourism-btn tourism-btn-outline tourism-btn-sm">
+                    <i class="fas fa-box"></i>
+                    Kelola Paket
+                </a>
+                <a href="{% url 'admin_panel:tourism_events_list' %}" class="tourism-btn tourism-btn-outline tourism-btn-sm">
+                    <i class="fas fa-calendar-alt"></i>
+                    Kelola Event
+                </a>
+                <a href="{% url 'admin_panel:tourism_reviews_list' %}" class="tourism-btn tourism-btn-outline tourism-btn-sm">
+                    <i class="fas fa-star"></i>
+                    Kelola Review
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="tourism-grid tourism-grid-2">
+        <div class="tourism-card">
+            <div class="tourism-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="tourism-subtitle">Lokasi Wisata Terbaru</h6>
+                    <a href="{% url 'admin_panel:tourism_locations_list' %}" class="tourism-btn tourism-btn-sm tourism-btn-primary">Lihat Semua</a>
+                </div>
+            </div>
+            <div class="tourism-card-body">
+                {% if recent_locations %}
+                    <div class="tourism-table-responsive">
+                        <table class="tourism-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama Lokasi</th>
+                                    <th>Kategori</th>
+                                    <th>Status</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for location in recent_locations %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'admin_panel:tourism_location_detail' location.id %}" class="tourism-text-primary">
+                                            {{ location.title|truncatechars:20 }}
+                                        </a>
+                                    </td>
+                                    <td>{{ location.category.name }}</td>
+                                    <td>
+                                        {% if location.is_active %}
+                                            <span class="tourism-badge tourism-badge-success">Aktif</span>
+                                        {% else %}
+                                            <span class="tourism-badge tourism-badge-secondary">Tidak Aktif</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ location.created_at|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="tourism-text-center tourism-p-4">
+                        <i class="fas fa-map-marker-alt tourism-text-muted" style="font-size: 1.5rem;"></i>
+                        <p class="tourism-text-muted">Belum ada lokasi wisata</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tourism-card">
+            <div class="tourism-card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="tourism-subtitle">Review Terbaru</h6>
+                    <a href="{% url 'admin_panel:tourism_reviews_list' %}" class="tourism-btn tourism-btn-sm tourism-btn-primary">Lihat Semua</a>
+                </div>
+            </div>
+            <div class="tourism-card-body">
+                {% if recent_reviews %}
+                    <div class="tourism-table-responsive">
+                        <table class="tourism-table">
+                            <thead>
+                                <tr>
+                                    <th>Lokasi</th>
+                                    <th>Rating</th>
+                                    <th>Status</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for review in recent_reviews %}
+                                <tr>
+                                    <td>{{ review.tourism_location.title|truncatechars:15 }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="fas fa-star tourism-text-warning"></i>
+                                                {% else %}
+                                                    <i class="far fa-star tourism-text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if review.is_approved %}
+                                            <span class="tourism-badge tourism-badge-success">Disetujui</span>
+                                        {% else %}
+                                            <span class="tourism-badge tourism-badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ review.created_at|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="tourism-text-center tourism-p-4">
+                        <i class="fas fa-star tourism-text-muted" style="font-size: 1.5rem;"></i>
+                        <p class="tourism-text-muted">Belum ada review</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="tourism-grid tourism-grid-2">
+        <div class="tourism-card">
+            <div class="tourism-card-header">
+                <h6 class="tourism-subtitle">Statistik Bulanan</h6>
+            </div>
+            <div class="tourism-card-body">
+                <canvas id="monthlyChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="tourism-card">
+            <div class="tourism-card-header">
+                <h6 class="tourism-subtitle">Distribusi Rating</h6>
+            </div>
+            <div class="tourism-card-body">
+                <canvas id="ratingChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Statistics Chart
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            datasets: [{
+                label: 'Lokasi Wisata',
+                data: [12, 19, 3, 5, 2, 3, 8, 12, 15, 18, 22, 25],
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Review',
+                data: [8, 15, 12, 18, 25, 30, 35, 28, 32, 38, 42, 45],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Rating Distribution Chart
+    const ratingCtx = document.getElementById('ratingChart').getContext('2d');
+    new Chart(ratingCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['5 Bintang', '4 Bintang', '3 Bintang', '2 Bintang', '1 Bintang'],
+            datasets: [{
+                data: [45, 30, 15, 7, 3],
+                backgroundColor: [
+                    '#10b981',
+                    '#3b82f6',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#6b7280'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

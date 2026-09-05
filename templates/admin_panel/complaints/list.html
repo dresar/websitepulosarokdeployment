@@ -1,0 +1,1065 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/complaints-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/complaints-components.css' %}">
+<style>
+/* Enhanced Complaints List Styles */
+.complaints-list-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.complaints-list-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.complaints-list-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.complaints-list-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.complaints-list-body {
+    padding: 2rem;
+}
+
+.complaints-list-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.complaints-list-stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.complaints-list-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.complaints-list-stat-card:hover::before {
+    transform: translateX(100%);
+}
+
+.complaints-list-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.complaints-list-stat-card-success {
+    border-left-color: #dc3545;
+}
+
+.complaints-list-stat-card-warning {
+    border-left-color: #ffc107;
+}
+
+.complaints-list-stat-card-info {
+    border-left-color: #17a2b8;
+}
+
+.complaints-list-stat-card-default {
+    border-left-color: #6c757d;
+}
+
+.complaints-list-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.complaints-list-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #495057;
+}
+
+.complaints-list-stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.complaints-list-stat-icon-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.complaints-list-stat-icon-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+}
+
+.complaints-list-stat-icon-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.complaints-list-stat-icon-default {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+}
+
+.complaints-list-stat-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.complaints-list-filter {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.complaints-list-filter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.complaints-list-filter-input {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    min-width: 250px;
+}
+
+.complaints-list-filter-input:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.complaints-list-filter-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    min-width: 150px;
+}
+
+.complaints-list-filter-select:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    outline: none;
+}
+
+.complaints-list-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.complaints-list-table table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.complaints-list-table thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.complaints-list-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-list-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: middle;
+}
+
+.complaints-list-table tbody tr:hover {
+    background: #f8f9fa;
+    transition: background 0.3s ease;
+}
+
+.complaints-list-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.complaints-list-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #dc3545;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.complaints-list-checkbox:checked {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.complaints-list-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-list-badge-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.complaints-list-badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.complaints-list-badge-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.complaints-list-badge-secondary {
+    background: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.complaints-list-badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.complaints-list-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.complaints-list-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.complaints-list-btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.complaints-list-btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+}
+
+.complaints-list-btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.complaints-list-btn-outline-warning:hover {
+    background: #ffc107;
+    color: #212529;
+    text-decoration: none;
+}
+
+.complaints-list-btn-outline-info {
+    border-color: #17a2b8;
+    color: #17a2b8;
+    background: transparent;
+}
+
+.complaints-list-btn-outline-info:hover {
+    background: #17a2b8;
+    color: white;
+    text-decoration: none;
+}
+
+.complaints-list-empty {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.complaints-list-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.complaints-list-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+}
+
+.complaints-list-pagination .page-link {
+    border: 2px solid #e2e8f0;
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.complaints-list-pagination .page-link:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: #f8f9fa;
+}
+
+.complaints-list-pagination .page-item.active .page-link {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.complaints-list-pagination .page-item.disabled .page-link {
+    background: #f8f9fa;
+    border-color: #e2e8f0;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.complaints-list-bulk-actions {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid #e9ecef;
+    display: none;
+}
+
+.complaints-list-bulk-actions.show {
+    display: block;
+}
+
+.complaints-list-bulk-actions-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.complaints-list-bulk-actions-title {
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.complaints-list-bulk-actions-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.complaints-list-bulk-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.complaints-list-bulk-btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.complaints-list-bulk-btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+}
+
+.complaints-list-bulk-btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.complaints-list-bulk-btn-outline-warning:hover {
+    background: #ffc107;
+    color: #212529;
+    text-decoration: none;
+}
+
+.complaints-list-bulk-btn-outline-info {
+    border-color: #17a2b8;
+    color: #17a2b8;
+    background: transparent;
+}
+
+.complaints-list-bulk-btn-outline-info:hover {
+    background: #17a2b8;
+    color: white;
+    text-decoration: none;
+}
+
+.complaints-list-quick-actions {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    margin-top: 2rem;
+}
+
+.complaints-list-quick-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.complaints-list-quick-actions-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.complaints-list-quick-actions-title i {
+    color: #dc3545;
+}
+
+.complaints-list-quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.complaints-list-quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.complaints-list-quick-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.complaints-list-quick-action-btn:hover::before {
+    left: 100%;
+}
+
+.complaints-list-quick-action-btn:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+    text-decoration: none;
+}
+
+.complaints-list-quick-action-btn i {
+    font-size: 1.2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .complaints-list-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .complaints-list-filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .complaints-list-filter-input,
+    .complaints-list-filter-select {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .complaints-list-body {
+        padding: 1.5rem;
+    }
+    
+    .complaints-list-header {
+        padding: 1rem;
+    }
+    
+    .complaints-list-title {
+        font-size: 1.1rem;
+    }
+    
+    .complaints-list-stat-card {
+        padding: 1rem;
+    }
+    
+    .complaints-list-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .complaints-list-stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .complaints-list-table {
+        overflow-x: auto;
+    }
+    
+    .complaints-list-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .complaints-list-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .complaints-list-quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .complaints-list-body {
+        padding: 1rem;
+    }
+    
+    .complaints-list-header {
+        padding: 1rem;
+    }
+    
+    .complaints-list-title {
+        font-size: 1rem;
+    }
+    
+    .complaints-list-stat-card {
+        padding: 0.75rem;
+    }
+    
+    .complaints-list-stat-value {
+        font-size: 1.25rem;
+    }
+    
+    .complaints-list-stat-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .complaints-list-table th,
+    .complaints-list-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .complaints-list-bulk-actions-buttons {
+        flex-direction: column;
+    }
+    
+    .complaints-list-bulk-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="complaints-list-container">
+    <div class="complaints-list-header">
+        <h3 class="complaints-list-title">
+            <i class="fas fa-list"></i>Daftar Keluhan
+        </h3>
+    </div>
+    <div class="complaints-list-body">
+        <!-- Statistics Cards -->
+        <div class="complaints-list-stats">
+            <div class="complaints-list-stat-card complaints-list-stat-card-success">
+                <div class="complaints-list-stat-header">
+                    <div>
+                        <div class="complaints-list-stat-value">{{ complaints.paginator.count|default:0 }}</div>
+                        <div class="complaints-list-stat-label">Total Keluhan</div>
+                    </div>
+                    <div class="complaints-list-stat-icon complaints-list-stat-icon-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="complaints-list-stat-card complaints-list-stat-card-warning">
+                <div class="complaints-list-stat-header">
+                    <div>
+                        <div class="complaints-list-stat-value">{{ pending_count|default:0 }}</div>
+                        <div class="complaints-list-stat-label">Menunggu</div>
+                    </div>
+                    <div class="complaints-list-stat-icon complaints-list-stat-icon-warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="complaints-list-stat-card complaints-list-stat-card-info">
+                <div class="complaints-list-stat-header">
+                    <div>
+                        <div class="complaints-list-stat-value">{{ in_progress_count|default:0 }}</div>
+                        <div class="complaints-list-stat-label">Diproses</div>
+                    </div>
+                    <div class="complaints-list-stat-icon complaints-list-stat-icon-info">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="complaints-list-stat-card complaints-list-stat-card-default">
+                <div class="complaints-list-stat-header">
+                    <div>
+                        <div class="complaints-list-stat-value">{{ resolved_count|default:0 }}</div>
+                        <div class="complaints-list-stat-label">Selesai</div>
+                    </div>
+                    <div class="complaints-list-stat-icon complaints-list-stat-icon-default">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="complaints-list-filter">
+            <form method="get" id="filterForm" class="complaints-list-filter-form">
+                <input type="text" class="complaints-list-filter-input" id="search" name="search" 
+                       value="{{ search }}" placeholder="Cari judul atau pelapor...">
+                <select class="complaints-list-filter-select" id="category" name="category">
+                    <option value="">Kategori</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <select class="complaints-list-filter-select" id="status" name="status">
+                    <option value="">Status</option>
+                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Menunggu</option>
+                    <option value="in_progress" {% if selected_status == 'in_progress' %}selected{% endif %}>Diproses</option>
+                    <option value="resolved" {% if selected_status == 'resolved' %}selected{% endif %}>Selesai</option>
+                    <option value="closed" {% if selected_status == 'closed' %}selected{% endif %}>Tutup</option>
+                </select>
+                <select class="complaints-list-filter-select" id="priority" name="priority">
+                    <option value="">Prioritas</option>
+                    <option value="high" {% if selected_priority == 'high' %}selected{% endif %}>Tinggi</option>
+                    <option value="medium" {% if selected_priority == 'medium' %}selected{% endif %}>Sedang</option>
+                    <option value="low" {% if selected_priority == 'low' %}selected{% endif %}>Rendah</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Data Table -->
+        <div class="complaints-list-table">
+            <div class="table-responsive">
+                <table class="table" id="complaintsTable">
+                    <thead>
+                        <tr>
+                            <th width="5%">
+                                <input type="checkbox" id="selectAll" class="complaints-list-checkbox">
+                            </th>
+                            <th width="5%">No</th>
+                            <th width="20%">Judul</th>
+                            <th width="15%">Pelapor</th>
+                            <th width="10%">Kategori</th>
+                            <th width="8%">Status</th>
+                            <th width="8%">Prioritas</th>
+                            <th width="12%">Tanggal</th>
+                            <th width="10%">Ditugaskan</th>
+                            <th width="7%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="complaints-list-checkbox complaint-checkbox" value="{{ complaint.id }}">
+                            </td>
+                            <td>{{ forloop.counter0|add:complaints.start_index }}</td>
+                            <td>
+                                <strong>{{ complaint.title|truncatechars:40 }}</strong>
+                                {% if complaint.is_urgent %}
+                                    <span class="complaints-list-badge complaints-list-badge-danger">Mendesak</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ complaint.complainant_name }}</strong>
+                                    {% if complaint.complainant_phone %}
+                                        <br><small class="text-muted">{{ complaint.complainant_phone }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if complaint.category %}
+                                    <span class="complaints-list-badge complaints-list-badge-info">{{ complaint.category.name }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="complaints-list-badge complaints-list-badge-{% if complaint.status == 'pending' %}warning{% elif complaint.status == 'in_progress' %}info{% elif complaint.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                    {{ complaint.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="complaints-list-badge complaints-list-badge-{% if complaint.priority == 'urgent' %}danger{% elif complaint.priority == 'high' %}warning{% elif complaint.priority == 'medium' %}info{% else %}secondary{% endif %}">
+                                    {{ complaint.get_priority_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ complaint.created_at|date:"d M Y" }}</strong>
+                                    <br><small class="text-muted">{{ complaint.created_at|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                {% if complaint.assigned_to %}
+                                    {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username }}
+                                {% else %}
+                                    <span class="text-muted">Belum ditugaskan</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="complaints-list-actions">
+                                    <button type="button" class="complaints-list-btn complaints-list-btn-outline-primary" 
+                                            data-complaint-id="{{ complaint.id }}" data-action="view" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="complaints-list-btn complaints-list-btn-outline-warning" 
+                                            data-complaint-id="{{ complaint.id }}" data-action="update" title="Update Status">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="complaints-list-btn complaints-list-btn-outline-info" 
+                                            data-complaint-id="{{ complaint.id }}" data-action="add-update" title="Tambah Update">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="complaints-list-empty">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Tidak ada keluhan ditemukan</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if complaints.has_other_pages %}
+            <div class="complaints-list-pagination">
+                <nav aria-label="Pagination">
+                    <ul class="pagination">
+                        {% if complaints.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ complaints.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ complaints.number }} of {{ complaints.paginator.num_pages }}
+                            </span>
+                        </li>
+                        
+                        {% if complaints.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ complaints.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ complaints.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="complaints-list-bulk-actions" id="bulkActions">
+            <div class="complaints-list-bulk-actions-header">
+                <h6 class="complaints-list-bulk-actions-title">Aksi Massal:</h6>
+            </div>
+            <div class="complaints-list-bulk-actions-buttons">
+                <button type="button" class="complaints-list-bulk-btn complaints-list-bulk-btn-outline-primary" onclick="bulkExport()">
+                    <i class="fas fa-download"></i>Ekspor Terpilih
+                </button>
+                <button type="button" class="complaints-list-bulk-btn complaints-list-bulk-btn-outline-warning" onclick="bulkUpdateStatus()">
+                    <i class="fas fa-edit"></i>Update Status
+                </button>
+                <button type="button" class="complaints-list-bulk-btn complaints-list-bulk-btn-outline-info" onclick="bulkAssign()">
+                    <i class="fas fa-user-plus"></i>Tugaskan
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="complaints-list-quick-actions">
+            <div class="complaints-list-quick-actions-header">
+                <h5 class="complaints-list-quick-actions-title">
+                    <i class="fas fa-bolt"></i>Aksi Cepat
+                </h5>
+            </div>
+            <div class="complaints-list-quick-actions-grid">
+                <a href="{% url 'admin_panel:complaints_dashboard' %}" class="complaints-list-quick-action-btn">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'admin_panel:complaint_categories_list' %}" class="complaints-list-quick-action-btn">
+                    <i class="fas fa-tags"></i>
+                    <span>Kelola Kategori</span>
+                </a>
+                <button type="button" class="complaints-list-quick-action-btn" onclick="markAllAsRead()">
+                    <i class="fas fa-check"></i>
+                    <span>Tandai Semua Dibaca</span>
+                </button>
+                <button type="button" class="complaints-list-quick-action-btn" onclick="refreshData()">
+                    <i class="fas fa-refresh"></i>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('.complaint-checkbox').prop('checked', $(this).prop('checked'));
+        toggleBulkActions();
+    });
+    
+    // Individual checkbox change
+    $('.complaint-checkbox').change(function() {
+        var totalCheckboxes = $('.complaint-checkbox').length;
+        var checkedCheckboxes = $('.complaint-checkbox:checked').length;
+        
+        $('#selectAll').prop('checked', totalCheckboxes === checkedCheckboxes);
+        toggleBulkActions();
+    });
+    
+    // Auto-submit form on filter change
+    $('#category, #status, #priority').change(function() {
+        $('#filterForm').submit();
+    });
+    
+    // Handle action buttons
+    $('.complaints-list-btn[data-action]').click(function() {
+        var complaintId = $(this).data('complaint-id');
+        var action = $(this).data('action');
+        
+        switch(action) {
+            case 'view':
+                viewComplaint(complaintId);
+                break;
+            case 'update':
+                updateComplaint(complaintId);
+                break;
+            case 'add-update':
+                addUpdate(complaintId);
+                break;
+        }
+    });
+});
+
+function toggleBulkActions() {
+    var checkedCount = $('.complaint-checkbox:checked').length;
+    if (checkedCount > 0) {
+        $('#bulkActions').addClass('show');
+    } else {
+        $('#bulkActions').removeClass('show');
+    }
+}
+
+function viewComplaint(id) {
+    // Implement view complaint functionality
+    window.location.href = '{% url "admin_panel:complaint_detail" 0 %}'.replace('0', id);
+}
+
+function updateComplaint(id) {
+    // Implement update complaint functionality
+    window.location.href = '{% url "admin_panel:complaint_update" 0 %}'.replace('0', id);
+}
+
+function addUpdate(id) {
+    // Implement add update functionality
+    window.location.href = '{% url "admin_panel:complaint_add_update" 0 %}'.replace('0', id);
+}
+
+function exportData(format) {
+    var params = new URLSearchParams(window.location.search);
+    params.set('format', format);
+    window.location.href = '{% url "complaints:export_complaints" %}?' + params.toString();
+}
+
+function bulkExport() {
+    var selectedIds = $('.complaint-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showAlert('Pilih data yang akan diekspor', 'warning');
+        return;
+    }
+    
+    // Implement bulk export
+    console.log('Bulk export:', selectedIds);
+}
+
+function bulkUpdateStatus() {
+    var selectedIds = $('.complaint-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showAlert('Pilih data yang akan diupdate', 'warning');
+        return;
+    }
+    
+    // Implement bulk update status
+    console.log('Bulk update status:', selectedIds);
+}
+
+function bulkAssign() {
+    var selectedIds = $('.complaint-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showAlert('Pilih data yang akan ditugaskan', 'warning');
+        return;
+    }
+    
+    // Implement bulk assign
+    console.log('Bulk assign:', selectedIds);
+}
+
+function markAllAsRead() {
+    if (confirm('Tandai semua keluhan sebagai dibaca?')) {
+        // Implement mark all as read
+        console.log('Mark all as read');
+    }
+}
+
+function refreshData() {
+    location.reload();
+}
+</script>
+{% endblock extra_js %}

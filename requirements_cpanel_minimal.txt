@@ -1,0 +1,33 @@
+# Minimal requirements for cPanel
+# Mengurangi resource usage dan menghindari OpenBLAS issues
+
+# Core Django
+Django==4.2.16
+django-cors-headers==4.3.1
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+
+# Image processing (lightweight)
+Pillow==10.1.0
+
+# Environment
+python-dotenv==1.0.0
+
+# Import/Export (tanpa numpy/openpyxl yang berat)
+django-import-export==3.3.1
+
+# Cache (optional)
+django-redis==5.4.0
+
+# Production server
+gunicorn==21.2.0
+
+# Database (SQLite3 sudah built-in)
+# Tidak perlu psycopg2 untuk PostgreSQL
+
+# Logging
+# Tidak perlu logging packages tambahan
+
+# Security
+# Django sudah include security features
+

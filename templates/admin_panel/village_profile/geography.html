@@ -1,0 +1,561 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Geography Form Styles - Bootstrap 4 Compatible */
+.geography-form-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.geography-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #28a745;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.geography-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-color: #28a745;
+}
+
+.geography-form-card .card-header {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.geography-form-card .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.geography-form-card .card-body {
+    padding: 1.5rem;
+    background: transparent;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    position: relative;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #28a745;
+    border-radius: 0 2px 2px 0;
+}
+
+.form-section h6 {
+    color: #28a745;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+
+.form-section h6::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #28a745;
+    border-radius: 1px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+.form-control {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    color: #495057;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    background: #ffffff;
+    color: #495057;
+    outline: none;
+}
+
+.form-control:hover {
+    border-color: #adb5bd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+}
+
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .geography-form-card {
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+    }
+    
+    .geography-form-card .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .geography-form-card .card-body {
+        padding: 1rem;
+    }
+    
+    .form-section {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-section h6 {
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-control {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .geography-form-card .card-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .geography-form-card .card-body {
+        padding: 0.75rem;
+    }
+    
+    .form-section {
+        padding: 0.5rem;
+    }
+    
+    .form-section h6 {
+        font-size: 0.8rem;
+    }
+    
+    .form-control {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Enhanced Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <div class="mb-3 mb-md-0">
+        <h4 class="text-success mb-2" style="font-weight: 600; font-size: 1.5rem;">
+            <i class="fas fa-map-marked-alt mr-2"></i>Data Geografis Desa
+        </h4>
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+            Kelola informasi geografis dan lokasi desa
+        </p>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <button class="btn btn-outline-primary btn-sm mb-2 mb-sm-0" onclick="previewGeography()">
+            <i class="fas fa-eye mr-1"></i>Preview
+        </button>
+        <button class="btn btn-success btn-sm" onclick="saveGeographyData()">
+            <i class="fas fa-save mr-1"></i>Simpan Data
+        </button>
+    </div>
+</div>
+
+<!-- Geography Information Form -->
+<div class="geography-form-card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-map-marked-alt mr-2"></i>Informasi Geografis Desa
+        </h5>
+    </div>
+    <div class="card-body">
+        <form id="geographyForm">
+            <input type="hidden" id="geographyVillageId" value="{{ village_profile.id|default:'' }}">
+            
+            <!-- Coordinates Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-crosshairs mr-2"></i>Koordinat Lokasi</h6>
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="latitude" class="form-label">Latitude <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="latitude" step="0.0000001" 
+                                   value="{{ geography.latitude|default:'-4.5000000' }}" required>
+                            <small class="form-text text-muted">Koordinat lintang (-90 sampai 90)</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="longitude" class="form-label">Longitude <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="longitude" step="0.0000001" 
+                                   value="{{ geography.longitude|default:'120.2000000' }}" required>
+                            <small class="form-text text-muted">Koordinat bujur (-180 sampai 180)</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-12">
+                        <div class="form-group">
+                            <label for="altitude" class="form-label">Ketinggian (mdpl)</label>
+                            <input type="number" class="form-control" id="altitude" 
+                                   value="{{ geography.altitude|default:'100' }}">
+                            <small class="form-text text-muted">Ketinggian di atas permukaan laut</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Climate Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-cloud-sun mr-2"></i>Iklim & Cuaca</h6>
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="climate" class="form-label">Jenis Iklim</label>
+                            <input type="text" class="form-control" id="climate" 
+                                   value="{{ geography.climate|default:'Tropis' }}">
+                            <small class="form-text text-muted">Contoh: Tropis, Subtropis</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="rainfall" class="form-label">Curah Hujan (mm/tahun)</label>
+                            <input type="number" class="form-control" id="rainfall" 
+                                   value="{{ geography.rainfall|default:'2000' }}">
+                            <small class="form-text text-muted">Rata-rata curah hujan tahunan</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="temperatureMin" class="form-label">Suhu Min (°C)</label>
+                            <input type="number" class="form-control" id="temperatureMin" 
+                                   value="{{ geography.temperature_min|default:'25' }}">
+                            <small class="form-text text-muted">Suhu minimum</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="temperatureMax" class="form-label">Suhu Max (°C)</label>
+                            <input type="number" class="form-control" id="temperatureMax" 
+                                   value="{{ geography.temperature_max|default:'32' }}">
+                            <small class="form-text text-muted">Suhu maksimum</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Topography Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-mountain mr-2"></i>Topografi & Tanah</h6>
+                <div class="row">
+                    <div class="col-lg-6 col-md-12">
+                        <div class="form-group">
+                            <label for="topography" class="form-label">Topografi</label>
+                            <input type="text" class="form-control" id="topography" 
+                                   value="{{ geography.topography|default:'Dataran rendah' }}">
+                            <small class="form-text text-muted">Contoh: Dataran rendah, Perbukitan, Pegunungan</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12">
+                        <div class="form-group">
+                            <label for="soilType" class="form-label">Jenis Tanah</label>
+                            <input type="text" class="form-control" id="soilType" 
+                                   value="{{ geography.soil_type|default:'Alluvial' }}">
+                            <small class="form-text text-muted">Contoh: Alluvial, Vulkanik, Laterit</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Boundaries Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-map mr-2"></i>Batas Wilayah</h6>
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="boundaryNorth" class="form-label">Batas Utara</label>
+                            <input type="text" class="form-control" id="boundaryNorth" 
+                                   value="{{ geography.boundary_north|default:'' }}">
+                            <small class="form-text text-muted">Desa/wilayah di sebelah utara</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="boundarySouth" class="form-label">Batas Selatan</label>
+                            <input type="text" class="form-control" id="boundarySouth" 
+                                   value="{{ geography.boundary_south|default:'' }}">
+                            <small class="form-text text-muted">Desa/wilayah di sebelah selatan</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="boundaryEast" class="form-label">Batas Timur</label>
+                            <input type="text" class="form-control" id="boundaryEast" 
+                                   value="{{ geography.boundary_east|default:'' }}">
+                            <small class="form-text text-muted">Desa/wilayah di sebelah timur</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="boundaryWest" class="form-label">Batas Barat</label>
+                            <input type="text" class="form-control" id="boundaryWest" 
+                                   value="{{ geography.boundary_west|default:'' }}">
+                            <small class="form-text text-muted">Desa/wilayah di sebelah barat</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <a href="{% url "village_profile:admin_dashboard" %}" class="btn btn-secondary btn-sm mb-3 mb-md-0">
+                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Dashboard
+            </a>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="resetGeographyForm()">
+                    <i class="fas fa-undo mr-1"></i>Reset Form
+                </button>
+                <button type="button" class="btn btn-success btn-sm" onclick="saveGeographyData()">
+                    <i class="fas fa-save mr-1"></i>Simpan Data Geografis
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-validate coordinates
+    $('#latitude, #longitude').on('blur', function() {
+        validateCoordinates();
+    });
+});
+
+function validateCoordinates() {
+    const latitude = parseFloat($('#latitude').val());
+    const longitude = parseFloat($('#longitude').val());
+    
+    if (latitude < -90 || latitude > 90) {
+        showToast('error', 'Latitude harus antara -90 dan 90');
+        $('#latitude').focus();
+        return false;
+    }
+    
+    if (longitude < -180 || longitude > 180) {
+        showToast('error', 'Longitude harus antara -180 dan 180');
+        $('#longitude').focus();
+        return false;
+    }
+    
+    return true;
+}
+
+function saveGeographyData() {
+    if (!validateCoordinates()) {
+        return;
+    }
+    
+    const submitBtn = $('button[onclick="saveGeographyData()"]');
+    const originalText = submitBtn.html();
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+    
+    const formData = new FormData();
+    formData.append('village_id', $('#geographyVillageId').val());
+    formData.append('latitude', $('#latitude').val());
+    formData.append('longitude', $('#longitude').val());
+    formData.append('altitude', $('#altitude').val());
+    formData.append('climate', $('#climate').val());
+    formData.append('rainfall', $('#rainfall').val());
+    formData.append('temperature_min', $('#temperatureMin').val());
+    formData.append('temperature_max', $('#temperatureMax').val());
+    formData.append('topography', $('#topography').val());
+    formData.append('soil_type', $('#soilType').val());
+    formData.append('boundary_north', $('#boundaryNorth').val());
+    formData.append('boundary_south', $('#boundarySouth').val());
+    formData.append('boundary_east', $('#boundaryEast').val());
+    formData.append('boundary_west', $('#boundaryWest').val());
+    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+    
+    $.ajax({
+        url: '{% url "village_profile:admin_save_geography" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast('success', 'Data geografis berhasil disimpan');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', 'Gagal menyimpan data: ' + response.message);
+            }
+        },
+        error: function() {
+            showToast('error', 'Gagal menyimpan data geografis');
+        },
+        finally: function() {
+            submitBtn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function resetGeographyForm() {
+    if (confirm('Apakah Anda yakin ingin mereset form?')) {
+        location.reload();
+    }
+}
+
+function previewGeography() {
+    window.open('{% url "village_profile:geography" %}', '_blank');
+}
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% csrf_token %}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock extra_js %}

@@ -1,0 +1,459 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block title %}Cache Management - Pulosarok Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cache-stats {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .file-list {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+    
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+    }
+    
+    .file-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .file-item:last-child {
+        border-bottom: none;
+    }
+    
+    .file-info {
+        flex: 1;
+    }
+    
+    .file-name {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .file-details {
+        font-size: 0.875rem;
+        color: #666;
+    }
+    
+    .file-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn-cache {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-cache:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-danger-cache {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    }
+    
+    .btn-danger-cache:hover {
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+    
+    .btn-success-cache {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    }
+    
+    .btn-success-cache:hover {
+        box-shadow: 0 5px 15px rgba(81, 207, 102, 0.4);
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .alert-cache {
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: none;
+    }
+    
+    .alert-info-cache {
+        background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+        color: white;
+    }
+    
+    .alert-warning-cache {
+        background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+        color: #333;
+    }
+    
+    .alert-success-cache {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">🗂️ Cache Management</h1>
+                    <p class="text-muted">Kelola dan hapus media files yang tidak digunakan</p>
+                </div>
+                <div>
+                    <button class="btn-cache" onclick="scanFiles()">
+                        <i class="fas fa-search"></i> Scan Files
+                    </button>
+                    <button class="btn-danger-cache" onclick="deleteAllUnused()">
+                        <i class="fas fa-trash"></i> Delete All Unused
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div id="alert-container"></div>
+
+            <!-- Cache Statistics -->
+            <div class="cache-stats">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-card text-center">
+                            <h3 class="mb-1">{{ stats.total_files }}</h3>
+                            <p class="mb-0">Total Files</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card text-center">
+                            <h3 class="mb-1">{{ stats.total_size_formatted }}</h3>
+                            <p class="mb-0">Total Size</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card text-center">
+                            <h3 class="mb-1">{{ stats.unused_files }}</h3>
+                            <p class="mb-0">Unused Files</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card text-center">
+                            <h3 class="mb-1">{{ stats.unused_size_formatted }}</h3>
+                            <p class="mb-0">Unused Size</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unused Files List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-times"></i> Unused Media Files
+                        <span class="badge badge-primary ml-2">{{ total_unused }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p class="mt-2">Scanning files...</p>
+                    </div>
+                    
+                    <div class="file-list" id="file-list">
+                        {% for file in unused_files %}
+                        <div class="file-item" data-file="{{ file.path }}">
+                            <div class="file-info">
+                                <div class="file-name">{{ file.path }}</div>
+                                <div class="file-details">
+                                    Size: {{ file.size|filesizeformat }} | 
+                                    Modified: {{ file.modified|date:"M d, Y H:i" }}
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteFile('{{ file.path }}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <p class="text-muted">No unused files found!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables
+let unusedFiles = [];
+
+// Show alert
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = `alert-${type}-cache`;
+    
+    alertContainer.innerHTML = `
+        <div class="alert-cache ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Scan for unused files
+function scanFiles() {
+    const loading = document.getElementById('loading');
+    const fileList = document.getElementById('file-list');
+    
+    loading.style.display = 'block';
+    fileList.style.display = 'none';
+    
+    fetch('/admin-panel/cache/api/scan/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        loading.style.display = 'none';
+        fileList.style.display = 'block';
+        
+        if (data.success) {
+            unusedFiles = data.files;
+            showAlert(`Found ${data.unused_count} unused files (${data.unused_size})`, 'success');
+            updateFileList();
+        } else {
+            showAlert(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        loading.style.display = 'none';
+        fileList.style.display = 'block';
+        showAlert('Error scanning files: ' + error.message, 'danger');
+    });
+}
+
+// Update file list
+function updateFileList() {
+    const fileList = document.getElementById('file-list');
+    
+    if (unusedFiles.length === 0) {
+        fileList.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                <p class="text-muted">No unused files found!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    unusedFiles.forEach(file => {
+        html += `
+            <div class="file-item" data-file="${file.path}">
+                <div class="file-info">
+                    <div class="file-name">${file.path}</div>
+                    <div class="file-details">
+                        Size: ${formatFileSize(file.size)} | 
+                        Modified: ${new Date(file.modified * 1000).toLocaleDateString()}
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteFile('${file.path}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    fileList.innerHTML = html;
+}
+
+// Delete single file
+function deleteFile(filePath) {
+    if (!confirm(`Are you sure you want to delete "${filePath}"?`)) {
+        return;
+    }
+    
+    fetch('/admin-panel/cache/api/delete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            file_paths: [filePath]
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            // Remove from list
+            const fileItem = document.querySelector(`[data-file="${filePath}"]`);
+            if (fileItem) {
+                fileItem.remove();
+            }
+            // Update unused files array
+            unusedFiles = unusedFiles.filter(f => f.path !== filePath);
+        } else {
+            showAlert(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('Error deleting file: ' + error.message, 'danger');
+    });
+}
+
+// Delete all unused files
+function deleteAllUnused() {
+    if (unusedFiles.length === 0) {
+        showAlert('No unused files to delete', 'warning');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete ${unusedFiles.length} unused files?`)) {
+        return;
+    }
+    
+    fetch('/admin-panel/cache/api/delete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            file_paths: []
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            // Clear the list
+            document.getElementById('file-list').innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                    <p class="text-muted">All unused files have been deleted!</p>
+                </div>
+            `;
+            unusedFiles = [];
+        } else {
+            showAlert(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('Error deleting files: ' + error.message, 'danger');
+    });
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-scan on page load
+    scanFiles();
+});
+</script>
+{% endblock %}

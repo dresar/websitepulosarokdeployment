@@ -1,0 +1,372 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .layanan-wrapper {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .feedback-info-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .feedback-info-card .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .feedback-info-card .card-title {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .feedback-info-card .card-body {
+        padding: 2rem;
+    }
+
+    .reply-form-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .reply-form-card .card-header {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .reply-form-card .card-title {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .reply-form-card .card-body {
+        padding: 2rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .feedback-details {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #28a745;
+    }
+
+    .feedback-details h6 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .feedback-details p {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .feedback-details strong {
+        color: #2c3e50;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: #212529;
+    }
+
+    .badge-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .badge-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+        color: white;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .layanan-wrapper {
+            padding: 1rem 0;
+        }
+        
+        .page-header {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feedback-info-card .card-body,
+        .reply-form-card .card-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="layanan-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Balas Feedback</h4>
+                            <p class="text-muted mb-0">Berikan balasan untuk feedback dari pengguna</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Information -->
+                <div class="feedback-info-card">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="fas fa-comment mr-2"></i>Informasi Feedback
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="feedback-details">
+                            <h6>Detail Feedback</h6>
+                            <p><strong>Nama:</strong> {{ feedback.name }}</p>
+                            <p><strong>Email:</strong> {{ feedback.email }}</p>
+                            {% if feedback.phone %}
+                            <p><strong>Telepon:</strong> {{ feedback.phone }}</p>
+                            {% endif %}
+                            <p><strong>Kategori:</strong> 
+                                <span class="badge badge-{% if feedback.category == 'complaint' %}danger{% elif feedback.category == 'suggestion' %}info{% elif feedback.category == 'question' %}primary{% else %}success{% endif %}">
+                                    {{ feedback.get_category_display }}
+                                </span>
+                            </p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge badge-{% if feedback.status == 'pending' %}warning{% elif feedback.status == 'read' %}info{% elif feedback.status == 'replied' %}success{% else %}secondary{% endif %}">
+                                    {{ feedback.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>Rating:</strong> 
+                                <span class="rating-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= feedback.rating %}
+                                            ★
+                                        {% else %}
+                                            ☆
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                ({{ feedback.rating }}/5)
+                            </p>
+                            <p><strong>Subjek:</strong> {{ feedback.subject }}</p>
+                            <p><strong>Pesan:</strong></p>
+                            <div class="bg-white p-3 rounded border">
+                                {{ feedback.message|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reply Form -->
+                <div class="reply-form-card">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="fas fa-reply mr-2"></i>Form Balasan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="replyForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="feedback_id" value="{{ feedback.id }}">
+                            
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Balasan</label>
+                                    <textarea class="form-control" name="reply" rows="6" 
+                                              placeholder="Masukkan balasan untuk feedback ini..." required>{% if feedback.reply %}{{ feedback.reply }}{% endif %}</textarea>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Status Setelah Balasan</label>
+                                    <select class="form-control" name="status" required>
+                                        <option value="replied" {% if feedback.status == 'replied' %}selected{% endif %}>Sudah Dibalas</option>
+                                        <option value="closed" {% if feedback.status == 'closed' %}selected{% endif %}>Ditutup</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Kirim Email ke Pengirim</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="send_email" id="send_email" checked>
+                                        <label class="form-check-label" for="send_email">
+                                            Kirim balasan via email ke {{ feedback.email }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times mr-1"></i>Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane mr-1"></i>Kirim Balasan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Form submission
+    $('#replyForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $.ajax({
+            url: '{% url "admin_panel:layanan:feedback_reply" feedback.id %}',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    setTimeout(() => {
+                        window.location.href = '{% url "admin_panel:layanan:feedback_list" %}';
+                    }, 1500);
+                } else {
+                    showAlert('error', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                showAlert('error', 'Terjadi kesalahan saat mengirim balasan');
+            }
+        });
+    });
+});
+
+// Alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('body').prepend(alertHtml);
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,886 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/beneficiaries.css' %}">
+<style>
+/* Light Theme Improvements */
+.beneficiaries-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.filter-card {
+    background: #ffffff;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.filter-card .card-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.beneficiaries-table {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.beneficiaries-table .card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border: none;
+}
+
+.beneficiaries-table .card-title {
+    color: white;
+    font-weight: 600;
+    margin: 0;
+}
+
+.beneficiaries-table .table {
+    margin: 0;
+    background: white;
+}
+
+.beneficiaries-table .table thead th {
+    background: #f8f9fa;
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.beneficiaries-table .table tbody td {
+    padding: 1rem;
+    border: none;
+    border-bottom: 1px solid #f8f9fa;
+    vertical-align: middle;
+}
+
+.beneficiaries-table .table tbody tr:hover {
+    background: #f8f9fa;
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
+
+/* Beneficiary Photo Styles */
+.beneficiary-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.beneficiary-photo:hover {
+    transform: scale(1.1);
+    border-color: #007bff;
+}
+
+.beneficiary-photo-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.beneficiary-photo-placeholder:hover {
+    transform: scale(1.1);
+}
+
+/* Action Buttons - Horizontal Layout */
+.btn-group {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-group .btn {
+    border-radius: 8px !important;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    margin: 0.125rem;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-group .btn-outline-primary:hover {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.btn-group .btn-outline-success:hover {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-group .btn-outline-warning:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-group .btn-outline-danger:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* Badge Improvements */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.badge-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+    color: white;
+}
+
+/* Form Improvements */
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background: white;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Button Improvements */
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 2px dashed #dee2e6;
+    margin: 2rem 0;
+}
+
+.empty-state i {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+/* Pagination */
+.pagination {
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 0.25rem;
+    border: 2px solid #e9ecef;
+    color: #007bff;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Bulk Actions Styling */
+.bulk-actions {
+    transition: all 0.3s ease;
+}
+
+.bulk-actions .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.bulk-actions .btn:last-child {
+    margin-right: 0;
+}
+
+/* Checkbox Styling */
+.form-check-input {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* ID Badge Styling */
+.badge-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .beneficiaries-wrapper {
+        padding: 1rem 0;
+    }
+    
+    .page-header {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn-group {
+        flex-direction: column !important;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+    
+    .bulk-actions {
+        flex-direction: column !important;
+        width: 100%;
+    }
+    
+    .bulk-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Hide some columns on mobile */
+    .d-none.d-md-table-cell {
+        display: none !important;
+    }
+    
+    .d-none.d-lg-table-cell {
+        display: none !important;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.beneficiaries-table .table tbody tr {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Card Hover Effects */
+.beneficiaries-table:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="beneficiaries-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Daftar Penerima Bantuan</h4>
+                            <p class="text-muted mb-0">Kelola data penerima bantuan di Desa Pulosari</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:beneficiary_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus mr-1"></i>Tambah Penerima
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Filters -->
+                <div class="filter-card">
+                    <div class="card-body">
+                        <form method="get" id="filterForm" class="row">
+                            <div class="col-md-4">
+                                <label for="search" class="form-label">Pencarian</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ search }}" placeholder="Cari nama, NIK, atau telepon...">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="category" class="form-label">Kategori</label>
+                                <select class="form-control" id="category" name="category">
+                                    <option value="">Semua Kategori</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">Semua Status</option>
+                                    <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Aktif</option>
+                                    <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Tidak Aktif</option>
+                                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex">
+                                    <button type="submit" class="btn btn-primary mr-2">
+                                        <i class="fas fa-search mr-1"></i>Cari
+                                    </button>
+                                    <a href="{% url 'admin_panel:beneficiaries_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times mr-1"></i>Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            <!-- Data Table -->
+            <div class="beneficiaries-table">
+                <div class="card-header">
+                    <h6 class="card-title">
+                        <i class="fas fa-hand-holding-heart mr-2"></i>Daftar Penerima Bantuan
+                        <span class="text-muted">{{ beneficiaries.paginator.count }} data</span>
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <div class="bulk-actions d-none" id="bulkActions">
+                            <button class="btn btn-sm btn-outline-danger" id="bulkDeleteBtn" disabled>
+                                <i class="fas fa-trash mr-1"></i>Hapus Terpilih
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" id="bulkEditBtn" disabled>
+                                <i class="fas fa-edit mr-1"></i>Edit Terpilih
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" id="bulkExportBtn" disabled>
+                                <i class="fas fa-file-csv mr-1"></i>Export Terpilih
+                            </button>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" id="exportAllBtn">
+                            <i class="fas fa-file-csv mr-1"></i>Export Semua
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" id="beneficiariesTable">
+                        <thead>
+                            <tr>
+                                <th width="3%" class="text-center">
+                                    <input type="checkbox" id="selectAll" class="form-check-input">
+                                </th>
+                                <th width="5%" class="d-none d-md-table-cell">ID</th>
+                                <th width="10%" class="d-none d-lg-table-cell">Foto</th>
+                                <th width="25%">Nama</th>
+                                <th width="15%" class="d-none d-sm-table-cell">NIK</th>
+                                <th width="15%" class="d-none d-md-table-cell">Kategori</th>
+                                <th width="10%" class="d-none d-md-table-cell">Status</th>
+                                <th width="10%" class="d-none d-lg-table-cell">Tanggal</th>
+                                <th width="15%" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for beneficiary in beneficiaries %}
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input beneficiary-checkbox" value="{{ beneficiary.id }}">
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="badge badge-primary">#{{ beneficiary.id }}</span>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if beneficiary.photo %}
+                                        <img src="{{ beneficiary.photo.url }}" alt="{{ beneficiary.name }}" 
+                                             class="beneficiary-photo">
+                                    {% else %}
+                                        <div class="beneficiary-photo-placeholder">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <!-- Mobile Photo -->
+                                        <div class="d-lg-none mr-2">
+                                            {% if beneficiary.photo %}
+                                                <img src="{{ beneficiary.photo.url }}" alt="{{ beneficiary.name }}" 
+                                                     class="beneficiary-photo">
+                                            {% else %}
+                                                <div class="beneficiary-photo-placeholder">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="beneficiary-name">{{ beneficiary.person.name }}</div>
+                                            <div class="beneficiary-nik d-sm-none">{{ beneficiary.person.nik }}</div>
+                                            <div class="d-md-none">
+                                                <span class="badge badge-info badge-sm">{{ beneficiary.category.name|truncatechars:10 }}</span>
+                                                <span class="badge badge-{% if beneficiary.status == 'aktif' %}success{% elif beneficiary.status == 'pending' %}warning{% else %}secondary{% endif %} badge-sm mr-2">
+                                                    {{ beneficiary.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="d-none d-sm-table-cell"><span class="text-muted">{{ beneficiary.person.nik }}</span></td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="badge badge-info">{{ beneficiary.category.name }}</span>
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="badge badge-{% if beneficiary.status == 'aktif' %}success{% elif beneficiary.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                        {{ beneficiary.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="d-none d-lg-table-cell"><span class="text-muted">{{ beneficiary.created_at|date:"d/m/Y" }}</span></td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'admin_panel:beneficiary_detail' beneficiary.pk %}" 
+                                           class="btn btn-outline-primary btn-sm" title="Detail" data-toggle="tooltip">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'admin_panel:beneficiary_update' beneficiary.pk %}" 
+                                           class="btn btn-outline-warning btn-sm" title="Edit" data-toggle="tooltip">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if beneficiary.person.phone_number or beneficiary.person.mobile_number %}
+                                        <a href="https://wa.me/{{ beneficiary.person.phone_number|default:beneficiary.person.mobile_number|cut:'+' }}" 
+                                           target="_blank" class="btn btn-outline-success btn-sm" title="WhatsApp" data-toggle="tooltip">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </a>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
+                                                data-beneficiary-id="{{ beneficiary.id }}" 
+                                                data-beneficiary-name="{{ beneficiary.person.name|escapejs }}" 
+                                                title="Hapus" data-toggle="tooltip">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="empty-state">
+                                    <div class="text-center">
+                                        <i class="fas fa-hand-holding-heart"></i>
+                                        <h5 class="text-muted">Belum ada data penerima bantuan</h5>
+                                        <p class="text-muted">Silakan tambah penerima bantuan baru</p>
+                                        <a href="{% url 'admin_panel:beneficiary_create' %}" class="btn btn-success mt-3">
+                                            <i class="fas fa-plus mr-1"></i>Tambah Penerima
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if beneficiaries.has_other_pages %}
+            <div class="pagination">
+                <ul class="pagination">
+                    {% if beneficiaries.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ beneficiaries.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ beneficiaries.number }} of {{ beneficiaries.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if beneficiaries.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ beneficiaries.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ beneficiaries.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus penerima bantuan:</p>
+                <div class="alert alert-warning">
+                    <strong id="beneficiaryName"></strong>
+                </div>
+                <p class="text-muted">Data yang sudah dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>Hapus Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+// Global variables
+let deleteId = null;
+let selectedBeneficiaries = [];
+
+// Auto-submit filter form on change
+$('#filterForm select').on('change', function() {
+    $('#filterForm').submit();
+});
+
+// Search with debounce
+let searchTimeout;
+$('#search').on('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        $('#filterForm').submit();
+    }, 500);
+});
+
+// Delete modal functionality
+function showDeleteModal(id, name) {
+    deleteId = id;
+    $('#beneficiaryName').text(name);
+    $('#deleteModal').modal('show');
+}
+
+$('#confirmDeleteBtn').click(function() {
+    if (deleteId) {
+        const submitBtn = $(this);
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+                }
+            }
+        });
+        
+        $.ajax({
+            url: `{% url 'admin_panel:beneficiary_delete' 0 %}`.replace('0', deleteId),
+            type: 'POST',
+            success: function(response) {
+                $('#deleteModal').modal('hide');
+                if (response.success) {
+                    showToast('success', response.message || 'Data penerima bantuan berhasil dihapus');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('error', response.message || 'Gagal menghapus data');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#deleteModal').modal('hide');
+                console.error('Delete error:', xhr.responseText);
+                showToast('error', 'Terjadi kesalahan saat menghapus data: ' + error);
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    }
+});
+
+// Reset delete modal when closed
+$('#deleteModal').on('hidden.bs.modal', function() {
+    deleteId = null;
+});
+
+// Initialize tooltips for Bootstrap 4
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[title]').tooltip({
+        placement: 'top',
+        trigger: 'hover'
+    });
+    
+    // Handle delete button clicks
+    $(document).on('click', '.delete-btn', function() {
+        const beneficiaryId = $(this).data('beneficiary-id');
+        const beneficiaryName = $(this).data('beneficiary-name');
+        showDeleteModal(beneficiaryId, beneficiaryName);
+    });
+});
+
+// Bulk actions functionality
+$('#selectAll').on('change', function() {
+    const isChecked = $(this).is(':checked');
+    $('.beneficiary-checkbox').prop('checked', isChecked);
+    updateBulkActions();
+});
+
+$('.beneficiary-checkbox').on('change', function() {
+    updateBulkActions();
+    updateSelectAll();
+});
+
+function updateBulkActions() {
+    const checkedBoxes = $('.beneficiary-checkbox:checked');
+    const count = checkedBoxes.length;
+    
+    if (count > 0) {
+        $('#bulkActions').removeClass('d-none');
+        $('#bulkDeleteBtn, #bulkEditBtn, #bulkExportBtn').prop('disabled', false);
+        $('#bulkDeleteBtn').html(`<i class="fas fa-trash mr-1"></i>Hapus ${count} Item`);
+    } else {
+        $('#bulkActions').addClass('d-none');
+        $('#bulkDeleteBtn, #bulkEditBtn, #bulkExportBtn').prop('disabled', true);
+    }
+}
+
+function updateSelectAll() {
+    const totalBoxes = $('.beneficiary-checkbox').length;
+    const checkedBoxes = $('.beneficiary-checkbox:checked').length;
+    
+    if (checkedBoxes === 0) {
+        $('#selectAll').prop('indeterminate', false).prop('checked', false);
+    } else if (checkedBoxes === totalBoxes) {
+        $('#selectAll').prop('indeterminate', false).prop('checked', true);
+    } else {
+        $('#selectAll').prop('indeterminate', true);
+    }
+}
+
+// Bulk delete functionality
+$('#bulkDeleteBtn').on('click', function() {
+    const selectedIds = $('.beneficiary-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showToast('warning', 'Pilih item yang akan dihapus');
+        return;
+    }
+    
+    if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} item?`)) {
+        bulkDeleteBeneficiaries(selectedIds);
+    }
+});
+
+function bulkDeleteBeneficiaries(ids) {
+    const btn = $('#bulkDeleteBtn');
+    const originalText = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+    
+    // Prepare data for Django's getlist() method
+    const formData = new FormData();
+    formData.append('action', 'bulk_delete');
+    formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+    ids.forEach(id => {
+        formData.append('ids', id);
+    });
+    
+    $.ajax({
+        url: '{% url "admin_panel:beneficiaries_list" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast('success', response.message);
+                // Clear selections
+                $('.beneficiary-checkbox:checked').prop('checked', false);
+                $('#selectAll').prop('checked', false);
+                updateBulkActions();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', response.message || 'Gagal menghapus data');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Bulk delete error:', xhr.responseText);
+            let errorMessage = 'Terjadi kesalahan saat menghapus data';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.message) {
+                    errorMessage = response.message;
+                }
+            } catch (e) {
+                // Use default error message
+            }
+            showToast('error', errorMessage);
+        },
+        complete: function() {
+            btn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% endblock extra_js %}

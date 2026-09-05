@@ -1,0 +1,329 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .form-input {
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .dark .form-input:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+    
+    .step-indicator {
+        position: relative;
+    }
+    
+    .step-indicator::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 100%;
+        height: 2px;
+        background: #e2e8f0;
+        transform: translateY(-50%);
+    }
+    
+    .step-indicator:last-child::after {
+        display: none;
+    }
+    
+    .step-indicator.active::after {
+        background: #3b82f6;
+    }
+    
+    @media (max-width: 640px) {
+        .step-indicator::after {
+            display: none;
+        }
+    }
+    
+    .file-upload-area {
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #3b82f6;
+        background-color: #f8fafc;
+    }
+    
+    .dark .file-upload-area:hover {
+        border-color: #60a5fa;
+        background-color: #1e293b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Ajukan Dokumen
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">
+                Lengkapi formulir di bawah ini untuk mengajukan dokumen yang Anda butuhkan
+            </p>
+        </div>
+
+        <!-- Progress Steps - Mobile Responsive -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+                <div class="step-indicator active flex items-center w-full sm:w-auto">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold text-sm sm:text-base">1</div>
+                    <span class="ml-2 sm:ml-3 text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Informasi Dasar</span>
+                </div>
+                <div class="step-indicator flex items-center w-full sm:w-auto">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base">2</div>
+                    <span class="ml-2 sm:ml-3 text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Dokumen Pendukung</span>
+                </div>
+                <div class="step-indicator flex items-center w-full sm:w-auto">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base">3</div>
+                    <span class="ml-2 sm:ml-3 text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Konfirmasi</span>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Step 1: Basic Information -->
+            <div class="form-section rounded-2xl p-4 sm:p-6 lg:p-8">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-user text-blue-600 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                    Informasi Dasar
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                        <label for="full_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nama Lengkap <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="full_name" name="full_name" required
+                               class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                               placeholder="Masukkan nama lengkap">
+                    </div>
+                    
+                    <div>
+                        <label for="nik" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            NIK <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="nik" name="nik" required
+                               class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                               placeholder="Masukkan NIK">
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nomor Telepon <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" id="phone" name="phone" required
+                               class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                               placeholder="Masukkan nomor telepon">
+                    </div>
+                    
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Email
+                        </label>
+                        <input type="email" id="email" name="email"
+                               class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                               placeholder="Masukkan email">
+                    </div>
+                    
+                    <div class="sm:col-span-2">
+                        <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Alamat Lengkap <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="address" name="address" rows="3" required
+                                  class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                                  placeholder="Masukkan alamat lengkap"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Document Information -->
+            <div class="form-section rounded-2xl p-4 sm:p-6 lg:p-8">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-file-alt text-green-600 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                    Informasi Dokumen
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                        <label for="document_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Jenis Dokumen <span class="text-red-500">*</span>
+                        </label>
+                        <select id="document_type" name="document_type" required
+                                class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white">
+                            <option value="">Pilih jenis dokumen</option>
+                            <option value="ktp">KTP</option>
+                            <option value="kk">Kartu Keluarga</option>
+                            <option value="surat_keterangan">Surat Keterangan</option>
+                            <option value="surat_nikah">Surat Nikah</option>
+                            <option value="surat_pindah">Surat Pindah</option>
+                            <option value="surat_kematian">Surat Kematian</option>
+                            <option value="surat_domisili">Surat Domisili</option>
+                            <option value="surat_tidak_mampu">Surat Tidak Mampu</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="purpose" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Tujuan Penggunaan <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="purpose" name="purpose" required
+                               class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                               placeholder="Contoh: Melamar kerja, kuliah, dll">
+                    </div>
+                    
+                    <div class="sm:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Keterangan Tambahan
+                        </label>
+                        <textarea id="description" name="description" rows="3"
+                                  class="form-input w-full px-4 py-3 rounded-xl focus:outline-none dark:text-white"
+                                  placeholder="Tambahkan keterangan jika diperlukan"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Supporting Documents -->
+            <div class="form-section rounded-2xl p-4 sm:p-6 lg:p-8">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center">
+                    <i class="fas fa-paperclip text-purple-600 mr-2 sm:mr-3 text-sm sm:text-base"></i>
+                    Dokumen Pendukung
+                </h2>
+                
+                <div class="space-y-6">
+                    <!-- KTP Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Fotokopi KTP <span class="text-red-500">*</span>
+                        </label>
+                        <div class="file-upload-area rounded-xl p-4 sm:p-6 text-center">
+                            <input type="file" id="ktp_file" name="ktp_file" accept="image/*,.pdf" required
+                                   class="hidden" onchange="handleFileSelect(this, 'ktp_preview')">
+                            <label for="ktp_file" class="cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-2xl sm:text-4xl text-gray-400 mb-2 sm:mb-4"></i>
+                                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-1 sm:mb-2">Klik untuk mengupload KTP</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Format: JPG, PNG, PDF (Max 5MB)</p>
+                            </label>
+                            <div id="ktp_preview" class="mt-4 hidden">
+                                <img id="ktp_image" class="max-w-xs mx-auto rounded-lg" alt="Preview">
+                                <p id="ktp_filename" class="text-sm text-gray-600 dark:text-gray-300 mt-2"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KK Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Fotokopi KK <span class="text-red-500">*</span>
+                        </label>
+                        <div class="file-upload-area rounded-xl p-4 sm:p-6 text-center">
+                            <input type="file" id="kk_file" name="kk_file" accept="image/*,.pdf" required
+                                   class="hidden" onchange="handleFileSelect(this, 'kk_preview')">
+                            <label for="kk_file" class="cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-2xl sm:text-4xl text-gray-400 mb-2 sm:mb-4"></i>
+                                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-1 sm:mb-2">Klik untuk mengupload KK</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Format: JPG, PNG, PDF (Max 5MB)</p>
+                            </label>
+                            <div id="kk_preview" class="mt-4 hidden">
+                                <img id="kk_image" class="max-w-xs mx-auto rounded-lg" alt="Preview">
+                                <p id="kk_filename" class="text-sm text-gray-600 dark:text-gray-300 mt-2"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Documents -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Dokumen Tambahan (Opsional)
+                        </label>
+                        <div class="file-upload-area rounded-xl p-4 sm:p-6 text-center">
+                            <input type="file" id="additional_file" name="additional_file" accept="image/*,.pdf"
+                                   class="hidden" onchange="handleFileSelect(this, 'additional_preview')">
+                            <label for="additional_file" class="cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-2xl sm:text-4xl text-gray-400 mb-2 sm:mb-4"></i>
+                                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-1 sm:mb-2">Klik untuk mengupload dokumen tambahan</p>
+                                <p class="text-xs sm:text-sm text-gray-500">Format: JPG, PNG, PDF (Max 5MB)</p>
+                            </label>
+                            <div id="additional_preview" class="mt-4 hidden">
+                                <img id="additional_image" class="max-w-xs mx-auto rounded-lg" alt="Preview">
+                                <p id="additional_filename" class="text-sm text-gray-600 dark:text-gray-300 mt-2"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" 
+                        class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-colors shadow-lg hover:shadow-xl">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Ajukan Dokumen
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function handleFileSelect(input, previewId) {
+        const file = input.files[0];
+        if (file) {
+            const preview = document.getElementById(previewId);
+            const filename = document.getElementById(previewId.replace('_preview', '_filename'));
+            
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId.replace('_preview', '_image'));
+                    img.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.classList.remove('hidden');
+            }
+            
+            filename.textContent = file.name;
+        }
+    }
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const requiredFields = ['full_name', 'nik', 'phone', 'address', 'document_type', 'purpose'];
+        let isValid = true;
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById(fieldName);
+            if (!field.value.trim()) {
+                field.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                field.classList.remove('border-red-500');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Mohon lengkapi semua field yang wajib diisi.');
+        }
+    });
+</script>
+{% endblock %}
+

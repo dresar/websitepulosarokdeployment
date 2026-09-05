@@ -1,0 +1,746 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Data Disabilitas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Bulk Actions Improvements */
+.bulk-actions-container {
+    position: relative;
+}
+
+.bulk-actions-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.bulk-actions-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24 !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .form-control {
+        font-size: 16px; /* Prevent zoom on mobile */
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .bulk-actions-container .btn {
+        font-size: 12px;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-lg-2, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+    
+    .d-flex.align-items-end {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .d-flex.align-items-end .btn {
+        margin-bottom: 0.5rem;
+        margin-right: 0 !important;
+    }
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.avatar-placeholder i {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.badge-custom {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item active">Disabilitas</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-wheelchair text-primary mr-2"></i>
+                        Data Disabilitas
+                    </h1>
+                    <p class="text-muted mb-0">Kelola data disabilitas desa</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'admin_panel:references_disabilitas_add' %}" class="btn btn-primary mr-2">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Disabilitas
+                    </a>
+                    <!-- Export Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i>
+                            Export Data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdownBtn">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-file mr-1"></i>
+                                Pilih Format Export
+                            </h6>
+                            <div class="dropdown-divider"></div>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_disabilitas_export_excel' %}">
+                                <i class="fas fa-file-excel text-success mr-2"></i>
+                                <span>Excel (.xlsx)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_disabilitas_export_csv' %}">
+                                <i class="fas fa-file-csv text-info mr-2"></i>
+                                <span>CSV (.csv)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_disabilitas_export_json' %}">
+                                <i class="fas fa-file-code text-warning mr-2"></i>
+                                <span>JSON (.json)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_disabilitas_export_pdf' %}">
+                                <i class="fas fa-file-pdf text-danger mr-2"></i>
+                                <span>PDF (.pdf)</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filter & Pencarian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="search" class="form-label font-weight-bold">Cari Disabilitas</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ request.GET.search }}" placeholder="Masukkan nama..." 
+                                       style="min-height: 40px; font-size: 14px;">
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="disability_type" class="form-label font-weight-bold">Jenis Disabilitas</label>
+                                <select class="form-control" id="disability_type" name="disability_type" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Jenis</option>
+                                    {% for type in disability_types %}
+                                        <option value="{{ type.id }}" {% if request.GET.disability_type == type.id|stringformat:"s" %}selected{% endif %}>{{ type.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="severity" class="form-label font-weight-bold">Tingkat Keparahan</label>
+                                <select class="form-control" id="severity" name="severity" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Tingkat</option>
+                                    <option value="ringan" {% if request.GET.severity == 'ringan' %}selected{% endif %}>Ringan</option>
+                                    <option value="sedang" {% if request.GET.severity == 'sedang' %}selected{% endif %}>Sedang</option>
+                                    <option value="berat" {% if request.GET.severity == 'berat' %}selected{% endif %}>Berat</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="status" class="form-label font-weight-bold">Status</label>
+                                <select class="form-control" id="status" name="status" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Status</option>
+                                    <option value="aktif" {% if request.GET.status == 'aktif' %}selected{% endif %}>Aktif</option>
+                                    <option value="tidak_aktif" {% if request.GET.status == 'tidak_aktif' %}selected{% endif %}>Tidak Aktif</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-1 col-md-6 mb-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary mr-2">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Cari
+                                </button>
+                                <a href="{% url 'admin_panel:references_disabilitas_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times mr-1"></i>
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disabilitas List -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-2"></i>
+                Daftar Disabilitas
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if page_obj.object_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="selectAll">
+                                        <label class="custom-control-label" for="selectAll"></label>
+                                    </div>
+                                </th>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>NIK</th>
+                                <th>Jenis Disabilitas</th>
+                                <th>Tingkat Keparahan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disabilitas in page_obj.object_list %}
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input disabilitas-checkbox" 
+                                               id="disabilitas_{{ disabilitas.id }}" value="{{ disabilitas.id }}">
+                                        <label class="custom-control-label" for="disabilitas_{{ disabilitas.id }}"></label>
+                                    </div>
+                                </td>
+                                <td>{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-placeholder me-2">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>{{ disabilitas.penduduk.name }}</strong>
+                                            <div class="d-sm-none text-muted small">{{ disabilitas.penduduk.nik }}</div>
+                                            <div class="d-md-none text-muted small">{{ disabilitas.disability_type.name|default:"-" }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="d-none d-sm-table-cell">{{ disabilitas.penduduk.nik }}</td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="badge badge-warning badge-custom">{{ disabilitas.disability_type.name|default:"-" }}</span>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if disabilitas.severity %}
+                                        <span class="badge badge-{% if disabilitas.severity == 'ringan' %}success{% elif disabilitas.severity == 'sedang' %}warning{% else %}danger{% endif %} badge-custom">{{ disabilitas.get_severity_display }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {% if disabilitas.is_active %}
+                                        <span class="badge badge-success badge-custom">Aktif</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary badge-custom">Tidak Aktif</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'admin_panel:references_disabilitas_detail' disabilitas.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if user|can_change:"references" %}
+                                        <a href="{% url 'admin_panel:references_disabilitas_edit' disabilitas.id %}" 
+                                           class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if user|can_delete:"references" %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                data-disabilitas-id="{{ disabilitas.id }}"
+                                                data-penduduk-name="{{ disabilitas.penduduk.name }}"
+                                                onclick="deleteDisabilitasFromButton(this)"
+                                                title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="bulk-actions-container" id="bulkActionsContainer">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="bulkActionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-tasks mr-1"></i>
+                                <span id="bulkActionsText">Aksi Massal</span>
+                                <span class="badge badge-light ml-2" id="bulkActionsCount">0</span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="bulkActionsDropdown">
+                                <a class="dropdown-item" href="#" onclick="executeBulkAction('activate')">
+                                    <i class="fas fa-check text-success mr-2"></i>Aktifkan
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="executeBulkAction('deactivate')">
+                                    <i class="fas fa-pause text-warning mr-2"></i>Nonaktifkan
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="#" onclick="executeBulkAction('delete')">
+                                    <i class="fas fa-trash mr-2"></i>Hapus Data
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-muted">
+                        Menampilkan {{ page_obj.start_index|default:0 }} - {{ page_obj.end_index|default:0 }} dari {{ page_obj.paginator.count|default:0 }} data
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-wheelchair fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Belum ada data disabilitas</h5>
+                    <p class="text-muted">Klik tombol "Tambah Disabilitas" untuk menambahkan data pertama</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus <strong id="deleteItemName"></strong>?</p>
+                <p class="text-danger"><small>Data yang dihapus tidak dapat dikembalikan.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentDisabilitasId = null;
+
+$(document).ready(function() {
+    console.log('Disabilitas List page loaded');
+    
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('.disabilitas-checkbox').prop('checked', this.checked);
+        updateBulkActions();
+    });
+    
+    // Bind checkbox change events
+    $(document).on('change', '.disabilitas-checkbox', function() {
+        updateBulkActions();
+    });
+});
+
+function deleteDisabilitasFromButton(button) {
+    const disabilitasId = $(button).data('disabilitas-id');
+    const pendudukName = $(button).data('penduduk-name');
+    const disabilitasName = 'Disabilitas ' + pendudukName;
+    
+    deleteDisabilitas(disabilitasId, disabilitasName);
+}
+
+function deleteDisabilitas(disabilitasId, disabilitasName) {
+    $('#deleteItemName').text(disabilitasName);
+    $('#confirmDeleteBtn').off('click').on('click', function() {
+        const btn = $(this);
+        const originalText = btn.html();
+        
+        // Show loading
+        btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        btn.prop('disabled', true);
+        
+        fetch(`/admin-panel/references/disabilitas/${disabilitasId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                $('#deleteModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus data');
+        })
+        .finally(() => {
+            btn.html(originalText);
+            btn.prop('disabled', false);
+        });
+    });
+    
+    $('#deleteModal').modal('show');
+}
+
+// Bulk Actions Functions
+function updateBulkActions() {
+    const selected = $('.disabilitas-checkbox:checked').length;
+    const container = $('#bulkActionsContainer');
+    const count = $('#bulkActionsCount');
+    const dropdown = $('#bulkActionsDropdown');
+    
+    // Always show container, but change style based on selection
+    count.text(selected);
+    
+    if (selected > 0) {
+        dropdown.removeClass('btn-outline-primary').addClass('btn-primary');
+        dropdown.find('i').removeClass('fa-tasks').addClass('fa-check');
+    } else {
+        dropdown.removeClass('btn-primary').addClass('btn-outline-primary');
+        dropdown.find('i').removeClass('fa-check').addClass('fa-tasks');
+    }
+    
+    // Update select all checkbox
+    const totalCheckboxes = $('.disabilitas-checkbox').length;
+    const selectAll = $('#selectAll');
+    
+    if (selected === 0) {
+        selectAll.prop('indeterminate', false).prop('checked', false);
+    } else if (selected === totalCheckboxes) {
+        selectAll.prop('indeterminate', false).prop('checked', true);
+    } else {
+        selectAll.prop('indeterminate', true);
+    }
+}
+
+function executeBulkAction(action) {
+    const selected = $('.disabilitas-checkbox:checked');
+    
+    if (selected.length === 0) {
+        showError('Pilih minimal satu data');
+        return;
+    }
+    
+    // Get selected IDs
+    const selectedIds = [];
+    selected.each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    // Action labels
+    const actionLabels = {
+        'activate': 'mengaktifkan',
+        'deactivate': 'menonaktifkan', 
+        'delete': 'menghapus'
+    };
+    
+    // Confirm for delete action
+    if (action === 'delete') {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} data disabilitas?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Apakah Anda yakin ingin ${actionLabels[action]} ${selectedIds.length} data disabilitas?`)) {
+            return;
+        }
+    }
+    
+    showLoading(`Menjalankan aksi ${actionLabels[action]} pada ${selectedIds.length} data...`);
+    
+    // Execute the actual bulk action
+    if (action === 'delete') {
+        bulkDeleteDisabilitas(selectedIds);
+    } else if (action === 'activate') {
+        bulkActivateDisabilitas(selectedIds);
+    } else if (action === 'deactivate') {
+        bulkDeactivateDisabilitas(selectedIds);
+    }
+}
+
+function bulkDeleteDisabilitas(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_disabilitas_bulk_delete" %}',
+        type: 'POST',
+        data: {
+            'disabilitas_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menghapus ${response.deleted_count} data disabilitas`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                let errorMessage = response.message || 'Gagal menghapus data disabilitas';
+                if (response.errors && response.errors.length > 0) {
+                    errorMessage += '\n\nDetail error:\n' + response.errors.join('\n');
+                }
+                showAlert(errorMessage, 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk delete error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menghapus data disabilitas: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkActivateDisabilitas(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_disabilitas_bulk_activate" %}',
+        type: 'POST',
+        data: {
+            'disabilitas_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil mengaktifkan ${response.activated_count} data disabilitas`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal mengaktifkan data disabilitas', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk activate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat mengaktifkan data disabilitas: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkDeactivateDisabilitas(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_disabilitas_bulk_deactivate" %}',
+        type: 'POST',
+        data: {
+            'disabilitas_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menonaktifkan ${response.deactivated_count} data disabilitas`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal menonaktifkan data disabilitas', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk deactivate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menonaktifkan data disabilitas: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function showError(message) {
+    showAlert(message, 'error');
+}
+
+function showLoading(message) {
+    // Show loading overlay
+    $('body').append(`
+        <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                <div class="spinner-border text-primary mb-2"></div>
+                <div>${message}</div>
+            </div>
+        </div>
+    `);
+}
+
+function hideLoading() {
+    $('#loadingOverlay').remove();
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-warning';
+    const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-exclamation-triangle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    $('body').append(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

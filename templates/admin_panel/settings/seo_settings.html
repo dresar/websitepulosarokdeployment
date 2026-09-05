@@ -1,0 +1,591 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan SEO & Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    .seo-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .seo-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .seo-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .seo-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .seo-stats {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .seo-settings {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    
+    .seo-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .seo-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .seo-btn.primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .seo-btn.primary:hover {
+        background: #5a6fd8;
+        transform: translateY(-2px);
+    }
+    
+    .seo-btn.danger {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .seo-btn.danger:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+    }
+    
+    .seo-btn.warning {
+        background: #f39c12;
+        color: white;
+    }
+    
+    .seo-btn.warning:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+    }
+    
+    .seo-btn.success {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .seo-btn.success:hover {
+        background: #229954;
+        transform: translateY(-2px);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .settings-info {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .settings-info h4 {
+        margin: 0 0 10px 0;
+        color: #667eea;
+    }
+    
+    .settings-info p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .seo-preview {
+        background: #f8f9fa;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .seo-preview h5 {
+        color: #333;
+        margin-bottom: 15px;
+    }
+    
+    .seo-preview .search-result {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+        background: white;
+        margin-bottom: 10px;
+    }
+    
+    .seo-preview .search-title {
+        color: #1a0dab;
+        font-size: 18px;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .seo-preview .search-url {
+        color: #006621;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    .seo-preview .search-description {
+        color: #545454;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .analytics-card {
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 20px;
+        background: #f8f9fa;
+    }
+    
+    .analytics-card h5 {
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .analytics-card .form-group {
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="seo-container">
+    <!-- Header -->
+    <div class="seo-header">
+        <h1><i class="fas fa-search"></i> Pengaturan SEO & Analytics</h1>
+        <p>Optimasi website untuk mesin pencari dan analisis performa</p>
+    </div>
+    
+    <!-- SEO Statistics -->
+    <div class="seo-stats">
+        <h4 class="mb-3">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Statistik SEO
+        </h4>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ seo_stats.page_views|default:"0" }}</div>
+                    <div class="stat-label">Page Views</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ seo_stats.unique_visitors|default:"0" }}</div>
+                    <div class="stat-label">Unique Visitors</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ seo_stats.bounce_rate|default:"0" }}%</div>
+                    <div class="stat-label">Bounce Rate</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ seo_stats.seo_score|default:"85" }}%</div>
+                    <div class="stat-label">SEO Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SEO Settings Form -->
+    <div class="seo-settings">
+        <form method="post">
+            {% csrf_token %}
+            
+            <h3><i class="fas fa-cog"></i> Pengaturan SEO Dasar</h3>
+            
+            <div class="settings-info">
+                <h4>Informasi SEO</h4>
+                <p>Konfigurasi pengaturan SEO untuk meningkatkan visibilitas website di mesin pencari seperti Google.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="site_title">Judul Website</label>
+                <input type="text" id="site_title" name="site_title" value="{{ settings.site_title|default:'Website Desa Pulosarok' }}" maxlength="60">
+                <div class="help-text">Judul yang akan muncul di hasil pencarian (maksimal 60 karakter)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="site_description">Deskripsi Website</label>
+                <textarea id="site_description" name="site_description" maxlength="160" placeholder="Deskripsi singkat tentang website desa Pulosarok...">{{ settings.site_description|default:'' }}</textarea>
+                <div class="help-text">Deskripsi yang akan muncul di hasil pencarian (maksimal 160 karakter)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="site_keywords">Keywords</label>
+                <input type="text" id="site_keywords" name="site_keywords" value="{{ settings.site_keywords|default:'' }}" placeholder="desa, pulosarok, website, informasi">
+                <div class="help-text">Kata kunci yang relevan dengan website (pisahkan dengan koma)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="site_author">Author</label>
+                <input type="text" id="site_author" name="site_author" value="{{ settings.site_author|default:'Tim Website Pulosarok' }}" placeholder="Tim Website Pulosarok">
+            </div>
+            
+            <div class="form-group">
+                <label for="site_language">Bahasa Website</label>
+                <select id="site_language" name="site_language">
+                    <option value="id" {% if settings.site_language == 'id' %}selected{% endif %}>Bahasa Indonesia</option>
+                    <option value="en" {% if settings.site_language == 'en' %}selected{% endif %}>English</option>
+                </select>
+            </div>
+            
+            <!-- SEO Preview -->
+            <div class="seo-preview">
+                <h5><i class="fas fa-eye"></i> Preview Hasil Pencarian</h5>
+                <div class="search-result">
+                    <a href="#" class="search-title" id="preview-title">{{ settings.site_title|default:'Website Desa Pulosarok' }}</a>
+                    <div class="search-url" id="preview-url">https://pulosarok.my.id</div>
+                    <div class="search-description" id="preview-description">{{ settings.site_description|default:'Website resmi desa Pulosarok yang menyediakan informasi lengkap tentang desa, layanan, dan kegiatan masyarakat.' }}</div>
+                </div>
+            </div>
+            
+            <!-- Open Graph Settings -->
+            <h3><i class="fas fa-share-alt"></i> Open Graph (Social Media)</h3>
+            
+            <div class="form-group">
+                <label for="og_title">Open Graph Title</label>
+                <input type="text" id="og_title" name="og_title" value="{{ settings.og_title|default:'' }}" placeholder="Website Desa Pulosarok">
+                <div class="help-text">Judul yang akan muncul saat dibagikan di media sosial</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="og_description">Open Graph Description</label>
+                <textarea id="og_description" name="og_description" placeholder="Deskripsi untuk media sosial...">{{ settings.og_description|default:'' }}</textarea>
+                <div class="help-text">Deskripsi yang akan muncul saat dibagikan di media sosial</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="og_image">Open Graph Image</label>
+                <input type="file" id="og_image" name="og_image" accept="image/*">
+                {% if settings.og_image %}
+                    <p>Gambar saat ini: <a href="{{ settings.og_image.url }}" target="_blank">{{ settings.og_image.name }}</a></p>
+                {% endif %}
+                <div class="help-text">Gambar yang akan muncul saat dibagikan di media sosial (1200x630 px)</div>
+            </div>
+            
+            <!-- Analytics Settings -->
+            <h3><i class="fas fa-chart-line"></i> Analytics & Tracking</h3>
+            
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h5><i class="fab fa-google"></i> Google Analytics</h5>
+                    
+                    <div class="form-group">
+                        <label for="google_analytics_id">Google Analytics ID</label>
+                        <input type="text" id="google_analytics_id" name="google_analytics_id" value="{{ settings.google_analytics_id|default:'' }}" placeholder="GA-XXXXXXXXX">
+                        <div class="help-text">ID tracking Google Analytics</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="google_tag_manager_id">Google Tag Manager ID</label>
+                        <input type="text" id="google_tag_manager_id" name="google_tag_manager_id" value="{{ settings.google_tag_manager_id|default:'' }}" placeholder="GTM-XXXXXXX">
+                        <div class="help-text">ID Google Tag Manager</div>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h5><i class="fab fa-facebook"></i> Facebook Pixel</h5>
+                    
+                    <div class="form-group">
+                        <label for="facebook_pixel_id">Facebook Pixel ID</label>
+                        <input type="text" id="facebook_pixel_id" name="facebook_pixel_id" value="{{ settings.facebook_pixel_id|default:'' }}" placeholder="123456789012345">
+                        <div class="help-text">ID Facebook Pixel untuk tracking</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enable_facebook_tracking" name="enable_facebook_tracking" {% if settings.enable_facebook_tracking %}checked{% endif %}>
+                            <label for="enable_facebook_tracking">Aktifkan Facebook Tracking</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h5><i class="fas fa-search"></i> Search Console</h5>
+                    
+                    <div class="form-group">
+                        <label for="google_search_console">Google Search Console</label>
+                        <input type="text" id="google_search_console" name="google_search_console" value="{{ settings.google_search_console|default:'' }}" placeholder="Verification code">
+                        <div class="help-text">Kode verifikasi Google Search Console</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bing_webmaster">Bing Webmaster Tools</label>
+                        <input type="text" id="bing_webmaster" name="bing_webmaster" value="{{ settings.bing_webmaster|default:'' }}" placeholder="Verification code">
+                        <div class="help-text">Kode verifikasi Bing Webmaster Tools</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sitemap Settings -->
+            <h3><i class="fas fa-sitemap"></i> Sitemap & Robots</h3>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_sitemap" name="enable_sitemap" {% if settings.enable_sitemap %}checked{% endif %}>
+                    <label for="enable_sitemap">Aktifkan Sitemap Otomatis</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_robots_txt" name="enable_robots_txt" {% if settings.enable_robots_txt %}checked{% endif %}>
+                    <label for="enable_robots_txt">Aktifkan robots.txt</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="robots_content">Isi robots.txt</label>
+                <textarea id="robots_content" name="robots_content" rows="10" placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /admin/&#10;Disallow: /private/">{{ settings.robots_content|default:'' }}</textarea>
+                <div class="help-text">Konten robots.txt untuk mengatur crawling bot</div>
+            </div>
+            
+            <!-- SEO Actions -->
+            <div class="seo-actions">
+                <a href="{% url 'core:generate_sitemap' %}" class="seo-btn primary">
+                    <i class="fas fa-sitemap"></i> Generate Sitemap
+                </a>
+                <a href="{% url 'core:seo_audit' %}" class="seo-btn warning">
+                    <i class="fas fa-search"></i> SEO Audit
+                </a>
+                <a href="{% url 'core:analytics_dashboard' %}" class="seo-btn success">
+                    <i class="fas fa-chart-bar"></i> Analytics Dashboard
+                </a>
+                <a href="{% url 'core:seo_reports' %}" class="seo-btn primary">
+                    <i class="fas fa-file-alt"></i> SEO Reports
+                </a>
+            </div>
+            
+            <!-- Save Button -->
+            <div style="text-align: center; margin-top: 40px;">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Simpan Pengaturan SEO
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Real-time SEO preview
+    function updateSEOPreview() {
+        const title = document.getElementById('site_title').value || 'Website Desa Pulosarok';
+        const description = document.getElementById('site_description').value || 'Website resmi desa Pulosarok yang menyediakan informasi lengkap tentang desa, layanan, dan kegiatan masyarakat.';
+        
+        document.getElementById('preview-title').textContent = title;
+        document.getElementById('preview-description').textContent = description;
+    }
+    
+    // Update preview on input
+    document.getElementById('site_title').addEventListener('input', updateSEOPreview);
+    document.getElementById('site_description').addEventListener('input', updateSEOPreview);
+    
+    // Character counter
+    function updateCharCount(field, maxLength) {
+        const currentLength = field.value.length;
+        const remaining = maxLength - currentLength;
+        
+        let counter = field.parentNode.querySelector('.char-counter');
+        if (!counter) {
+            counter = document.createElement('div');
+            counter.className = 'char-counter';
+            counter.style.fontSize = '0.8rem';
+            counter.style.color = remaining < 0 ? '#e74c3c' : '#6c757d';
+            field.parentNode.appendChild(counter);
+        }
+        
+        counter.textContent = `${currentLength}/${maxLength} karakter`;
+        counter.style.color = remaining < 0 ? '#e74c3c' : '#6c757d';
+    }
+    
+    // Add character counters
+    document.getElementById('site_title').addEventListener('input', function() {
+        updateCharCount(this, 60);
+    });
+    
+    document.getElementById('site_description').addEventListener('input', function() {
+        updateCharCount(this, 160);
+    });
+    
+    // SEO action confirmations
+    document.querySelectorAll('.seo-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const action = this.textContent.trim();
+            if (!confirm(`Apakah Anda yakin ingin ${action.toLowerCase()}?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const siteTitle = document.getElementById('site_title').value;
+        const siteDescription = document.getElementById('site_description').value;
+        
+        if (!siteTitle.trim()) {
+            e.preventDefault();
+            alert('Judul website harus diisi!');
+            return;
+        }
+        
+        if (siteTitle.length > 60) {
+            e.preventDefault();
+            alert('Judul website maksimal 60 karakter!');
+            return;
+        }
+        
+        if (siteDescription.length > 160) {
+            e.preventDefault();
+            alert('Deskripsi website maksimal 160 karakter!');
+            return;
+        }
+    });
+    
+    // Initialize character counters
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCharCount(document.getElementById('site_title'), 60);
+        updateCharCount(document.getElementById('site_description'), 160);
+    });
+</script>
+{% endblock %}

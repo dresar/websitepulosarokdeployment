@@ -1,0 +1,526 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Form Data Stunting{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    }
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    .child-option {
+        padding: 8px 12px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .child-option:hover {
+        background-color: #f8f9fa;
+    }
+    .child-option:last-child {
+        border-bottom: none;
+    }
+    .child-name {
+        font-weight: 600;
+        color: #495057;
+    }
+    .child-details {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 2px;
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box .form-control {
+        padding-left: 40px;
+    }
+    .search-box .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Form Header -->
+    <div class="form-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:stunting_data' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        Form Data Stunting
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Isi data stunting balita dan anak dengan lengkap</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <button class="btn btn-light" onclick="printForm()">
+                    <i class="fas fa-print mr-2"></i>
+                    Cetak Form
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+        <form id="stuntingDataForm">
+            <input type="hidden" id="stuntingDataId" name="id">
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="childSearch" class="required-field">Anak</label>
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control" id="childSearch" placeholder="Cari anak..." autocomplete="off">
+                            <div class="position-absolute w-100" id="childDropdown" style="display: none; z-index: 1000; background: white; border: 1px solid #ced4da; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                                <!-- Child options will be loaded here -->
+                            </div>
+                        </div>
+                        <input type="hidden" id="childId" name="child_id">
+                        <small class="form-text text-muted" id="selectedChildInfo"></small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="measurementDate" class="required-field">Tanggal Pengukuran</label>
+                        <input type="date" class="form-control" id="measurementDate" name="measurement_date" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="weight" class="required-field">Berat Badan (kg)</label>
+                        <input type="number" class="form-control" id="weight" name="weight" step="0.1" min="0" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="height" class="required-field">Tinggi Badan (cm)</label>
+                        <input type="number" class="form-control" id="height" name="height" step="0.1" min="0" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ageMonths" class="required-field">Usia (bulan)</label>
+                        <input type="number" class="form-control" id="ageMonths" name="age_months" min="0" max="60" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="gender" class="required-field">Jenis Kelamin</label>
+                        <select class="form-control" id="gender" name="gender" required>
+                            <option value="">Pilih Jenis Kelamin</option>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="stuntingStatus">Status Stunting</label>
+                        <select class="form-control" id="stuntingStatus" name="stunting_status">
+                            <option value="">Pilih Status</option>
+                            <option value="normal">Normal</option>
+                            <option value="pendek">Pendek (Stunted)</option>
+                            <option value="sangat_pendek">Sangat Pendek (Severely Stunted)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="intervention">Intervensi</label>
+                        <select class="form-control" id="intervention" name="intervention">
+                            <option value="">Pilih Intervensi</option>
+                            <option value="gizi">Intervensi Gizi</option>
+                            <option value="kesehatan">Intervensi Kesehatan</option>
+                            <option value="sanitasi">Intervensi Sanitasi</option>
+                            <option value="edukasi">Edukasi Keluarga</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="posyanduSelect" class="required-field">Posyandu</label>
+                        <select class="form-control" id="posyanduSelect" name="posyandu_id" required>
+                            <option value="">Pilih Posyandu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="healthWorker">Petugas Kesehatan</label>
+                        <input type="text" class="form-control" id="healthWorker" name="health_worker" placeholder="Nama petugas">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="notes">Catatan</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Catatan tambahan..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 text-right">
+                    <button type="button" class="btn btn-secondary mr-2" onclick="goBack()">
+                        <i class="fas fa-times mr-1"></i>
+                        Batal
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i>
+                        <span id="submitButtonText">Simpan</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin/posyandu-autocomplete.js' %}"></script>
+<script>
+$(document).ready(function() {
+    let childrenData = [];
+    let isEditMode = false;
+
+    // Load initial data
+    loadChildrenData();
+    loadPosyanduOptions();
+    
+    // Check if this is edit mode
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    if (editId) {
+        isEditMode = true;
+        loadStuntingDataForEdit(editId);
+    }
+
+    // Child search functionality
+    $('#childSearch').on('input', function() {
+        const query = $(this).val().toLowerCase();
+        if (query.length > 0) {
+            const filteredChildren = childrenData.filter(child => 
+                child.name.toLowerCase().includes(query) || 
+                child.nik.toLowerCase().includes(query)
+            );
+            displayChildDropdown(filteredChildren);
+        } else {
+            $('#childDropdown').hide();
+        }
+    });
+
+    // Hide dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#childSearch, #childDropdown').length) {
+            $('#childDropdown').hide();
+        }
+    });
+
+    // Form submission
+    $('#stuntingDataForm').on('submit', function(e) {
+        e.preventDefault();
+        if (isEditMode) {
+            updateStuntingData();
+        } else {
+            createStuntingData();
+        }
+    });
+
+    // Load children data (balita 0-5 tahun)
+    function loadChildrenData() {
+        $.ajax({
+            url: '{% url "posyandu:api_penduduk_search" %}',
+            method: 'GET',
+            data: { age_group: 'balita' },
+            success: function(response) {
+                childrenData = response.results || [];
+                console.log('Loaded children data:', childrenData);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading children data:', error);
+            }
+        });
+    }
+
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Pilih Posyandu</option>';
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+                $('#posyanduSelect').html(options);
+            }
+        });
+    }
+
+    // Display child dropdown
+    function displayChildDropdown(children) {
+        const dropdown = $('#childDropdown');
+        dropdown.empty();
+        
+        if (children.length === 0) {
+            dropdown.html('<div class="child-option">Tidak ada anak ditemukan</div>');
+        } else {
+            children.forEach(function(child) {
+                const age = calculateAge(child.birth_date);
+                const ageText = age < 12 ? `${age} bulan` : `${Math.floor(age/12)} tahun ${age%12} bulan`;
+                
+                dropdown.append(`
+                    <div class="child-option" data-child-id="${child.id}" data-child-name="${child.name}" data-child-nik="${child.nik}" data-child-gender="${child.gender}" data-child-birth="${child.birth_date}">
+                        <div class="child-name">${child.name}</div>
+                        <div class="child-details">NIK: ${child.nik} | ${child.gender === 'L' ? 'Laki-laki' : 'Perempuan'} | ${ageText}</div>
+                    </div>
+                `);
+            });
+        }
+        
+        dropdown.show();
+    }
+
+    // Calculate age in months
+    function calculateAge(birthDate) {
+        const birth = new Date(birthDate);
+        const now = new Date();
+        const diffTime = Math.abs(now - birth);
+        const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30.44));
+        return diffMonths;
+    }
+
+    // Child selection
+    $(document).on('click', '.child-option', function() {
+        const childId = $(this).data('child-id');
+        const childName = $(this).data('child-name');
+        const childNik = $(this).data('child-nik');
+        const childGender = $(this).data('child-gender');
+        const childBirth = $(this).data('child-birth');
+        
+        $('#childId').val(childId);
+        $('#childSearch').val(childName);
+        $('#gender').val(childGender);
+        $('#selectedChildInfo').text(`NIK: ${childNik} | ${childGender === 'L' ? 'Laki-laki' : 'Perempuan'}`);
+        
+        // Calculate and set age
+        const age = calculateAge(childBirth);
+        $('#ageMonths').val(age);
+        
+        $('#childDropdown').hide();
+    });
+
+    // Load stunting data for edit
+    function loadStuntingDataForEdit(id) {
+        $.ajax({
+            url: `{% url "posyandu:api_stunting_data_update" 0 %}`.replace('0', id),
+            method: 'GET',
+            success: function(response) {
+                $('#stuntingDataId').val(response.id);
+                $('#childId').val(response.child_id);
+                $('#childSearch').val(response.child_name);
+                $('#measurementDate').val(response.measurement_date);
+                $('#weight').val(response.weight);
+                $('#height').val(response.height);
+                $('#ageMonths').val(response.age_months);
+                $('#gender').val(response.gender);
+                $('#stuntingStatus').val(response.stunting_status);
+                $('#intervention').val(response.intervention);
+                $('#posyanduSelect').val(response.posyandu_id);
+                $('#healthWorker').val(response.health_worker);
+                $('#notes').val(response.notes);
+                
+                $('#submitButtonText').text('Update');
+            },
+            error: function(xhr, status, error) {
+                showAlert('Error loading stunting data for edit', 'danger');
+                console.error('Error loading stunting data for edit:', error);
+            }
+        });
+    }
+
+    // Create stunting data
+    function createStuntingData() {
+        const formData = new FormData($('#stuntingDataForm')[0]);
+        
+        $.ajax({
+            url: '{% url "posyandu:api_stunting_data_create" %}',
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                showAlert('Data stunting berhasil ditambahkan', 'success');
+                setTimeout(function() {
+                    window.location.href = '{% url "admin_panel:posyandu:stunting_data" %}';
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error adding stunting data';
+                showAlert(errorMessage, 'danger');
+            }
+        });
+    }
+
+    // Update stunting data
+    function updateStuntingData() {
+        const formData = new FormData($('#stuntingDataForm')[0]);
+        const stuntingId = $('#stuntingDataId').val();
+        
+        $.ajax({
+            url: `{% url "posyandu:api_stunting_data_update" 0 %}`.replace('0', stuntingId),
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                showAlert('Data stunting berhasil diperbarui', 'success');
+                setTimeout(function() {
+                    window.location.href = '{% url "admin_panel:posyandu:stunting_data" %}';
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                const errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error updating stunting data';
+                showAlert(errorMessage, 'danger');
+            }
+        });
+    }
+
+    // Go back function
+    window.goBack = function() {
+        window.location.href = '{% url "admin_panel:posyandu:stunting_data" %}';
+    };
+
+    // Print form function
+    window.printForm = function() {
+        window.print();
+    };
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 3 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

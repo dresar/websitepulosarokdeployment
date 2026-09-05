@@ -1,0 +1,62 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 overflow-hidden">
+    {% if village_profile.profile_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ village_profile.profile_image.url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-teal-600/80 to-cyan-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-teal-600 to-cyan-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Visi & Misi Desa</h1>
+            <p class="text-sm sm:text-base opacity-90">Arah dan tujuan pembangunan Desa Pulosarok</p>
+        </div>
+    </div>
+</section>
+
+<!-- Vision & Mission Content -->
+<section class="py-4 sm:py-6 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            {% if village_profile.vision %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 text-center">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-teal-500 rounded-full flex items-center justify-center text-white mx-auto mb-4">
+                    <i class="fas fa-bullseye text-xl sm:text-2xl"></i>
+                </div>
+                <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">Visi Desa</h2>
+                <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed italic">"{{ village_profile.vision }}"</p>
+            </div>
+            {% endif %}
+            
+            {% if village_profile.mission %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-cyan-500 rounded-full flex items-center justify-center text-white mx-auto mb-4">
+                    <i class="fas fa-target text-xl sm:text-2xl"></i>
+                </div>
+                <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Misi Desa</h2>
+                <ul class="space-y-2">
+                    {% for mission in village_profile.mission_list %}
+                    <li class="flex items-start text-sm sm:text-base text-gray-700 dark:text-gray-300">
+                        <span class="text-teal-600 dark:text-teal-400 font-bold mr-2 mt-0.5 text-lg">✓</span>
+                        <span>{{ mission }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if not village_profile.vision and not village_profile.mission %}
+        <div class="text-center py-8 sm:py-12">
+            <i class="fas fa-bullseye text-4xl sm:text-5xl text-gray-400 mb-3"></i>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">Visi & Misi belum tersedia</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-500">Visi dan misi desa akan segera ditambahkan</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

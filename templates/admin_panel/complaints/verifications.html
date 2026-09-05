@@ -1,0 +1,467 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Enhanced Verifications Styles */
+.verifications-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.verifications-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.verifications-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.verifications-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.verifications-body {
+    padding: 2rem;
+}
+
+.verifications-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.verifications-stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 3px solid;
+    transition: all 0.3s ease;
+}
+
+.verifications-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.verifications-stat-card-pending { border-left-color: #ffc107; }
+.verifications-stat-card-in-progress { border-left-color: #17a2b8; }
+.verifications-stat-card-verified { border-left-color: #28a745; }
+.verifications-stat-card-rejected { border-left-color: #dc3545; }
+.verifications-stat-card-requires-info { border-left-color: #6f42c1; }
+
+.verifications-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #495057;
+}
+
+.verifications-stat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.verifications-filter {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.verifications-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.verifications-table table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.verifications-table thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.verifications-table th {
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.verifications-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+.verifications-table tbody tr:hover {
+    background: #f8f9fa;
+    transition: background 0.3s ease;
+}
+
+.verifications-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.verifications-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.verifications-badge-in-progress {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.verifications-badge-verified {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.verifications-badge-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.verifications-badge-requires-info {
+    background: #e2e3f1;
+    color: #4a4a6a;
+    border: 1px solid #d1d3e2;
+}
+
+.verifications-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.verifications-btn {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.verifications-btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.verifications-btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+}
+
+.verifications-btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.verifications-btn-outline-warning:hover {
+    background: #ffc107;
+    color: #212529;
+    text-decoration: none;
+}
+
+.verifications-btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.verifications-btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+    text-decoration: none;
+}
+
+.verifications-empty {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.verifications-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.verifications-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+}
+
+.verifications-pagination .page-link {
+    border: 2px solid #e2e8f0;
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.verifications-pagination .page-link:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: #f8f9fa;
+}
+
+.verifications-pagination .page-item.active .page-link {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.verifications-pagination .page-item.disabled .page-link {
+    background: #f8f9fa;
+    border-color: #e2e8f0;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="verifications-container">
+    <div class="verifications-header">
+        <h3 class="verifications-title">
+            <i class="fas fa-check-circle"></i>{{ title|default:"Verifikasi Pengaduan" }}
+        </h3>
+    </div>
+    <div class="verifications-body">
+        <!-- Statistics Cards -->
+        <div class="verifications-stats">
+            <div class="verifications-stat-card verifications-stat-card-pending">
+                <div class="verifications-stat-value">{{ pending_verifications|default:0 }}</div>
+                <div class="verifications-stat-label">Menunggu Verifikasi</div>
+            </div>
+            
+            <div class="verifications-stat-card verifications-stat-card-in-progress">
+                <div class="verifications-stat-value">{{ in_progress_verifications|default:0 }}</div>
+                <div class="verifications-stat-label">Sedang Diverifikasi</div>
+            </div>
+            
+            <div class="verifications-stat-card verifications-stat-card-verified">
+                <div class="verifications-stat-value">{{ verified_verifications|default:0 }}</div>
+                <div class="verifications-stat-label">Terverifikasi</div>
+            </div>
+            
+            <div class="verifications-stat-card verifications-stat-card-rejected">
+                <div class="verifications-stat-value">{{ rejected_verifications|default:0 }}</div>
+                <div class="verifications-stat-label">Ditolak</div>
+            </div>
+            
+            <div class="verifications-stat-card verifications-stat-card-requires-info">
+                <div class="verifications-stat-value">{{ requires_info_verifications|default:0 }}</div>
+                <div class="verifications-stat-label">Memerlukan Info</div>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="verifications-filter">
+            <form method="get" class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="search" class="form-label">Pencarian</label>
+                    {{ search_form.search }}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    {{ search_form.status }}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="verification_type" class="form-label">Jenis</label>
+                    {{ search_form.verification_type }}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="priority" class="form-label">Prioritas</label>
+                    {{ search_form.priority }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search mr-2"></i>Cari
+                        </button>
+                        <a href="{% url 'admin_panel:verifications_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times mr-2"></i>Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Data Table -->
+        <div class="verifications-table">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>ID Pengaduan</th>
+                            <th>Jenis Verifikasi</th>
+                            <th>Status</th>
+                            <th>Prioritas</th>
+                            <th>Diverifikasi Oleh</th>
+                            <th>Tanggal Dibuat</th>
+                            <th>Tindak Lanjut</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for verification in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                            <td>
+                                <strong>{{ verification.complaint.complaint_id }}</strong>
+                                <br><small class="text-muted">{{ verification.complaint.title|truncatechars:30 }}</small>
+                            </td>
+                            <td>
+                                <span class="verifications-badge verifications-badge-{{ verification.verification_type }}">
+                                    {{ verification.get_verification_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="verifications-badge verifications-badge-{{ verification.status }}">
+                                    {{ verification.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="verifications-badge verifications-badge-{{ verification.priority_level }}">
+                                    {{ verification.get_priority_level_display }}
+                                </span>
+                            </td>
+                            <td>{{ verification.verified_by.get_full_name|default:verification.verified_by.username }}</td>
+                            <td>{{ verification.created_at|date:"d M Y H:i" }}</td>
+                            <td>
+                                {% if verification.requires_follow_up %}
+                                    <span class="badge badge-warning">Ya</span>
+                                    {% if verification.follow_up_date %}
+                                        <br><small class="text-muted">{{ verification.follow_up_date|date:"d M Y" }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge badge-secondary">Tidak</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="verifications-actions">
+                                    <a href="{% url 'admin_panel:verification_detail' verification.pk %}" 
+                                       class="verifications-btn verifications-btn-outline-primary" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'admin_panel:verification_update' verification.pk %}" 
+                                       class="verifications-btn verifications-btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'admin_panel:verification_delete' verification.pk %}" 
+                                       class="verifications-btn verifications-btn-outline-danger" 
+                                       onclick="return confirm('Apakah Anda yakin ingin menghapus verifikasi ini?')" 
+                                       title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="verifications-empty">
+                                <i class="fas fa-check-circle"></i>
+                                <h5>Tidak ada verifikasi ditemukan</h5>
+                                <p class="text-muted">Belum ada verifikasi pengaduan yang tersedia.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="verifications-pagination">
+                <nav aria-label="Pagination">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

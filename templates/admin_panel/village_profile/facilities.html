@@ -1,0 +1,888 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Facilities Form Styles - Bootstrap 4 Compatible */
+.facilities-form-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.facilities-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #28a745;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.facilities-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-color: #28a745;
+}
+
+.facilities-form-card .card-header {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.facilities-form-card .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.facilities-form-card .card-body {
+    padding: 1.5rem;
+    background: transparent;
+}
+
+.facility-item {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.facility-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #28a745;
+    border-radius: 0 2px 2px 0;
+}
+
+.facility-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    border-color: #28a745;
+}
+
+.facility-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.facility-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 2rem;
+}
+
+.facility-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.facility-info h6 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #495057;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.facility-type {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    color: #28a745;
+    font-weight: 500;
+}
+
+.facility-location {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.facility-condition {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.facility-actions {
+    display: flex;
+    gap: 0.375rem;
+}
+
+.facility-actions .btn {
+    padding: 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    position: relative;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #28a745;
+    border-radius: 0 2px 2px 0;
+}
+
+.form-section h6 {
+    color: #28a745;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+
+.form-section h6::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #28a745;
+    border-radius: 1px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+.form-control {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    color: #495057;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    background: #ffffff;
+    color: #495057;
+    outline: none;
+}
+
+.form-control:hover {
+    border-color: #adb5bd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+}
+
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.image-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    margin-bottom: 15px;
+}
+
+.image-upload-area:hover {
+    border-color: #28a745;
+    background: #f0fff4;
+}
+
+.image-upload-area.dragover {
+    border-color: #28a745;
+    background: #e8f5e8;
+}
+
+.image-upload-area i {
+    font-size: 2.5rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.image-upload-area p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #495057;
+}
+
+.image-upload-area small {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.image-preview {
+    width: 100%;
+    max-width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .facilities-form-card {
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+    }
+    
+    .facilities-form-card .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .facilities-form-card .card-body {
+        padding: 1rem;
+    }
+    
+    .form-section {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-section h6 {
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-control {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+    
+    .facility-item {
+        padding: 0.75rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .facility-image {
+        width: 100%;
+        height: 120px;
+        align-self: center;
+    }
+    
+    .facility-info {
+        text-align: center;
+    }
+    
+    .facility-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .facilities-form-card .card-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .facilities-form-card .card-body {
+        padding: 0.75rem;
+    }
+    
+    .form-section {
+        padding: 0.5rem;
+    }
+    
+    .form-section h6 {
+        font-size: 0.8rem;
+    }
+    
+    .form-control {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .facility-item {
+        padding: 0.5rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .facility-image {
+        width: 100%;
+        height: 100px;
+        align-self: center;
+    }
+    
+    .facility-info {
+        text-align: center;
+    }
+    
+    .facility-info h6 {
+        font-size: 0.9rem;
+    }
+    
+    .facility-type,
+    .facility-location,
+    .facility-condition {
+        font-size: 0.8rem;
+    }
+    
+    .facility-actions {
+        justify-content: center;
+    }
+    
+    .image-upload-area {
+        padding: 20px;
+    }
+    
+    .image-upload-area i {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Enhanced Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <div class="mb-3 mb-md-0">
+        <h4 class="text-success mb-2" style="font-weight: 600; font-size: 1.5rem;">
+            <i class="fas fa-building mr-2"></i>Fasilitas Desa
+        </h4>
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+            Kelola data fasilitas dan infrastruktur desa
+        </p>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <button class="btn btn-outline-primary btn-sm mb-2 mb-sm-0" onclick="previewFacilities()">
+            <i class="fas fa-eye mr-1"></i>Preview
+        </button>
+        <button class="btn btn-success btn-sm" onclick="addFacility()">
+            <i class="fas fa-plus mr-1"></i>Tambah Fasilitas
+        </button>
+    </div>
+</div>
+
+<!-- Facilities List -->
+<div class="facilities-form-card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-building mr-2"></i>Daftar Fasilitas Desa
+        </h5>
+    </div>
+    <div class="card-body">
+        <div id="facilitiesList">
+            {% for facility in facilities %}
+            <div class="facility-item" data-id="{{ facility.id }}">
+                <div class="facility-image">
+                    {% if facility.image %}
+                        <img src="{{ facility.image.url }}" alt="{{ facility.name }}" class="img-fluid">
+                    {% else %}
+                        <div class="image-placeholder">
+                            <i class="fas fa-building"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="facility-info">
+                    <h6>{{ facility.name }}</h6>
+                    <p class="facility-type">{{ facility.get_type_display }}</p>
+                    <p class="facility-location">
+                        <i class="fas fa-map-marker-alt mr-1"></i>{{ facility.location }}
+                    </p>
+                    {% if facility.condition %}
+                    <p class="facility-condition">
+                        <i class="fas fa-info-circle mr-1"></i>Kondisi: {{ facility.get_condition_display }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="facility-actions">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="editFacility({{ facility.id }})" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteFacility({{ facility.id }})" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-building fa-3x mb-3"></i>
+                <p>Belum ada data fasilitas</p>
+                <button class="btn btn-primary btn-sm" onclick="addFacility()">
+                    <i class="fas fa-plus mr-1"></i>Tambah Fasilitas Pertama
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Facility Modal -->
+<div class="modal fade" id="facilityModal" tabindex="-1" role="dialog" aria-labelledby="facilityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="facilityModalLabel">
+                    <i class="fas fa-building mr-2"></i>Tambah Fasilitas Desa
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="facilityForm">
+                    <input type="hidden" id="facilityId" value="">
+                    <input type="hidden" id="facilityVillageId" value="{{ village_profile.id|default:'' }}">
+                    
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityName" class="form-label">Nama Fasilitas <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="facilityName" required>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityType" class="form-label">Jenis Fasilitas <span class="text-danger">*</span></label>
+                                <select class="form-control" id="facilityType" required>
+                                    <option value="">Pilih Jenis Fasilitas</option>
+                                    <option value="PENDIDIKAN">Pendidikan</option>
+                                    <option value="KESEHATAN">Kesehatan</option>
+                                    <option value="IBADAH">Ibadah</option>
+                                    <option value="OLAHRAGA">Olahraga</option>
+                                    <option value="UMUM">Umum</option>
+                                    <option value="PEMERINTAHAN">Pemerintahan</option>
+                                    <option value="EKONOMI">Ekonomi</option>
+                                    <option value="TRANSPORTASI">Transportasi</option>
+                                    <option value="LAINNYA">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityLocation" class="form-label">Lokasi <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="facilityLocation" required>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityCondition" class="form-label">Kondisi</label>
+                                <select class="form-control" id="facilityCondition">
+                                    <option value="BAIK">Baik</option>
+                                    <option value="CUKUP">Cukup</option>
+                                    <option value="RUSAK">Rusak</option>
+                                    <option value="RENOVASI">Dalam Renovasi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="facilityDescription" class="form-label">Deskripsi <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="facilityDescription" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityCapacity" class="form-label">Kapasitas</label>
+                                <input type="text" class="form-control" id="facilityCapacity" placeholder="Contoh: 100 orang">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityBuiltYear" class="form-label">Tahun Dibangun</label>
+                                <input type="number" class="form-control" id="facilityBuiltYear" min="1900" max="2100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityManager" class="form-label">Pengelola</label>
+                                <input type="text" class="form-control" id="facilityManager">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="form-group">
+                                <label for="facilityContactPhone" class="form-label">Telepon Kontak</label>
+                                <input type="text" class="form-control" id="facilityContactPhone">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="facilityOperationalHours" class="form-label">Jam Operasional</label>
+                        <input type="text" class="form-control" id="facilityOperationalHours" placeholder="Contoh: 08:00 - 17:00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Gambar Fasilitas</label>
+                        <div class="image-upload-area" onclick="document.getElementById('facilityImage').click()">
+                            <i class="fas fa-camera"></i>
+                            <p>Klik untuk memilih gambar atau drag & drop</p>
+                            <small>Format: JPG, PNG (Max: 2MB)</small>
+                        </div>
+                        <input type="file" id="facilityImage" name="image" accept="image/*" style="display: none;" onchange="previewFacilityImage(this)">
+                        <img id="facilityImagePreview" class="image-preview" alt="Preview" style="display: none;">
+                        <div class="form-check mt-2" id="removeImageCheck" style="display: none;">
+                            <input type="checkbox" class="form-check-input" id="removeImage" name="remove_image">
+                            <label class="form-check-label" for="removeImage">Hapus Gambar</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-success" onclick="saveFacility()">
+                    <i class="fas fa-save mr-1"></i>Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <a href="{% url "village_profile:admin_dashboard" %}" class="btn btn-secondary btn-sm mb-3 mb-md-0">
+                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Dashboard
+            </a>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="refreshFacilities()">
+                    <i class="fas fa-sync mr-1"></i>Refresh
+                </button>
+                <button type="button" class="btn btn-success btn-sm" onclick="addFacility()">
+                    <i class="fas fa-plus mr-1"></i>Tambah Fasilitas
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function addFacility() {
+    $('#facilityModalLabel').html('<i class="fas fa-building mr-2"></i>Tambah Fasilitas Desa');
+    $('#facilityForm')[0].reset();
+    $('#facilityId').val('');
+    $('#facilityImagePreview').hide();
+    $('#removeImageCheck').hide();
+    $('#facilityModal').modal('show');
+}
+
+function editFacility(id) {
+    // Load facility data and show modal
+    $.get(`{% url "village_profile:admin_api_get_facility" %}?id=${id}`)
+        .done(function(response) {
+            if (response.success) {
+                const facility = response.data;
+                $('#facilityModalLabel').html('<i class="fas fa-building mr-2"></i>Edit Fasilitas Desa');
+                $('#facilityId').val(facility.id);
+                $('#facilityName').val(facility.name);
+                $('#facilityType').val(facility.type);
+                $('#facilityLocation').val(facility.location);
+                $('#facilityCondition').val(facility.condition);
+                $('#facilityDescription').val(facility.description);
+                $('#facilityCapacity').val(facility.capacity);
+                $('#facilityBuiltYear').val(facility.built_year);
+                $('#facilityManager').val(facility.manager);
+                $('#facilityContactPhone').val(facility.contact_phone);
+                $('#facilityOperationalHours').val(facility.operational_hours);
+                
+                // Handle image
+                if (facility.image) {
+                    $('#facilityImagePreview').attr('src', facility.image).show();
+                    $('#removeImageCheck').show();
+                } else {
+                    $('#facilityImagePreview').hide();
+                    $('#removeImageCheck').hide();
+                }
+                
+                $('#facilityModal').modal('show');
+            } else {
+                showToast('error', 'Gagal memuat data fasilitas');
+            }
+        })
+        .fail(function() {
+            showToast('error', 'Gagal memuat data fasilitas');
+        });
+}
+
+function deleteFacility(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus fasilitas ini?')) {
+        $.ajax({
+            url: '{% url "village_profile:admin_delete_facility" %}',
+            type: 'POST',
+            data: {
+                facility_id: id,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast('success', 'Fasilitas berhasil dihapus');
+                    $(`.facility-item[data-id="${id}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                } else {
+                    showToast('error', 'Gagal menghapus fasilitas: ' + response.message);
+                }
+            },
+            error: function() {
+                showToast('error', 'Gagal menghapus fasilitas');
+            }
+        });
+    }
+}
+
+function saveFacility() {
+    const submitBtn = $('button[onclick="saveFacility()"]');
+    const originalText = submitBtn.html();
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+    
+    const formData = new FormData();
+    formData.append('facility_id', $('#facilityId').val());
+    formData.append('village_id', $('#facilityVillageId').val());
+    formData.append('name', $('#facilityName').val());
+    formData.append('type', $('#facilityType').val());
+    formData.append('location', $('#facilityLocation').val());
+    formData.append('condition', $('#facilityCondition').val());
+    formData.append('description', $('#facilityDescription').val());
+    formData.append('capacity', $('#facilityCapacity').val());
+    formData.append('built_year', $('#facilityBuiltYear').val());
+    formData.append('manager', $('#facilityManager').val());
+    formData.append('contact_phone', $('#facilityContactPhone').val());
+    formData.append('operational_hours', $('#facilityOperationalHours').val());
+    
+    // Handle image upload
+    const imageFile = document.getElementById('facilityImage').files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+    
+    // Handle remove image checkbox
+    if ($('#removeImage').is(':checked')) {
+        formData.append('remove_image', 'on');
+    }
+    
+    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+    
+    $.ajax({
+        url: '{% url "village_profile:admin_save_facility" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast('success', 'Fasilitas berhasil disimpan');
+                $('#facilityModal').modal('hide');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', 'Gagal menyimpan fasilitas: ' + response.message);
+            }
+        },
+        error: function() {
+            showToast('error', 'Gagal menyimpan fasilitas');
+        },
+        finally: function() {
+            submitBtn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function refreshFacilities() {
+    location.reload();
+}
+
+function previewFacilities() {
+    window.open('{% url "village_profile:facilities" %}', '_blank');
+}
+
+function previewFacilityImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#facilityImagePreview').attr('src', e.target.result).show();
+            $('#removeImageCheck').show();
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% csrf_token %}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock extra_js %}

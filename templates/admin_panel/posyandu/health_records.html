@@ -1,0 +1,882 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard Rekam Kesehatan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .medical-header {
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3a8a 50%, #0f172a 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(44, 90, 160, 0.3);
+    }
+    
+    .dashboard-card {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    }
+    
+    .section-header {
+        color: #1e293b;
+        font-weight: 700;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #3b82f6;
+        font-size: 1.3rem;
+    }
+    
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 35px;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        border-left: 5px solid #3b82f6;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), transparent);
+        border-radius: 0 0 0 100px;
+    }
+    
+    .stat-card.primary { border-left-color: #3b82f6; }
+    .stat-card.success { border-left-color: #10b981; }
+    .stat-card.warning { border-left-color: #f59e0b; }
+    .stat-card.danger { border-left-color: #ef4444; }
+    .stat-card.info { border-left-color: #06b6d4; }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        color: #64748b;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2rem;
+        opacity: 0.2;
+        color: #3b82f6;
+    }
+    
+    .filter-panel {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid #cbd5e1;
+    }
+    
+    .filter-title {
+        color: #334155;
+        font-weight: 700;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+    
+    .form-control-modern {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-control-modern:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+    
+    .btn-modern {
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-primary-modern {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-primary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-secondary-modern {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+    }
+    
+    .btn-secondary-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.4);
+    }
+    
+    .records-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .table-modern {
+        margin-bottom: 0;
+    }
+    
+    .table-modern thead th {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 20px 15px;
+        border: none;
+    }
+    
+    .table-modern tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .table-modern tbody tr:hover {
+        background: #f8fafc;
+        transform: scale(1.01);
+    }
+    
+    .table-modern tbody td {
+        padding: 20px 15px;
+        vertical-align: middle;
+        border: none;
+    }
+    
+    .badge-modern {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-primary { background: #dbeafe; color: #1e40af; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-action:hover {
+        transform: scale(1.1);
+    }
+    
+    .btn-view { background: #dbeafe; color: #1e40af; }
+    .btn-edit { background: #fef3c7; color: #92400e; }
+    .btn-delete { background: #fee2e2; color: #991b1b; }
+    
+    .search-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #cbd5e1;
+    }
+    
+    .pagination-modern .page-link {
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+        padding: 12px 16px;
+        margin: 0 4px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination-modern .page-link:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .pagination-modern .page-item.active .page-link {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+    }
+    
+    .patient-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-right: 15px;
+    }
+    
+    .patient-info h6 {
+        margin: 0;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+    
+    .patient-info small {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+    
+    .spinner-border-modern {
+        width: 3rem;
+        height: 3rem;
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .alert-modern {
+        border: none;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .alert-success-modern {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #166534;
+        border-left: 5px solid #10b981;
+    }
+    
+    .alert-danger-modern {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border-left: 5px solid #ef4444;
+    }
+    
+    .alert-warning-modern {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        border-left: 5px solid #f59e0b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Medical Header -->
+    <div class="medical-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:posyandu_admin' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h1 class="mb-0">
+                        <i class="fas fa-heartbeat mr-3"></i>
+                        Dashboard Rekam Kesehatan
+                    </h1>
+                </div>
+                <p class="mb-0 opacity-90 fs-5">Kelola dan pantau data kesehatan masyarakat dengan mudah</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'admin_panel:posyandu:health_record_create' %}" class="btn btn-light btn-modern me-2">
+                    <i class="fas fa-plus mr-2"></i>
+                    Tambah Rekam
+                </a>
+                <button class="btn btn-outline-light btn-modern" onclick="refreshData()">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card primary">
+            <i class="fas fa-file-medical stat-icon"></i>
+            <div class="stat-number" id="totalRecords">0</div>
+            <div class="stat-label">Total Rekam</div>
+        </div>
+        <div class="stat-card success">
+            <i class="fas fa-calendar-day stat-icon"></i>
+            <div class="stat-number" id="todayRecords">0</div>
+            <div class="stat-label">Hari Ini</div>
+        </div>
+        <div class="stat-card warning">
+            <i class="fas fa-calendar-week stat-icon"></i>
+            <div class="stat-number" id="thisWeekRecords">0</div>
+            <div class="stat-label">Minggu Ini</div>
+        </div>
+        <div class="stat-card danger">
+            <i class="fas fa-exclamation-triangle stat-icon"></i>
+            <div class="stat-number" id="incompleteRecords">0</div>
+            <div class="stat-label">Tidak Lengkap</div>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel">
+        <h6 class="filter-title">
+            <i class="fas fa-filter mr-2"></i>
+            Filter & Pencarian
+        </h6>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="posyanduFilter" class="form-label fw-bold">Posyandu</label>
+                    <select class="form-control form-control-modern" id="posyanduFilter">
+                        <option value="">Semua Posyandu</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="patientTypeFilter" class="form-label fw-bold">Jenis Pasien</label>
+                    <select class="form-control form-control-modern" id="patientTypeFilter">
+                        <option value="">Semua Jenis</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="dateFrom" class="form-label fw-bold">Dari Tanggal</label>
+                            <input type="date" class="form-control form-control-modern" id="dateFrom">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="dateTo" class="form-label fw-bold">Sampai Tanggal</label>
+                            <input type="date" class="form-control form-control-modern" id="dateTo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="mb-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary-modern btn-modern" onclick="applyFilters()">
+                            <i class="fas fa-search mr-1"></i>
+                            Filter
+                        </button>
+                        <button class="btn btn-secondary-modern btn-modern" onclick="clearFilters()">
+                            <i class="fas fa-times mr-1"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Records Section -->
+    <div class="dashboard-card">
+        <h5 class="section-header">
+            <i class="fas fa-list-alt mr-2"></i>
+            Daftar Rekam Kesehatan
+        </h5>
+        
+        <!-- Search Bar -->
+        <div class="search-section">
+            <div class="row">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-modern border-start-0" 
+                               id="searchInput" placeholder="Cari nama pasien, NIK, atau diagnosis...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary-modern btn-modern w-100" onclick="loadHealthRecords()">
+                        <i class="fas fa-search mr-1"></i>
+                        Cari
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border-modern"></div>
+            <p class="mt-3 text-muted">Memuat data...</p>
+        </div>
+        
+        <!-- Records Table -->
+        <div class="records-table">
+            <table class="table table-modern">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Pasien</th>
+                        <th>Jenis</th>
+                        <th>Tanggal</th>
+                        <th>Posyandu</th>
+                        <th>Diagnosis</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="healthRecordsTable">
+                    <!-- Records will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Health records pagination" class="mt-4">
+            <ul class="pagination pagination-modern justify-content-center" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let currentFilters = {};
+    let currentPage = 1;
+
+    // Initialize
+    loadStatistics();
+    loadPosyanduOptions();
+    loadPatientTypes();
+    loadHealthRecords();
+
+    // Add event listeners for real-time filtering
+    $('#searchInput').on('input', function() {
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(function() {
+            loadHealthRecords();
+        }, 500);
+    });
+
+    $('#posyanduFilter, #patientTypeFilter, #dateFrom, #dateTo').on('change', function() {
+        loadHealthRecords();
+    });
+
+    // Load statistics
+    function loadStatistics() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_health_record_list" %}',
+            method: 'GET',
+            success: function(response) {
+                updateStatistics(response.statistics);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading statistics:', error);
+            }
+        });
+    }
+
+    // Update statistics
+    function updateStatistics(stats) {
+        $('#totalRecords').text(stats.total || 0);
+        $('#todayRecords').text(stats.today || 0);
+        $('#thisWeekRecords').text(stats.this_week || 0);
+        $('#incompleteRecords').text(stats.incomplete || 0);
+    }
+
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Semua Posyandu</option>';
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+                $('#posyanduFilter').html(options);
+            }
+        });
+    }
+
+    // Load patient types
+    function loadPatientTypes() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_patient_types" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Semua Jenis</option>';
+                response.results.forEach(function(patientType) {
+                    options += `<option value="${patientType.code}">${patientType.name}</option>`;
+                });
+                $('#patientTypeFilter').html(options);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading patient types:', error);
+            }
+        });
+    }
+
+    // Load health records
+    function loadHealthRecords() {
+        showLoading();
+        
+        const search = $('#searchInput').val();
+        const posyandu = $('#posyanduFilter').val();
+        const patientType = $('#patientTypeFilter').val();
+        const dateFrom = $('#dateFrom').val();
+        const dateTo = $('#dateTo').val();
+        
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_health_record_list" %}',
+            method: 'GET',
+            data: {
+                search: search,
+                location: posyandu,
+                patient_type: patientType,
+                date_from: dateFrom,
+                date_to: dateTo,
+                page: currentPage
+            },
+            success: function(response) {
+                hideLoading();
+                displayHealthRecords(response.results);
+                updatePagination(response.pagination);
+                updateStatistics(response.statistics);
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('Error loading health records:', error);
+                showAlert('Error loading health records', 'danger');
+            }
+        });
+    }
+
+    // Show loading
+    function showLoading() {
+        $('#loadingSpinner').show();
+        $('#healthRecordsTable').html('');
+    }
+
+    // Hide loading
+    function hideLoading() {
+        $('#loadingSpinner').hide();
+    }
+
+    // Display health records
+    function displayHealthRecords(records) {
+        const container = $('#healthRecordsTable');
+        
+        if (records.length === 0) {
+            container.html(`
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h5 class="mt-3">Tidak ada rekam kesehatan ditemukan</h5>
+                            <p class="text-muted">Coba ubah filter atau tambah rekam kesehatan baru</p>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            return;
+        }
+
+        let html = '';
+        records.forEach(function(record, index) {
+            const patientTypeLabel = getPatientTypeLabel(record.patient_type);
+            const statusBadge = getStatusBadge(record.status);
+            const patientInitials = getPatientInitials(record.patient_name);
+            
+            html += `
+                <tr>
+                    <td><strong>${index + 1}</strong></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="patient-avatar">
+                                ${patientInitials}
+                            </div>
+                            <div class="patient-info">
+                                <h6>${record.patient_name || '-'}</h6>
+                                <small>NIK: ${record.patient_nik || '-'}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-modern badge-primary">${patientTypeLabel}</span>
+                    </td>
+                    <td><strong>${record.visit_date || '-'}</strong></td>
+                    <td>${record.posyandu_name || '-'}</td>
+                    <td>
+                        <div class="text-truncate" style="max-width: 200px;" title="${record.diagnosis || '-'}">
+                            ${record.diagnosis || '-'}
+                        </div>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/admin-panel/posyandu/health-records/${record.id}/" 
+                               class="btn-action btn-view" title="Detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="/admin-panel/posyandu/health-records/${record.id}/update/" 
+                               class="btn-action btn-edit" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn-action btn-delete" onclick="deleteHealthRecord(${record.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Get patient initials
+    function getPatientInitials(name) {
+        if (!name) return '?';
+        const words = name.split(' ');
+        if (words.length >= 2) {
+            return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return name[0].toUpperCase();
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        const container = $('#pagination');
+        
+        if (!pagination || pagination.total_pages <= 1) {
+            container.html('');
+            return;
+        }
+
+        let html = '';
+        
+        // Previous button
+        if (pagination.has_previous) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${pagination.previous_page_number})">Previous</a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
+        }
+
+        // Page numbers
+        for (let i = 1; i <= pagination.total_pages; i++) {
+            if (i === pagination.current_page) {
+                html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${i})">${i}</a></li>`;
+            }
+        }
+
+        // Next button
+        if (pagination.has_next) {
+            html += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${pagination.next_page_number})">Next</a></li>`;
+        } else {
+            html += `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
+        }
+
+        container.html(html);
+    }
+
+    // Go to page
+    window.goToPage = function(page) {
+        currentPage = page;
+        loadHealthRecords();
+    };
+
+    // Delete health record
+    window.deleteHealthRecord = function(recordId) {
+        if (confirm('Apakah Anda yakin ingin menghapus rekam kesehatan ini?')) {
+            $.ajax({
+                url: `{% url "admin_panel:posyandu:api_health_record_delete" 0 %}`.replace('0', recordId),
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    showAlert('Rekam kesehatan berhasil dihapus', 'success');
+                    loadHealthRecords();
+                    loadStatistics();
+                },
+                error: function(xhr, status, error) {
+                    showAlert('Error deleting health record', 'danger');
+                }
+            });
+        }
+    };
+
+    // Helper functions
+    function getPatientTypeLabel(type) {
+        const option = $(`#patientTypeFilter option[value="${type}"]`);
+        if (option.length > 0) {
+            return option.text();
+        }
+        
+        const labels = {
+            'balita': 'Balita',
+            'ibu_hamil': 'Ibu Hamil',
+            'ibu_menyusui': 'Ibu Menyusui',
+            'lansia': 'Lansia'
+        };
+        return labels[type] || type;
+    }
+
+    function getStatusBadge(status) {
+        const badges = {
+            'active': '<span class="badge badge-modern badge-success">Aktif</span>',
+            'inactive': '<span class="badge badge-modern badge-warning">Tidak Aktif</span>',
+            'pending': '<span class="badge badge-modern badge-danger">Pending</span>'
+        };
+        return badges[status] || '<span class="badge badge-modern badge-primary">-</span>';
+    }
+
+    // Apply filters
+    window.applyFilters = function() {
+        currentFilters = {
+            admin_panel:posyandu: $('#posyanduFilter').val(),
+            patient_type: $('#patientTypeFilter').val(),
+            date_from: $('#dateFrom').val(),
+            date_to: $('#dateTo').val()
+        };
+        currentPage = 1;
+        loadHealthRecords();
+    };
+
+    // Clear filters
+    window.clearFilters = function() {
+        $('#posyanduFilter').val('');
+        $('#patientTypeFilter').val('');
+        $('#dateFrom').val('');
+        $('#dateTo').val('');
+        $('#searchInput').val('');
+        currentFilters = {};
+        currentPage = 1;
+        loadHealthRecords();
+    };
+
+    // Refresh data
+    window.refreshData = function() {
+        loadStatistics();
+        loadHealthRecords();
+        showAlert('Data berhasil diperbarui', 'success');
+    };
+
+    // Show alert
+    function showAlert(message, type) {
+        $('.alert').remove();
+        
+        const alertClass = `alert-${type}-modern`;
+        const alertHtml = `
+            <div class="alert alert-modern ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,437 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Paket Wisata{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Package Information -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Informasi Paket Wisata</h6>
+                <div class="btn-group">
+                    <a href="{% url 'admin_panel:tourism_package_edit' package.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit mr-1"></i>Edit
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deletePackage({{ package.id }})">
+                        <i class="fas fa-trash mr-1"></i>Hapus
+                    </button>
+                </div>
+            </div>
+            <div class="card-body bg-white">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>{{ package.title }}</h4>
+                        <p class="text-muted">{{ package.description }}</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Jenis Paket:</strong> 
+                                <span class="badge badge-info">{{ package.get_package_type_display }}</span>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Lokasi:</strong> 
+                                <a href="{% url 'admin_panel:tourism_location_detail' package.tourism_location.id %}" 
+                                   class="text-decoration-none">
+                                    {{ package.tourism_location.title }}
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Durasi:</strong> 
+                                {{ package.duration }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Harga:</strong><br>
+                                <span class="h4 text-primary">Rp {{ package.price|floatformat:0 }}</span>
+                                <small class="text-muted"> {{ package.currency }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>WhatsApp:</strong><br>
+                                {% if package.whatsapp %}
+                                    <a href="https://wa.me/{{ package.whatsapp }}" target="_blank" class="btn btn-success btn-sm">
+                                        <i class="fab fa-whatsapp mr-1"></i>{{ package.whatsapp }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Tidak tersedia</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Package Features -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Yang Termasuk</h6>
+                                {% if package.includes %}
+                                    <div class="border p-3 rounded">
+                                        {% for include in package.includes %}
+                                            <span class="badge badge-success mr-1 mb-1">{{ include }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Tidak ada informasi</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Yang Tidak Termasuk</h6>
+                                {% if package.excludes %}
+                                    <div class="border p-3 rounded">
+                                        {% for exclude in package.excludes %}
+                                            <span class="badge badge-danger mr-1 mb-1">{{ exclude }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Tidak ada informasi</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Itinerary -->
+                        {% if package.itinerary %}
+                        <div class="mt-4">
+                            <h6 class="text-primary">Itinerary</h6>
+                            <div class="border p-3 rounded">
+                                <ol>
+                                    {% for item in package.itinerary %}
+                                        <li class="mb-2">{{ item }}</li>
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Booking Information -->
+                        <div class="mt-4">
+                            <h6 class="text-primary">Informasi Booking</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Maksimal Peserta:</strong><br>
+                                    {{ package.max_participants|default:"Tidak terbatas" }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Minimal Peserta:</strong><br>
+                                    {{ package.min_participants|default:"1" }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Deadline Booking:</strong><br>
+                                    {{ package.booking_deadline }} hari sebelum keberangkatan
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        {% if package.image %}
+                            <img src="{{ package.image.url }}" alt="{{ package.title }}" 
+                                 class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
+                        {% endif %}
+                        
+                        {% if package.hero_image %}
+                            <img src="{{ package.hero_image.url }}" alt="{{ package.title }} Hero" 
+                                 class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Status Information -->
+                <div class="mt-4">
+                    <h6 class="text-primary">Status Paket</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    {% if package.is_active %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">Status</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    {% if package.is_featured %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-muted"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">Featured</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    <i class="fas fa-users text-info"></i>
+                                </div>
+                                <div class="text-muted small">Peserta</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    <i class="fas fa-clock text-warning"></i>
+                                </div>
+                                <div class="text-muted small">Durasi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Galeri Paket</h6>
+            </div>
+            <div class="card-body bg-white">
+                {% if galleries %}
+                    <div class="row">
+                        {% for gallery in galleries %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                {% if gallery.image %}
+                                    <img src="{{ gallery.image.url }}" alt="{{ gallery.title }}" 
+                                         class="card-img-top" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body p-2">
+                                    <h6 class="card-title mb-1">{{ gallery.title|truncatechars:20 }}</h6>
+                                    <p class="card-text small text-muted">{{ gallery.description|truncatechars:50 }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">Belum ada galeri</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Aksi Cepat</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'admin_panel:tourism_package_edit' package.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit mr-2"></i>Edit Paket
+                    </a>
+                    <a href="{% url 'admin_panel:tourism_location_detail' package.tourism_location.id %}" class="btn btn-info">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Lihat Lokasi
+                    </a>
+                    <a href="{% url 'tourism:package_detail_by_slug' package.slug %}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-external-link-alt mr-2"></i>Lihat di Website
+                    </a>
+                    {% if package.whatsapp %}
+                    <a href="https://wa.me/{{ package.whatsapp }}?text=Halo, saya tertarik dengan paket {{ package.title }}" 
+                       class="btn btn-success" target="_blank">
+                        <i class="fab fa-whatsapp mr-2"></i>Hubungi WhatsApp
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Package Details -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Detail Paket</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div class="mb-3">
+                    <strong>Dibuat:</strong><br>
+                    {{ package.created_at|date:"d F Y H:i" }}
+                </div>
+                
+                {% if package.updated_at %}
+                <div class="mb-3">
+                    <strong>Diperbarui:</strong><br>
+                    {{ package.updated_at|date:"d F Y H:i" }}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <strong>Mata Uang:</strong><br>
+                    {{ package.currency }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Files -->
+        {% if package.video or package.youtube_link or package.hero_video or package.hero_youtube %}
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Media</h6>
+            </div>
+            <div class="card-body bg-white">
+                {% if package.video %}
+                <div class="mb-3">
+                    <strong>Video Paket:</strong><br>
+                    <video controls class="img-fluid">
+                        <source src="{{ package.video.url }}" type="video/mp4">
+                        Browser Anda tidak mendukung video.
+                    </video>
+                </div>
+                {% endif %}
+
+                {% if package.youtube_link %}
+                <div class="mb-3">
+                    <strong>YouTube Paket:</strong><br>
+                    <a href="{{ package.youtube_link }}" target="_blank" class="btn btn-danger btn-sm">
+                        <i class="fab fa-youtube mr-1"></i>Lihat di YouTube
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if package.hero_video %}
+                <div class="mb-3">
+                    <strong>Video Hero:</strong><br>
+                    <video controls class="img-fluid">
+                        <source src="{{ package.hero_video.url }}" type="video/mp4">
+                        Browser Anda tidak mendukung video.
+                    </video>
+                </div>
+                {% endif %}
+
+                {% if package.hero_youtube %}
+                <div class="mb-3">
+                    <strong>YouTube Hero:</strong><br>
+                    <a href="{{ package.hero_youtube }}" target="_blank" class="btn btn-danger btn-sm">
+                        <i class="fab fa-youtube mr-1"></i>Lihat di YouTube
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Package Statistics -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Statistik</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border-right">
+                            <div class="h4 text-primary">{{ package.max_participants|default:"∞" }}</div>
+                            <div class="text-muted small">Maks Peserta</div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div>
+                            <div class="h4 text-success">{{ package.min_participants|default:"1" }}</div>
+                            <div class="text-muted small">Min Peserta</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-right">
+                            <div class="h4 text-info">{{ package.booking_deadline }}</div>
+                            <div class="text-muted small">Hari Deadline</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div>
+                            <div class="h4 text-warning">{{ package.duration }}</div>
+                            <div class="text-muted small">Durasi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function deletePackage(packageId) {
+    if (confirm('Apakah Anda yakin ingin menghapus paket ini?')) {
+        fetch(`{% url 'admin_panel:tourism_package_delete' 0 %}`.replace('0', packageId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', 'Paket berhasil dihapus!');
+                setTimeout(() => {
+                    window.location.href = '{% url "admin_panel:tourism_packages_list" %}';
+                }, 2000);
+            } else {
+                showAlert('error', 'Gagal menghapus paket!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', 'Terjadi kesalahan!');
+        });
+    }
+}
+
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.content-wrapper');
+    container.insertAdjacentHTML('afterbegin', alertHtml);
+    
+    setTimeout(() => {
+        const alert = container.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/tourism-responsive.css' %}">
+<style>
+/* Light theme styling for package detail */
+.card { background-color: #ffffff; border: 1px solid #e3e6f0; }
+.card-header { background-color: #ffffff; border-bottom: 1px solid #e3e6f0; }
+.card-body { background-color: #ffffff; }
+.text-dark { color: #5a5c69 !important; }
+.text-primary { color: #007bff !important; }
+.text-success { color: #28a745 !important; }
+.text-info { color: #17a2b8 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-danger { color: #dc3545 !important; }
+.text-secondary { color: #6c757d !important; }
+.text-muted { color: #858796 !important; }
+.btn-primary { background-color: #007bff; border-color: #007bff; }
+.btn-primary:hover { background-color: #0056b3; border-color: #004085; }
+.btn-warning { background-color: #ffc107; border-color: #ffc107; color: #212529; }
+.btn-warning:hover { background-color: #e0a800; border-color: #d39e00; }
+.btn-danger { background-color: #dc3545; border-color: #dc3545; }
+.btn-danger:hover { background-color: #c82333; border-color: #bd2130; }
+.btn-info { background-color: #17a2b8; border-color: #17a2b8; }
+.btn-info:hover { background-color: #138496; border-color: #117a8b; }
+.btn-success { background-color: #28a745; border-color: #28a745; }
+.btn-success:hover { background-color: #218838; border-color: #1e7e34; }
+</style>
+{% endblock extra_css %}

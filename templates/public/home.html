@@ -1,0 +1,1265 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/android-fixes.css' %}">
+<link rel="stylesheet" href="{% static 'css/tourism-mobile.css' %}">
+<link rel="stylesheet" href="{% static 'css/mobile-optimization.css' %}">
+<style>
+/* Ensure hero image is always visible */
+.hero-section .absolute.inset-0 {
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Override any conflicting styles */
+.hero-section {
+    position: relative !important;
+    min-height: 100vh !important;
+}
+
+.hero-section .absolute.inset-0[style*="background-image"] {
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 1 !important;
+}
+
+/* Force hero image to be visible in dark mode */
+.dark .hero-section .absolute.inset-0[style*="background-image"] {
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    background-image: inherit !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    z-index: 1 !important;
+}
+
+/* Override any dark mode filters that might affect hero images */
+.dark .hero-section {
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.dark .hero-section > div[style*="background-image"] {
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Card hover effects */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Mobile optimization for cards */
+@media (max-width: 768px) {
+    .card-hover {
+        transform: none;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-2px);
+    }
+}
+
+/* Touch feedback for mobile */
+.touch-feedback:active {
+    transform: scale(0.98);
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Hero Section - Full Screen Image -->
+<section class="hero-section relative min-h-screen flex items-center overflow-hidden">
+    <!-- Background Image - Full Screen -->
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('{{ hero_image_url }}'); filter: none !important; opacity: 1 !important; visibility: visible !important; z-index: 1;"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-900 to-blue-600"></div>
+    {% endif %}
+    
+    <!-- Overlay - Reduced opacity for better image visibility -->
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-blue-600/30" style="z-index: 2;"></div>
+    
+    <!-- Hero Content -->
+    <div class="container mx-auto px-3 sm:px-4 lg:px-6 relative z-20 text-center text-white pt-4">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold mb-1 md:mb-2">
+            {% if hero_title %}{{ hero_title }}{% else %}{{ website_settings.site_name|default:"Selamat Datang di Website Desa" }}{% endif %}
+        </h1>
+        <p class="text-sm sm:text-base md:text-lg mb-2 md:mb-3 max-w-2xl mx-auto opacity-95 leading-relaxed">
+            {% if hero_subtitle %}{{ hero_subtitle }}{% else %}{{ website_settings.site_description|default:website_settings.meta_description|default:"Desa Pesisir yang Indah di Tepi Samudera" }}{% endif %}
+        </p>
+        
+        <!-- Menu Grid: 9 Menu Items - Enhanced Design -->
+        <div class="grid grid-cols-3 gap-1 sm:gap-2 md:gap-3 lg:gap-4 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl mx-auto" data-animate>
+            <!-- Profil Desa -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'core:profile' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <!-- Shadow Box -->
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <!-- Main Button -->
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-building text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <!-- Label -->
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Profil Desa
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Berita -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'news:list' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-newspaper text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Berita
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Layanan -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'layanan:document_services' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-file-alt text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Layanan
+                    </span>
+                </a>
+            </div>
+            
+            <!-- UMKM -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'business:business_list' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-store text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        UMKM
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Wisata -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'tourism:dashboard' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-mountain text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Wisata
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Posyandu -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'posyandu:public_posyandu_home' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-heartbeat text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Posyandu
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Organisasi -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'organization:organization_list' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-users text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Organisasi
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Pengaduan -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="{% url 'core:complaints' %}" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-comments text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Pengaduan
+                    </span>
+                </a>
+            </div>
+            
+            <!-- Kontak -->
+            <div class="hero-menu-item flex flex-col items-center justify-center group">
+                <a href="#contact" class="flex flex-col items-center justify-center w-full p-1 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 backdrop-blur-md rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-white/30"></div>
+                    
+                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mb-2 sm:mb-3 group-hover:from-blue-400 group-hover:to-blue-500 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-xl">
+                        <i class="fas fa-phone text-base sm:text-lg md:text-xl lg:text-2xl group-hover:scale-110 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <span class="text-[10px] sm:text-xs md:text-sm lg:text-base font-bold text-white text-center leading-tight group-hover:text-blue-200 transition-colors duration-300 drop-shadow-lg">
+                        Kontak
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Announcements Section - Inside Hero -->
+        {% if announcements %}
+        <div class="mt-4 sm:mt-6 md:mt-8 max-w-4xl mx-auto">
+            <!-- Section Header -->
+            <div class="flex items-center justify-center mb-3 sm:mb-4">
+                <div class="flex items-center gap-1 sm:gap-2 bg-white/20 backdrop-blur-md rounded-full px-3 sm:px-4 py-1.5 sm:py-2">
+                    <div class="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-bullhorn text-white text-xs"></i>
+                    </div>
+                    <h3 class="text-xs sm:text-sm md:text-base font-bold text-white">
+                        <span class="hidden sm:inline">Pengumuman Penting</span>
+                        <span class="sm:hidden">Pengumuman</span>
+                    </h3>
+                </div>
+            </div>
+            
+            <!-- Announcements Slider -->
+            <div class="relative overflow-hidden rounded-xl">
+                <div id="announcementsSlider" class="flex transition-transform duration-500 ease-in-out">
+                    {% for announcement in announcements %}
+                    <div class="announcement-slide w-full flex-shrink-0">
+                        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 shadow-lg border border-white/30 dark:border-gray-600/30">
+                            <div class="flex items-start gap-2 sm:gap-3">
+                                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                                    <i class="fas fa-bullhorn text-xs"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xs sm:text-sm md:text-base font-bold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                        {{ announcement.title }}
+                                    </h4>
+                                    <p class="text-[10px] sm:text-xs md:text-sm text-gray-600 dark:text-gray-300 mb-1 sm:mb-2 line-clamp-2">
+                                        {{ announcement.content|striptags|truncatewords:15 }}
+                                    </p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                            <i class="fas fa-calendar text-xs"></i>
+                                            {{ announcement.start_date|date:"d M Y" }}
+                                        </span>
+                                        {% if announcement.slug %}
+                                        <a href="{% url 'news:announcement_detail' announcement.slug %}" class="text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-semibold text-[9px] sm:text-xs flex items-center gap-1 hover:gap-2 transition-all">
+                                            <span class="hidden sm:inline">Baca Selengkapnya</span>
+                                            <span class="sm:hidden">Baca</span>
+                                            <i class="fas fa-arrow-right text-xs"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Navigation Dots -->
+                {% if announcements|length > 1 %}
+                <div class="flex justify-center gap-1 sm:gap-2 mt-2 sm:mt-4">
+                    {% for announcement in announcements %}
+                    <button class="announcement-dot w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-300 hover:bg-orange-400 transition-all duration-300 touch-target {% if forloop.first %}bg-orange-500{% endif %}" data-slide="{{ forloop.counter0 }}"></button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+    </div>
+</section>
+
+
+<!-- Profil Desa Section -->
+<section class="py-8 md:py-12 lg:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Profil Desa {% if village_profile %}{{ village_profile.name }}{% else %}Pulosarok{% endif %}
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Mengenal lebih dekat tentang desa dan masyarakatnya
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
+            <!-- Description -->
+            <div class="space-y-6" data-animate>
+                <div>
+                    <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                        {% if village_profile %}
+                            {{ village_profile.profile_description|default:village_profile.description|default:"Desa yang terletak di tepi pantai dengan pemandangan yang menakjubkan. Masyarakatnya yang ramah dan budaya yang kaya menjadikan desa ini sebagai tempat yang menarik untuk dikunjungi." }}
+                        {% else %}
+                            Desa yang terletak di tepi pantai dengan pemandangan yang menakjubkan. Masyarakatnya yang ramah dan budaya yang kaya menjadikan desa ini sebagai tempat yang menarik untuk dikunjungi.
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <!-- Village Info from Database -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Lokasi</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                {% if village_profile %}{{ village_profile.district|default:"Kecamatan" }}{% else %}Kecamatan Sekadau{% endif %}
+                            </p>
+                        </div>
+            </div>
+            
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                            <i class="fas fa-expand-arrows-alt text-green-600 dark:text-green-400"></i>
+                </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Luas Wilayah</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                                {% if village_profile %}{{ village_profile.area|default:"-" }}{% else %}-{% endif %} km²
+                            </p>
+                        </div>
+            </div>
+            
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                            <i class="fas fa-users text-purple-600 dark:text-purple-400"></i>
+                </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Total Penduduk</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ total_population|default:"0" }} jiwa</p>
+                        </div>
+            </div>
+            
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+                            <i class="fas fa-home text-orange-600 dark:text-orange-400"></i>
+                </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white text-sm">Jumlah Keluarga</h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ total_families|default:"0" }} keluarga</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Button -->
+                <div class="pt-4">
+                    <a href="{% url 'core:profile' %}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105">
+                        <span>Lihat Profil Lengkap</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Village Image from Database -->
+            <div class="relative" data-animate>
+                {% if village_profile.profile_image %}
+                <!-- Profile Image -->
+                <div class="relative h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-2xl">
+                    <img src="{{ village_profile.profile_image.url }}" alt="Gambar Profil Desa {{ village_profile.name }}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4 text-white">
+                        <h4 class="font-bold text-lg md:text-xl mb-2">Gambar Profil Desa</h4>
+                        <p class="text-sm opacity-90">Gambar resmi {{ village_profile.name }}</p>
+                    </div>
+                </div>
+                {% elif village_photos %}
+                <!-- Village Photos Slider -->
+                <div class="relative h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-2xl">
+                    <div id="village-description-slider" class="relative w-full h-full">
+                        {% for photo in village_photos|slice:":3" %}
+                        <div class="slider-slide {% if forloop.first %}active{% endif %} absolute inset-0 transition-opacity duration-1000">
+                            <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4 text-white">
+                                <h4 class="font-bold text-lg md:text-xl mb-2">{{ photo.title }}</h4>
+                                {% if photo.description %}
+                                <p class="text-sm opacity-90">{{ photo.description|truncatewords:15 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Slider Controls -->
+                    <div class="absolute bottom-4 right-4 flex space-x-2">
+                        {% for photo in village_photos|slice:":3" %}
+                        <button class="slider-dot w-3 h-3 rounded-full bg-white/50 hover:bg-white transition-colors duration-300 {% if forloop.first %}bg-white{% endif %}" data-slide="{{ forloop.counter0 }}"></button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <!-- Fallback image -->
+                <div class="h-64 sm:h-80 md:h-96 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                    <div class="text-center text-white">
+                        <i class="fas fa-image text-4xl md:text-5xl mb-4 opacity-50"></i>
+                        <p class="text-lg font-semibold">Galeri Desa</p>
+                        <p class="text-sm opacity-75">Foto-foto desa akan ditampilkan di sini</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistika Penduduk -->
+<section class="py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Statistika Penduduk
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Data demografi dan statistik penduduk {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Statistics Grid: Simple Layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" data-animate>
+            <!-- Komposisi Gender -->
+            <div class="text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-users text-blue-600 dark:text-blue-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Komposisi Gender</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Laki-laki</span>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ male_population|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Perempuan</span>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ female_population|default:0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Kelompok Usia -->
+            <div class="text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-birthday-cake text-green-600 dark:text-green-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Kelompok Usia</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">0-14 tahun</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ age_groups.age_0_14|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">15-24 tahun</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ age_groups.age_15_24|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">25+ tahun</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ age_groups.age_25_54|default:0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tingkat Pendidikan -->
+            <div class="text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-graduation-cap text-purple-600 dark:text-purple-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Tingkat Pendidikan</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">SD</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ education_levels.sd|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">SMP</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ education_levels.smp|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">SMA+</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ education_levels.sma|default:0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mata Pencaharian -->
+            <div class="text-center">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-briefcase text-orange-600 dark:text-orange-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Mata Pencaharian</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Nelayan</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ occupation_levels.nelayan|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Petani</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ occupation_levels.petani|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Lainnya</span>
+                            <span class="font-bold text-sm text-gray-900 dark:text-white">{{ occupation_levels.lainnya|default:0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest News Section -->
+<section class="py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Berita Terkini
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Informasi dan berita terbaru dari {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- News Grid: 2x2 mobile layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8" data-animate>
+            {% for news in latest_news|slice:":4" %}
+            <a href="{% url 'news:detail' news.slug %}" class="block">
+                <article class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-blue-300 card-hover cursor-pointer">
+                    {% if news.featured_image %}
+                    <img src="{{ news.featured_image.url }}" alt="{{ news.title }}" class="w-full h-24 md:h-32 lg:h-40 object-cover transition-transform duration-500 hover:scale-110" style="filter: none !important; opacity: 1 !important; visibility: visible !important;">
+                    {% else %}
+                    <div class="w-full h-24 md:h-32 lg:h-40 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center">
+                        <i class="fas fa-image text-white text-2xl md:text-3xl lg:text-4xl opacity-50"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-3 md:p-4 lg:p-5">
+                        <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide inline-block mb-2">
+                            {{ news.category.name|default:'Berita' }}
+                        </span>
+                        
+                        <h3 class="text-sm md:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
+                            {{ news.title }}
+                        </h3>
+                        
+                        <p class="text-[10px] md:text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                            {{ news.excerpt|default:news.content|truncatewords:10|striptags }}
+                        </p>
+                        
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <span class="text-[9px] md:text-xs text-gray-500 flex items-center gap-1">
+                                <i class="fas fa-calendar text-[8px] md:text-[10px]"></i>
+                                {{ news.published_date|date:"d M Y" }}
+                            </span>
+                            <span class="text-blue-600 hover:text-blue-700 font-semibold text-[9px] md:text-xs flex items-center gap-1 hover:gap-2 transition-all">
+                                Baca <i class="fas fa-arrow-right text-[8px] md:text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            </a>
+            {% empty %}
+            <!-- Fallback cards when no news -->
+            {% for i in "1234"|make_list %}
+            <article class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-blue-300 card-hover">
+                <div class="w-full h-24 md:h-32 lg:h-40 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center">
+                    <i class="fas fa-image text-white text-2xl md:text-3xl lg:text-4xl opacity-50"></i>
+                </div>
+                
+                <div class="p-3 md:p-4 lg:p-5">
+                    <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide inline-block mb-2">
+                        Berita
+                    </span>
+                    
+                    <h3 class="text-sm md:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        Berita {{ forloop.counter }}
+                    </h3>
+                    
+                    <p class="text-[10px] md:text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Informasi terbaru dari desa
+                    </p>
+                    
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-[9px] md:text-xs text-gray-500 flex items-center gap-1">
+                            <i class="fas fa-calendar text-[8px] md:text-[10px]"></i>
+                            {{ "now"|date:"d M Y" }}
+                        </span>
+                        <a href="{% url 'news:list' %}" class="text-blue-600 hover:text-blue-700 font-semibold text-[9px] md:text-xs flex items-center gap-1 hover:gap-2 transition-all">
+                            Baca <i class="fas fa-arrow-right text-[8px] md:text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        
+        <!-- See All Button -->
+        <div class="text-center" data-animate>
+            <a href="{% url 'news:list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold text-xs md:text-sm inline-flex items-center gap-1 md:gap-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 touch-feedback">
+                <span>Lihat Semua Berita</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Businesses - Dynamic Data -->
+{% if featured_businesses %}
+<section class="py-8 md:py-12 lg:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                UMKM Unggulan
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Usaha Mikro, Kecil, dan Menengah di {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Business Grid: 2x2 mobile layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8" data-animate>
+            {% for business in featured_businesses %}
+            <a href="{% url 'business:business_detail' business.id %}" class="block">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-green-300 card-hover cursor-pointer">
+                    {% if business.header_image %}
+                    <img src="{{ business.header_image.url }}" alt="{{ business.name }}" class="w-full h-24 md:h-32 lg:h-40 object-cover transition-transform duration-500 hover:scale-110" style="filter: none !important; opacity: 1 !important; visibility: visible !important;">
+                    {% else %}
+                    <div class="w-full h-24 md:h-32 lg:h-40 bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 flex items-center justify-center">
+                        <i class="fas fa-store text-white text-2xl md:text-3xl lg:text-4xl opacity-50"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-3 md:p-4 lg:p-5">
+                        <span class="badge-green text-white px-2 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide inline-block mb-2">
+                            {{ business.business_type_display|default:'UMKM' }}
+                        </span>
+                        
+                        <h3 class="text-sm md:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-green-600 transition-colors">
+                            {{ business.name }}
+                        </h3>
+                        
+                        <p class="text-[10px] md:text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                            {{ business.description|truncatewords:8|striptags }}
+                        </p>
+                        
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <span class="text-[9px] md:text-xs text-gray-500 flex items-center gap-1 truncate">
+                                <i class="fas fa-map-marker-alt text-[8px] md:text-[10px]"></i>
+                                <span class="truncate">{{ business.address|truncatechars:12 }}</span>
+                            </span>
+                            <span class="text-green-600 hover:text-green-700 font-semibold text-[9px] md:text-xs flex items-center gap-1 hover:gap-2 transition-all whitespace-nowrap">
+                                Detail <i class="fas fa-arrow-right text-[8px] md:text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- See All Button -->
+        <div class="text-center" data-animate>
+            <a href="{% url 'business:business_list' %}" class="badge-green text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold text-xs md:text-sm inline-flex items-center gap-1 md:gap-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 touch-feedback">
+                <span>Lihat Semua UMKM</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Tourism Section -->
+<section class="py-8 md:py-12 lg:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Destinasi Wisata
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Tempat wisata menarik di {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Tourism Grid: 2x2 mobile layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8" data-animate>
+            {% for location in tourism_locations|slice:":4" %}
+            <a href="{% url 'tourism:location_detail' location.slug %}" class="block">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-purple-300 card-hover cursor-pointer">
+                    {% if location.main_image %}
+                    <img src="{{ location.main_image.url }}" alt="{{ location.title }}" class="w-full h-24 md:h-32 lg:h-40 object-cover transition-transform duration-500 hover:scale-110" style="filter: none !important; opacity: 1 !important; visibility: visible !important;">
+                    {% else %}
+                    <div class="w-full h-24 md:h-32 lg:h-40 bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 flex items-center justify-center">
+                        <i class="fas fa-mountain text-white text-2xl md:text-3xl lg:text-4xl opacity-50"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-3 md:p-4 lg:p-5">
+                        <span class="bg-purple-500 text-white px-2 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide inline-block mb-2">
+                            {{ location.location_type_display|default:'Wisata' }}
+                        </span>
+                        
+                        <h3 class="text-sm md:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-purple-600 transition-colors">
+                            {{ location.title }}
+                        </h3>
+                        
+                        <p class="text-[10px] md:text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                            {{ location.short_description|truncatewords:8|striptags }}
+                        </p>
+                        
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <span class="text-[9px] md:text-xs text-gray-500 flex items-center gap-1 truncate">
+                                <i class="fas fa-map-marker-alt text-[8px] md:text-[10px]"></i>
+                                <span class="truncate">{{ location.address|truncatechars:12 }}</span>
+                            </span>
+                            <span class="text-purple-600 hover:text-purple-700 font-semibold text-[9px] md:text-xs flex items-center gap-1 hover:gap-2 transition-all whitespace-nowrap">
+                                Detail <i class="fas fa-arrow-right text-[8px] md:text-[10px]"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <!-- Fallback cards when no tourism data -->
+            {% for i in "1234"|make_list %}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-purple-300 card-hover">
+                <div class="w-full h-24 md:h-32 lg:h-40 bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 flex items-center justify-center">
+                    <i class="fas fa-mountain text-white text-2xl md:text-3xl lg:text-4xl opacity-50"></i>
+                </div>
+                
+                <div class="p-3 md:p-4 lg:p-5">
+                    <span class="bg-purple-500 text-white px-2 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wide inline-block mb-2">
+                        Wisata
+                    </span>
+                    
+                    <h3 class="text-sm md:text-base lg:text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        Destinasi {{ forloop.counter }}
+                    </h3>
+                    
+                    <p class="text-[10px] md:text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Tempat wisata menarik di desa
+                    </p>
+                    
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-[9px] md:text-xs text-gray-500 flex items-center gap-1 truncate">
+                            <i class="fas fa-map-marker-alt text-[8px] md:text-[10px]"></i>
+                            <span class="truncate">Desa</span>
+                        </span>
+                        <a href="{% url 'tourism:dashboard' %}" class="text-purple-600 hover:text-purple-700 font-semibold text-[9px] md:text-xs flex items-center gap-1 hover:gap-2 transition-all whitespace-nowrap">
+                            Detail <i class="fas fa-arrow-right text-[8px] md:text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        
+        <!-- See All Button -->
+        <div class="text-center" data-animate>
+            <a href="{% url 'tourism:dashboard' %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold text-xs md:text-sm inline-flex items-center gap-1 md:gap-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 touch-feedback">
+                <span>Lihat Semua Wisata</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Organization Section - Dynamic Data -->
+{% if village_officials %}
+<section class="py-8 md:py-12 lg:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Organisasi Desa
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Lembaga dan organisasi yang ada di {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Organization Grid: 2x2 Mobile Layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" data-animate>
+            {% for official in village_officials|slice:":4" %}
+            <a href="{% url 'organization:perangkat_desa_detail' official.id %}" class="block">
+                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-blue-200 dark:border-blue-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover cursor-pointer">
+                    <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                        <i class="fas fa-user text-xl md:text-2xl lg:text-3xl"></i>
+                    </div>
+                    <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">{{ official.name }}</h3>
+                    <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-2">{{ official.position }}</p>
+                    <div class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-calendar mr-1"></i>
+                        {{ official.start_date|date:"Y" }}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        <!-- See All Button -->
+        <div class="text-center" data-animate>
+            <a href="{% url 'organization:organization_list' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold text-xs md:text-sm inline-flex items-center gap-1 md:gap-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 touch-feedback">
+                <span>Lihat Semua Organisasi</span>
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Posyandu Section - Dynamic Data -->
+<section class="py-8 md:py-12 lg:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Posyandu
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Layanan kesehatan terpadu untuk ibu dan anak di {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Posyandu Grid: 2x2 Mobile Layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" data-animate>
+            <!-- Jadwal Posyandu -->
+            <div class="bg-gradient-to-br from-red-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-red-200 dark:border-red-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-calendar-alt text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Jadwal Posyandu</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Setiap hari Selasa dan Kamis pukul 08.00-11.00 WIB</p>
+                <a href="{% url 'posyandu:public_posyandu_home' %}" class="text-red-600 hover:text-red-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Lihat Jadwal <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Imunisasi -->
+            <div class="bg-gradient-to-br from-green-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-green-200 dark:border-green-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-syringe text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Imunisasi</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Program imunisasi rutin untuk bayi dan balita</p>
+                <a href="{% url 'posyandu:public_posyandu_home' %}" class="text-green-600 hover:text-green-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info Imunisasi <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Gizi Balita -->
+            <div class="bg-gradient-to-br from-yellow-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-yellow-200 dark:border-yellow-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-baby text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Gizi Balita</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Pemantauan tumbuh kembang dan gizi balita</p>
+                <a href="{% url 'posyandu:public_posyandu_home' %}" class="text-yellow-600 hover:text-yellow-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info Gizi <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Ibu Hamil -->
+            <div class="bg-gradient-to-br from-pink-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-pink-200 dark:border-pink-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-heart text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Ibu Hamil</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Pemeriksaan kesehatan ibu hamil dan persiapan persalinan</p>
+                <a href="{% url 'posyandu:public_posyandu_home' %}" class="text-pink-600 hover:text-pink-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info Ibu Hamil <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Organisasi Desa Section - Dynamic Data -->
+<section class="py-8 md:py-12 lg:py-16 bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Organisasi Desa
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Lembaga dan organisasi yang ada di {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Organization Grid: 2x2 Mobile Layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" data-animate>
+            <!-- PKK -->
+            <div class="bg-gradient-to-br from-purple-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-users text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">PKK</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Pemberdayaan Kesejahteraan Keluarga</p>
+                <a href="{% url 'organization:pkk_list' %}" class="text-purple-600 hover:text-purple-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info PKK <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Karang Taruna -->
+            <div class="bg-gradient-to-br from-blue-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-blue-200 dark:border-blue-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-user-friends text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Karang Taruna</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Organisasi kepemudaan desa</p>
+                <a href="{% url 'organization:karang_taruna_list' %}" class="text-blue-600 hover:text-blue-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info Karang Taruna <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Lembaga Adat -->
+            <div class="bg-gradient-to-br from-orange-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-orange-200 dark:border-orange-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-landmark text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Lembaga Adat</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Pelestarian budaya dan adat istiadat</p>
+                <a href="{% url 'organization:lembaga_adat_list' %}" class="text-orange-600 hover:text-orange-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info Lembaga Adat <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- BPD -->
+            <div class="bg-gradient-to-br from-green-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-green-200 dark:border-green-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-gavel text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">BPD</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Badan Permusyawaratan Desa</p>
+                <a href="{% url 'organization:organization_list' %}" class="text-green-600 hover:text-green-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Info BPD <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Layanan Surat Section - Dynamic Data -->
+<section class="py-8 md:py-12 lg:py-16 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-white mb-2 md:mb-4 relative inline-block section-title-underline" data-animate>
+                Layanan Surat
+            </h2>
+            <p class="text-sm md:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-4" data-animate>
+                Layanan administrasi dan surat menyurat {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Letter Services Grid: 2x2 Mobile Layout -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" data-animate>
+            <!-- Surat Keterangan -->
+            <div class="bg-gradient-to-br from-indigo-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-indigo-200 dark:border-indigo-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-file-alt text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Surat Keterangan</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Surat keterangan domisili, tidak mampu, dll</p>
+                <a href="{% url 'layanan:document_services' %}" class="text-indigo-600 hover:text-indigo-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Ajukan Surat <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Surat Izin -->
+            <div class="bg-gradient-to-br from-teal-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-teal-200 dark:border-teal-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-stamp text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Surat Izin</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Surat izin usaha, keramaian, dll</p>
+                <a href="{% url 'layanan:document_services' %}" class="text-teal-600 hover:text-teal-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Ajukan Izin <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Surat Rekomendasi -->
+            <div class="bg-gradient-to-br from-cyan-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-cyan-200 dark:border-cyan-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-handshake text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Surat Rekomendasi</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Surat rekomendasi untuk berbagai keperluan</p>
+                <a href="{% url 'layanan:document_services' %}" class="text-cyan-600 hover:text-cyan-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Ajukan Rekomendasi <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+            
+            <!-- Surat Kematian -->
+            <div class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-gray-200 dark:border-gray-900 rounded-2xl p-4 md:p-6 text-center shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 card-hover">
+                <div class="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 md:mb-4 shadow-lg">
+                    <i class="fas fa-cross text-xl md:text-2xl lg:text-3xl"></i>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white mb-2">Surat Kematian</h3>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-3">Surat keterangan kematian</p>
+                <a href="{% url 'layanan:document_services' %}" class="text-gray-600 hover:text-gray-700 font-semibold text-xs flex items-center justify-center gap-1 mt-2 hover:gap-2 transition-all">
+                    Ajukan Surat <i class="fas fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section - Compact Mobile Design -->
+<section class="relative py-4 md:py-8 lg:py-12 hero-ocean-gradient overflow-hidden mobile-contact-section">
+    <!-- Wave decoration -->
+    <div class="absolute bottom-0 left-0 w-full h-16 md:h-24 opacity-10">
+        <div class="wave"></div>
+    </div>
+    
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Section Header - Compact -->
+        <div class="text-center mb-4 md:mb-8 mobile-contact-header">
+            <h2 class="text-xl md:text-2xl lg:text-3xl font-extrabold text-white mb-1 md:mb-2" data-animate>
+                Hubungi Kami
+            </h2>
+            <p class="text-xs md:text-sm lg:text-base text-white/90 max-w-xl mx-auto" data-animate>
+                Butuh bantuan atau informasi? Jangan ragu untuk menghubungi {{ village_profile.name|default:"Desa" }}
+            </p>
+        </div>
+        
+        <!-- Mobile Contact - Compact Grid -->
+        <div class="block md:hidden">
+            <div class="grid grid-cols-1 gap-3 text-white mb-4" data-animate>
+                <!-- Phone -->
+                {% if website_settings.contact_phone %}
+                <div class="flex items-center justify-center mobile-contact-item bg-white/10 backdrop-blur-sm rounded-lg">
+                    <div class="mobile-contact-icon bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="mobile-contact-title">Telepon</h3>
+                        <p class="mobile-contact-text opacity-90">{{ website_settings.contact_phone }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Email -->
+                {% if website_settings.contact_email %}
+                <div class="flex items-center justify-center mobile-contact-item bg-white/10 backdrop-blur-sm rounded-lg">
+                    <div class="mobile-contact-icon bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="mobile-contact-title">Email</h3>
+                        <p class="mobile-contact-text opacity-90">{{ website_settings.contact_email }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Address -->
+                {% if website_settings.contact_address %}
+                <div class="flex items-center justify-center mobile-contact-item bg-white/10 backdrop-blur-sm rounded-lg">
+                    <div class="mobile-contact-icon bg-white/20 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="mobile-contact-title">Alamat</h3>
+                        <p class="mobile-contact-text opacity-90">{{ website_settings.contact_address }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Desktop Contact - Full Grid -->
+        <div class="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-white mb-6" data-animate>
+            <div class="text-center p-4">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-phone text-lg md:text-xl"></i>
+                </div>
+                <h3 class="text-base md:text-lg font-bold mb-1">Telepon</h3>
+                <p class="text-sm md:text-base opacity-90">{{ website_settings.contact_phone|default:'+62 xxx-xxxx-xxxx' }}</p>
+            </div>
+            
+            <div class="text-center p-4">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-envelope text-lg md:text-xl"></i>
+                </div>
+                <h3 class="text-base md:text-lg font-bold mb-1">Email</h3>
+                <p class="text-sm md:text-base opacity-90">{{ website_settings.contact_email|default:'info@pulosarok.desa.id' }}</p>
+            </div>
+            
+            <div class="text-center p-4">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-map-marker-alt text-lg md:text-xl"></i>
+                </div>
+                <h3 class="text-base md:text-lg font-bold mb-1">Alamat</h3>
+                <p class="text-sm md:text-base opacity-90">{{ website_settings.contact_address|default:'Desa, Kabupaten Sekadau' }}</p>
+            </div>
+        </div>
+        
+        <!-- Contact Button - Compact -->
+        <div class="text-center" data-animate>
+            <a href="{% url 'core:complaints' %}" class="bg-white text-blue-600 hover:bg-gray-100 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold text-xs md:text-sm inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 touch-feedback mobile-contact-button">
+                <i class="fas fa-comments"></i>
+                <span>Kirim Pesan</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Beautiful Back to Top Button -->
+<button id="backToTopBtn" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 z-50 opacity-0 pointer-events-none group backdrop-blur-sm border border-white/20" aria-label="Kembali ke atas">
+    <div class="flex items-center justify-center">
+        <i class="fas fa-arrow-up text-lg group-hover:scale-110 transition-transform duration-300"></i>
+    </div>
+    <!-- Ripple effect -->
+    <div class="absolute inset-0 rounded-full bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+</button>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+<script src="{% static 'js/home-page.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Database Announcements Auto Slider
+    const dbAnnouncementsSlider = document.getElementById('announcementsSlider');
+    const dbAnnouncementDots = document.querySelectorAll('#announcementsSlider ~ div .announcement-dot');
+    
+    if (dbAnnouncementsSlider && dbAnnouncementDots.length > 1) {
+        let dbCurrentSlide = 0;
+        const dbTotalSlides = dbAnnouncementDots.length;
+        let dbAutoSlideInterval;
+        
+        // Auto slide function for database announcements
+        function startDbAutoSlide() {
+            dbAutoSlideInterval = setInterval(() => {
+                dbCurrentSlide = (dbCurrentSlide + 1) % dbTotalSlides;
+                updateDbSlider();
+            }, 5000); // Change slide every 5 seconds
+        }
+        
+        // Update database slider position
+        function updateDbSlider() {
+            const translateX = -dbCurrentSlide * 100;
+            dbAnnouncementsSlider.style.transform = `translateX(${translateX}%)`;
+            
+            // Update dots
+            dbAnnouncementDots.forEach((dot, index) => {
+                dot.classList.toggle('bg-orange-500', index === dbCurrentSlide);
+                dot.classList.toggle('bg-orange-300', index !== dbCurrentSlide);
+            });
+        }
+        
+        // Dot navigation for database announcements
+        dbAnnouncementDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                clearInterval(dbAutoSlideInterval);
+                dbCurrentSlide = index;
+                updateDbSlider();
+                startDbAutoSlide();
+            });
+        });
+        
+        // Pause auto slide on hover for database announcements
+        dbAnnouncementsSlider.addEventListener('mouseenter', () => {
+            clearInterval(dbAutoSlideInterval);
+        });
+        
+        dbAnnouncementsSlider.addEventListener('mouseleave', () => {
+            startDbAutoSlide();
+        });
+        
+        // Start auto sliding for database announcements
+        startDbAutoSlide();
+    }
+    
+    // Beautiful Back to Top Button functionality
+    const backToTopBtn = document.getElementById('backToTopBtn');
+    
+    // Show/hide button based on scroll position
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+            backToTopBtn.classList.add('opacity-100');
+        } else {
+            backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+            backToTopBtn.classList.remove('opacity-100');
+        }
+    });
+    
+    // Smooth scroll to top when clicked
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+});
+</script>
+{% endblock extra_js %}

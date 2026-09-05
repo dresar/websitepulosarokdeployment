@@ -1,0 +1,179 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmation-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 20px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .warning-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+    .location-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: left;
+    }
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 5px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    .info-value {
+        color: #6c757d;
+    }
+    .action-buttons {
+        margin-top: 30px;
+    }
+    .btn-confirm {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+        padding: 10px 30px;
+        margin: 0 10px;
+    }
+    .btn-confirm:hover {
+        background: #c82333;
+        border-color: #bd2130;
+        color: white;
+    }
+    .btn-cancel {
+        background: #6c757d;
+        border-color: #6c757d;
+        color: white;
+        padding: 10px 30px;
+        margin: 0 10px;
+    }
+    .btn-cancel:hover {
+        background: #5a6268;
+        border-color: #545b62;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="confirmation-card">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                
+                <h3 class="mb-3">Konfirmasi Penghapusan</h3>
+                <p class="text-muted mb-4">
+                    Apakah Anda yakin ingin menghapus lokasi posyandu ini? 
+                    Tindakan ini tidak dapat dibatalkan.
+                </p>
+                
+                <div class="location-info">
+                    <h5 class="mb-3">
+                        <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+                        Detail Lokasi
+                    </h5>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Nama Lokasi:</span>
+                        <span class="info-value">{{ location.name }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Alamat:</span>
+                        <span class="info-value">{{ location.address }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Kapasitas:</span>
+                        <span class="info-value">{{ location.capacity }} orang</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value">
+                            {% if location.is_active %}
+                                <span class="badge badge-success">Aktif</span>
+                            {% else %}
+                                <span class="badge badge-danger">Tidak Aktif</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if location.contact_phone %}
+                    <div class="info-item">
+                        <span class="info-label">Telepon:</span>
+                        <span class="info-value">{{ location.contact_phone }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if location.coordinator %}
+                    <div class="info-item">
+                        <span class="info-label">Koordinator:</span>
+                        <span class="info-value">{{ location.coordinator.name }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="action-buttons">
+                    <form method="post" style="display: inline;" id="deleteForm">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-confirm" id="deleteBtn">
+                            <i class="fas fa-trash mr-1"></i>
+                            Ya, Hapus Lokasi
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'admin_panel:posyandu:locations' %}" class="btn btn-cancel">
+                        <i class="fas fa-times mr-1"></i>
+                        Batal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    let isSubmitting = false;
+    
+    $('#deleteForm').on('submit', function(e) {
+        if (isSubmitting) {
+            e.preventDefault();
+            return false;
+        }
+        
+        isSubmitting = true;
+        $('#deleteBtn').prop('disabled', true);
+        $('#deleteBtn').html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        
+        // Re-enable after 5 seconds as fallback
+        setTimeout(function() {
+            isSubmitting = false;
+            $('#deleteBtn').prop('disabled', false);
+            $('#deleteBtn').html('<i class="fas fa-trash mr-1"></i>Ya, Hapus Lokasi');
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

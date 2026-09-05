@@ -1,0 +1,876 @@
+{% extends "admin_panel/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+.gallery-container {
+    background: #f8f9fa;
+    min-height: calc(100vh - 200px);
+    padding: 15px 0;
+}
+
+.gallery-header {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.photo-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid #e9ecef;
+}
+
+.photo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.photo-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background: #f8f9fa;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.photo-card:hover .photo-overlay {
+    opacity: 1;
+}
+
+.photo-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.photo-actions .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.photo-info {
+    padding: 12px;
+}
+
+.photo-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.photo-description {
+    color: #666;
+    font-size: 12px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.photo-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #999;
+}
+
+.empty-gallery {
+    text-align: center;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.empty-gallery i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.btn-gallery {
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 14px;
+}
+
+.btn-gallery:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: #007bff;
+    color: white;
+    border-radius: 8px 8px 0 0;
+    border: none;
+    padding: 15px 20px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.image-preview {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    display: none;
+}
+
+.image-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 6px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.image-upload-area:hover {
+    border-color: #007bff;
+    background: #f0f8ff;
+}
+
+.image-upload-area.dragover {
+    border-color: #007bff;
+    background: #e6f3ff;
+}
+
+.image-upload-area i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.image-upload-area p {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.image-upload-area small {
+    font-size: 12px;
+}
+
+/* Statistics cards */
+.stats-card {
+    padding: 15px;
+    border-radius: 6px;
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.stats-card h4 {
+    margin-bottom: 5px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.stats-card small {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    
+    .gallery-header {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .photo-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .photo-image {
+        height: 120px;
+    }
+    
+    .photo-info {
+        padding: 10px;
+    }
+}
+</style>
+
+<div class="gallery-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="gallery-header">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+                    <h2 class="text-primary mb-2">
+                        <i class="fas fa-camera mr-2"></i>Galeri Desa
+                    </h2>
+                    <p class="text-muted mb-0">Kelola galeri foto dan dokumentasi desa</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-gallery" onclick="previewGallery()">
+                        <i class="fas fa-eye mr-1"></i>Preview
+        </button>
+                    <button class="btn btn-success btn-gallery" onclick="openAddModal()">
+            <i class="fas fa-plus mr-1"></i>Tambah Foto
+        </button>
+    </div>
+</div>
+
+            <!-- Statistics -->
+            <div class="row text-center">
+                <div class="col-md-3 col-6 mb-2">
+                    <div class="stats-card bg-primary">
+                        <h4 class="mb-1" id="totalPhotos">0</h4>
+                        <small>Total Foto</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <div class="stats-card bg-success">
+                        <h4 class="mb-1" id="thisMonth">0</h4>
+                        <small>Bulan Ini</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <div class="stats-card bg-info">
+                        <h4 class="mb-1" id="totalSize">0 MB</h4>
+                        <small>Total Ukuran</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-2">
+                    <div class="stats-card bg-warning">
+                        <h4 class="mb-1" id="categories">0</h4>
+                        <small>Kategori</small>
+                    </div>
+                </div>
+            </div>
+</div>
+
+<!-- Gallery Grid -->
+        <div id="galleryGrid" class="gallery-grid">
+    <!-- Photos will be loaded here -->
+</div>
+
+        <!-- Empty State -->
+        <div id="emptyGallery" class="empty-gallery" style="display: none;">
+            <i class="fas fa-images"></i>
+            <h4 class="text-muted mb-3">Belum Ada Foto</h4>
+            <p class="text-muted mb-4">Mulai dengan menambahkan foto pertama ke galeri desa</p>
+            <button class="btn btn-primary btn-gallery" onclick="openAddModal()">
+                <i class="fas fa-plus mr-1"></i>Tambah Foto Pertama
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url "village_profile:admin_dashboard" %}" class="btn btn-secondary btn-gallery">
+                        <i class="fas fa-arrow-left mr-1"></i>Kembali ke Dashboard
+                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-gallery" onclick="refreshGallery()">
+                            <i class="fas fa-sync mr-1"></i>Refresh
+                        </button>
+                        <button type="button" class="btn btn-success btn-gallery" onclick="openAddModal()">
+                            <i class="fas fa-plus mr-1"></i>Tambah Foto
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoModalLabel">
+                    <i class="fas fa-camera mr-2"></i>Tambah Foto Baru
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="photoForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="photoId" name="photo_id">
+                    
+                    <!-- Image Upload -->
+                    <div class="form-group">
+                        <label class="form-label font-weight-bold">Foto</label>
+                        <div class="image-upload-area">
+                            <i class="fas fa-cloud-upload-alt text-muted"></i>
+                            <p>Klik untuk memilih foto atau drag & drop</p>
+                            <small class="text-muted">Format: JPG, PNG, GIF (Max: 5MB)</small>
+                        </div>
+                        <input type="file" id="photoFile" name="photo" accept="image/*" style="display: none;">
+                        <img id="imagePreview" class="image-preview mt-3" alt="Preview">
+                    </div>
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label for="photoTitle" class="form-label font-weight-bold">Judul Foto</label>
+                        <input type="text" class="form-control" id="photoTitle" name="title" placeholder="Masukkan judul foto" required>
+                    </div>
+                    
+                    <!-- Description -->
+                                <div class="form-group">
+                        <label for="photoDescription" class="form-label font-weight-bold">Deskripsi</label>
+                        <textarea class="form-control" id="photoDescription" name="description" rows="3" placeholder="Deskripsi foto (opsional)"></textarea>
+                                </div>
+
+                    <!-- Category -->
+                                <div class="form-group">
+                        <label for="photoCategory" class="form-label font-weight-bold">Kategori</label>
+                        <select class="form-control" id="photoCategory" name="category" required>
+                            <option value="">Pilih Kategori</option>
+                                        <option value="LANDSCAPE">Pemandangan</option>
+                                        <option value="BUILDING">Bangunan</option>
+                                        <option value="ACTIVITY">Kegiatan</option>
+                                        <option value="CULTURE">Budaya</option>
+                                        <option value="FACILITY">Fasilitas</option>
+                                        <option value="EVENT">Acara</option>
+                                        <option value="PEOPLE">Masyarakat</option>
+                                        <option value="NATURE">Alam</option>
+                                        <option value="OTHER">Lainnya</option>
+                                    </select>
+                        </div>
+                        
+                    <!-- Tags -->
+                        <div class="form-group">
+                        <label for="photoTags" class="form-label font-weight-bold">Tag</label>
+                        <input type="text" class="form-control" id="photoTags" name="tags" placeholder="Masukkan tag (pisahkan dengan koma)">
+                        <small class="form-text text-muted">Contoh: desa, alam, kegiatan, masyarakat</small>
+                    </div>
+                    
+                    <!-- Date Taken -->
+                                <div class="form-group">
+                        <label for="photoDate" class="form-label font-weight-bold">Tanggal Diambil</label>
+                        <input type="date" class="form-control" id="photoDate" name="date_taken">
+                                </div>
+
+                    <!-- Location -->
+                                <div class="form-group">
+                        <label for="photoLocation" class="form-label font-weight-bold">Lokasi</label>
+                        <input type="text" class="form-control" id="photoLocation" name="location" placeholder="Lokasi foto diambil">
+                        </div>
+                        
+                    <!-- Photographer -->
+                                <div class="form-group">
+                        <label for="photoPhotographer" class="form-label font-weight-bold">Fotografer</label>
+                        <input type="text" class="form-control" id="photoPhotographer" name="photographer" placeholder="Nama fotografer">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-primary" onclick="savePhoto()">
+                    <i class="fas fa-save mr-1"></i>Simpan Foto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-trash mr-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus foto ini?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash mr-1"></i>Hapus Foto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+let currentPhotoId = null;
+let photos = [];
+
+// Initialize gallery
+$(document).ready(function() {
+    loadGallery();
+    setupImageUpload();
+});
+
+// Load gallery data
+function loadGallery() {
+    $.ajax({
+        url: '{% url "village_profile:gallery_api" %}',
+        method: 'GET',
+        success: function(data) {
+            if (data.success) {
+                photos = data.photos || [];
+                displayGallery();
+                updateStatistics();
+            } else {
+                console.error('API Error:', data.message);
+                showEmptyGallery();
+            }
+        },
+        error: function(xhr) {
+            console.error('Load gallery error:', xhr);
+            showEmptyGallery();
+            if (xhr.status === 404) {
+                showAlert('error', 'API endpoint tidak ditemukan. Pastikan URL routing sudah benar.');
+            } else if (xhr.status === 403) {
+                showAlert('error', 'Anda tidak memiliki izin untuk mengakses galeri.');
+            } else {
+                showAlert('error', 'Gagal memuat data galeri. Silakan refresh halaman.');
+            }
+        }
+    });
+}
+
+// Display gallery
+function displayGallery() {
+    const grid = $('#galleryGrid');
+    const emptyState = $('#emptyGallery');
+    
+    if (photos.length === 0) {
+        grid.hide();
+        emptyState.show();
+        return;
+    }
+    
+    grid.show();
+    emptyState.hide();
+    
+    grid.empty();
+    
+    photos.forEach(photo => {
+        const photoCard = createPhotoCard(photo);
+        grid.append(photoCard);
+    });
+}
+
+// Create photo card
+function createPhotoCard(photo) {
+    const photoUrl = photo.image_url || '{% static "images/placeholder.svg" %}';
+    const uploadDate = new Date(photo.created_at).toLocaleDateString('id-ID');
+    
+    return $(`
+        <div class="photo-card">
+            <img src="${photoUrl}" alt="${photo.title}" class="photo-image" onerror="this.src='{% static "images/placeholder.svg" %}'">
+            <div class="photo-overlay">
+                <div class="photo-actions">
+                    <button class="btn btn-light btn-sm" onclick="viewPhoto(${photo.id})" title="Lihat">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                    <button class="btn btn-warning btn-sm" onclick="editPhoto(${photo.id})" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                    <button class="btn btn-danger btn-sm" onclick="deletePhoto(${photo.id})" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+            <div class="photo-info">
+                <div class="photo-title">${photo.title}</div>
+                <div class="photo-description">${photo.description || 'Tidak ada deskripsi'}</div>
+                <div class="photo-meta">
+                    <span><i class="fas fa-calendar mr-1"></i>${uploadDate}</span>
+                    <span><i class="fas fa-tag mr-1"></i>${getCategoryLabel(photo.category) || 'Tidak ada kategori'}</span>
+                            </div>
+                        </div>
+                    </div>
+    `);
+}
+
+// Update statistics
+function updateStatistics() {
+    const totalPhotos = photos.length;
+    const thisMonth = photos.filter(photo => {
+        const photoDate = new Date(photo.created_at);
+        const now = new Date();
+        return photoDate.getMonth() === now.getMonth() && photoDate.getFullYear() === now.getFullYear();
+    }).length;
+    
+    const totalSize = photos.reduce((sum, photo) => sum + (photo.file_size || 0), 0);
+    const categories = [...new Set(photos.map(photo => photo.category))].length;
+    
+    $('#totalPhotos').text(totalPhotos);
+    $('#thisMonth').text(thisMonth);
+    $('#totalSize').text((totalSize / 1024 / 1024).toFixed(1) + ' MB');
+    $('#categories').text(categories);
+}
+
+// Show empty gallery
+function showEmptyGallery() {
+    $('#galleryGrid').hide();
+    $('#emptyGallery').show();
+    updateStatistics();
+}
+
+// Open add modal
+function openAddModal() {
+    currentPhotoId = null;
+    $('#photoModalLabel').html('<i class="fas fa-camera mr-2"></i>Tambah Foto Baru');
+    
+    // Reset form
+    $('#photoForm')[0].reset();
+    $('#photoId').val('');
+    $('#imagePreview').hide();
+    
+    // Reset file input
+    $('#photoFile').val('');
+    
+    // Clear any previous error states
+    $('.form-control').removeClass('is-invalid');
+    $('.invalid-feedback').remove();
+    
+    $('#photoModal').modal('show');
+}
+
+// Edit photo
+function editPhoto(photoId) {
+    const photo = photos.find(p => p.id === photoId);
+    if (!photo) return;
+    
+    currentPhotoId = photoId;
+    $('#photoModalLabel').html('<i class="fas fa-edit mr-2"></i>Edit Foto');
+    
+    // Fill form with photo data
+    $('#photoTitle').val(photo.title);
+    $('#photoDescription').val(photo.description || '');
+    $('#photoCategory').val(photo.category || '');
+    $('#photoTags').val(photo.tags || '');
+    $('#photoDate').val(photo.date_taken || '');
+    $('#photoLocation').val(photo.location || '');
+    $('#photoPhotographer').val(photo.photographer || '');
+    
+    // Show current image
+    if (photo.image_url) {
+        $('#imagePreview').attr('src', photo.image_url).show();
+    }
+    
+    $('#photoModal').modal('show');
+}
+
+// Delete photo
+function deletePhoto(photoId) {
+    currentPhotoId = photoId;
+    $('#deleteModal').modal('show');
+}
+
+// Confirm delete
+function confirmDelete() {
+    if (!currentPhotoId) return;
+    
+    $.ajax({
+        url: '{% url "village_profile:gallery_api" %}',
+        method: 'DELETE',
+        data: {
+            photo_id: currentPhotoId,
+            csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function() {
+            $('#deleteModal').modal('hide');
+            showAlert('success', 'Foto berhasil dihapus!');
+                    loadGallery();
+        },
+        error: function() {
+            showAlert('error', 'Gagal menghapus foto!');
+        }
+    });
+}
+
+// Save photo
+function savePhoto() {
+    const form = $('#photoForm')[0];
+    const formData = new FormData(form);
+    
+    // Validate required fields
+    const title = $('#photoTitle').val().trim();
+    const category = $('#photoCategory').val();
+    const photoFile = $('#photoFile')[0].files[0];
+    
+    if (!title) {
+        showAlert('error', 'Judul foto harus diisi!');
+        return;
+    }
+    
+    if (!category) {
+        showAlert('error', 'Kategori harus dipilih!');
+        return;
+    }
+    
+    if (!currentPhotoId && !photoFile) {
+        showAlert('error', 'Foto harus diupload!');
+        return;
+    }
+    
+    // Show loading
+    const saveBtn = $('button[onclick="savePhoto()"]');
+    const originalText = saveBtn.html();
+    saveBtn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...').prop('disabled', true);
+    
+    if (currentPhotoId) {
+        formData.append('photo_id', currentPhotoId);
+    }
+    
+    $.ajax({
+        url: '{% url "village_profile:gallery_api" %}',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            $('#photoModal').modal('hide');
+            showAlert('success', currentPhotoId ? 'Foto berhasil diperbarui!' : 'Foto berhasil ditambahkan!');
+            loadGallery();
+        },
+        error: function(xhr) {
+            console.error('Upload error:', xhr);
+            let errorMessage = 'Gagal menyimpan foto!';
+            
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.errors) {
+                    errorMessage = 'Gagal menyimpan foto: ' + Object.values(xhr.responseJSON.errors).flat().join(', ');
+                } else if (xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+            } else if (xhr.responseText) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    errorMessage = response.message || errorMessage;
+                } catch (e) {
+                    errorMessage = 'Terjadi kesalahan server!';
+                }
+            }
+            
+            showAlert('error', errorMessage);
+        },
+        complete: function() {
+            saveBtn.html(originalText).prop('disabled', false);
+        }
+    });
+}
+
+// Preview image
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#imagePreview').attr('src', e.target.result).show();
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Setup image upload
+function setupImageUpload() {
+    const uploadArea = $('.image-upload-area');
+    const fileInput = $('#photoFile');
+    
+    // Click to upload
+    uploadArea.on('click', function() {
+        fileInput.click();
+    });
+    
+    // Drag and drop events
+    uploadArea.on('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass('dragover');
+    });
+    
+    uploadArea.on('dragenter', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass('dragover');
+    });
+    
+    uploadArea.on('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragover');
+    });
+    
+    uploadArea.on('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragover');
+        
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                showAlert('error', 'File harus berupa gambar!');
+                return;
+            }
+            
+            // Check file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showAlert('error', 'Ukuran file maksimal 5MB!');
+                return;
+            }
+            
+            // Set file to input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput[0].files = dataTransfer.files;
+            
+            // Preview image
+            previewImage(fileInput[0]);
+        }
+    });
+    
+    // File input change
+    fileInput.on('change', function() {
+        if (this.files && this.files[0]) {
+            previewImage(this);
+        }
+    });
+}
+
+// View photo
+function viewPhoto(photoId) {
+    const photo = photos.find(p => p.id === photoId);
+    if (photo) {
+        window.open(photo.image_url, '_blank');
+    }
+}
+
+// Refresh gallery
+function refreshGallery() {
+    loadGallery();
+    showAlert('info', 'Galeri diperbarui!');
+}
+
+// Preview gallery
+function previewGallery() {
+    window.open('{% url "village_profile:gallery" %}', '_blank');
+}
+
+// Get category label
+function getCategoryLabel(category) {
+    const categories = {
+        'LANDSCAPE': 'Pemandangan',
+        'BUILDING': 'Bangunan',
+        'ACTIVITY': 'Kegiatan',
+        'CULTURE': 'Budaya',
+        'FACILITY': 'Fasilitas',
+        'EVENT': 'Acara',
+        'PEOPLE': 'Masyarakat',
+        'NATURE': 'Alam',
+        'OTHER': 'Lainnya'
+    };
+    return categories[category] || category;
+}
+
+// Show alert
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const alert = $(`
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `);
+    
+    $('.gallery-header').after(alert);
+    
+    setTimeout(() => {
+        alert.alert('close');
+    }, 3000);
+}
+</script>
+{% endblock extra_js %}

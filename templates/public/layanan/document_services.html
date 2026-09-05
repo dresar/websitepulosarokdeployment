@@ -1,0 +1,300 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .service-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .service-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .service-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .document-type-card {
+        transition: all 0.3s ease;
+    }
+    
+    .document-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+    }
+    
+    .dark .document-type-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(96, 165, 250, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/80 to-indigo-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">Layanan Dokumen Desa</h1>
+            <p class="text-lg opacity-90 max-w-3xl mx-auto">
+                Kelola dokumen kependudukan dan administrasi desa dengan mudah. Ajukan permohonan dokumen secara online dan pantau status pengajuan Anda.
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-alt text-2xl text-blue-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">15+</h3>
+                <p class="text-gray-600 dark:text-gray-300">Jenis Dokumen</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clock text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">1-3</h3>
+                <p class="text-gray-600 dark:text-gray-300">Hari Proses</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-circle text-2xl text-purple-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">100%</h3>
+                <p class="text-gray-600 dark:text-gray-300">Online</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Document Types -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-list-alt text-blue-600 mr-3"></i>
+                        Jenis Dokumen Tersedia
+                    </h2>
+                
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- KTP -->
+                        <div class="document-type-card bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-id-card text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">KTP</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Kartu Tanda Penduduk</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Dokumen identitas resmi untuk warga negara Indonesia
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Proses: 1-2 hari</span>
+                                <a href="{% url 'layanan:document_request' %}?type=ktp" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Ajukan
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- KK -->
+                        <div class="document-type-card bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-users text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">KK</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Kartu Keluarga</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Dokumen yang memuat data keluarga
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Proses: 2-3 hari</span>
+                                <a href="{% url 'layanan:document_request' %}?type=kk" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Ajukan
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Surat Keterangan -->
+                        <div class="document-type-card bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-file-signature text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Surat Keterangan</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Berbagai jenis surat keterangan</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Surat keterangan domisili, tidak mampu, dll
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Proses: 1 hari</span>
+                                <a href="{% url 'layanan:document_request' %}?type=surat_keterangan" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Ajukan
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Surat Nikah -->
+                        <div class="document-type-card bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-heart text-pink-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Surat Nikah</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Dokumen pernikahan</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Surat keterangan nikah dari desa
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Proses: 2-3 hari</span>
+                                <a href="{% url 'layanan:document_request' %}?type=surat_nikah" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Ajukan
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Surat Pindah -->
+                        <div class="document-type-card bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-truck text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Surat Pindah</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Dokumen pindah domisili</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Surat keterangan pindah domisili
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Proses: 3-5 hari</span>
+                                <a href="{% url 'layanan:document_request' %}?type=surat_pindah" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Ajukan
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Surat Kematian -->
+                        <div class="document-type-card bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-600 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-cross text-gray-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Surat Kematian</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Dokumen kematian</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                Surat keterangan kematian
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Proses: 1 hari</span>
+                                <a href="{% url 'layanan:document_request' %}?type=surat_kematian" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Ajukan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-bolt text-yellow-600 mr-3"></i>
+                        Aksi Cepat
+                    </h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'layanan:document_request' %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-plus mr-2"></i>Ajukan Dokumen Baru
+                        </a>
+                        <a href="{% url 'layanan:request_status' %}" class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-search mr-2"></i>Cek Status Pengajuan
+                        </a>
+                        <a href="{% url 'layanan:chat_layanan' %}" class="block w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-comments mr-2"></i>Chat Layanan
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Requirements -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-clipboard-list text-green-600 mr-3"></i>
+                        Persyaratan Umum
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Fotokopi KTP pemohon</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Fotokopi KK</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Surat pengantar RT/RW</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-check-circle text-green-600 mt-1"></i>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Dokumen pendukung sesuai jenis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-phone text-blue-600 mr-3"></i>
+                        Kontak Layanan
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-green-600"></i>
+                            <span class="text-gray-700 dark:text-gray-300">+62 812-3456-7890</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-blue-600"></i>
+                            <span class="text-gray-700 dark:text-gray-300">dokumen@pulosarok.desa.id</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clock text-orange-600"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Senin - Jumat: 08:00 - 16:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

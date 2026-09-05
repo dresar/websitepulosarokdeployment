@@ -1,0 +1,589 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/hero_images.css' %}">
+<style>
+/* Hero Images List Styling */
+.hero-images-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.filter-card {
+    background: #ffffff;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.filter-card .card-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.image-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.image-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.image-preview {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #f8f9fa;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+.image-info {
+    padding: 1.5rem;
+}
+
+.image-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.image-meta {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.image-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+}
+
+.image-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 0.85rem;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-outline-primary {
+    border: 1px solid #007bff;
+    color: #007bff;
+    background: white;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-outline-warning {
+    border: 1px solid #ffc107;
+    color: #ffc107;
+    background: white;
+}
+
+.btn-outline-warning:hover {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background: white;
+}
+
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.empty-state i {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.pagination {
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 0.25rem;
+    border: 2px solid #e9ecef;
+    color: #007bff;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-images-wrapper {
+        padding: 1rem 0;
+    }
+    
+    .page-header {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .images-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .image-actions {
+        flex-direction: column;
+    }
+    
+    .image-actions .btn {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="hero-images-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Daftar Hero Images</h4>
+                            <p class="text-muted mb-0">Kelola semua gambar hero website</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:hero_images:hero_image_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus mr-1"></i>Tambah Gambar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter -->
+                <div class="filter-card">
+                    <div class="card-body">
+                        <form method="get" class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Cari Gambar</label>
+                                <input type="text" class="form-control" name="search" value="{{ search }}" placeholder="Nama gambar...">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Halaman</label>
+                                <select class="form-control" name="page">
+                                    <option value="">Semua Halaman</option>
+                                    {% for value, display in page_choices %}
+                                    <option value="{{ value }}" {% if page_filter == value %}selected{% endif %}>{{ display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-control" name="status">
+                                    <option value="">Semua Status</option>
+                                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktif</option>
+                                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Non-Aktif</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <div class="d-flex align-items-end h-100">
+                                    <button type="submit" class="btn btn-primary mr-2">
+                                        <i class="fas fa-search mr-1"></i>Filter
+                                    </button>
+                                    <a href="{% url 'admin_panel:hero_images:hero_images_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times mr-1"></i>Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Images Grid -->
+                {% if page_obj %}
+                <div class="images-grid">
+                    {% for image in page_obj %}
+                    <div class="image-card">
+                        <div class="image-preview-container">
+                            {% if image.image %}
+                                <img src="{{ image.image.url }}" alt="{{ image.name }}" class="image-preview">
+                            {% else %}
+                                <div class="image-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="image-info">
+                            <h5 class="image-title">{{ image.name }}</h5>
+                            <div class="image-meta">
+                                <span class="badge badge-{% if image.is_active %}success{% else %}secondary{% endif %}">
+                                    {% if image.is_active %}Aktif{% else %}Non-Aktif{% endif %}
+                                </span>
+                                <span class="badge badge-primary">{{ image.get_page_display }}</span>
+                            </div>
+                            
+                            <div class="image-actions">
+                                <a href="{% url 'admin_panel:hero_images:hero_image_edit' image.id %}" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteImage({{ image.id }}, '{{ image.name }}')">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if image_type %}&type={{ image_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if image_type %}&type={{ image_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if image_type %}&type={{ image_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if image_type %}&type={{ image_type }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-images fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Belum ada gambar hero</h5>
+                    <p class="text-muted">Silakan tambah gambar hero pertama</p>
+                    <a href="{% url 'admin_panel:hero_images:hero_image_create' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus mr-1"></i>Tambah Gambar
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" onclick="closeDeleteModal()">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus gambar:</p>
+                <div class="alert alert-warning">
+                    <strong id="imageNameToDelete"></strong>
+                </div>
+                <p class="text-muted">Data yang sudah dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal" id="importModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-upload text-info mr-2"></i>Import Hero Images
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="importForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Pilih File</label>
+                        <input type="file" class="form-control" name="import_file" accept=".json,.csv" required>
+                        <small class="form-text">Format yang didukung: JSON, CSV</small>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <strong>Catatan:</strong> File harus berisi data gambar hero dengan format yang sesuai.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-info" id="confirmImportBtn">
+                    <i class="fas fa-upload mr-1"></i>Import
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+let deleteImageId = null;
+
+// Individual delete function
+function deleteImage(imageId, imageName) {
+    deleteImageId = imageId;
+    $('#imageNameToDelete').text(imageName);
+    $('#deleteModal').modal('show');
+}
+
+// Close modal function
+function closeDeleteModal() {
+    $('#deleteModal').modal('hide');
+    deleteImageId = null;
+}
+
+$('#confirmDeleteBtn').click(function() {
+    if (deleteImageId) {
+        const submitBtn = $(this);
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        
+        $.ajax({
+            url: `{% url 'admin_panel:hero_images:hero_image_delete' 0 %}`.replace('0', deleteImageId),
+            type: 'POST',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+            },
+            success: function(response) {
+                $('#deleteModal').modal('hide');
+                if (response.success) {
+                    showToast('success', 'Gambar berhasil dihapus');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('error', response.message || 'Gagal menghapus gambar');
+                }
+            },
+            error: function() {
+                showToast('error', 'Terjadi kesalahan saat menghapus gambar');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    }
+});
+
+// Reset modal when closed
+$('#deleteModal').on('hidden.bs.modal', function() {
+    deleteImageId = null;
+});
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+{% endblock extra_js %}

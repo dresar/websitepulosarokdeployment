@@ -1,0 +1,1165 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Profil Pengguna{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom Profile Styles */
+    .profile-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid white;
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        display: block;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .profile-avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid white;
+        background: rgba(255,255,255,0.2);
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-email {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-id-info {
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .profile-id-info code {
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        padding: 0.25rem 0.5rem;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+    }
+    
+    .role-badges {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .role-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+    
+    .profile-content {
+        padding: 2rem;
+    }
+    
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #667eea;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-title i {
+        margin-right: 0.75rem;
+        color: #667eea;
+        font-size: 1.3rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border-left: 5px solid #667eea;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .info-value {
+        color: #2c3e50;
+        font-weight: 500;
+        text-align: right;
+        flex: 1;
+        margin-left: 1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+    
+    .btn-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary-custom {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-left: 0.5rem;
+    }
+    
+    .btn-secondary-custom:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .photo-upload-area {
+        border: 3px dashed #667eea;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .photo-upload-area:hover {
+        border-color: #764ba2;
+        background: #e9ecef;
+    }
+    
+    .photo-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        display: block;
+        border: 3px solid #667eea;
+    }
+    
+    .photo-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 3px dashed #e9ecef;
+        margin: 0 auto 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+    
+    .photo-upload-section {
+        border: 2px dashed #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        background-color: #f8f9fa;
+    }
+    
+    .current-photo-display {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    #photo-preview-container {
+        border: 2px dashed #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        background-color: #f8f9fa;
+    }
+    
+    #save-photo-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    #save-photo-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .login-history-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+    }
+    
+    .login-history-item:hover {
+        transform: translateX(5px);
+    }
+    
+    .login-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .login-content {
+        flex: 1;
+    }
+    
+    .login-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    
+    .login-details {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .browser-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
+    
+    .browser-chrome { background: #e3f2fd; color: #1976d2; }
+    .browser-firefox { background: #fff3e0; color: #f57c00; }
+    .browser-safari { background: #e8f5e8; color: #388e3c; }
+    .browser-edge { background: #e3f2fd; color: #1976d2; }
+    .browser-other { background: #f5f5f5; color: #757575; }
+    
+    .edit-mode {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-top: 1rem;
+        border: 2px solid #667eea;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+    }
+    
+    .badge-custom {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .badge-primary { background: #cce7ff; color: #004085; }
+    .badge-secondary { background: #e2e3e5; color: #383d41; }
+    
+    /* Custom Notifications */
+    .custom-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 400px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideInRight 0.3s ease-out;
+    }
+    
+    .custom-notification-info {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+        color: white;
+    }
+    
+    .custom-notification-success {
+        background: linear-gradient(135deg, #4CAF50, #388E3C);
+        color: white;
+    }
+    
+    .custom-notification-error {
+        background: linear-gradient(135deg, #F44336, #D32F2F);
+        color: white;
+    }
+    
+    .custom-notification-warning {
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+        color: white;
+    }
+    
+    .notification-content {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+    }
+    
+    .notification-content i:first-child {
+        margin-right: 12px;
+        font-size: 18px;
+    }
+    
+    .notification-content span {
+        flex: 1;
+        font-weight: 500;
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 4px;
+        margin-left: 12px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    .notification-close:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1rem 0;
+        }
+        
+        .profile-header {
+            padding: 2rem 1rem;
+        }
+        
+        .profile-avatar, .profile-avatar-placeholder {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+        }
+        
+        .profile-content {
+            padding: 1rem;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-section {
+            padding: 1rem;
+        }
+        
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+        }
+        
+        .info-value {
+            text-align: left;
+            margin-left: 0;
+            margin-top: 0.25rem;
+        }
+        
+        .btn-custom, .btn-secondary-custom {
+            width: 100%;
+            margin: 0.25rem 0;
+        }
+        
+        .login-history-item {
+            padding: 0.75rem;
+        }
+        
+        .login-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .custom-notification {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            min-width: auto;
+            max-width: none;
+        }
+    }
+    
+    @media (min-width: 1200px) {
+        .profile-container {
+            padding: 3rem 0;
+        }
+        
+        .profile-content {
+            padding: 3rem;
+        }
+        
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="header-photo-container">
+                    {% if profile.photo %}
+                        <img src="{{ profile.photo.url }}" alt="Profile Photo" class="profile-avatar" id="header-photo">
+                    {% else %}
+                        <div class="profile-avatar-placeholder" id="header-photo-placeholder">
+                            <i class="fas fa-user fa-3x"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+                {% if profile_id %}
+                <div class="profile-id-info">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        ID Profil: <code>{{ profile_id }}</code>
+                    </small>
+                </div>
+                {% endif %}
+                
+                <div class="role-badges">
+                    {% for role in user.roles.all %}
+                        <span class="role-badge">{{ role.name }}</span>
+                    {% empty %}
+                        <span class="role-badge">Pengguna</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="profile-content">
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ user.date_joined|timesince }}</div>
+                        <div class="stat-label">Bergabung</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ user.last_login|date:"d/m/Y"|default:"-" }}</div>
+                        <div class="stat-label">Login Terakhir</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            {% if user.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                        </div>
+                        <div class="stat-label">Status Akun</div>
+                    </div>
+                </div>
+                
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>Informasi Pribadi
+                    </h3>
+                    
+                    <!-- View Mode -->
+                    <div id="profile-view-mode">
+                        <!-- Current Photo Display -->
+                        <div class="current-photo-section text-center mb-4">
+                            {% if profile.photo %}
+                                <img src="{{ profile.photo.url }}" alt="Current Photo" class="photo-preview" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;">
+                                <p class="text-muted mt-2">Foto Profil Saat Ini</p>
+                            {% else %}
+                                <div class="photo-placeholder" style="width: 150px; height: 150px; border-radius: 50%; border: 3px dashed #e9ecef; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                    <i class="fas fa-user fa-3x text-muted mb-2"></i>
+                                    <p class="text-muted">Belum ada foto profil</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <div class="info-item">
+                                    <span class="info-label">Nama Lengkap</span>
+                                    <span class="info-value">{{ user.get_full_name|default:"-" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Username</span>
+                                    <span class="info-value">{{ user.username }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value">{{ user.email }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <div class="info-item">
+                                    <span class="info-label">No. Telepon</span>
+                                    <span class="info-value">{{ profile.phone|default:"-" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Tanggal Lahir</span>
+                                    <span class="info-value">{{ profile.birth_date|date:"d F Y"|default:"-" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Jenis Kelamin</span>
+                                    <span class="info-value">
+                                        {% if profile.gender == 'M' %}Laki-laki
+                                        {% elif profile.gender == 'F' %}Perempuan
+                                        {% else %}-{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-item">
+                                <span class="info-label">Alamat</span>
+                                <span class="info-value">{{ profile.address|default:"-" }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn-custom" onclick="toggleEditMode('profile')">
+                                <i class="fas fa-edit mr-2"></i>Edit Profil
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Edit Mode -->
+                    <div id="profile-edit-mode" class="edit-mode" style="display: none;">
+                        <form method="post" action="{% url 'admin_panel:profile_update' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_first_name">Nama Depan</label>
+                                        <input type="text" class="form-control" id="id_first_name" name="first_name" value="{{ user.first_name }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_last_name">Nama Belakang</label>
+                                        <input type="text" class="form-control" id="id_last_name" name="last_name" value="{{ user.last_name }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_email">Email</label>
+                                <input type="email" class="form-control" id="id_email" name="email" value="{{ user.email }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_phone">No. Telepon</label>
+                                <input type="tel" class="form-control" id="id_phone" name="phone" value="{{ profile.phone|default:'' }}" placeholder="Contoh: 081234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="id_address">Alamat</label>
+                                <textarea class="form-control" id="id_address" name="address" rows="3" placeholder="Masukkan alamat lengkap">{{ profile.address|default:'' }}</textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_birth_date">Tanggal Lahir</label>
+                                        <input type="date" class="form-control" id="id_birth_date" name="birth_date" value="{{ profile.birth_date|date:'Y-m-d'|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_gender">Jenis Kelamin</label>
+                                        <select class="form-control" id="id_gender" name="gender">
+                                            <option value="">Pilih Jenis Kelamin</option>
+                                            <option value="M" {% if profile.gender == 'M' %}selected{% endif %}>Laki-laki</option>
+                                            <option value="F" {% if profile.gender == 'F' %}selected{% endif %}>Perempuan</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Photo Upload Section -->
+                            <div class="form-group">
+                                <label for="id_photo">Foto Profil</label>
+                                <div class="photo-upload-section">
+                                    <!-- Current Photo Display -->
+                                    <div class="current-photo-display text-center mb-3">
+                                        {% if profile.photo %}
+                                            <img src="{{ profile.photo.url }}" alt="Current Photo" class="photo-preview" id="current-photo">
+                                        {% else %}
+                                            <div class="photo-placeholder">
+                                                <i class="fas fa-user fa-3x text-muted mb-2"></i>
+                                                <p class="text-muted">Belum ada foto profil</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Photo Upload Input -->
+                                    <input type="file" class="form-control" id="id_photo" name="photo" accept="image/*" onchange="previewPhoto(this)">
+                                    <small class="form-text text-muted">Format yang didukung: JPG, PNG, GIF, WebP. Maksimal 2MB.</small>
+                                    
+                                    <!-- Photo Preview -->
+                                    <div id="photo-preview-container" class="text-center mb-3" style="display: none;">
+                                        <img id="photo-preview" class="photo-preview" alt="Preview">
+                                        <p class="text-muted mt-2">Preview foto yang akan diupload</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn-secondary-custom" onclick="toggleEditMode('profile')">
+                                    <i class="fas fa-times mr-2"></i>Batal
+                                </button>
+                                <button type="submit" class="btn-custom">
+                                    <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Password Change -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-key"></i>Ubah Password
+                    </h3>
+                    
+                    <!-- Password View Mode -->
+                    <div id="password-view-mode">
+                        <div class="info-card">
+                            <div class="info-item">
+                                <span class="info-label">Password</span>
+                                <span class="info-value">••••••••</span>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn-custom" onclick="toggleEditMode('password')">
+                                <i class="fas fa-key mr-2"></i>Ubah Password
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Password Edit Mode -->
+                    <div id="password-edit-mode" class="edit-mode" style="display: none;">
+                        <form method="post" action="{% url 'admin_panel:change_password' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="id_old_password">Password Lama</label>
+                                <input type="password" class="form-control" id="id_old_password" name="old_password" required placeholder="Masukkan password lama">
+                            </div>
+                            <div class="form-group">
+                                <label for="id_new_password1">Password Baru</label>
+                                <input type="password" class="form-control" id="id_new_password1" name="new_password1" required placeholder="Minimal 8 karakter">
+                                <small class="form-text text-muted">Password minimal 8 karakter</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_new_password2">Konfirmasi Password Baru</label>
+                                <input type="password" class="form-control" id="id_new_password2" name="new_password2" required placeholder="Ulangi password baru">
+                            </div>
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn-secondary-custom" onclick="toggleEditMode('password')">
+                                    <i class="fas fa-times mr-2"></i>Batal
+                                </button>
+                                <button type="submit" class="btn-custom">
+                                    <i class="fas fa-key mr-2"></i>Ubah Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Login History -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-history"></i>Riwayat Login
+                    </h3>
+                    
+                    <!-- Current Session -->
+                    <div class="login-history-item">
+                        <div class="login-icon bg-success">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="login-content">
+                            <div class="login-title">Sesi Saat Ini</div>
+                            <div class="login-details">
+                                {{ user.last_login|date:"d F Y H:i"|default:"Belum pernah login" }}
+                            </div>
+                            <div class="login-details">
+                                <span class="browser-badge browser-chrome" id="current-browser">Deteksi Browser...</span>
+                                <span class="text-muted ml-2" id="current-ip">IP: Deteksi...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Logins -->
+                    {% for login in recent_logins %}
+                    <div class="login-history-item">
+                        <div class="login-icon bg-info">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="login-content">
+                            <div class="login-title">{{ login.login_time|date:"d F Y H:i" }}</div>
+                            <div class="login-details">
+                                {% if login.browser %}
+                                    <span class="browser-badge browser-{{ login.browser|lower }}">{{ login.browser }}</span>
+                                {% else %}
+                                    <span class="browser-badge browser-other">Unknown</span>
+                                {% endif %}
+                                <span class="text-muted ml-2">IP: {{ login.ip_address }}</span>
+                            </div>
+                            {% if login.location %}
+                            <div class="login-details">
+                                <small class="text-muted"><i class="fas fa-map-marker-alt mr-1"></i>{{ login.location }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="login-history-item">
+                        <div class="login-icon bg-secondary">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="login-content">
+                            <div class="login-title">Belum ada riwayat login</div>
+                            <div class="login-details text-muted">
+                                Riwayat login akan tersimpan setelah login berikutnya
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Account Creation -->
+                    <div class="login-history-item">
+                        <div class="login-icon bg-primary">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="login-content">
+                            <div class="login-title">Akun Dibuat</div>
+                            <div class="login-details">
+                                {{ user.date_joined|date:"d F Y H:i" }}
+                            </div>
+                            <div class="login-details">
+                                <span class="browser-badge browser-other">Sistem</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-bolt"></i>Aksi Cepat
+                    </h3>
+                    <div class="text-center">
+                        <a href="{% url 'admin_panel:dashboard' %}" class="btn-custom">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Kembali ke Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleEditMode(mode) {
+    if (mode === 'profile') {
+        const viewMode = document.getElementById('profile-view-mode');
+        const editMode = document.getElementById('profile-edit-mode');
+        
+        if (viewMode.style.display === 'none') {
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+        } else {
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+        }
+    } else if (mode === 'password') {
+        const viewMode = document.getElementById('password-view-mode');
+        const editMode = document.getElementById('password-edit-mode');
+        
+        if (viewMode.style.display === 'none') {
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+        } else {
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+        }
+    }
+}
+
+// Photo upload functionality is now handled by form submission
+
+// Photo preview functionality
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Validate file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran file terlalu besar! Maksimal 2MB.');
+            input.value = '';
+            return;
+        }
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Format file tidak didukung! Gunakan JPG, PNG, GIF, atau WebP.');
+            input.value = '';
+            return;
+        }
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('photo-preview');
+            const container = document.getElementById('photo-preview-container');
+            
+            if (preview && container) {
+                preview.src = e.target.result;
+                container.style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.custom-notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `custom-notification custom-notification-${type}`;
+    
+    // Set icon based on type
+    let icon = 'fas fa-info-circle';
+    if (type === 'success') icon = 'fas fa-check-circle';
+    if (type === 'error') icon = 'fas fa-exclamation-circle';
+    if (type === 'warning') icon = 'fas fa-exclamation-triangle';
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="${icon}"></i>
+            <span>${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function detectBrowser() {
+    const userAgent = navigator.userAgent;
+    let browserName = 'Unknown';
+    let browserClass = 'browser-other';
+    
+    if (userAgent.indexOf('Chrome') > -1 && userAgent.indexOf('Edg') === -1) {
+        browserName = 'Chrome';
+        browserClass = 'browser-chrome';
+    } else if (userAgent.indexOf('Firefox') > -1) {
+        browserName = 'Firefox';
+        browserClass = 'browser-firefox';
+    } else if (userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1) {
+        browserName = 'Safari';
+        browserClass = 'browser-safari';
+    } else if (userAgent.indexOf('Edg') > -1) {
+        browserName = 'Edge';
+        browserClass = 'browser-edge';
+    }
+    
+    return { name: browserName, class: browserClass };
+}
+
+function getClientIP() {
+    return new Promise((resolve) => {
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => resolve(data.ip))
+            .catch(() => {
+                fetch('https://ipapi.co/json/')
+                    .then(response => response.json())
+                    .then(data => resolve(data.ip))
+                    .catch(() => resolve('Tidak dapat dideteksi'));
+            });
+    });
+}
+
+function updateLoginInfo() {
+    const browser = detectBrowser();
+    const browserElement = document.getElementById('current-browser');
+    
+    if (browserElement) {
+        browserElement.textContent = browser.name;
+        browserElement.className = 'browser-badge ' + browser.class;
+    }
+    
+    // Get IP address
+    getClientIP().then(ip => {
+        const ipElement = document.getElementById('current-ip');
+        if (ipElement) {
+            ipElement.textContent = 'IP: ' + ip;
+        }
+    });
+}
+
+$(document).ready(function() {
+    // Update browser and IP info
+    updateLoginInfo();
+    
+    // Form validation for profile update
+    $('#profile-edit-mode form').on('submit', function(e) {
+        console.log('=== FORM SUBMIT DEBUG ===');
+        console.log('Form submit event triggered');
+        console.log('Form action:', this.action);
+        console.log('Form method:', this.method);
+        console.log('Form enctype:', this.enctype);
+        
+        // Check if photo file is selected
+        var photoInput = document.getElementById('id_photo');
+        if (photoInput && photoInput.files.length > 0) {
+            console.log('Photo file selected:', photoInput.files[0].name, 'Size:', photoInput.files[0].size);
+        } else {
+            console.log('No photo file selected');
+        }
+        
+        var email = $('#id_email').val();
+        console.log('Email value:', email);
+        
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailRegex.test(email)) {
+            console.log('Email validation failed');
+            e.preventDefault();
+            alert('Format email tidak valid!');
+            return false;
+        }
+        
+        console.log('Form validation passed, submitting...');
+        console.log('=== END FORM SUBMIT DEBUG ===');
+    });
+    
+    // Password confirmation validation
+    $('#password-edit-mode form').on('submit', function(e) {
+        var newPassword1 = $('#id_new_password1').val();
+        var newPassword2 = $('#id_new_password2').val();
+        
+        if (newPassword1 !== newPassword2) {
+            e.preventDefault();
+            alert('Konfirmasi password tidak cocok!');
+            return false;
+        }
+        
+        if (newPassword1.length < 8) {
+            e.preventDefault();
+            alert('Password minimal 8 karakter!');
+            return false;
+        }
+    });
+    
+    // Auto-hide success messages after 5 seconds
+    setTimeout(function() {
+        $('.alert-success').fadeOut();
+    }, 5000);
+});
+</script>
+{% endblock %}

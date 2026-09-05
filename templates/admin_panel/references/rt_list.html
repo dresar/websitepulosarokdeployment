@@ -1,0 +1,1502 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Data RT{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Bulk Actions Improvements */
+.bulk-actions-container {
+    position: relative;
+}
+
+.bulk-actions-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.bulk-actions-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24 !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .form-control {
+        font-size: 16px; /* Prevent zoom on mobile */
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .bulk-actions-container .btn {
+        font-size: 12px;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-lg-2, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+    
+    .d-flex.align-items-end {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .d-flex.align-items-end .btn {
+        margin-bottom: 0.5rem;
+        margin-right: 0 !important;
+    }
+}
+
+.search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-results {
+    padding: 0;
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1001;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.avatar-placeholder i {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.result-info {
+    flex-grow: 1;
+}
+
+.result-name {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.result-details {
+    font-size: 0.875rem;
+    color: #6c757d;
+    line-height: 1.3;
+}
+
+.result-details i {
+    margin-right: 4px;
+    width: 12px;
+}
+
+.selected-item {
+    border: 1px solid #28a745;
+    border-radius: 0.375rem;
+}
+
+.avatar-placeholder i {
+    color: #28a745;
+}
+
+.no-results {
+    padding: 16px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.loading {
+    padding: 16px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item active">RT</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-home text-primary mr-2"></i>
+                        Data RT
+                    </h1>
+                    <p class="text-muted mb-0">Kelola data Rukun Tetangga (RT) di desa</p>
+                </div>
+                <div class="d-flex">
+                    <button type="button" class="btn btn-primary mr-2" id="tambahRTBtn">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah RT
+                    </button>
+                    
+                    <!-- Export Dropdown -->
+                    <!-- Export Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i>
+                            Export Data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdownBtn">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-file mr-1"></i>
+                                Pilih Format Export
+                            </h6>
+                            <div class="dropdown-divider"></div>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_rt_export_excel' %}">
+                                <i class="fas fa-file-excel text-success mr-2"></i>
+                                <span>Excel (.xlsx)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_rt_export_csv' %}">
+                                <i class="fas fa-file-csv text-info mr-2"></i>
+                                <span>CSV (.csv)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_rt_export_json' %}">
+                                <i class="fas fa-file-code text-warning mr-2"></i>
+                                <span>JSON (.json)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_rt_export_pdf' %}">
+                                <i class="fas fa-file-pdf text-danger mr-2"></i>
+                                <span>PDF (.pdf)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filter & Pencarian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="search" class="form-label font-weight-bold">Cari RT</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ request.GET.search }}" placeholder="Masukkan nomor RT..." 
+                                       style="min-height: 40px; font-size: 14px;">
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="dusun" class="form-label font-weight-bold">Dusun</label>
+                                <select class="form-control" id="dusun" name="dusun" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Dusun</option>
+                                    {% for dusun in dusun_options %}
+                                        <option value="{{ dusun.id }}" {% if request.GET.dusun == dusun.id|stringformat:"s" %}selected{% endif %}>{{ dusun.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="status" class="form-label font-weight-bold">Status</label>
+                                <select class="form-control" id="status" name="status" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Status</option>
+                                    <option value="aktif" {% if request.GET.status == 'aktif' %}selected{% endif %}>Aktif</option>
+                                    <option value="tidak_aktif" {% if request.GET.status == 'tidak_aktif' %}selected{% endif %}>Tidak Aktif</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-1 col-md-6 mb-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary mr-2">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Cari
+                                </button>
+                                <a href="{% url 'admin_panel:references_rt_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times mr-1"></i>
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RT List -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-2"></i>
+                Daftar RT
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if page_obj.object_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="selectAll">
+                                        <label class="custom-control-label" for="selectAll"></label>
+                                    </div>
+                                </th>
+                                <th>No</th>
+                                <th>Dusun</th>
+                                <th>RW</th>
+                                <th>Nomor RT</th>
+                                <th>Ketua RT</th>
+                                <th>Jumlah Penduduk</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rt in page_obj.object_list %}
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input item-checkbox" 
+                                               id="rt_{{ rt.id }}" value="{{ rt.id }}">
+                                        <label class="custom-control-label" for="rt_{{ rt.id }}"></label>
+                                    </div>
+                                </td>
+                                <td>{{ forloop.counter|add:page_obj.start_index|add:"-1" }}</td>
+                                <td>
+                                    <span class="badge badge-info">{{ rt.rw.dusun.name }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-secondary">RW {{ rt.rw.rw_number }}</span>
+                                </td>
+                                <td>
+                                    <strong>RT {{ rt.rt_number }}</strong>
+                                </td>
+                                <td>
+                                    {% if rt.ketua_rt %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-placeholder me-2">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <div class="font-weight-bold">{{ rt.ketua_rt.name }}</div>
+                                                <small class="text-muted">{{ rt.ketua_rt.nik }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Belum ditentukan</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary">{{ rt.population_count }} orang</span>
+                                </td>
+                                <td>
+                                    {% if rt.is_active %}
+                                        <span class="badge badge-success">Aktif</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Tidak Aktif</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                data-rt-id="{{ rt.id }}"
+                                                data-dusun-name="{{ rt.rw.dusun.name }}"
+                                                data-rw-number="{{ rt.rw.rw_number }}"
+                                                data-rw-id="{{ rt.rw.id }}"
+                                                data-rt-number="{{ rt.rt_number }}"
+                                                data-ketua-name="{{ rt.ketua_rt.name|default:"" }}"
+                                                data-ketua-id="{{ rt.ketua_rt.id|default:"" }}"
+                                                data-description="{{ rt.description|default:"" }}"
+                                                onclick="editRTFromButton(this)"
+                                                title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                data-rt-id="{{ rt.id }}"
+                                                data-rt-number="{{ rt.rt_number }}"
+                                                onclick="deleteRTFromButton(this)"
+                                                title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Bulk Actions - Always Visible -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="bulk-actions-container" id="bulkActionsContainer">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="bulkActionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-tasks mr-1"></i>
+                                <span id="bulkActionsText">Aksi Massal</span>
+                                <span class="badge badge-light ml-2" id="bulkActionsCount">0</span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="bulkActionsDropdown">
+                                <a class="dropdown-item" href="#" onclick="executeBulkAction('activate')">
+                                    <i class="fas fa-check text-success mr-2"></i>Aktifkan
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="executeBulkAction('deactivate')">
+                                    <i class="fas fa-pause text-warning mr-2"></i>Nonaktifkan
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="#" onclick="executeBulkAction('delete')">
+                                    <i class="fas fa-trash mr-2"></i>Hapus Data
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-muted">
+                        Menampilkan {{ page_obj.start_index|default:0 }} - {{ page_obj.end_index|default:0 }} dari {{ page_obj.paginator.count|default:0 }} data
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-home fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Belum ada data RT</h5>
+                    <p class="text-muted">Klik tombol "Tambah RT" untuk menambahkan data RT pertama</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- RT Modal -->
+<div class="modal fade" id="rtModal" tabindex="-1" role="dialog" aria-labelledby="rtModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rtModalLabel">
+                    <i class="fas fa-plus mr-2"></i>
+                    <span id="rtModalTitle">Tambah RT</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Petunjuk Import:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Download template Excel terlebih dahulu</li>
+                        <li>Isi template dengan data yang akan diimport</li>
+                        <li>Upload file Excel yang sudah diisi</li>
+                        <li>Data duplikat akan dilewati</li>
+                    </ul>
+                </div>
+                
+                <form id="rtForm">
+                    <div class="row">
+                        <!-- Dusun -->
+                        <div class="col-md-6 mb-3">
+                            <label for="dusun_id" class="form-label">
+                                Dusun <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="dusun_id" name="dusun_id" required>
+                                <option value="">Pilih Dusun</option>
+                                <!-- Options will be populated via JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- RW -->
+                        <div class="col-md-6 mb-3">
+                            <label for="rw_id" class="form-label">
+                                RW <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="rw_id" name="rw_id" required disabled>
+                                <option value="">Pilih RW</option>
+                                <!-- Options will be populated via JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Nomor RT -->
+                        <div class="col-md-6 mb-3">
+                            <label for="rt_number" class="form-label">
+                                Nomor RT <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="rt_number" name="rt_number" 
+                                   placeholder="Contoh: 001" required>
+                        </div>
+
+                        <!-- Ketua RT Search -->
+                        <div class="col-12 mb-3">
+                            <label for="ketua_rt_search" class="form-label">
+                                Ketua RT
+                            </label>
+                            <div class="position-relative">
+                                <input type="text" class="form-control" id="ketua_rt_search" 
+                                       placeholder="Cari ketua RT..." autocomplete="off" disabled>
+                                <input type="hidden" id="ketua_rt_id" name="ketua_rt_id">
+                                <div id="ketua_rt_dropdown" class="search-dropdown" style="display: none;">
+                                    <div class="search-results" id="ketua_rt_results">
+                                        <!-- Results will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-search mr-1"></i>
+                                Cari ketua RT dari data penduduk (usia 17+ tahun)
+                            </small>
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div class="col-12 mb-3">
+                            <label for="description" class="form-label">
+                                Deskripsi
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Deskripsi RT..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="saveRTBtn" onclick="saveRT()">
+                    <i class="fas fa-save mr-1"></i>
+                    Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus <strong id="deleteItemName"></strong>?</p>
+                <p class="text-danger"><small>Data yang dihapus tidak dapat dikembalikan.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentRTId = null;
+let searchTimeout;
+
+$(document).ready(function() {
+    console.log('RT List page loaded');
+    loadDusunOptions();
+    
+    // Test button click
+    $('#tambahRTBtn').on('click', function() {
+        console.log('Tambah RT button clicked');
+        openRTModal();
+    });
+    
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('.item-checkbox').prop('checked', this.checked);
+        updateBulkActions();
+    });
+    
+    // Bind checkbox change events
+    $(document).on('change', '.item-checkbox', function() {
+        updateBulkActions();
+    });
+    
+    // Modal events
+    $('#rtModal').on('show.bs.modal', function() {
+        console.log('RT Modal is about to show');
+    });
+    
+    $('#rtModal').on('shown.bs.modal', function() {
+        console.log('RT Modal is shown');
+    });
+    
+    // Search functionality for ketua RT
+    $('#ketua_rt_search').on('input', function() {
+        const query = $(this).val();
+        searchPenduduk(query);
+    });
+    
+    // Clear selection button
+    $('#clear_selection').on('click', function() {
+        clearSelection();
+    });
+    
+    // Hide dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#ketua_rt_search, #ketua_rt_dropdown').length) {
+            hideDropdown();
+        }
+    });
+    
+    // Dusun change event
+    $('#dusun_id').on('change', function() {
+        const dusunId = $(this).val();
+        if (dusunId) {
+            loadRWOptions(dusunId);
+        } else {
+            $('#rw_id').empty().append('<option value="">Pilih RW</option>').prop('disabled', true);
+            $('#ketua_rt_search').prop('disabled', true);
+            clearSelection();
+        }
+    });
+    
+    // RW change event
+    $('#rw_id').on('change', function() {
+        const rwId = $(this).val();
+        if (rwId) {
+            $('#ketua_rt_search').prop('disabled', false);
+        } else {
+            $('#ketua_rt_search').prop('disabled', true);
+            clearSelection();
+        }
+    });
+    
+    // Dusun change event for search
+    $('#dusun_id').on('change', function() {
+        const dusunId = $(this).val();
+        if (dusunId) {
+            $('#ketua_rt_search').prop('disabled', false);
+        } else {
+            $('#ketua_rt_search').prop('disabled', true);
+            clearSelection();
+        }
+    });
+});
+
+function loadDusunOptions() {
+    fetch('{% url "admin_panel:api_references_dusun_list" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data) {
+                const select = $('#dusun_id');
+                select.empty().append('<option value="">Pilih Dusun</option>');
+                
+                data.data.forEach(function(dusun) {
+                    select.append(`<option value="${dusun.id}">${dusun.name}</option>`);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading dusun options:', error);
+        });
+}
+
+function loadRWOptions(dusunId) {
+    fetch(`/admin-panel/api/references/rw/by-dusun/${dusunId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data) {
+                const select = $('#rw_id');
+                select.empty().append('<option value="">Pilih RW</option>').prop('disabled', false);
+                
+                data.data.forEach(function(rw) {
+                    select.append(`<option value="${rw.id}">RW ${rw.rw_number}</option>`);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading RW options:', error);
+        });
+}
+
+function searchPenduduk(query) {
+    const dusunId = $('#dusun_id').val();
+    
+    if (!dusunId || query.length < 2) {
+        hideDropdown();
+        return;
+    }
+    
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        showLoading();
+        
+        const url = `/admin-panel/api/references/penduduk-by-dusun/${dusunId}/?q=${encodeURIComponent(query)}`;
+        
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('API response:', data);
+                if (data.success && data.data) {
+                    displaySearchResults(data.data);
+                } else {
+                    console.log('No results or API error:', data);
+                    showNoResults();
+                }
+            })
+            .catch(error => {
+                console.error('Error searching penduduk:', error);
+                showNoResults();
+            });
+    }, 300);
+}
+
+function showLoading() {
+    const results = document.getElementById('ketua_rt_results');
+    results.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> Mencari...</div>';
+    showDropdown();
+}
+
+function displaySearchResults(pendudukList) {
+    const results = document.getElementById('ketua_rt_results');
+    
+    if (pendudukList.length === 0) {
+        showNoResults();
+        return;
+    }
+    
+    results.innerHTML = pendudukList.map(penduduk => {
+        const safeName = penduduk.name.replace(/'/g, "\\'");
+        const safeNik = penduduk.nik.replace(/'/g, "\\'");
+        const safePhone = (penduduk.phone || '').replace(/'/g, "\\'");
+        const safeOccupation = (penduduk.occupation || '').replace(/'/g, "\\'");
+        
+        return `
+            <div class="search-result-item" data-penduduk-id="${penduduk.id}" data-penduduk-name="${safeName}" data-penduduk-nik="${safeNik}" data-penduduk-phone="${safePhone}" data-penduduk-occupation="${safeOccupation}">
+                <div class="avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="result-info">
+                    <div class="result-name">${penduduk.name}</div>
+                    <div class="result-details">
+                        <i class="fas fa-id-card"></i>${penduduk.nik}<br>
+                        <i class="fas fa-phone"></i>${penduduk.phone || '-'}<br>
+                        <i class="fas fa-briefcase"></i>${penduduk.occupation || '-'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Add click event listeners
+    results.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const id = this.getAttribute('data-penduduk-id');
+            const name = this.getAttribute('data-penduduk-name');
+            const nik = this.getAttribute('data-penduduk-nik');
+            const phone = this.getAttribute('data-penduduk-phone');
+            const occupation = this.getAttribute('data-penduduk-occupation');
+            
+            selectPenduduk(id, name, nik, phone, occupation);
+        });
+    });
+    
+    showDropdown();
+}
+
+function showNoResults() {
+    const results = document.getElementById('ketua_rt_results');
+    results.innerHTML = '<div class="no-results">Tidak ada penduduk yang ditemukan</div>';
+    showDropdown();
+}
+
+function showDropdown() {
+    document.getElementById('ketua_rt_dropdown').style.display = 'block';
+}
+
+function hideDropdown() {
+    document.getElementById('ketua_rt_dropdown').style.display = 'none';
+}
+
+function selectPenduduk(id, name, nik, phone, occupation) {
+    // Set hidden input value
+    document.getElementById('ketua_rt_id').value = id;
+    
+    // Clear search input
+    document.getElementById('ketua_rt_search').value = '';
+    
+    // Hide dropdown
+    hideDropdown();
+}
+
+function clearSelection() {
+    document.getElementById('ketua_rt_id').value = '';
+    document.getElementById('ketua_rt_search').value = '';
+}
+
+function openRTModal(rtId = null) {
+    console.log('openRTModal called with rtId:', rtId);
+    currentRTId = rtId;
+    
+    if (rtId) {
+        $('#rtModalTitle').text('Edit RT');
+        $('#saveRTBtn').html('<i class="fas fa-save mr-1"></i>Update');
+    } else {
+        $('#rtModalTitle').text('Tambah RT');
+        $('#saveRTBtn').html('<i class="fas fa-save mr-1"></i>Simpan');
+        $('#rtForm')[0].reset();
+        $('#rw_id').prop('disabled', true);
+        $('#ketua_rt_search').prop('disabled', true);
+        clearSelection();
+    }
+    
+    console.log('Showing modal...');
+    $('#rtModal').modal('show');
+}
+
+function editRT(rtId, dusunName, rwNumber, rwId, rtNumber, ketuaName, ketuaId, description) {
+    openRTModal(rtId);
+    
+    // Set form values
+    $('#dusun_id option').each(function() {
+        if ($(this).text() === dusunName) {
+            $(this).prop('selected', true);
+            loadRWOptions($(this).val());
+            
+            // Wait for RW options to load, then select the correct RW
+            setTimeout(() => {
+                $('#rw_id option').each(function() {
+                    if ($(this).text() === `RW ${rwNumber}`) {
+                        $(this).prop('selected', true);
+                        $('#ketua_rt_search').prop('disabled', false);
+                    }
+                });
+            }, 500);
+        }
+    });
+    
+    $('#rt_number').val(rtNumber);
+    $('#description').val(description);
+    
+    if (ketuaId) {
+        $('#ketua_rt_id').val(ketuaId);
+        $('#ketua_rt_search').val(ketuaName);
+    }
+}
+
+function saveRT() {
+    const formData = {
+        rw_id: $('#rw_id').val(),
+        rt_number: $('#rt_number').val(),
+        ketua_rt_id: $('#ketua_rt_id').val(),
+        description: $('#description').val()
+    };
+    
+    // Validation
+    if (!formData.rw_id || !formData.rt_number) {
+        alert('RW dan nomor RT harus diisi');
+        return;
+    }
+    
+    const url = currentRTId ? 
+        `/admin-panel/references/rt/${currentRTId}/edit/` : 
+        '/admin-panel/references/rt/create/';
+    
+    const btn = $('#saveRTBtn');
+    const originalText = btn.html();
+    
+    // Show loading
+    btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+    btn.prop('disabled', true);
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#rtModal').modal('hide');
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyimpan data');
+    })
+    .finally(() => {
+        btn.html(originalText);
+        btn.prop('disabled', false);
+    });
+}
+
+function deleteRT(rtId, rtName) {
+    $('#deleteItemName').text(rtName);
+    $('#confirmDeleteBtn').off('click').on('click', function() {
+        const btn = $(this);
+        const originalText = btn.html();
+        
+        // Show loading
+        btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        btn.prop('disabled', true);
+        
+        fetch(`/admin-panel/references/rt/${rtId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                $('#deleteModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus data');
+        })
+        .finally(() => {
+            btn.html(originalText);
+            btn.prop('disabled', false);
+        });
+    });
+    
+    $('#deleteModal').modal('show');
+}
+
+// New functions for data attributes approach
+function editRTFromButton(button) {
+    const rtId = $(button).data('rt-id');
+    const dusunName = $(button).data('dusun-name');
+    const rwNumber = $(button).data('rw-number');
+    const rwId = $(button).data('rw-id');
+    const rtNumber = $(button).data('rt-number');
+    const ketuaName = $(button).data('ketua-name');
+    const ketuaId = $(button).data('ketua-id');
+    const description = $(button).data('description');
+    
+    editRT(rtId, dusunName, rwNumber, rwId, rtNumber, ketuaName, ketuaId, description);
+}
+
+function deleteRTFromButton(button) {
+    const rtId = $(button).data('rt-id');
+    const rtNumber = $(button).data('rt-number');
+    const rtName = 'RT ' + rtNumber;
+    
+    deleteRT(rtId, rtName);
+}
+
+// Export functions
+function exportData() {
+    window.location.href = '{% url "admin_panel:references_rt_export_csv" %}';
+}
+
+function exportExcel() {
+    window.location.href = '{% url "admin_panel:references_rt_export_excel" %}';
+}
+
+function exportPDF() {
+    window.location.href = '{% url "admin_panel:references_rt_export_pdf" %}';
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Bulk Actions Functions
+function updateBulkActions() {
+    const selected = $('.item-checkbox:checked').length;
+    const container = $('#bulkActionsContainer');
+    const count = $('#bulkActionsCount');
+    const dropdown = $('#bulkActionsDropdown');
+    
+    // Always show container, but change style based on selection
+    count.text(selected);
+    
+    if (selected > 0) {
+        dropdown.removeClass('btn-outline-primary').addClass('btn-primary');
+        dropdown.find('i').removeClass('fa-tasks').addClass('fa-check');
+    } else {
+        dropdown.removeClass('btn-primary').addClass('btn-outline-primary');
+        dropdown.find('i').removeClass('fa-check').addClass('fa-tasks');
+    }
+    
+    // Update select all checkbox
+    const totalCheckboxes = $('.item-checkbox').length;
+    const selectAll = $('#selectAll');
+    
+    if (selected === 0) {
+        selectAll.prop('indeterminate', false).prop('checked', false);
+    } else if (selected === totalCheckboxes) {
+        selectAll.prop('indeterminate', false).prop('checked', true);
+    } else {
+        selectAll.prop('indeterminate', true);
+    }
+}
+
+function executeBulkAction(action) {
+    const selected = $('.item-checkbox:checked');
+    
+    if (selected.length === 0) {
+        showError('Pilih minimal satu data');
+        return;
+    }
+    
+    // Get selected IDs
+    const selectedIds = [];
+    selected.each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    // Action labels
+    const actionLabels = {
+        'activate': 'mengaktifkan',
+        'deactivate': 'menonaktifkan', 
+        'delete': 'menghapus'
+    };
+    
+    // Confirm for delete action
+    if (action === 'delete') {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} data RT?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Apakah Anda yakin ingin ${actionLabels[action]} ${selectedIds.length} data RT?`)) {
+            return;
+        }
+    }
+    
+    showLoading(`Menjalankan aksi ${actionLabels[action]} pada ${selectedIds.length} data...`);
+    
+    // Execute the actual bulk action
+    if (action === 'delete') {
+        bulkDeleteRT(selectedIds);
+    } else if (action === 'activate') {
+        bulkActivateRT(selectedIds);
+    } else if (action === 'deactivate') {
+        bulkDeactivateRT(selectedIds);
+    }
+}
+
+function bulkDeleteRT(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_rt_bulk_delete" %}',
+        type: 'POST',
+        data: {
+            'rt_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menghapus ${response.deleted_count} data RT`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                let errorMessage = response.message || 'Gagal menghapus data RT';
+                if (response.errors && response.errors.length > 0) {
+                    errorMessage += '\n\nDetail error:\n' + response.errors.join('\n');
+                }
+                showAlert(errorMessage, 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk delete error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menghapus data RT: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkActivateRT(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_rt_bulk_activate" %}',
+        type: 'POST',
+        data: {
+            'rt_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil mengaktifkan ${response.activated_count} data RT`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal mengaktifkan data RT', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk activate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat mengaktifkan data RT: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkDeactivateRT(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_rt_bulk_deactivate" %}',
+        type: 'POST',
+        data: {
+            'rt_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menonaktifkan ${response.deactivated_count} data RT`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal menonaktifkan data RT', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk deactivate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menonaktifkan data RT: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function showError(message) {
+    showAlert(message, 'error');
+}
+
+function showLoading(message) {
+    // Show loading overlay
+    $('body').append(`
+        <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                <div class="spinner-border text-primary mb-2"></div>
+                <div>${message}</div>
+            </div>
+        </div>
+    `);
+}
+
+function hideLoading() {
+    $('#loadingOverlay').remove();
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-warning';
+    const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-exclamation-triangle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    $('body').append(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+
+<!-- Import Modal -->
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="fas fa-file-import mr-2"></i>
+                    Import Data RT
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Petunjuk Import:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Download template Excel terlebih dahulu</li>
+                        <li>Isi template dengan data yang akan diimport</li>
+                        <li>Upload file Excel yang sudah diisi</li>
+                        <li>Data duplikat akan dilewati</li>
+                    </ul>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" action="{% url 'admin_panel:references_quick_import' 'rt' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="importFile" class="form-label">
+                            <i class="fas fa-file mr-1"></i>
+                            Pilih File <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="importFile" name="file" accept=".xlsx,.xls" required>
+                        <small class="form-text text-muted">
+                            Format yang didukung: Excel (.xlsx, .xls) - Maksimal 10MB
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-download mr-1"></i>
+                            Download Template
+                        </label>
+                        <div class="text-center">
+                            <a href="{% url 'admin_panel:references_get_template' 'rt' %}?format=excel" class="btn btn-outline-success">
+                                <i class="fas fa-download mr-1"></i>
+                                Download Template Excel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitImport()">
+                    <i class="fas fa-upload mr-1"></i>
+                    Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulkActionModal" tabindex="-1" role="dialog" aria-labelledby="bulkActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkActionModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Aksi Bulk
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-warning mr-2"></i>
+                    <strong>Peringatan:</strong> Aksi ini akan diterapkan pada <span id="bulkActionCount">0</span> item yang dipilih.
+                </div>
+                <p id="bulkActionMessage">Apakah Anda yakin ingin melanjutkan?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="confirmBulkAction">
+                    <i class="fas fa-check mr-1"></i>
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set current model name for import/export
+window.currentModelName = 'rt';
+
+// Import functionality
+function submitImport() {
+    const form = document.querySelector('#importModal form');
+    const formData = new FormData(form);
+    
+    fetch('{% url "admin_panel:references_quick_import" "rt" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Import berhasil! ' + data.message);
+            $('#importModal').modal('hide');
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+        alert('Error saat mengimport data');
+    });
+}
+
+// Bulk actions functionality
+let selectedItems = [];
+let currentBulkAction = '';
+
+// Bulk delete
+$('#bulkDeleteBtn').click(function() {
+    currentBulkAction = 'delete';
+    $('#bulkActionModalLabel').html('<i class="fas fa-trash mr-2"></i>Konfirmasi Hapus Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin menghapus item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Bulk deactivate
+$('#bulkDeactivateBtn').click(function() {
+    currentBulkAction = 'deactivate';
+    $('#bulkActionModalLabel').html('<i class="fas fa-eye-slash mr-2"></i>Konfirmasi Nonaktifkan Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin menonaktifkan item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Bulk activate
+$('#bulkActivateBtn').click(function() {
+    currentBulkAction = 'activate';
+    $('#bulkActionModalLabel').html('<i class="fas fa-eye mr-2"></i>Konfirmasi Aktifkan Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin mengaktifkan item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Clear selection
+$('#clearSelectionBtn').click(function() {
+    $('.item-checkbox').prop('checked', false);
+    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+    updateBulkActions();
+});
+
+// Confirm bulk action
+$('#confirmBulkAction').click(function() {
+    if (selectedItems.length === 0) {
+        alert('Tidak ada item yang dipilih.');
+        return;
+    }
+    
+    $.ajax({
+        url: '{% url "admin_panel:references_bulk_action" %}',
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val(),
+            'model': 'rt',
+            'action': currentBulkAction,
+            'items': selectedItems.join(',')
+        },
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                $('#bulkActionModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function() {
+            alert('Terjadi kesalahan saat memproses aksi bulk.');
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<script>
+// Set current model name for import/export
+window.currentModelName = 'rt';
+</script>
+
+{% endblock %}

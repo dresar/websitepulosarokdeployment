@@ -1,0 +1,747 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Manajemen Komentar Berita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comment-card {
+        border: none;
+        border-radius: 20px;
+        padding: 0;
+        margin-bottom: 1.5rem;
+        background: white;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+    .comment-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .comment-card.pending {
+        border-left: 6px solid #ffc107;
+        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    }
+    .comment-card.approved {
+        border-left: 6px solid #28a745;
+        background: linear-gradient(135deg, #e8f5e8 0%, #ffffff 100%);
+    }
+    .comment-card.rejected {
+        border-left: 6px solid #dc3545;
+        background: linear-gradient(135deg, #ffeaea 0%, #ffffff 100%);
+    }
+    .comment-card.spam {
+        border-left: 6px solid #6c757d;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    .comment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+        opacity: 0.1;
+    }
+    .comment-header {
+        display: flex;
+        justify-content-between;
+        align-items: flex-start;
+        padding: 2rem 2rem 1rem 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .comment-author {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+    }
+    .author-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        position: relative;
+    }
+    .author-avatar::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #007bff, #28a745, #ffc107, #dc3545);
+        z-index: -1;
+        opacity: 0.2;
+    }
+    .author-info h6 {
+        margin: 0;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .author-info small {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .comment-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 0;
+        padding: 2rem;
+        margin: 0;
+        line-height: 1.8;
+        font-size: 1rem;
+        color: #495057;
+        border-left: 4px solid #e9ecef;
+        position: relative;
+    }
+    .comment-content::before {
+        content: '"';
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        font-size: 4rem;
+        color: #e9ecef;
+        font-family: serif;
+        line-height: 1;
+    }
+    .comment-actions {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        padding: 1.5rem 2rem 2rem 2rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    .comment-reply {
+        margin: 1rem 2rem 0 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 15px;
+        border-left: 4px solid #007bff;
+        position: relative;
+    }
+    .comment-reply::before {
+        content: '↳';
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        font-size: 1.5rem;
+        color: #007bff;
+        background: #f8f9fa;
+        padding: 0 5px;
+    }
+    .filter-tabs {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .filter-tab {
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        text-decoration: none;
+        color: #6c757d;
+        margin-right: 0.8rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+    }
+    .filter-tab::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+    }
+    .filter-tab:hover::before {
+        left: 100%;
+    }
+    .filter-tab.active {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+    }
+    .filter-tab:hover {
+        background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        color: #495057;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    .filter-tab.active:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .search-box {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    .stat-card .number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #007bff, #28a745);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    .stat-card .label {
+        color: #6c757d;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        color: #dee2e6;
+    }
+    .empty-state h5 {
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .comment-preview {
+        max-height: 200px;
+        overflow-y: auto;
+        position: relative;
+    }
+    .comment-preview::-webkit-scrollbar {
+        width: 6px;
+    }
+    .comment-preview::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    .comment-preview::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    .comment-preview::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .form-control {
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        padding: 0.8rem 1.2rem;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .pagination {
+        margin-top: 2rem;
+    }
+    .page-link {
+        border-radius: 15px !important;
+        margin: 0 0.2rem;
+        border: 2px solid #e9ecef !important;
+        color: #6c757d;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .page-link:hover {
+        background: #007bff;
+        color: white;
+        border-color: #007bff !important;
+        transform: translateY(-2px);
+    }
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-color: #007bff !important;
+        color: white;
+    }
+    .news-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .news-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-comments text-primary"></i> Manajemen Komentar Berita
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2">
+                <a href="{% url 'admin_panel:news_dashboard' %}" class="btn btn-outline-primary btn-modern">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="{% url 'admin_panel:news_list' %}" class="btn btn-outline-secondary btn-modern">
+                    <i class="fas fa-newspaper"></i> Berita
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="number">{{ total_comments|default:0 }}</div>
+            <div class="label">Total Komentar</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ approved_comments|default:0 }}</div>
+            <div class="label">Disetujui</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ pending_comments|default:0 }}</div>
+            <div class="label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ rejected_comments|default:0 }}</div>
+            <div class="label">Ditolak</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ spam_comments|default:0 }}</div>
+            <div class="label">Spam</div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="{% url 'admin_panel:news_comments' %}" 
+           class="filter-tab {% if not current_filters.status %}active{% endif %}">
+            <i class="fas fa-list"></i> Semua
+        </a>
+        <a href="{% url 'admin_panel:news_comments' %}?status=approved" 
+           class="filter-tab {% if current_filters.status == 'approved' %}active{% endif %}">
+            <i class="fas fa-check"></i> Disetujui
+        </a>
+        <a href="{% url 'admin_panel:news_comments' %}?status=pending" 
+           class="filter-tab {% if current_filters.status == 'pending' %}active{% endif %}">
+            <i class="fas fa-clock"></i> Pending
+        </a>
+        <a href="{% url 'admin_panel:news_comments' %}?status=rejected" 
+           class="filter-tab {% if current_filters.status == 'rejected' %}active{% endif %}">
+            <i class="fas fa-times"></i> Ditolak
+        </a>
+        <a href="{% url 'admin_panel:news_comments' %}?status=spam" 
+           class="filter-tab {% if current_filters.status == 'spam' %}active{% endif %}">
+            <i class="fas fa-ban"></i> Spam
+        </a>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+        <form method="GET" id="searchForm">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">
+                            <i class="fas fa-search"></i> Cari Komentar
+                        </label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ current_filters.search }}" placeholder="Ketik nama, email, atau komentar...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="news" class="form-label">
+                            <i class="fas fa-newspaper"></i> Filter Berita
+                        </label>
+                        <select class="form-control" id="news" name="news">
+                            <option value="">Semua Berita</option>
+                            {% for news_item in news_list %}
+                            <option value="{{ news_item.id }}" {% if current_filters.news == news_item.id|stringformat:"s" %}selected{% endif %}>
+                                {{ news_item.title|truncatechars:50 }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="date_from" class="form-label">
+                            <i class="fas fa-calendar"></i> Tanggal Mulai
+                        </label>
+                        <input type="date" class="form-control" id="date_from" name="date_from" 
+                               value="{{ current_filters.date_from }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-modern w-100">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <a href="{% url 'admin_panel:news_comments' %}" class="btn btn-outline-secondary btn-modern">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Comments List -->
+    <div id="commentsList">
+        {% for comment in comments %}
+        <div class="comment-card {{ comment.status }}">
+            <div class="comment-header">
+                <div class="comment-author">
+                    <div class="author-avatar">
+                        {{ comment.author_name|first|upper }}
+                    </div>
+                    <div class="author-info">
+                        <h6>{{ comment.author_name }}</h6>
+                        <small>{{ comment.author_email }}</small>
+                    </div>
+                </div>
+                <div class="comment-meta">
+                    <span class="badge status-badge badge-{% if comment.status == 'approved' %}success{% elif comment.status == 'pending' %}warning{% elif comment.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                        {{ comment.get_status_display }}
+                    </span>
+                    <small class="text-muted">
+                        <i class="fas fa-clock"></i> {{ comment.created_at|timesince }} yang lalu
+                    </small>
+                </div>
+            </div>
+
+            <div class="comment-content">
+                <div class="comment-preview">
+                    {{ comment.content|linebreaks }}
+                </div>
+            </div>
+
+            {% if comment.parent %}
+            <div class="comment-reply">
+                <h6><i class="fas fa-reply"></i> Balasan untuk: {{ comment.parent.author_name }}</h6>
+                <p class="text-muted">{{ comment.parent.content|truncatechars:100 }}</p>
+            </div>
+            {% endif %}
+
+            <div class="comment-actions">
+                <a href="{% url 'admin_panel:news_detail' comment.news.pk %}" class="btn btn-sm btn-outline-primary btn-modern">
+                    <i class="fas fa-eye"></i> Lihat Berita
+                </a>
+                {% if comment.status != 'approved' %}
+                <button class="btn btn-sm btn-success btn-modern" onclick="approveComment({{ comment.id }})">
+                    <i class="fas fa-check"></i> Setujui
+                </button>
+                {% endif %}
+                {% if comment.status != 'rejected' %}
+                <button class="btn btn-sm btn-warning btn-modern" onclick="rejectComment({{ comment.id }})">
+                    <i class="fas fa-times"></i> Tolak
+                </button>
+                {% endif %}
+                {% if comment.status != 'spam' %}
+                <button class="btn btn-sm btn-secondary btn-modern" onclick="spamComment({{ comment.id }})">
+                    <i class="fas fa-ban"></i> Spam
+                </button>
+                {% endif %}
+                <button class="btn btn-sm btn-danger btn-modern" onclick="deleteComment({{ comment.id }}, '{{ comment.author_name|escapejs }}')">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+
+            <div class="mt-2 px-4 pb-3">
+                <small class="text-muted">
+                    <i class="fas fa-newspaper"></i> 
+                    <a href="{% url 'admin_panel:news_detail' comment.news.pk %}" class="news-link">
+                        {{ comment.news.title|truncatechars:60 }}
+                    </a>
+                    • <i class="fas fa-calendar"></i> {{ comment.created_at|date:"d M Y H:i" }}
+                </small>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-comments"></i>
+            <h5>Tidak ada komentar ditemukan</h5>
+            <p>Belum ada komentar yang sesuai dengan filter yang dipilih.</p>
+            <a href="{% url 'admin_panel:news_list' %}" class="btn btn-primary btn-modern">
+                <i class="fas fa-newspaper"></i> Lihat Berita
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if comments.has_other_pages %}
+    <nav aria-label="Comments pagination">
+        <ul class="pagination justify-content-center">
+            {% if comments.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.news %}&news={{ current_filters.news }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ comments.previous_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.news %}&news={{ current_filters.news }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in comments.paginator.page_range %}
+                {% if comments.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > comments.number|add:'-3' and num < comments.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.news %}&news={{ current_filters.news }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if comments.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ comments.next_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.news %}&news={{ current_filters.news }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ comments.paginator.num_pages }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.news %}&news={{ current_filters.news }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus komentar dari <strong id="deleteCommentAuthor"></strong>?</p>
+                <p class="text-danger">
+                    <i class="fas fa-warning"></i> Tindakan ini tidak dapat dibatalkan.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger btn-modern" id="confirmDelete">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+// Individual comment actions
+function approveComment(id) {
+    fetch(`{% url 'admin_panel:news_comment_approve' 0 %}`.replace('0', id), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyetujui komentar');
+    });
+}
+
+function rejectComment(id) {
+    fetch(`{% url 'admin_panel:news_comment_reject' 0 %}`.replace('0', id), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menolak komentar');
+    });
+}
+
+function spamComment(id) {
+    if (confirm('Apakah Anda yakin ingin menandai komentar ini sebagai spam?')) {
+        fetch(`{% url 'admin_panel:news_comment_spam' 0 %}`.replace('0', id), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menandai komentar sebagai spam');
+        });
+    }
+}
+
+function deleteComment(id, author) {
+    document.getElementById('deleteCommentAuthor').textContent = author;
+    document.getElementById('confirmDelete').onclick = function() {
+        fetch(`{% url 'admin_panel:news_comment_delete' 0 %}`.replace('0', id), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus komentar');
+        });
+    };
+    $('#deleteModal').modal('show');
+}
+
+// Auto-submit form on filter change
+document.getElementById('searchForm').addEventListener('change', function() {
+    this.submit();
+});
+</script>
+{% endblock %}

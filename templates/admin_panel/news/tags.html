@@ -1,0 +1,803 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Manajemen Tag Berita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tag-card {
+        border: none;
+        border-radius: 20px;
+        padding: 0;
+        margin-bottom: 1.5rem;
+        background: white;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+    .tag-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .tag-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+        opacity: 0.1;
+    }
+    .tag-header {
+        display: flex;
+        justify-content-between;
+        align-items: flex-start;
+        padding: 2rem 2rem 1rem 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .tag-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .tag-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        border: 2px solid white;
+    }
+    .tag-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #007bff, #28a745);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.3rem;
+    }
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .tag-actions {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+    .tag-description {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-top: 1px solid #e9ecef;
+        color: #495057;
+        font-style: italic;
+        line-height: 1.6;
+    }
+    .tag-footer {
+        padding: 1rem 2rem 2rem 2rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content-between;
+        align-items: center;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        color: #dee2e6;
+    }
+    .empty-state h5 {
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .create-tag-form {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .create-tag-form h5 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .color-picker {
+        width: 60px;
+        height: 60px;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .color-picker:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+    .tag-cloud h5 {
+        width: 100%;
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .tag-cloud-item {
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    .tag-cloud-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+    }
+    .tag-cloud-item:hover::before {
+        left: 100%;
+    }
+    .tag-cloud-item:hover {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,123,255,0.3);
+        border-color: #007bff;
+    }
+    .tag-cloud-item.large {
+        font-size: 1.3rem;
+        padding: 1rem 2rem;
+    }
+    .tag-cloud-item.medium {
+        font-size: 1.1rem;
+        padding: 0.9rem 1.8rem;
+    }
+    .tag-cloud-item.small {
+        font-size: 0.9rem;
+        padding: 0.7rem 1.4rem;
+    }
+    .search-box {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.8rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .form-control {
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        padding: 0.8rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .page-header h1 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-overview-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-overview-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+    }
+    .stat-overview-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    .stat-overview-card .number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #007bff, #28a745);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    .stat-overview-card .label {
+        color: #6c757d;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+            <h1>
+                <i class="fas fa-tags text-primary"></i> Manajemen Tag Berita
+            </h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group mr-2">
+                    <button class="btn btn-primary btn-modern" data-toggle="modal" data-target="#createTagModal">
+                        <i class="fas fa-plus"></i> Tambah Tag
+                    </button>
+                    <a href="{% url 'admin_panel:news_dashboard' %}" class="btn btn-outline-primary btn-modern">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-overview">
+        <div class="stat-overview-card">
+            <div class="number">{{ tags.paginator.count|default:0 }}</div>
+            <div class="label">Total Tag</div>
+        </div>
+        <div class="stat-overview-card">
+            <div class="number">{{ tags|length|default:0 }}</div>
+            <div class="label">Ditampilkan</div>
+        </div>
+        <div class="stat-overview-card">
+            <div class="number">{{ tags|length|default:0 }}</div>
+            <div class="label">Aktif</div>
+        </div>
+        <div class="stat-overview-card">
+            <div class="number">{{ tags|length|default:0 }}</div>
+            <div class="label">Populer</div>
+        </div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="searchTags" class="form-label">
+                        <i class="fas fa-search"></i> Cari Tag
+                    </label>
+                    <input type="text" class="form-control" id="searchTags" placeholder="Ketik nama tag...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="sortTags" class="form-label">
+                        <i class="fas fa-sort"></i> Urutkan
+                    </label>
+                    <select class="form-control" id="sortTags">
+                        <option value="name">Nama A-Z</option>
+                        <option value="-name">Nama Z-A</option>
+                        <option value="-news_count">Paling Banyak Digunakan</option>
+                        <option value="news_count">Paling Sedikit Digunakan</option>
+                        <option value="-created_at">Terbaru</option>
+                        <option value="created_at">Terlama</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-modern w-100" onclick="searchTags()">
+                            <i class="fas fa-search"></i> Cari
+                        </button>
+                        <button class="btn btn-outline-secondary btn-modern" onclick="resetSearch()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tag Cloud -->
+    <div class="tag-cloud">
+        <h5><i class="fas fa-cloud"></i> Tag Cloud</h5>
+        {% for tag in tags %}
+        <a href="#" class="tag-cloud-item {% if tag.news_count > 10 %}large{% elif tag.news_count > 5 %}medium{% else %}small{% endif %}" 
+           style="background: linear-gradient(135deg, {{ tag.color }}20 0%, {{ tag.color }}10 100%); color: {{ tag.color }}; border-color: {{ tag.color }}30;"
+           onclick="filterByTag('{{ tag.name }}')">
+            {{ tag.name }} ({{ tag.news_count }})
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Create Tag Form -->
+    <div class="create-tag-form">
+        <h5><i class="fas fa-plus-circle"></i> Tambah Tag Baru</h5>
+        <form id="createTagForm">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="tagName" class="form-label">Nama Tag</label>
+                        <input type="text" class="form-control" id="tagName" name="name" required>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="tagColor" class="form-label">Warna</label>
+                        <input type="color" class="form-control color-picker" id="tagColor" name="color" value="#6c757d">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="tagDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="tagDescription" name="description" rows="1"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary btn-modern">
+                    <i class="fas fa-save"></i> Simpan Tag
+                </button>
+                <button type="reset" class="btn btn-outline-secondary btn-modern">
+                    <i class="fas fa-times"></i> Reset
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tags List -->
+    <div class="row" id="tagsList">
+        {% for tag in tags %}
+        <div class="col-lg-4 col-md-6 tag-item" data-name="{{ tag.name|lower }}" data-count="{{ tag.news_count }}">
+            <div class="tag-card">
+                <div class="tag-header">
+                    <h6 class="tag-name">
+                        <span class="tag-color" style="background-color: {{ tag.color }}"></span>
+                        {{ tag.name }}
+                    </h6>
+                    <div class="tag-actions">
+                        <button class="btn btn-sm btn-outline-primary btn-modern" onclick="editTag({{ tag.id }})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-modern" onclick="deleteTag({{ tag.id }}, '{{ tag.name|escapejs }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                {% if tag.description %}
+                <div class="tag-description">
+                    {{ tag.description }}
+                </div>
+                {% endif %}
+                
+                <div class="tag-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ tag.news_count }}</div>
+                        <div class="stat-label">Berita</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ tag.views_count|default:0 }}</div>
+                        <div class="stat-label">Views</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ tag.likes_count|default:0 }}</div>
+                        <div class="stat-label">Likes</div>
+                    </div>
+                </div>
+                
+                <div class="tag-footer">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> Dibuat: {{ tag.created_at|date:"d M Y" }}
+                    </small>
+                    <span class="badge badge-modern" style="background-color: {{ tag.color }}20; color: {{ tag.color }}; border: 1px solid {{ tag.color }}30;">
+                        {{ tag.color }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="empty-state">
+                <i class="fas fa-tags"></i>
+                <h5>Belum ada tag</h5>
+                <p>Mulai dengan membuat tag pertama Anda.</p>
+                <button class="btn btn-primary btn-modern" data-toggle="modal" data-target="#createTagModal">
+                    <i class="fas fa-plus"></i> Tambah Tag
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create Tag Modal -->
+<div class="modal fade" id="createTagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle text-primary"></i> Tambah Tag Baru
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="modalCreateTagForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="modalTagName" class="form-label">Nama Tag</label>
+                        <input type="text" class="form-control" id="modalTagName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalTagColor" class="form-label">Warna</label>
+                        <input type="color" class="form-control color-picker" id="modalTagColor" name="color" value="#6c757d">
+                    </div>
+                    <div class="form-group">
+                        <label for="modalTagDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="modalTagDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary btn-modern" onclick="createTag()">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Tag Modal -->
+<div class="modal fade" id="editTagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit text-primary"></i> Edit Tag
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editTagForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="editTagId" name="id">
+                    <div class="form-group">
+                        <label for="editTagName" class="form-label">Nama Tag</label>
+                        <input type="text" class="form-control" id="editTagName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTagColor" class="form-label">Warna</label>
+                        <input type="color" class="form-control color-picker" id="editTagColor" name="color">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTagDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="editTagDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary btn-modern" onclick="updateTag()">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus tag <strong id="deleteTagName"></strong>?</p>
+                <p class="text-danger">
+                    <i class="fas fa-warning"></i> Tag ini akan dihapus dari semua berita yang menggunakannya.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger btn-modern" id="confirmDelete">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Search and filter functionality
+function searchTags() {
+    const searchTerm = document.getElementById('searchTags').value.toLowerCase();
+    const sortBy = document.getElementById('sortTags').value;
+    const tagItems = document.querySelectorAll('.tag-item');
+    
+    tagItems.forEach(item => {
+        const tagName = item.dataset.name;
+        if (tagName.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Sort tags
+    const container = document.getElementById('tagsList');
+    const sortedItems = Array.from(tagItems).sort((a, b) => {
+        if (sortBy === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+        if (sortBy === '-name') return b.dataset.name.localeCompare(a.dataset.name);
+        if (sortBy === '-news_count') return parseInt(b.dataset.count) - parseInt(a.dataset.count);
+        if (sortBy === 'news_count') return parseInt(a.dataset.count) - parseInt(b.dataset.count);
+        return 0;
+    });
+    
+    sortedItems.forEach(item => container.appendChild(item));
+}
+
+function resetSearch() {
+    document.getElementById('searchTags').value = '';
+    document.getElementById('sortTags').value = 'name';
+    searchTags();
+}
+
+function filterByTag(tagName) {
+    document.getElementById('searchTags').value = tagName;
+    searchTags();
+}
+
+// Create tag
+function createTag() {
+    const form = document.getElementById('modalCreateTagForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "admin_panel:news_tag_create" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat membuat tag');
+    });
+}
+
+// Edit tag
+function editTag(id) {
+    fetch(`{% url 'admin_panel:news_tag_update' 0 %}`.replace('0', id), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.tag) {
+            document.getElementById('editTagId').value = data.tag.id;
+            document.getElementById('editTagName').value = data.tag.name;
+            document.getElementById('editTagColor').value = data.tag.color;
+            document.getElementById('editTagDescription').value = data.tag.description;
+            
+            $('#editTagModal').modal('show');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengambil data tag');
+    });
+}
+
+// Update tag
+function updateTag() {
+    const form = document.getElementById('editTagForm');
+    const formData = new FormData(form);
+    const tagId = document.getElementById('editTagId').value;
+    
+    fetch(`{% url 'admin_panel:news_tag_update' 0 %}`.replace('0', tagId), {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memperbarui tag');
+    });
+}
+
+// Delete tag
+function deleteTag(id, name) {
+    document.getElementById('deleteTagName').textContent = name;
+    document.getElementById('confirmDelete').onclick = function() {
+        fetch(`{% url 'admin_panel:news_tag_delete' 0 %}`.replace('0', id), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus tag');
+        });
+    };
+    $('#deleteModal').modal('show');
+}
+
+// Form submission
+document.getElementById('createTagForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    createTag();
+});
+
+// Auto-search on input
+document.getElementById('searchTags').addEventListener('input', searchTags);
+document.getElementById('sortTags').addEventListener('change', searchTags);
+</script>
+{% endblock %}

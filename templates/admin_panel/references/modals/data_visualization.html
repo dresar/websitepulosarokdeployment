@@ -1,0 +1,373 @@
+<!-- Data Visualization Components -->
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Statistics Cards -->
+<div class="row mb-4" id="statsCards">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="totalItems">0</h4>
+                        <p class="card-text">Total Items</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-database fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="activeItems">0</h4>
+                        <p class="card-text">Active Items</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="inactiveItems">0</h4>
+                        <p class="card-text">Inactive Items</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="growthRate">0%</h4>
+                        <p class="card-text">Growth Rate</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie mr-2"></i>
+                    Status Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    Monthly Trends
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="trendsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-8 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Growth Over Time
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="growthChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-doughnut mr-2"></i>
+                    Category Breakdown
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Data Visualization JavaScript
+let statusChart, trendsChart, growthChart, categoryChart;
+
+// Initialize charts
+function initCharts() {
+    // Status Distribution Chart (Pie Chart)
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    statusChart = new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Active', 'Inactive'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: [
+                    '#28a745',
+                    '#dc3545'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Monthly Trends Chart (Bar Chart)
+    const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+    trendsChart = new Chart(trendsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Items Added',
+                data: [0, 0, 0, 0, 0, 0],
+                backgroundColor: '#007bff',
+                borderColor: '#0056b3',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Growth Over Time Chart (Line Chart)
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    growthChart = new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Total Items',
+                data: [0, 0, 0, 0, 0, 0],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Category Breakdown Chart (Doughnut Chart)
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Category 1', 'Category 2', 'Category 3'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: [
+                    '#007bff',
+                    '#28a745',
+                    '#ffc107'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// Update statistics
+function updateStatistics(data) {
+    const total = data.total || 0;
+    const active = data.active || 0;
+    const inactive = data.inactive || 0;
+    const growth = data.growth || 0;
+
+    $('#totalItems').text(total);
+    $('#activeItems').text(active);
+    $('#inactiveItems').text(inactive);
+    $('#growthRate').text(growth + '%');
+
+    // Update status chart
+    if (statusChart) {
+        statusChart.data.datasets[0].data = [active, inactive];
+        statusChart.update();
+    }
+}
+
+// Update trends chart
+function updateTrendsChart(data) {
+    if (trendsChart) {
+        trendsChart.data.labels = data.labels || [];
+        trendsChart.data.datasets[0].data = data.values || [];
+        trendsChart.update();
+    }
+}
+
+// Update growth chart
+function updateGrowthChart(data) {
+    if (growthChart) {
+        growthChart.data.labels = data.labels || [];
+        growthChart.data.datasets[0].data = data.values || [];
+        growthChart.update();
+    }
+}
+
+// Update category chart
+function updateCategoryChart(data) {
+    if (categoryChart) {
+        categoryChart.data.labels = data.labels || [];
+        categoryChart.data.datasets[0].data = data.values || [];
+        categoryChart.update();
+    }
+}
+
+// Load dashboard data
+function loadDashboardData() {
+    // This function should be implemented in each list page
+    // to load specific data for that model
+    if (typeof loadModelData === 'function') {
+        loadModelData();
+    }
+}
+
+// Initialize when document is ready
+$(document).ready(function() {
+    initCharts();
+    loadDashboardData();
+});
+</script>
+
+<style>
+/* Chart container styles */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Statistics cards */
+.bg-primary {
+    background-color: #007bff !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+/* Chart responsiveness */
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 0.9rem;
+    }
+    
+    canvas {
+        height: 200px !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    canvas {
+        max-width: 100%;
+        height: 300px !important;
+    }
+}
+</style>

@@ -1,0 +1,728 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<style>
+    /* Search Specific Styles */
+    .search-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .search-card {
+        border-color: #374151;
+    }
+    
+    .search-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .search-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+    
+    .search-type-location {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .dark .search-type-location {
+        background-color: #14532d;
+        color: #dcfce7;
+    }
+    
+    .search-type-event {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    
+    .dark .search-type-event {
+        background-color: #78350f;
+        color: #fde68a;
+    }
+    
+    .search-type-package {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .dark .search-type-package {
+        background-color: #1e3a8a;
+        color: #dbeafe;
+    }
+    
+    .search-type-category {
+        background-color: #e0e7ff;
+        color: #3730a3;
+    }
+    
+    .dark .search-type-category {
+        background-color: #312e81;
+        color: #c7d2fe;
+    }
+    
+    .featured-badge {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .rating-stars {
+        color: #fbbf24;
+    }
+    
+    .dark .rating-stars {
+        color: #f59e0b;
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 640px) {
+        .search-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .search-card .p-4 {
+            padding: 0.5rem;
+        }
+        
+        .search-card h3 {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .search-card p {
+            font-size: 0.625rem;
+            line-height: 0.875rem;
+        }
+        
+        .search-type-badge {
+            font-size: 0.5rem;
+            padding: 0.125rem 0.25rem;
+        }
+        
+        .filter-tab {
+            font-size: 0.625rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .search-suggestions {
+            max-height: 200px;
+        }
+        
+        .suggestion-item {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Make filter section scrollable on mobile */
+        .filter-section {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .filter-section .grid {
+            min-width: max-content;
+        }
+        
+        /* Ensure no sticky positioning on mobile */
+        .sticky {
+            position: relative !important;
+        }
+        
+        /* Mobile search bar optimizations */
+        #mainSearchInput {
+            padding: 0.375rem 0.5rem !important;
+            font-size: 0.75rem !important;
+            padding-left: 1.75rem !important;
+            padding-right: 3.5rem !important;
+        }
+        
+        #searchButton {
+            padding: 0.375rem 0.5rem !important;
+            font-size: 0.625rem !important;
+        }
+        
+        .search-icon {
+            font-size: 0.625rem !important;
+        }
+        
+        /* Reduce section padding on mobile */
+        .py-4 {
+            padding-top: 0.75rem !important;
+            padding-bottom: 0.75rem !important;
+        }
+    }
+    
+    /* Loading States */
+    .loading-skeleton {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Search Results */
+    .search-results {
+        min-height: 200px;
+    }
+    
+    /* Filter Tabs */
+    .filter-tab {
+        transition: all 0.3s ease;
+    }
+    
+    .filter-tab.active {
+        background-color: #3B82F6;
+        color: white;
+    }
+    
+    .dark .filter-tab.active {
+        background-color: #1D4ED8;
+    }
+    
+    .filter-tab:not(.active) {
+        background-color: #F3F4F6;
+        color: #6B7280;
+    }
+    
+    .dark .filter-tab:not(.active) {
+        background-color: #374151;
+        color: #9CA3AF;
+    }
+    
+    /* Search Suggestions */
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .dark .search-suggestions {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .suggestion-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f3f4f6;
+        transition: background-color 0.2s;
+    }
+    
+    .dark .suggestion-item {
+        border-bottom-color: #374151;
+    }
+    
+    .suggestion-item:hover {
+        background-color: #f9fafb;
+    }
+    
+    .dark .suggestion-item:hover {
+        background-color: #374151;
+    }
+    
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-teal-600/80 to-cyan-600/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-teal-500 to-cyan-500"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+                Cari Wisata Desa Pulosarok
+            </h1>
+            <p class="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl mx-auto">
+                Temukan destinasi, event, paket, dan kategori wisata yang sesuai dengan keinginan Anda
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <!-- Main Search Bar -->
+        <div class="relative mb-4">
+            <input type="text" 
+                   id="mainSearchInput" 
+                   placeholder="Cari destinasi, event, paket, atau kategori wisata..." 
+                   class="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-teal-500 focus:border-transparent transition-all duration-200 text-sm"
+                   value="{{ search_query|default:'' }}">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 text-sm search-icon"></i>
+            </div>
+            <button id="searchButton" class="absolute inset-y-0 right-0 px-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-r-lg transition-colors duration-200 text-sm">
+                <i class="fas fa-search mr-1"></i>Cari
+            </button>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="flex overflow-x-auto gap-1 mb-3 pb-2">
+            <button class="filter-tab active px-2 py-1 rounded text-xs font-medium whitespace-nowrap" data-type="all">
+                <i class="fas fa-th mr-1"></i>Semua
+            </button>
+            <button class="filter-tab px-2 py-1 rounded text-xs font-medium whitespace-nowrap" data-type="location">
+                <i class="fas fa-map-marker-alt mr-1"></i>Destinasi
+            </button>
+            <button class="filter-tab px-2 py-1 rounded text-xs font-medium whitespace-nowrap" data-type="event">
+                <i class="fas fa-calendar-alt mr-1"></i>Event
+            </button>
+            <button class="filter-tab px-2 py-1 rounded text-xs font-medium whitespace-nowrap" data-type="package">
+                <i class="fas fa-suitcase mr-1"></i>Paket
+            </button>
+            <button class="filter-tab px-2 py-1 rounded text-xs font-medium whitespace-nowrap" data-type="category">
+                <i class="fas fa-tags mr-1"></i>Kategori
+            </button>
+        </div>
+        
+        <!-- Advanced Filters -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <!-- Category Filter -->
+            <select id="categoryFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-teal-500 focus:border-transparent transition-all duration-200">
+                <option value="">Semua Kategori</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if current_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <!-- Type Filter -->
+            <select id="typeFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-teal-500 focus:border-transparent transition-all duration-200">
+                <option value="">Semua Jenis</option>
+                <option value="natural" {% if current_type == 'natural' %}selected{% endif %}>Alam</option>
+                <option value="cultural" {% if current_type == 'cultural' %}selected{% endif %}>Budaya</option>
+                <option value="historical" {% if current_type == 'historical' %}selected{% endif %}>Sejarah</option>
+                <option value="religious" {% if current_type == 'religious' %}selected{% endif %}>Religi</option>
+                <option value="culinary" {% if current_type == 'culinary' %}selected{% endif %}>Kuliner</option>
+                <option value="adventure" {% if current_type == 'adventure' %}selected{% endif %}>Petualangan</option>
+                <option value="education" {% if current_type == 'education' %}selected{% endif %}>Edukasi</option>
+            </select>
+            
+            <!-- Sort Filter -->
+            <select id="sortFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-teal-500 focus:border-transparent transition-all duration-200">
+                <option value="relevance" {% if current_sort == 'relevance' %}selected{% endif %}>Relevansi</option>
+                <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Terbaru</option>
+                <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Terlama</option>
+                <option value="name_asc" {% if current_sort == 'name_asc' %}selected{% endif %}>A-Z</option>
+                <option value="name_desc" {% if current_sort == 'name_desc' %}selected{% endif %}>Z-A</option>
+                <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Rating</option>
+            </select>
+            
+            <!-- Clear Filters -->
+            <button id="clearFilters" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+                <i class="fas fa-times mr-1"></i>Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+<div class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for i in "123456"|make_list %}
+                <div class="search-card bg-white dark:bg-gray-800 rounded-lg p-4 loading-skeleton">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Search Results -->
+        <div id="searchResults" class="search-results">
+            {% if search_query %}
+            <!-- Results Header -->
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    Hasil Pencarian untuk "{{ search_query }}"
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Ditemukan {{ total_results }} hasil
+                </p>
+            </div>
+            
+            <!-- Results Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for result in search_results %}
+                <div class="search-card bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                    <div class="relative">
+                        {% if result.get_featured_image %}
+                        <img src="{{ result.get_featured_image }}" 
+                             alt="{{ result.title }}" 
+                             class="w-full h-48 object-cover">
+                        {% else %}
+                        <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                            {% if result.type == 'location' %}
+                            <i class="fas fa-map-marker-alt text-4xl text-gray-400"></i>
+                            {% elif result.type == 'event' %}
+                            <i class="fas fa-calendar text-4xl text-gray-400"></i>
+                            {% elif result.type == 'package' %}
+                            <i class="fas fa-suitcase text-4xl text-gray-400"></i>
+                            {% elif result.type == 'category' %}
+                            <i class="fas fa-tags text-4xl text-gray-400"></i>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="absolute top-4 right-4 flex flex-col gap-2">
+                            <span class="search-type-badge search-type-{{ result.type }}">
+                                {% if result.type == 'location' %}Destinasi
+                                {% elif result.type == 'event' %}Event
+                                {% elif result.type == 'package' %}Paket
+                                {% elif result.type == 'category' %}Kategori
+                                {% endif %}
+                            </span>
+                            {% if result.featured or result.is_featured %}
+                            <span class="featured-badge">Unggulan</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                            {{ result.title }}
+                        </h3>
+                        
+                        <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                            {{ result.short_description|default:result.description|truncatechars:120 }}
+                        </p>
+                        
+                        <!-- Result Details -->
+                        <div class="space-y-2 mb-4">
+                            {% if result.type == 'location' %}
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>{{ result.address|truncatechars:30 }}</span>
+                            </div>
+                            {% if result.entry_fee %}
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-ticket-alt mr-2"></i>
+                                <span>{{ result.entry_fee|currency_idr }}</span>
+                            </div>
+                            {% endif %}
+                            {% elif result.type == 'event' %}
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-calendar mr-2"></i>
+                                <span>{{ result.start_date|date:"d M Y" }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>{{ result.tourism_location.title }}</span>
+                            </div>
+                            {% elif result.type == 'package' %}
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-clock mr-2"></i>
+                                <span>{{ result.duration }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>{{ result.tourism_location.title }}</span>
+                            </div>
+                            {% elif result.type == 'category' %}
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                <span>{{ result.location_count }} destinasi</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Rating for locations -->
+                        {% if result.type == 'location' and result.average_rating > 0 %}
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="rating-stars">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= result.average_rating %}
+                                            <i class="fas fa-star text-xs"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-xs"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">
+                                    {{ result.average_rating|floatformat:1 }}
+                                </span>
+                            </div>
+                            {% if result.total_reviews %}
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                ({{ result.total_reviews }} review)
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Price for packages -->
+                        {% if result.type == 'package' %}
+                        <div class="mb-4">
+                            <div class="text-center">
+                                <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                                    {{ result.price|currency_idr }}
+                                </span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">
+                                    {{ result.currency }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Result Actions -->
+                        <div class="flex gap-2">
+                            <a href="{{ result.get_absolute_url }}" 
+                               class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-eye mr-1"></i>Detail
+                            </a>
+                            {% if result.type == 'package' and result.whatsapp %}
+                            <a href="https://wa.me/{{ result.whatsapp }}" target="_blank" 
+                               class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full empty-state">
+                    <div class="text-center">
+                        <i class="fas fa-search text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Tidak Ditemukan</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Tidak ada hasil yang sesuai dengan pencarian Anda.</p>
+                        <button onclick="clearSearch()" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200">
+                            <i class="fas fa-refresh mr-2"></i>Coba Lagi
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if search_results.has_other_pages %}
+            <div class="mt-8 flex justify-center">
+                <nav class="flex items-center space-x-2">
+                    {% if search_results.has_previous %}
+                    <a href="?q={{ search_query }}&page={{ search_results.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" 
+                       class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-teal-50 dark:bg-teal-900 border border-teal-300 dark:border-teal-700 rounded-lg">
+                        {{ search_results.number }} dari {{ search_results.paginator.num_pages }}
+                    </span>
+                    
+                    {% if search_results.has_next %}
+                    <a href="?q={{ search_query }}&page={{ search_results.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" 
+                       class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+            {% else %}
+            <!-- No Search Query -->
+            <div class="text-center py-16">
+                <i class="fas fa-search text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Cari Wisata Impian Anda</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+                    Gunakan fitur pencarian di atas untuk menemukan destinasi, event, paket, atau kategori wisata yang sesuai dengan keinginan Anda.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'tourism:location_list' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors duration-200">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Lihat Destinasi
+                    </a>
+                    <a href="{% url 'tourism:event_list' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-transparent border-2 border-teal-600 text-teal-600 hover:bg-teal-600 hover:text-white font-medium rounded-lg transition-colors duration-200">
+                        <i class="fas fa-calendar-alt mr-2"></i>Lihat Event
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class TourismSearch {
+    constructor() {
+        this.mainSearchInput = document.getElementById('mainSearchInput');
+        this.searchButton = document.getElementById('searchButton');
+        this.categoryFilter = document.getElementById('categoryFilter');
+        this.typeFilter = document.getElementById('typeFilter');
+        this.sortFilter = document.getElementById('sortFilter');
+        this.clearFilters = document.getElementById('clearFilters');
+        this.filterTabs = document.querySelectorAll('.filter-tab');
+        this.loadingState = document.getElementById('loadingState');
+        this.searchResults = document.getElementById('searchResults');
+        
+        this.currentFilter = 'all';
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Main search functionality
+        this.mainSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.performSearch();
+            }
+        });
+        
+        this.searchButton.addEventListener('click', () => {
+            this.performSearch();
+        });
+        
+        // Filter tabs
+        this.filterTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                this.setActiveFilter(tab);
+                this.performSearch();
+            });
+        });
+        
+        // Filter functionality
+        this.categoryFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        this.typeFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        this.sortFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        // Clear filters
+        this.clearFilters.addEventListener('click', () => {
+            this.clearAllFilters();
+        });
+    }
+    
+    setActiveFilter(activeTab) {
+        this.filterTabs.forEach(tab => {
+            tab.classList.remove('active');
+        });
+        activeTab.classList.add('active');
+        this.currentFilter = activeTab.dataset.type;
+    }
+    
+    async performSearch() {
+        const searchQuery = this.mainSearchInput.value;
+        const categoryFilter = this.categoryFilter.value;
+        const typeFilter = this.typeFilter.value;
+        const sortFilter = this.sortFilter.value;
+        
+        // Show loading state
+        this.showLoading();
+        
+        try {
+            // Build URL with parameters
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('q', searchQuery);
+            if (this.currentFilter !== 'all') params.append('filter', this.currentFilter);
+            if (categoryFilter) params.append('category', categoryFilter);
+            if (typeFilter) params.append('type', typeFilter);
+            if (sortFilter) params.append('sort', sortFilter);
+            
+            // Reload page with new parameters
+            const url = window.location.pathname + '?' + params.toString();
+            window.location.href = url;
+        } catch (error) {
+            console.error('Error performing search:', error);
+            this.hideLoading();
+        }
+    }
+    
+    clearAllFilters() {
+        this.mainSearchInput.value = '';
+        this.categoryFilter.value = '';
+        this.typeFilter.value = '';
+        this.sortFilter.value = 'relevance';
+        
+        // Reset filter tabs
+        this.filterTabs.forEach(tab => {
+            tab.classList.remove('active');
+        });
+        this.filterTabs[0].classList.add('active'); // Set 'all' as active
+        this.currentFilter = 'all';
+        
+        // Clear search
+        window.location.href = window.location.pathname;
+    }
+    
+    showLoading() {
+        this.loadingState.classList.remove('hidden');
+        this.searchResults.classList.add('hidden');
+    }
+    
+    hideLoading() {
+        this.loadingState.classList.add('hidden');
+        this.searchResults.classList.remove('hidden');
+    }
+}
+
+// Global function for template compatibility
+function clearSearch() {
+    window.tourismSearch.clearAllFilters();
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    window.tourismSearch = new TourismSearch();
+});
+</script>
+{% endblock %}
+

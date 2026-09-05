@@ -1,0 +1,599 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<style>
+    /* Category Detail Specific Styles */
+    .category-hero {
+        position: relative;
+        height: 50vh;
+        min-height: 300px;
+        overflow: hidden;
+    }
+    
+    .category-hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.7);
+    }
+    
+    .category-hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3));
+    }
+    
+    .category-hero-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 2rem;
+        color: white;
+    }
+    
+    .category-icon {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .tourism-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .tourism-card {
+        border-color: #374151;
+    }
+    
+    .tourism-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .tourism-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .featured-badge {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .location-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+    
+    .location-type-natural {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .dark .location-type-natural {
+        background-color: #14532d;
+        color: #dcfce7;
+    }
+    
+    .location-type-cultural {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    
+    .dark .location-type-cultural {
+        background-color: #78350f;
+        color: #fde68a;
+    }
+    
+    .location-type-historical {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .dark .location-type-historical {
+        background-color: #1e3a8a;
+        color: #dbeafe;
+    }
+    
+    .location-type-religious {
+        background-color: #e0e7ff;
+        color: #3730a3;
+    }
+    
+    .dark .location-type-religious {
+        background-color: #312e81;
+        color: #c7d2fe;
+    }
+    
+    .location-type-culinary {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .dark .location-type-culinary {
+        background-color: #7f1d1d;
+        color: #fecaca;
+    }
+    
+    .location-type-adventure {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+    
+    .dark .location-type-adventure {
+        background-color: #1f2937;
+        color: #d1d5db;
+    }
+    
+    .location-type-education {
+        background-color: #f3e8ff;
+        color: #7c3aed;
+    }
+    
+    .dark .location-type-education {
+        background-color: #581c87;
+        color: #e9d5ff;
+    }
+    
+    .location-type-other {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+    
+    .dark .location-type-other {
+        background-color: #334155;
+        color: #cbd5e1;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #3B82F6, #10B981);
+        color: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+    
+    .filter-chip {
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+    }
+    
+    .filter-chip.active {
+        background-color: #3B82F6;
+        color: white;
+    }
+    
+    .filter-chip:hover {
+        background-color: #f3f4f6;
+    }
+    
+    .dark .filter-chip:hover {
+        background-color: #374151;
+    }
+    
+    .dark .filter-chip.active {
+        background-color: #3B82F6;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+    
+    .empty-state-icon {
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1rem;
+        opacity: 0.5;
+    }
+    
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    .dark .loading-skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+        background-size: 200% 100%;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
+{% endblock %}
+
+{% block title %}{{ category.name }} - Wisata Desa Pulosarok{% endblock %}
+
+{% block meta_description %}{{ category.description|truncatewords:20 }}{% endblock %}
+
+{% block content %}
+<!-- Category Hero Section -->
+<section class="category-hero">
+    {% if category.hero_image %}
+        <img src="{{ category.hero_image.url }}" alt="{{ category.name }}" class="category-hero-image">
+    {% elif category.image %}
+        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-hero-image">
+    {% else %}
+        <div class="w-full h-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+            <div class="text-center text-white">
+                <i class="{{ category.icon|default:'fas fa-mountain' }} text-6xl mb-4"></i>
+                <h1 class="text-4xl font-bold">{{ category.name }}</h1>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="category-hero-overlay"></div>
+    
+    <div class="category-hero-content">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="category-icon" style="background-color: {{ category.color|default:'#3B82F6' }};">
+                    <i class="{{ category.icon|default:'fas fa-mountain' }} text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-2">{{ category.name }}</h1>
+                    {% if category.is_featured %}
+                        <span class="featured-badge">Kategori Unggulan</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% if category.description %}
+                <p class="text-lg md:text-xl opacity-90 max-w-3xl">{{ category.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Category Stats -->
+<section class="py-8 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="stats-card">
+                <div class="stats-number">{{ locations.count }}</div>
+                <div class="stats-label">Destinasi Wisata</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">{{ featured_count }}</div>
+                <div class="stats-label">Destinasi Unggulan</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">{{ total_events }}</div>
+                <div class="stats-label">Event Mendatang</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filter and Search Section -->
+<section class="py-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <!-- Search -->
+            <div class="flex-1 max-w-md">
+                <div class="relative">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="Cari destinasi wisata..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-2">
+                <span class="text-sm text-gray-600 dark:text-gray-400 self-center mr-2">Filter:</span>
+                
+                <button class="filter-chip px-3 py-1 rounded-full text-sm border border-gray-300 dark:border-gray-600" data-filter="all">
+                    Semua
+                </button>
+                
+                <button class="filter-chip px-3 py-1 rounded-full text-sm border border-gray-300 dark:border-gray-600" data-filter="featured">
+                    Unggulan
+                </button>
+                
+                <button class="filter-chip px-3 py-1 rounded-full text-sm border border-gray-300 dark:border-gray-600" data-filter="natural">
+                    Wisata Alam
+                </button>
+                
+                <button class="filter-chip px-3 py-1 rounded-full text-sm border border-gray-300 dark:border-gray-600" data-filter="cultural">
+                    Wisata Budaya
+                </button>
+                
+                <button class="filter-chip px-3 py-1 rounded-full text-sm border border-gray-300 dark:border-gray-600" data-filter="adventure">
+                    Petualangan
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Locations Grid -->
+<section class="py-8 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if locations %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="locationsGrid">
+                {% for location in locations %}
+                    <div class="tourism-card bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300" 
+                         data-location-type="{{ location.location_type }}" 
+                         data-featured="{{ location.featured|yesno:'true,false' }}">
+                        
+                        <!-- Location Image -->
+                        <div class="relative h-48 overflow-hidden">
+                            {% if location.get_featured_image %}
+                                <img src="{{ location.get_featured_image }}" 
+                                     alt="{{ location.title }}" 
+                                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+                                    <i class="fas fa-mountain text-white text-4xl"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Featured Badge -->
+                            {% if location.featured %}
+                                <div class="absolute top-3 left-3">
+                                    <span class="featured-badge">Unggulan</span>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Location Type Badge -->
+                            <div class="absolute top-3 right-3">
+                                <span class="location-type-badge location-type-{{ location.location_type }}">
+                                    {{ location.location_type_display }}
+                                </span>
+                            </div>
+                            
+                            <!-- Rating -->
+                            {% if location.average_rating > 0 %}
+                                <div class="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded-lg text-sm">
+                                    <i class="fas fa-star text-yellow-400"></i>
+                                    <span>{{ location.average_rating|floatformat:1 }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Location Content -->
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                                {{ location.title }}
+                            </h3>
+                            
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+                                {{ location.short_description }}
+                            </p>
+                            
+                            <!-- Location Info -->
+                            <div class="space-y-2 mb-4">
+                                {% if location.address %}
+                                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                        <i class="fas fa-map-marker-alt mr-2 text-primary-500"></i>
+                                        <span class="truncate">{{ location.address }}</span>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if location.entry_fee %}
+                                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                        <i class="fas fa-ticket-alt mr-2 text-primary-500"></i>
+                                        <span>Rp {{ location.entry_fee|floatformat:0 }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="flex items-center text-sm text-green-600 dark:text-green-400">
+                                        <i class="fas fa-gift mr-2"></i>
+                                        <span>Gratis</span>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if location.opening_hours %}
+                                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                        <i class="fas fa-clock mr-2 text-primary-500"></i>
+                                        <span>{{ location.opening_hours }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex space-x-2">
+                                <a href="{% url 'tourism:location_detail' location.slug %}" 
+                                   class="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium text-center transition-colors duration-200">
+                                    Lihat Detail
+                                </a>
+                                
+                                {% if location.contact_phone %}
+                                    <a href="https://wa.me/{{ location.contact_phone|slice:'1:' }}" 
+                                       target="_blank" 
+                                       class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center space-x-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="px-3 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg">
+                                    {{ num }}
+                                </span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}" 
+                                   class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-mountain text-6xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Belum Ada Destinasi Wisata
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Belum ada destinasi wisata dalam kategori {{ category.name }}.
+                </p>
+                <a href="{% url 'tourism:location_list' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Lihat Semua Destinasi
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Related Categories -->
+{% if related_categories %}
+<section class="py-8 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Kategori Lainnya</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for related_category in related_categories %}
+                <a href="{% url 'tourism:category_detail' related_category.slug %}" 
+                   class="group bg-white dark:bg-gray-700 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" 
+                             style="background-color: {{ related_category.color|default:'#3B82F6' }};">
+                            <i class="{{ related_category.icon|default:'fas fa-mountain' }} text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                                {{ related_category.name }}
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">
+                                {{ related_category.location_count }} destinasi
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const locationsGrid = document.getElementById('locationsGrid');
+    const locationCards = document.querySelectorAll('[data-location-type]');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            locationCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Filter functionality
+    const filterChips = document.querySelectorAll('.filter-chip');
+    
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            // Remove active class from all chips
+            filterChips.forEach(c => c.classList.remove('active'));
+            // Add active class to clicked chip
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            
+            locationCards.forEach(card => {
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } else if (filter === 'featured') {
+                    if (card.dataset.featured === 'true') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } else {
+                    if (card.dataset.locationType === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+    
+    // Initialize with 'all' filter active
+    const allFilter = document.querySelector('[data-filter="all"]');
+    if (allFilter) {
+        allFilter.classList.add('active');
+    }
+});
+</script>
+{% endblock %}

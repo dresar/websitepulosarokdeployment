@@ -1,0 +1,225 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .service-card {
+        transition: all 0.3s ease;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark .service-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .business-service {
+        transition: all 0.3s ease;
+    }
+    
+    .business-service:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark .business-service:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .category-badge {
+        transition: all 0.2s ease;
+    }
+    
+    .category-badge:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Layanan Bisnis & UMKM
+            </h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                Dukung pertumbuhan ekonomi desa melalui layanan bisnis dan UMKM yang terintegrasi
+            </p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-store text-2xl text-blue-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ business_services|length }}</h3>
+                <p class="text-gray-600 dark:text-gray-300">Layanan Bisnis</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chart-line text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">100%</h3>
+                <p class="text-gray-600 dark:text-gray-300">Gratis</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-2xl text-purple-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">24/7</h3>
+                <p class="text-gray-600 dark:text-gray-300">Dukungan</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 text-center">
+                <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-handshake text-2xl text-orange-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Online</h3>
+                <p class="text-gray-600 dark:text-gray-300">Konsultasi</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Business Services -->
+            <div class="lg:col-span-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                        <i class="fas fa-briefcase text-blue-600 mr-3"></i>
+                        Layanan Bisnis Tersedia
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% for service in business_services %}
+                        <div class="business-service bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4">
+                                    <i class="fas fa-{{ service.icon|default:'briefcase' }} text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ service.name }}</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">{{ service.category }}</p>
+                                </div>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                {{ service.description|truncatewords:20 }}
+                            </p>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-clock text-green-600 text-sm"></i>
+                                    <span class="text-sm text-gray-600 dark:text-gray-300">{{ service.processing_time }}</span>
+                                </div>
+                                <a href="{% url 'business:business_detail' service.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Detail
+                                </a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-2 text-center py-8">
+                            <i class="fas fa-briefcase text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-600 dark:text-gray-300">Belum ada layanan bisnis yang tersedia</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Categories -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-tags text-purple-600 mr-3"></i>
+                        Kategori Layanan
+                    </h3>
+                    <div class="space-y-2">
+                        <span class="category-badge inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-medium">
+                            Konsultasi Bisnis
+                        </span>
+                        <span class="category-badge inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-medium">
+                            Pelatihan
+                        </span>
+                        <span class="category-badge inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-3 py-1 rounded-full text-sm font-medium">
+                            Pendampingan
+                        </span>
+                        <span class="category-badge inline-block bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-3 py-1 rounded-full text-sm font-medium">
+                            Akses Modal
+                        </span>
+                        <span class="category-badge inline-block bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200 px-3 py-1 rounded-full text-sm font-medium">
+                            Pemasaran
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-bolt text-yellow-600 mr-3"></i>
+                        Aksi Cepat
+                    </h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'business:business_register' %}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-plus mr-2"></i>Daftar Bisnis
+                        </a>
+                        <a href="{% url 'business:business_list' %}" class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-list mr-2"></i>Lihat Semua Bisnis
+                        </a>
+                        <a href="{% url 'layanan:chat_layanan' %}" class="block w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-comments mr-2"></i>Konsultasi Online
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-phone text-green-600 mr-3"></i>
+                        Kontak Bisnis
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-green-600"></i>
+                            <span class="text-gray-700 dark:text-gray-300">+62 812-3456-7890</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-blue-600"></i>
+                            <span class="text-gray-700 dark:text-gray-300">bisnis@pulosarok.desa.id</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clock text-orange-600"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Senin - Jumat: 08:00 - 16:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Services -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-link text-blue-600 mr-3"></i>
+                        Layanan Terkait
+                    </h3>
+                    <div class="space-y-2">
+                        <a href="{% url 'layanan:document_services' %}" class="block w-full text-left px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                            <i class="fas fa-file-alt mr-2"></i>Layanan Dokumen
+                        </a>
+                        <a href="{% url 'layanan:posyandu_services' %}" class="block w-full text-left px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
+                            <i class="fas fa-heartbeat mr-2"></i>Layanan Posyandu
+                        </a>
+                        <a href="{% url 'layanan:tourism_services' %}" class="block w-full text-left px-4 py-3 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
+                            <i class="fas fa-mountain mr-2"></i>Layanan Wisata
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

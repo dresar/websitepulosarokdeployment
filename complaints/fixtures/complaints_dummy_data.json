@@ -1,0 +1,257 @@
+[
+  {
+    "model": "complaints.complaintcategory",
+    "pk": 1,
+    "fields": {
+      "name": "Infrastruktur Jalan",
+      "description": "Pengaduan terkait kondisi jalan, jembatan, dan infrastruktur transportasi",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z",
+      "updated_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.complaintcategory",
+    "pk": 2,
+    "fields": {
+      "name": "Pelayanan Publik",
+      "description": "Pengaduan terkait pelayanan administrasi dan birokrasi desa",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z",
+      "updated_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.complaintcategory",
+    "pk": 3,
+    "fields": {
+      "name": "Kebersihan Lingkungan",
+      "description": "Pengaduan terkait kebersihan, sampah, dan lingkungan hidup",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z",
+      "updated_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.complaintcategory",
+    "pk": 4,
+    "fields": {
+      "name": "Keamanan dan Ketertiban",
+      "description": "Pengaduan terkait keamanan, ketertiban, dan gangguan sosial",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z",
+      "updated_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.complaintcategory",
+    "pk": 5,
+    "fields": {
+      "name": "Fasilitas Umum",
+      "description": "Pengaduan terkait fasilitas umum seperti lampu jalan, taman, dll",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z",
+      "updated_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.complaint",
+    "pk": 1,
+    "fields": {
+      "complaint_id": "550e8400-e29b-41d4-a716-446655440001",
+      "reporter_name": "Siti Aminah",
+      "reporter_email": "siti.aminah@email.com",
+      "reporter_phone": "081234567890",
+      "reporter_address": "Jl. Mawar RT 02 RW 01, Desa Pulosarok",
+      "category": 1,
+      "title": "Jalan Rusak di RT 02 RW 01",
+      "description": "Jalan di depan rumah Pak Slamet kondisinya sangat rusak dengan banyak lubang. Saat hujan menjadi genangan air yang dalam dan berbahaya untuk kendaraan. Mohon segera diperbaiki karena sudah mengganggu aktivitas warga.",
+      "location": "Jl. Mawar RT 02 RW 01",
+      "incident_date": "2024-01-10T14:30:00Z",
+      "status": "in_progress",
+      "priority": "high",
+      "attachment": null,
+      "assigned_to": null,
+      "admin_notes": "Sudah dilakukan survei lapangan. Menunggu persetujuan anggaran.",
+      "resolution": "",
+      "created_at": "2024-01-12T09:15:00Z",
+      "updated_at": "2024-01-14T10:30:00Z",
+      "resolved_at": null,
+      "rating": null,
+      "feedback": ""
+    }
+  },
+  {
+    "model": "complaints.complaint",
+    "pk": 2,
+    "fields": {
+      "complaint_id": "550e8400-e29b-41d4-a716-446655440002",
+      "reporter_name": "Budi Santoso",
+      "reporter_email": "budi.santoso@email.com",
+      "reporter_phone": "081234567891",
+      "reporter_address": "Jl. Melati RT 01 RW 02, Desa Pulosarok",
+      "category": 2,
+      "title": "Pelayanan KTP Lambat",
+      "description": "Sudah 2 minggu mengajukan permohonan KTP baru tapi belum ada kabar. Petugas bilang masih dalam proses tapi tidak ada kepastian waktu. Mohon dipercepat karena KTP dibutuhkan untuk keperluan pekerjaan.",
+      "location": "Kantor Desa Pulosarok",
+      "incident_date": "2024-01-05T08:00:00Z",
+      "status": "in_review",
+      "priority": "medium",
+      "attachment": null,
+      "assigned_to": null,
+      "admin_notes": "Sedang koordinasi dengan Disdukcapil untuk percepatan proses.",
+      "resolution": "",
+      "created_at": "2024-01-08T11:20:00Z",
+      "updated_at": "2024-01-13T14:45:00Z",
+      "resolved_at": null,
+      "rating": null,
+      "feedback": ""
+    }
+  },
+  {
+    "model": "complaints.complaint",
+    "pk": 3,
+    "fields": {
+      "complaint_id": "550e8400-e29b-41d4-a716-446655440003",
+      "reporter_name": "Dewi Sartika",
+      "reporter_email": "dewi.sartika@email.com",
+      "reporter_phone": "081234567892",
+      "reporter_address": "Jl. Anggrek RT 03 RW 01, Desa Pulosarok",
+      "category": 3,
+      "title": "Sampah Menumpuk di TPS",
+      "description": "TPS di ujung jalan sudah penuh dan sampah mulai berserakan. Bau tidak sedap dan mengundang lalat. Mohon segera diangkut karena sudah mengganggu kesehatan warga sekitar.",
+      "location": "TPS Jl. Melati",
+      "incident_date": "2024-01-07T16:00:00Z",
+      "status": "resolved",
+      "priority": "high",
+      "attachment": null,
+      "assigned_to": null,
+      "admin_notes": "Sudah dikoordinasikan dengan Dinas Kebersihan.",
+      "resolution": "Sampah telah diangkut dan TPS sudah dibersihkan. Jadwal pengangkutan rutin telah diperbaiki.",
+      "created_at": "2024-01-09T13:30:00Z",
+      "updated_at": "2024-01-11T16:00:00Z",
+      "resolved_at": "2024-01-11T16:00:00Z",
+      "rating": 5,
+      "feedback": "Terima kasih, sampah sudah diangkut dengan cepat."
+    }
+  },
+  {
+    "model": "complaints.complaint",
+    "pk": 4,
+    "fields": {
+      "complaint_id": "550e8400-e29b-41d4-a716-446655440004",
+      "reporter_name": "Ahmad Fauzi",
+      "reporter_email": "ahmad.fauzi@email.com",
+      "reporter_phone": "081234567893",
+      "reporter_address": "Jl. Dahlia RT 03 RW 02, Desa Pulosarok",
+      "category": 4,
+      "title": "Pencurian Motor di Malam Hari",
+      "description": "Terjadi pencurian sepeda motor di area parkir masjid. Ini sudah kejadian ketiga dalam bulan ini. Mohon peningkatan keamanan dan patroli malam hari di area tersebut.",
+      "location": "Masjid Al-Ikhlas RT 03",
+      "incident_date": "2024-01-13T22:30:00Z",
+      "status": "pending",
+      "priority": "urgent",
+      "attachment": null,
+      "assigned_to": null,
+      "admin_notes": "",
+      "resolution": "",
+      "created_at": "2024-01-14T07:45:00Z",
+      "updated_at": "2024-01-14T07:45:00Z",
+      "resolved_at": null,
+      "rating": null,
+      "feedback": ""
+    }
+  },
+  {
+    "model": "complaints.complaint",
+    "pk": 5,
+    "fields": {
+      "complaint_id": "550e8400-e29b-41d4-a716-446655440005",
+      "reporter_name": "Rina Wati",
+      "reporter_email": "rina.wati@email.com",
+      "reporter_phone": "081234567894",
+      "reporter_address": "Jl. Anggrek RT 01 RW 02, Desa Pulosarok",
+      "category": 5,
+      "title": "Lampu Jalan Mati",
+      "description": "Lampu penerangan jalan di sepanjang Jl. Anggrek sudah mati semua sejak seminggu lalu. Jalan menjadi gelap dan rawan kecelakaan, terutama untuk pengendara motor di malam hari.",
+      "location": "Jl. Anggrek RT 01 RW 02",
+      "incident_date": "2024-01-06T19:00:00Z",
+      "status": "in_progress",
+      "priority": "high",
+      "attachment": null,
+      "assigned_to": null,
+      "admin_notes": "Sudah dilaporkan ke PLN. Menunggu perbaikan jaringan listrik.",
+      "resolution": "",
+      "created_at": "2024-01-11T08:20:00Z",
+      "updated_at": "2024-01-13T15:10:00Z",
+      "resolved_at": null,
+      "rating": null,
+      "feedback": ""
+    }
+  },
+  {
+    "model": "complaints.chatintent",
+    "pk": 1,
+    "fields": {
+      "name": "greeting",
+      "description": "Sapaan dan pembukaan percakapan",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.chatintent",
+    "pk": 2,
+    "fields": {
+      "name": "complaint_info",
+      "description": "Informasi tentang cara membuat pengaduan",
+      "is_active": true,
+      "created_at": "2024-01-15T08:00:00Z"
+    }
+  },
+  {
+    "model": "complaints.chatpattern",
+    "pk": 1,
+    "fields": {
+      "intent": 1,
+      "pattern": "halo",
+      "is_active": true
+    }
+  },
+  {
+    "model": "complaints.chatpattern",
+    "pk": 2,
+    "fields": {
+      "intent": 1,
+      "pattern": "hai",
+      "is_active": true
+    }
+  },
+  {
+    "model": "complaints.chatpattern",
+    "pk": 3,
+    "fields": {
+      "intent": 2,
+      "pattern": "cara pengaduan",
+      "is_active": true
+    }
+  },
+  {
+    "model": "complaints.chatresponse",
+    "pk": 1,
+    "fields": {
+      "intent": 1,
+      "response": "Halo! Selamat datang di layanan pengaduan Desa Pulosarok. Ada yang bisa saya bantu?",
+      "is_active": true
+    }
+  },
+  {
+    "model": "complaints.chatresponse",
+    "pk": 2,
+    "fields": {
+      "intent": 2,
+      "response": "Untuk membuat pengaduan, Anda bisa mengisi formulir di website atau datang langsung ke kantor desa. Pastikan menyertakan data lengkap dan bukti jika ada.",
+      "is_active": true
+    }
+  }
+]

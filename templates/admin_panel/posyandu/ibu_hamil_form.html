@@ -1,0 +1,702 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .form-container {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255, 154, 158, 0.1);
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    
+    .form-control:focus {
+        border-color: #ff9a9e;
+        box-shadow: 0 0 0 0.2rem rgba(255, 154, 158, 0.25);
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box .form-control {
+        padding-left: 45px;
+    }
+    
+    .search-box .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ff9a9e;
+        font-size: 1.1rem;
+    }
+    
+    .mother-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+    }
+    
+    .mother-option {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f1f3f4;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .mother-option:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .mother-option:last-child {
+        border-bottom: none;
+    }
+    
+    .mother-name {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 4px;
+    }
+    
+    .mother-details {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .pregnancy-stage {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .stage-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stage-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .btn-custom {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .mother-details-card {
+        background-color: #e9f7ef;
+        border-left: 5px solid #28a745;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .mother-details-card h6 {
+        color: #28a745;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .mother-details-card p {
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        color: #343a40;
+    }
+    
+    .mother-details-card p strong {
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Form Header -->
+    <div class="form-header">
+        <h2 class="mb-2">
+            <i class="fas fa-baby mr-2"></i>
+            {{ page_title|default:"Tambah Data Ibu Hamil" }}
+        </h2>
+        <p class="mb-0">{{ page_subtitle|default:"Form untuk menambah data ibu hamil baru" }}</p>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <form id="ibuHamilForm">
+            {% csrf_token %}
+            <input type="hidden" id="ibuHamilId" name="ibu_hamil_id" value="{{ ibu_hamil.id|default:'' }}">
+            
+            <!-- Mother Selection -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-user text-primary mr-2"></i>
+                        Pilih Ibu Hamil
+                    </h5>
+                </div>
+                <div class="col-md-8">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="form-control" id="motherSearch" placeholder="Cari nama ibu atau NIK..." autocomplete="off">
+                        <div class="mother-search-results" id="motherSearchResults"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-outline-primary btn-custom w-100" id="clearMotherSelection">
+                        <i class="fas fa-times mr-1"></i>
+                        Hapus Pilihan
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Selected Mother Info -->
+            <div class="row mb-4" id="selectedMotherInfo" style="display: none;">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <h6 class="mb-2">
+                            <i class="fas fa-check-circle text-success mr-2"></i>
+                            Ibu Terpilih
+                        </h6>
+                        <div id="motherInfoContent"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pregnancy Details -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-heart text-primary mr-2"></i>
+                        Detail Kehamilan
+                    </h5>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="tanggalHpht" class="form-label">Tanggal HPHT <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="tanggalHpht" name="tanggal_hpht" required>
+                    <small class="form-text text-muted">Hari Pertama Haid Terakhir</small>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="usiaKehamilan" class="form-label">Usia Kehamilan (minggu)</label>
+                    <input type="number" class="form-control" id="usiaKehamilan" name="usia_kehamilan" min="1" max="42" readonly>
+                    <small class="form-text text-muted">Otomatis dihitung dari HPHT</small>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="tanggalPerkiraanLahir" class="form-label">Tanggal Perkiraan Lahir</label>
+                    <input type="date" class="form-control" id="tanggalPerkiraanLahir" name="tanggal_perkiraan_lahir" readonly>
+                    <small class="form-text text-muted">Otomatis dihitung (HPHT + 280 hari)</small>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="posyanduSelect" class="form-label">Posyandu <span class="required">*</span></label>
+                    <select class="form-control" id="posyanduSelect" name="posyandu_id" required>
+                        <option value="">Pilih Posyandu</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="riwayatKehamilan" class="form-label">Riwayat Kehamilan</label>
+                    <select class="form-control" id="riwayatKehamilan" name="riwayat_kehamilan">
+                        <option value="">Pilih Riwayat</option>
+                        <option value="1">Kehamilan Pertama</option>
+                        <option value="2">Kehamilan Kedua</option>
+                        <option value="3">Kehamilan Ketiga</option>
+                        <option value="4+">Kehamilan Keempat atau Lebih</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="risikoKehamilan" class="form-label">Risiko Kehamilan</label>
+                    <select class="form-control" id="risikoKehamilan" name="risiko_kehamilan">
+                        <option value="rendah">Risiko Rendah</option>
+                        <option value="tinggi">Risiko Tinggi</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="beratBadanSebelumHamil" class="form-label">Berat Badan Sebelum Hamil (kg)</label>
+                    <input type="number" class="form-control" id="beratBadanSebelumHamil" name="berat_badan_sebelum_hamil" step="0.1" min="0">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="tinggiBadan" class="form-label">Tinggi Badan (cm)</label>
+                    <input type="number" class="form-control" id="tinggiBadan" name="tinggi_badan" step="0.1" min="0">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="golonganDarah" class="form-label">Golongan Darah</label>
+                    <select class="form-control" id="golonganDarah" name="golongan_darah">
+                        <option value="">Pilih Golongan Darah</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="nomorBukuKia" class="form-label">Nomor Buku KIA</label>
+                    <input type="text" class="form-control" id="nomorBukuKia" name="nomor_buku_kia" placeholder="Nomor buku KIA">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="statusAktif" class="form-label">Status <span class="required">*</span></label>
+                    <select class="form-control" id="statusAktif" name="status_aktif" required>
+                        <option value="true">Aktif</option>
+                        <option value="false">Tidak Aktif</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <label for="riwayatPenyakit" class="form-label">Riwayat Penyakit</label>
+                    <textarea class="form-control" id="riwayatPenyakit" name="riwayat_penyakit" rows="3" placeholder="Riwayat penyakit yang pernah diderita..."></textarea>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <label for="keterangan" class="form-label">Keterangan</label>
+                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3" placeholder="Keterangan tambahan..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'admin_panel:posyandu:ibu_hamil' %}" class="btn btn-outline-secondary btn-custom">
+                            <i class="fas fa-arrow-left mr-1"></i>
+                            Kembali
+                        </a>
+                        <div>
+                            <button type="button" class="btn btn-outline-warning btn-custom mr-2" id="resetForm">
+                                <i class="fas fa-undo mr-1"></i>
+                                Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-custom" id="submitBtn">
+                                <i class="fas fa-save mr-1"></i>
+                                <span id="submitText">Simpan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin/posyandu-autocomplete.js' %}"></script>
+<script>
+$(document).ready(function() {
+    let selectedMother = null;
+    let isEditMode = $('#ibuHamilId').val() !== '';
+    
+    // Set page title based on mode
+    if (isEditMode) {
+        $('#submitText').text('Update');
+        loadIbuHamilData();
+    }
+    
+    // Load initial data
+    loadPosyanduOptions();
+    
+    // Mother search functionality
+    let searchTimeout;
+    $('#motherSearch').on('input', function() {
+        const query = $(this).val();
+        
+        clearTimeout(searchTimeout);
+        if (query.length < 2) {
+            $('#motherSearchResults').hide();
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            searchMothers(query);
+        }, 300);
+    });
+    
+    // Hide search results when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-box').length) {
+            $('#motherSearchResults').hide();
+        }
+    });
+    
+    // Clear mother selection
+    $('#clearMotherSelection').on('click', function() {
+        selectedMother = null;
+        $('#motherSearch').val('');
+        $('#selectedMotherInfo').hide();
+        $('#motherSearchResults').hide();
+    });
+    
+    // Calculate pregnancy age when HPHT changes
+    $('#tanggalHpht').on('change', function() {
+        calculatePregnancyAge();
+    });
+    
+    // Form submission
+    $('#ibuHamilForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        if (!selectedMother) {
+            showAlert('Pilih ibu hamil terlebih dahulu', 'warning');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        formData.append('penduduk_id', selectedMother.id);
+        
+        const submitBtn = $('#submitBtn');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+        
+        const url = isEditMode ? 
+            `{% url 'admin_panel:posyandu:api_ibu_hamil_update' 0 %}`.replace('0', $('#ibuHamilId').val()) :
+            '{% url "admin_panel:posyandu:api_ibu_hamil_create" %}';
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                showAlert(response.message || 'Data ibu hamil berhasil disimpan', 'success');
+                setTimeout(function() {
+                    window.location.href = '{% url "admin_panel:posyandu:ibu_hamil" %}';
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.error || 'Terjadi kesalahan saat menyimpan data';
+                showAlert(errorMsg, 'danger');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+    
+    // Reset form
+    $('#resetForm').on('click', function() {
+        if (confirm('Apakah Anda yakin ingin mereset form?')) {
+            $('#ibuHamilForm')[0].reset();
+            selectedMother = null;
+            $('#selectedMotherInfo').hide();
+            $('#motherSearch').val('');
+        }
+    });
+    
+    // Search mothers function
+    function searchMothers(query) {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_penduduk_search" %}',
+            method: 'GET',
+            data: { 
+                q: query,
+                age_group: 'ibu_hamil' // Perempuan 17+ tahun
+            },
+            success: function(response) {
+                displayMotherSearchResults(response.results);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error searching mothers:', error);
+            }
+        });
+    }
+    
+    // Display mother search results
+    function displayMotherSearchResults(mothers) {
+        const container = $('#motherSearchResults');
+        
+        if (mothers.length === 0) {
+            container.html('<div class="mother-option text-center text-muted">Tidak ada ibu ditemukan</div>');
+        } else {
+            let html = '';
+            mothers.forEach(function(mother, index) {
+                const age = calculateAge(mother.birth_date);
+                html += `
+                    <div class="mother-option" data-mother='${JSON.stringify(mother)}' data-mother-index="${index}">
+                        <div class="mother-name">${mother.name || 'N/A'}</div>
+                        <div class="mother-details">
+                            NIK: ${mother.nik || 'N/A'} | Usia: ${age} tahun | ${mother.gender_display || (mother.gender === 'P' ? 'Perempuan' : 'Laki-laki')}
+                        </div>
+                    </div>
+                `;
+            });
+            container.html(html);
+        }
+        
+        container.show();
+    }
+    
+    // Mother selection
+    $(document).on('click', '.mother-option', function() {
+        try {
+            const motherData = $(this).data('mother');
+            console.log('Mother data:', motherData);
+            
+            if (typeof motherData === 'string') {
+                selectedMother = JSON.parse(motherData);
+            } else if (typeof motherData === 'object') {
+                selectedMother = motherData;
+            } else {
+                console.error('Invalid mother data type:', typeof motherData);
+                showAlert('Error: Data ibu tidak valid', 'danger');
+                return;
+            }
+            
+            $('#motherSearch').val(selectedMother.name);
+            $('#selectedMotherInfo').show();
+            $('#motherInfoContent').html(`
+                <div class="row">
+                    <div class="col-md-8">
+                        <strong>${selectedMother.name}</strong><br>
+                        <small class="text-muted">
+                            NIK: ${selectedMother.nik} | 
+                            Usia: ${calculateAge(selectedMother.birth_date)} tahun | 
+                            ${selectedMother.gender_display || (selectedMother.gender === 'P' ? 'Perempuan' : 'Laki-laki')}
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeMotherSelection">
+                            <i class="fas fa-times"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            `);
+            $('#motherSearchResults').hide();
+        } catch (error) {
+            console.error('Error parsing mother data:', error);
+            showAlert('Error: Gagal memproses data ibu', 'danger');
+        }
+    });
+    
+    // Remove mother selection
+    $(document).on('click', '#removeMotherSelection', function() {
+        selectedMother = null;
+        $('#motherSearch').val('');
+        $('#selectedMotherInfo').hide();
+    });
+    
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Pilih Posyandu</option>';
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+                $('#posyanduSelect').html(options);
+            }
+        });
+    }
+    
+    // Load ibu hamil data for edit
+    function loadIbuHamilData() {
+        $.ajax({
+            url: `{% url 'admin_panel:posyandu:api_ibu_hamil_update' 0 %}`.replace('0', $('#ibuHamilId').val()),
+            method: 'GET',
+            success: function(response) {
+                // Populate form fields
+                $('#tanggalHpht').val(response.tanggal_hpht);
+                $('#usiaKehamilan').val(response.usia_kehamilan);
+                $('#tanggalPerkiraanLahir').val(response.tanggal_perkiraan_lahir);
+                $('#posyanduSelect').val(response.posyandu_id);
+                $('#riwayatKehamilan').val(response.riwayat_kehamilan);
+                $('#risikoKehamilan').val(response.risiko_kehamilan);
+                $('#beratBadanSebelumHamil').val(response.berat_badan_sebelum_hamil);
+                $('#tinggiBadan').val(response.tinggi_badan);
+                $('#golonganDarah').val(response.golongan_darah);
+                $('#nomorBukuKia').val(response.nomor_buku_kia);
+                $('#statusAktif').val(response.status_aktif.toString());
+                $('#riwayatPenyakit').val(response.riwayat_penyakit);
+                $('#keterangan').val(response.keterangan);
+                
+                // Set selected mother
+                if (response.penduduk_id) {
+                    selectedMother = {
+                        id: response.penduduk_id,
+                        name: response.penduduk_name,
+                        nik: response.penduduk_nik,
+                        birth_date: response.penduduk_birth_date,
+                        gender: response.penduduk_gender
+                    };
+                    $('#motherSearch').val(selectedMother.name);
+                    $('#selectedMotherInfo').show();
+                    $('#motherInfoContent').html(`
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>${selectedMother.name}</strong><br>
+                                <small class="text-muted">
+                                    NIK: ${selectedMother.nik} | 
+                                    Usia: ${calculateAge(selectedMother.birth_date)} tahun | 
+                                    ${selectedMother.gender_display || (selectedMother.gender === 'P' ? 'Perempuan' : 'Laki-laki')}
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="removeMotherSelection">
+                                    <i class="fas fa-times"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading ibu hamil data:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+    
+    // Calculate pregnancy age
+    function calculatePregnancyAge() {
+        const hpht = new Date($('#tanggalHpht').val());
+        if (hpht && !isNaN(hpht.getTime())) {
+            const today = new Date();
+            const diffTime = today - hpht;
+            const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+            
+            $('#usiaKehamilan').val(diffWeeks);
+            
+            // Calculate estimated due date (HPHT + 280 days)
+            const dueDate = new Date(hpht);
+            dueDate.setDate(dueDate.getDate() + 280);
+            $('#tanggalPerkiraanLahir').val(dueDate.toISOString().split('T')[0]);
+        }
+    }
+    
+    // Calculate age in years
+    function calculateAge(birthDate) {
+        if (!birthDate) return 0;
+        const birth = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return Math.max(0, age);
+    }
+    
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,306 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Pengaturan Wisata{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-cog text-primary mr-2"></i>
+            Pengaturan Wisata
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button type="submit" form="settingsForm" class="btn btn-primary">
+                <i class="fas fa-save mr-1"></i> Simpan Pengaturan
+            </button>
+        </div>
+    </div>
+
+    <form id="settingsForm" method="post">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- General Settings -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog mr-2"></i>
+                            Pengaturan Umum
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="site_name" class="form-label">Nama Situs Wisata</label>
+                            <input type="text" class="form-control" id="site_name" name="site_name" value="{{ settings.site_name|default:'Desa Pulosari' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="site_description" class="form-label">Deskripsi Situs</label>
+                            <textarea class="form-control" id="site_description" name="site_description" rows="3">{{ settings.site_description|default:'Portal wisata desa Pulosari yang menampilkan berbagai destinasi wisata menarik.' }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="contact_email" class="form-label">Email Kontak</label>
+                            <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ settings.contact_email|default:'' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="contact_phone" class="form-label">Telepon Kontak</label>
+                            <input type="tel" class="form-control" id="contact_phone" name="contact_phone" value="{{ settings.contact_phone|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Settings -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-eye mr-2"></i>
+                            Pengaturan Tampilan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="items_per_page" class="form-label">Item per Halaman</label>
+                            <select class="form-control" id="items_per_page" name="items_per_page">
+                                <option value="10" {% if settings.items_per_page == 10 %}selected{% endif %}>10</option>
+                                <option value="20" {% if settings.items_per_page == 20 %}selected{% endif %}>20</option>
+                                <option value="50" {% if settings.items_per_page == 50 %}selected{% endif %}>50</option>
+                                <option value="100" {% if settings.items_per_page == 100 %}selected{% endif %}>100</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="default_category" class="form-label">Kategori Default</label>
+                            <select class="form-control" id="default_category" name="default_category">
+                                <option value="">Pilih Kategori</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if settings.default_category == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="enable_reviews" name="enable_reviews" {% if settings.enable_reviews %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_reviews">
+                                Aktifkan Review
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="enable_ratings" name="enable_ratings" {% if settings.enable_ratings %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_ratings">
+                                Aktifkan Rating
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Map Settings -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-map mr-2"></i>
+                            Pengaturan Peta
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="default_latitude" class="form-label">Latitude Default</label>
+                            <input type="number" step="any" class="form-control" id="default_latitude" name="default_latitude" value="{{ settings.default_latitude|default:'-7.250445' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="default_longitude" class="form-label">Longitude Default</label>
+                            <input type="number" step="any" class="form-control" id="default_longitude" name="default_longitude" value="{{ settings.default_longitude|default:'110.214845' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="map_zoom" class="form-label">Zoom Level</label>
+                            <select class="form-control" id="map_zoom" name="map_zoom">
+                                {% for i in "12345678901234567890" %}
+                                    <option value="{{ forloop.counter }}" {% if settings.map_zoom == forloop.counter %}selected{% endif %}>{{ forloop.counter }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="google_maps_api_key" class="form-label">Google Maps API Key</label>
+                            <input type="text" class="form-control" id="google_maps_api_key" name="google_maps_api_key" value="{{ settings.google_maps_api_key|default:'' }}">
+                            <small class="form-text text-muted">API key untuk menampilkan peta Google Maps</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-bell mr-2"></i>
+                            Pengaturan Notifikasi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="notify_new_review" name="notify_new_review" {% if settings.notify_new_review %}checked{% endif %}>
+                            <label class="form-check-label" for="notify_new_review">
+                                Notifikasi Review Baru
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="notify_new_rating" name="notify_new_rating" {% if settings.notify_new_rating %}checked{% endif %}>
+                            <label class="form-check-label" for="notify_new_rating">
+                                Notifikasi Rating Baru
+                            </label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="notification_email" class="form-label">Email Notifikasi</label>
+                            <input type="email" class="form-control" id="notification_email" name="notification_email" value="{{ settings.notification_email|default:'' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="auto_approve_reviews" class="form-label">Auto Approve Review</label>
+                            <select class="form-control" id="auto_approve_reviews" name="auto_approve_reviews">
+                                <option value="true" {% if settings.auto_approve_reviews %}selected{% endif %}>Ya</option>
+                                <option value="false" {% if not settings.auto_approve_reviews %}selected{% endif %}>Tidak</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- SEO Settings -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-search mr-2"></i>
+                            Pengaturan SEO
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="meta_title" class="form-label">Meta Title</label>
+                            <input type="text" class="form-control" id="meta_title" name="meta_title" value="{{ settings.meta_title|default:'' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="meta_description" class="form-label">Meta Description</label>
+                            <textarea class="form-control" id="meta_description" name="meta_description" rows="3">{{ settings.meta_description|default:'' }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="meta_keywords" class="form-label">Meta Keywords</label>
+                            <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="{{ settings.meta_keywords|default:'' }}">
+                            <small class="form-text text-muted">Pisahkan dengan koma</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Settings -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-share-alt mr-2"></i>
+                            Media Sosial
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="facebook_url" class="form-label">Facebook URL</label>
+                            <input type="url" class="form-control" id="facebook_url" name="facebook_url" value="{{ settings.facebook_url|default:'' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="instagram_url" class="form-label">Instagram URL</label>
+                            <input type="url" class="form-control" id="instagram_url" name="instagram_url" value="{{ settings.instagram_url|default:'' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="youtube_url" class="form-label">YouTube URL</label>
+                            <input type="url" class="form-control" id="youtube_url" name="youtube_url" value="{{ settings.youtube_url|default:'' }}">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="twitter_url" class="form-label">Twitter URL</label>
+                            <input type="url" class="form-control" id="twitter_url" name="twitter_url" value="{{ settings.twitter_url|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-body text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save mr-2"></i>
+                            Simpan Semua Pengaturan
+                        </button>
+                        <a href="{% url 'admin_panel:tourism_dashboard' %}" class="btn btn-secondary btn-lg ml-2">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali ke Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control, .form-select {
+        border: 1px solid #ddd;
+        border-radius: 0.375rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .card-title {
+        color: #333;
+    }
+    
+    .text-muted {
+        color: #6c757d !important;
+    }
+    
+    .form-text {
+        color: #6c757d;
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}
+

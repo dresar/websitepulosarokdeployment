@@ -1,0 +1,545 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/business-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-components.css' %}">
+<style>
+.category-detail-header {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    color: #212529;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.category-detail-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.category-detail-subtitle {
+    color: #495057;
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0 0;
+}
+
+.category-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.category-stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.category-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.category-stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffc107;
+    margin-bottom: 0.5rem;
+}
+
+.category-stat-label {
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.business-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.business-section-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.business-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.business-section-title i {
+    color: #ffc107;
+}
+
+.business-list {
+    padding: 1.5rem;
+}
+
+.business-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.business-item:last-child {
+    border-bottom: none;
+}
+
+.business-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.business-info {
+    flex: 1;
+}
+
+.business-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.business-details {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.business-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.business-action-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 6px;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.business-action-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    color: #495057;
+    text-decoration: none;
+}
+
+.business-action-btn.btn-primary {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.business-action-btn.btn-primary:hover {
+    background: #ffb300;
+    border-color: #ffb300;
+    color: #212529;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-description {
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    .category-detail-header {
+        padding: 1.5rem;
+    }
+    
+    .category-detail-title {
+        font-size: 1.5rem;
+    }
+    
+    .category-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .business-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .business-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="business-container">
+    <!-- Category Header -->
+    <div class="category-detail-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="category-detail-title">
+                    <i class="fas fa-tags"></i>{{ category.name }}
+                </h1>
+                <p class="category-detail-subtitle">{{ category.description }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge badge-{% if category.is_active %}success{% else %}secondary{% endif %}">
+                    <i class="fas fa-{% if category.is_active %}check-circle{% else %}times-circle{% endif %}"></i>
+                    {% if category.is_active %}Aktif{% else %}Non-Aktif{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="category-stats-grid">
+        <div class="category-stat-card">
+            <div class="category-stat-number">{{ total_businesses }}</div>
+            <div class="category-stat-label">Total Usaha</div>
+        </div>
+        <div class="category-stat-card">
+            <div class="category-stat-number">{{ umkm_list.count }}</div>
+            <div class="category-stat-label">UMKM</div>
+        </div>
+        <div class="category-stat-card">
+            <div class="category-stat-number">{{ koperasi_list.count }}</div>
+            <div class="category-stat-label">Koperasi</div>
+        </div>
+        <div class="category-stat-card">
+            <div class="category-stat-number">{{ bumg_list.count }}</div>
+            <div class="category-stat-label">BUMG</div>
+        </div>
+        <div class="category-stat-card">
+            <div class="category-stat-number">{{ layanan_list.count }}</div>
+            <div class="category-stat-label">Layanan Jasa</div>
+        </div>
+    </div>
+
+    <!-- UMKM Section -->
+    {% if umkm_list %}
+    <div class="business-section">
+        <div class="business-section-header">
+            <h3 class="business-section-title">
+                <i class="fas fa-industry"></i>UMKM ({{ umkm_list.count }})
+            </h3>
+        </div>
+        <div class="business-list">
+            {% for umkm in umkm_list %}
+            <div class="business-item">
+                <div class="business-info">
+                    <div class="business-name">{{ umkm.nama_usaha }}</div>
+                    <div class="business-details">
+                        Pemilik: {{ umkm.pemilik }} | 
+                        Skala: {{ umkm.get_skala_usaha_display }} | 
+                        Status: {{ umkm.get_status_display }}
+                    </div>
+                </div>
+                <div class="business-actions">
+                    <a href="{% url 'admin_panel:umkm_detail' umkm.id %}" class="business-action-btn">
+                        <i class="fas fa-eye"></i>Detail
+                    </a>
+                    <a href="{% url 'admin_panel:umkm_edit' umkm.id %}" class="business-action-btn">
+                        <i class="fas fa-edit"></i>Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Koperasi Section -->
+    {% if koperasi_list %}
+    <div class="business-section">
+        <div class="business-section-header">
+            <h3 class="business-section-title">
+                <i class="fas fa-handshake"></i>Koperasi ({{ koperasi_list.count }})
+            </h3>
+        </div>
+        <div class="business-list">
+            {% for koperasi in koperasi_list %}
+            <div class="business-item">
+                <div class="business-info">
+                    <div class="business-name">{{ koperasi.nama }}</div>
+                    <div class="business-details">
+                        Ketua: {{ koperasi.ketua }} | 
+                        Anggota: {{ koperasi.jumlah_anggota }} | 
+                        Status: {{ koperasi.get_status_display }}
+                    </div>
+                </div>
+                <div class="business-actions">
+                    <a href="{% url 'admin_panel:koperasi_detail' koperasi.id %}" class="business-action-btn">
+                        <i class="fas fa-eye"></i>Detail
+                    </a>
+                    <a href="{% url 'admin_panel:koperasi_edit' koperasi.id %}" class="business-action-btn">
+                        <i class="fas fa-edit"></i>Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- BUMG Section -->
+    {% if bumg_list %}
+    <div class="business-section">
+        <div class="business-section-header">
+            <h3 class="business-section-title">
+                <i class="fas fa-building"></i>BUMG ({{ bumg_list.count }})
+            </h3>
+        </div>
+        <div class="business-list">
+            {% for bumg in bumg_list %}
+            <div class="business-item">
+                <div class="business-info">
+                    <div class="business-name">{{ bumg.nama }}</div>
+                        <div class="business-details">
+                            Direktur: {{ bumg.direktur }} | 
+                            Modal: {{ bumg.modal_dasar|rupiah }} | 
+                            Status: {{ bumg.get_status_display }}
+                        </div>
+                </div>
+                <div class="business-actions">
+                    <a href="{% url 'admin_panel:bumg_detail' bumg.id %}" class="business-action-btn">
+                        <i class="fas fa-eye"></i>Detail
+                    </a>
+                    <a href="{% url 'admin_panel:bumg_edit' bumg.id %}" class="business-action-btn">
+                        <i class="fas fa-edit"></i>Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Layanan Jasa Section -->
+    {% if layanan_list %}
+    <div class="business-section">
+        <div class="business-section-header">
+            <h3 class="business-section-title">
+                <i class="fas fa-tools"></i>Layanan Jasa ({{ layanan_list.count }})
+            </h3>
+        </div>
+        <div class="business-list">
+            {% for layanan in layanan_list %}
+            <div class="business-item">
+                <div class="business-info">
+                    <div class="business-name">{{ layanan.nama }}</div>
+                    <div class="business-details">
+                        Penyedia: {{ layanan.penyedia }} | 
+                        Kategori: {{ layanan.get_kategori_display }} | 
+                        Status: {{ layanan.get_status_display }}
+                    </div>
+                </div>
+                <div class="business-actions">
+                    <a href="{% url 'admin_panel:layanan_jasa_detail' layanan.id %}" class="business-action-btn">
+                        <i class="fas fa-eye"></i>Detail
+                    </a>
+                    <a href="{% url 'admin_panel:layanan_jasa_edit' layanan.id %}" class="business-action-btn">
+                        <i class="fas fa-edit"></i>Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Empty State -->
+    {% if total_businesses == 0 %}
+    <div class="business-section">
+        <div class="empty-state">
+            <i class="fas fa-inbox empty-state-icon"></i>
+            <h4 class="empty-state-title">Belum ada usaha dalam kategori ini</h4>
+            <p class="empty-state-description">Kategori "{{ category.name }}" belum memiliki usaha yang terkait.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="{% url 'admin_panel:business_categories_list' %}" class="business-btn business-btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i>Kembali ke Daftar Kategori
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_panel:business_category_update' category.id %}" class="business-btn business-btn-warning">
+                <i class="fas fa-edit"></i>Edit Kategori
+            </a>
+            <a href="{% url 'admin_panel:business_category_delete_confirm' category.id %}" class="business-btn business-btn-danger">
+                <i class="fas fa-trash"></i>Hapus Kategori
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteCategoryModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Konfirmasi Hapus Kategori
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle mr-2"></i>PERINGATAN!</h6>
+                    <p class="mb-0">Menghapus kategori akan menghapus SEMUA usaha yang terkait dengan kategori ini. Tindakan ini tidak dapat dibatalkan!</p>
+                </div>
+                
+                <div id="categoryDeleteInfo">
+                    <!-- Information will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                <form id="deleteCategoryForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash mr-2"></i>Ya, Hapus Semua
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function confirmDeleteCategory(categoryId, categoryName) {
+    // Load category information
+    $.ajax({
+        url: '{% url "admin_panel:business_category_delete" 0 %}'.replace('0', categoryId),
+        type: 'GET',
+        success: function(response) {
+            if (response.success) {
+                let infoHtml = `
+                    <h6>Informasi Kategori:</h6>
+                    <p><strong>Nama:</strong> ${response.category_name}</p>
+                    <p><strong>Deskripsi:</strong> ${response.category_description || '-'}</p>
+                    
+                    <h6 class="mt-3">Usaha yang akan dihapus (${response.total_businesses}):</h6>
+                `;
+                
+                if (response.umkm_count > 0) {
+                    infoHtml += `<p><strong>UMKM (${response.umkm_count}):</strong></p><ul>`;
+                    response.umkm_list.forEach(function(umkm) {
+                        infoHtml += `<li>${umkm.name}</li>`;
+                    });
+                    infoHtml += `</ul>`;
+                }
+                
+                if (response.koperasi_count > 0) {
+                    infoHtml += `<p><strong>Koperasi (${response.koperasi_count}):</strong></p><ul>`;
+                    response.koperasi_list.forEach(function(koperasi) {
+                        infoHtml += `<li>${koperasi.name}</li>`;
+                    });
+                    infoHtml += `</ul>`;
+                }
+                
+                if (response.bumg_count > 0) {
+                    infoHtml += `<p><strong>BUMG (${response.bumg_count}):</strong></p><ul>`;
+                    response.bumg_list.forEach(function(bumg) {
+                        infoHtml += `<li>${bumg.name}</li>`;
+                    });
+                    infoHtml += `</ul>`;
+                }
+                
+                if (response.layanan_count > 0) {
+                    infoHtml += `<p><strong>Layanan Jasa (${response.layanan_count}):</strong></p><ul>`;
+                    response.layanan_list.forEach(function(layanan) {
+                        infoHtml += `<li>${layanan.name}</li>`;
+                    });
+                    infoHtml += `</ul>`;
+                }
+                
+                $('#categoryDeleteInfo').html(infoHtml);
+                $('#deleteCategoryForm').attr('action', '{% url "admin_panel:business_category_delete" 0 %}'.replace('0', categoryId));
+                $('#deleteCategoryModal').modal('show');
+            }
+        },
+        error: function() {
+            alert('Gagal memuat informasi kategori');
+        }
+    });
+}
+
+// Handle form submission
+$('#deleteCategoryForm').on('submit', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var url = form.attr('action');
+    
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: form.serialize(),
+        success: function(response) {
+            if (response.success) {
+                $('#deleteCategoryModal').modal('hide');
+                alert(response.message);
+                window.location.href = '{% url "admin_panel:business_categories_list" %}';
+            } else {
+                alert('Terjadi kesalahan: ' + response.message);
+            }
+        },
+        error: function() {
+            alert('Terjadi kesalahan saat menghapus kategori');
+        }
+    });
+});
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}{{ website_settings.site_description|default:'Website resmi Desa Pulosarok - Informasi desa, layanan administrasi, dan berita terkini' }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{{ website_settings.site_keywords|default:'desa, pulosarok, administrasi, layanan, berita' }}{% endblock %}">
+    <meta name="author" content="Desa Pulosarok">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="{% block og_title %}{{ page_title|default:'Desa Pulosarok' }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ page_subtitle|default:'Website resmi Desa Pulosarok' }}{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% block og_image %}{% if website_settings.logo %}{{ website_settings.logo.url }}{% else %}/static/images/logo.svg{% endif %}{% endblock %}">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ page_title|default:'Desa Pulosarok' }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ page_subtitle|default:'Website resmi Desa Pulosarok' }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% if website_settings.logo %}{{ website_settings.logo.url }}{% else %}/static/images/logo.svg{% endif %}{% endblock %}">
+    
+    <title>{% block title %}{{ page_title|default:'Desa Pulosarok' }}{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% if website_settings.favicon %}{{ website_settings.favicon.url }}{% else %}/static/images/favicon.svg{% endif %}">
+    
+    <!-- Google Tag Manager (noscript) -->
+    {% if website_settings.google_tag_manager_id %}
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ website_settings.google_tag_manager_id }}"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    {% endif %}
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Dark Theme CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/dark-theme.css' %}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --secondary-color: #10B981;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-effect {
+            background: rgba(17, 24, 39, 0.1);
+            border: 1px solid rgba(55, 65, 81, 0.2);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background-color: #f3f4f6;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background-color: #1f2937;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 9999px;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #9ca3af;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .mobile-padding {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Back button mobile optimization */
+            .fixed.top-20.left-4 button {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .fixed.top-20.left-4 button span {
+                display: none;
+            }
+            
+            /* Fix notification modal positioning on mobile */
+            #notificationsModal {
+                right: 0 !important;
+                left: auto !important;
+                transform: none !important;
+                max-width: calc(100vw - 1rem);
+                width: 240px !important;
+                margin-right: 0.5rem;
+                position: absolute !important;
+            }
+            
+            /* Make notification cards more compact on mobile */
+            #notificationsModal .space-y-2 > div {
+                padding: 0.5rem !important;
+                margin-bottom: 0.25rem !important;
+            }
+            
+            #notificationsModal .space-y-2 > div h4 {
+                font-size: 0.75rem !important;
+                line-height: 1rem !important;
+            }
+            
+            #notificationsModal .space-y-2 > div span {
+                font-size: 0.625rem !important;
+            }
+            
+            /* Force modal to stay on right side */
+            #notificationsModal {
+                position: absolute !important;
+                right: 0 !important;
+                left: auto !important;
+                transform: none !important;
+            }
+        }
+        
+        /* Touch-friendly buttons */
+        @media (hover: none) and (pointer: coarse) {
+            .touch-target {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+        
+        
+        /* Desktop dropdown styles - Fixed */
+        .group {
+            position: relative;
+        }
+        
+        .desktop-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease-in-out;
+            z-index: 1000;
+            min-width: 200px;
+        }
+        
+        .group:hover .desktop-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        /* Mobile Sidebar Overlay */
+        .mobile-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Mobile Sidebar - Compact Design */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e40af 0%, #1d4ed8 100%);
+            z-index: 50;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            box-shadow: -6px 0 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .dark .mobile-sidebar {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #1d4ed8 100%);
+        }
+        
+        .mobile-sidebar.show {
+            right: 0;
+        }
+        
+        /* Sidebar Header - Compact Design */
+        .sidebar-header {
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        
+        .dark .sidebar-header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-close {
+            padding: 0.375rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .sidebar-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        /* Sidebar Content */
+        .sidebar-content {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu-item {
+            margin: 0;
+        }
+        
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            margin: 0.125rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .dark .sidebar-menu-link {
+            color: white;
+        }
+        
+        .sidebar-menu-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        
+        .sidebar-menu-link i {
+            width: 18px;
+            margin-right: 0.625rem;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+        
+        .sidebar-menu-link .chevron {
+            margin-left: auto;
+            transition: transform 0.2s;
+        }
+        
+        .sidebar-menu-link.active .chevron {
+            transform: rotate(180deg);
+        }
+        
+        /* Sidebar Submenu - Compact Design */
+        .sidebar-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 0.125rem 0.75rem;
+            border-radius: 0.5rem;
+        }
+        
+        .dark .sidebar-submenu {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-submenu.show {
+            max-height: 500px;
+        }
+        
+        .sidebar-submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            border-radius: 0.5rem;
+            margin: 0.125rem;
+        }
+        
+        .dark .sidebar-submenu-link {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .sidebar-submenu-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-submenu-link i {
+            width: 14px;
+            margin-right: 0.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+        }
+        
+        /* Sidebar Social Media */
+        .sidebar-social {
+            padding: 1rem 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 0.5rem;
+        }
+        
+        .sidebar-social-header h4 {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .sidebar-social-links {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .sidebar-social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        
+        .sidebar-social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .sidebar-social-link:nth-child(1):hover {
+            background: #1877f2;
+        }
+        
+        .sidebar-social-link:nth-child(2):hover {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        
+        .sidebar-social-link:nth-child(3):hover {
+            background: #1da1f2;
+        }
+        
+        .sidebar-social-link:nth-child(4):hover {
+            background: #ff0000;
+        }
+        
+        /* Hamburger menu styles */
+        .hamburger-icon {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .hamburger-icon span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: currentColor;
+            border-radius: 2px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .3s ease-in-out;
+        }
+        
+        .hamburger-icon span:nth-child(1) {
+            top: 0px;
+        }
+        
+        .hamburger-icon span:nth-child(2) {
+            top: 7px;
+        }
+        
+        .hamburger-icon span:nth-child(3) {
+            top: 14px;
+        }
+        
+        .hamburger-icon.open span:nth-child(1) {
+            top: 7px;
+            transform: rotate(135deg);
+        }
+        
+        .hamburger-icon.open span:nth-child(2) {
+            opacity: 0;
+            left: -60px;
+        }
+        
+        .hamburger-icon.open span:nth-child(3) {
+            top: 7px;
+            transform: rotate(-135deg);
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 640px) {
+            .mobile-sidebar {
+                width: 80%;
+                max-width: 280px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mobile-sidebar {
+                width: 85%;
+                max-width: 260px;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="flex items-center space-x-3 group">
+                        {% if website_settings.logo %}
+                            <img src="{{ website_settings.logo.url }}" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-10 w-auto transition-transform duration-300 group-hover:scale-105">
+                        {% else %}
+                            <img src="/static/images/logo-desa.svg" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-10 w-auto transition-transform duration-300 group-hover:scale-105">
+                        {% endif %}
+                        <div class="hidden sm:block">
+                            <h1 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
+                                {{ website_settings.site_name|default:'Desa Pulosarok' }}
+                            </h1>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="{% url 'core:home' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative group">
+                        Beranda
+                        <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    
+                    <!-- Profil Desa with dropdown -->
+                    <div class="relative group">
+                        <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative flex items-center">
+                            Profil Desa
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 desktop-dropdown z-50">
+                            <div class="py-2">
+                                <a href="{% url 'village_profile:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-home mr-3"></i>Dashboard Profil
+                                </a>
+                                <a href="{% url 'village_profile:vision_mission' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-bullseye mr-3"></i>Visi & Misi
+                                </a>
+                                <a href="{% url 'village_profile:officials' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-users mr-3"></i>Perangkat Desa
+                                </a>
+                                <a href="{% url 'village_profile:facilities' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-building mr-3"></i>Fasilitas Desa
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <a href="{% url 'village_profile:geography' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-map-marker-alt mr-3"></i>Geografi
+                                </a>
+                                <a href="{% url 'village_profile:demography' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-chart-bar mr-3"></i>Demografi
+                                </a>
+                                <a href="{% url 'village_profile:history' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-scroll mr-3"></i>Sejarah Desa
+                                </a>
+                                <a href="{% url 'village_profile:gallery' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-images mr-3"></i>Galeri Foto
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Organisasi with dropdown -->
+                    <div class="relative group">
+                        <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative flex items-center">
+                            Organisasi
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 desktop-dropdown">
+                            <div class="py-2">
+                                <a href="{% url 'organization:organization_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-users mr-3"></i>Semua Organisasi
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <a href="{% url 'organization:perangkat_desa_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-user-tie mr-3"></i>Perangkat Desa
+                                </a>
+                                <a href="{% url 'organization:lembaga_adat_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-landmark mr-3"></i>Lembaga Adat
+                                </a>
+                                <a href="{% url 'organization:pkk_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-female mr-3"></i>PKK
+                                </a>
+                                <a href="{% url 'organization:kepemudaan_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-user-friends mr-3"></i>Kepemudaan
+                                </a>
+                                <a href="{% url 'organization:karang_taruna_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-users mr-3"></i>Karang Taruna
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Layanan with dropdown -->
+                    <div class="relative group">
+                        <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative flex items-center">
+                            Layanan
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 desktop-dropdown z-50">
+                            <div class="py-2">
+                                <a href="{% url 'layanan:index' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-home mr-3"></i>Dashboard Layanan
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <a href="{% url 'layanan:document_services' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-file-alt mr-3"></i>Layanan Dokumen
+                                </a>
+                                <a href="{% url 'layanan:posyandu_services' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-heartbeat mr-3"></i>Layanan Posyandu
+                                </a>
+                                <a href="{% url 'layanan:business_services' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-briefcase mr-3"></i>Layanan Bisnis
+                                </a>
+                                <a href="{% url 'layanan:tourism_services' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-mountain mr-3"></i>Layanan Wisata
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <a href="{% url 'layanan:chat_layanan' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-comments mr-3"></i>Chat Layanan
+                                </a>
+                                <a href="{% url 'layanan:document_request' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-file-upload mr-3"></i>Ajukan Dokumen
+                                </a>
+                                <a href="{% url 'layanan:request_status' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-search mr-3"></i>Cek Status
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Berita with dropdown -->
+                    <div class="relative group">
+                        <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative flex items-center">
+                            Berita
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 desktop-dropdown">
+                            <div class="py-2">
+                                <a href="{% url 'news:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-newspaper mr-3"></i>Semua Berita
+                                </a>
+                                <a href="{% url 'news:announcements' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-bullhorn mr-3"></i>Pengumuman
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <a href="{% url 'news:list' %}?featured=1" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-star mr-3"></i>Berita Utama
+                                </a>
+                                <a href="{% url 'news:list' %}?breaking=1" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-bolt mr-3"></i>Breaking News
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ekonomi with dropdown -->
+                    <div class="relative group">
+                        <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative flex items-center">
+                            Ekonomi
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 desktop-dropdown">
+                            <div class="py-2">
+                                <a href="{% url 'business:business_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-store mr-3"></i>Semua Bisnis
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <a href="{% url 'business:umkm_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-building mr-3"></i>UMKM
+                                </a>
+                                <a href="{% url 'business:koperasi_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-handshake mr-3"></i>Koperasi
+                                </a>
+                                <a href="{% url 'business:bumg_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-landmark mr-3"></i>BUMG
+                                </a>
+                                <a href="{% url 'business:toko_warung_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-shopping-cart mr-3"></i>Toko & Warung
+                                </a>
+                                <a href="{% url 'business:layanan_jasa_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-tools mr-3"></i>Layanan Jasa
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Wisata with dropdown -->
+                    <div class="relative group">
+                        <a href="#" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium relative flex items-center">
+                            Wisata
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full"></span>
+                        </a>
+                        <div class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 desktop-dropdown">
+                            <div class="py-2">
+                                <a href="{% url 'tourism:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-mountain mr-3"></i>Dashboard Wisata
+                                </a>
+                                <a href="{% url 'tourism:location_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-map-marker-alt mr-3"></i>Destinasi Wisata
+                                </a>
+                                <a href="{% url 'tourism:category_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-tags mr-3"></i>Kategori Wisata
+                                </a>
+                                <a href="{% url 'tourism:event_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-calendar-alt mr-3"></i>Event Wisata
+                                </a>
+                                <a href="{% url 'tourism:package_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-suitcase mr-3"></i>Paket Wisata
+                                </a>
+                                <a href="{% url 'tourism:search' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <i class="fas fa-search mr-3"></i>Cari Wisata
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notifications, Theme Toggle & Mobile Menu -->
+                <div class="flex items-center space-x-2">
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <button onclick="toggleNotifications()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 touch-target" aria-label="Notifications">
+                            <div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center relative">
+                                <i class="fas fa-bell text-white text-xs"></i>
+                                <span id="notificationBadge" class="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-[8px] font-bold">0</span>
+                                </span>
+                            </div>
+                        </button>
+                        
+                        <!-- Notifications Modal -->
+                        <div id="notificationsModal" class="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 hidden">
+                            <div class="p-2 sm:p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Notifikasi</h3>
+                                    <button onclick="toggleNotifications()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 touch-target">
+                                        <i class="fas fa-times text-sm"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Notifications List -->
+                                <div id="notificationsList" class="space-y-2 max-h-48 sm:max-h-64 overflow-y-auto">
+                                    <!-- Loading state -->
+                                    <div id="notificationsLoading" class="text-center py-3 sm:py-4">
+                                        <i class="fas fa-spinner fa-spin text-gray-400 text-sm"></i>
+                                        <p class="text-xs sm:text-sm text-gray-500 mt-2">Memuat notifikasi...</p>
+                                    </div>
+                                    
+                                    <!-- Empty state -->
+                                    <div id="notificationsEmpty" class="text-center py-6 sm:py-8 hidden">
+                                        <i class="fas fa-bell-slash text-gray-400 text-xl sm:text-2xl mb-2"></i>
+                                        <p class="text-xs sm:text-sm text-gray-500">Tidak ada notifikasi</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- View All Button -->
+                                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                    <a href="{% url 'news:announcements' %}" class="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 touch-target">
+                                        Lihat Semua Notifikasi
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 touch-target" aria-label="Toggle theme">
+                        <i class="fas fa-sun dark:hidden text-yellow-500"></i>
+                        <i class="fas fa-moon hidden dark:block text-blue-400"></i>
+                    </button>
+                    
+                    <!-- Mobile menu button -->
+                    <button type="button" class="lg:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 touch-target mobile-menu-button" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                        <div class="hamburger-icon">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation -->
+            <div class="mobile-menu hidden lg:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <!-- Main Navigation -->
+                    <a href="{% url 'core:home' %}" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target">
+                        <i class="fas fa-home mr-3"></i>Beranda
+                    </a>
+                    
+                    <!-- Profil Desa with submenu -->
+                    <div class="has-submenu">
+                        <a href="#" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target" onclick="toggleSubmenu(this)">
+                            <i class="fas fa-info-circle mr-3"></i>Profil Desa
+                            <i class="fas fa-chevron-down float-right mt-1 text-xs"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{% url 'village_profile:dashboard' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-home mr-3"></i>Dashboard Profil
+                            </a>
+                            <a href="{% url 'village_profile:vision_mission' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-bullseye mr-3"></i>Visi & Misi
+                            </a>
+                            <a href="{% url 'village_profile:officials' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-users mr-3"></i>Perangkat Desa
+                            </a>
+                            <a href="{% url 'village_profile:facilities' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-building mr-3"></i>Fasilitas Desa
+                            </a>
+                            <a href="{% url 'village_profile:geography' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-map-marker-alt mr-3"></i>Geografi
+                            </a>
+                            <a href="{% url 'village_profile:demography' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-chart-bar mr-3"></i>Demografi
+                            </a>
+                            <a href="{% url 'village_profile:history' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-scroll mr-3"></i>Sejarah Desa
+                            </a>
+                            <a href="{% url 'village_profile:gallery' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-images mr-3"></i>Galeri Foto
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Organisasi with submenu -->
+                    <div class="has-submenu">
+                        <a href="#" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target" onclick="toggleSubmenu(this)">
+                            <i class="fas fa-users mr-3"></i>Organisasi
+                            <i class="fas fa-chevron-down float-right mt-1 text-xs"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{% url 'organization:organization_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-users mr-3"></i>Semua Organisasi
+                            </a>
+                            <a href="{% url 'organization:perangkat_desa_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-user-tie mr-3"></i>Perangkat Desa
+                            </a>
+                            <a href="{% url 'organization:lembaga_adat_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-landmark mr-3"></i>Lembaga Adat
+                            </a>
+                            <a href="{% url 'organization:pkk_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-female mr-3"></i>PKK
+                            </a>
+                            <a href="{% url 'organization:kepemudaan_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-user-friends mr-3"></i>Kepemudaan
+                            </a>
+                            <a href="{% url 'organization:karang_taruna_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-users mr-3"></i>Karang Taruna
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Layanan with submenu -->
+                    <div class="has-submenu">
+                        <a href="#" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target" onclick="toggleSubmenu(this)">
+                            <i class="fas fa-cogs mr-3"></i>Layanan
+                            <i class="fas fa-chevron-down float-right mt-1 text-xs"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{% url 'layanan:index' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-home mr-3"></i>Dashboard Layanan
+                            </a>
+                            <a href="{% url 'layanan:document_services' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-file-alt mr-3"></i>Layanan Dokumen
+                            </a>
+                            <a href="{% url 'layanan:posyandu_services' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-heartbeat mr-3"></i>Layanan Posyandu
+                            </a>
+                            <a href="{% url 'layanan:business_services' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-briefcase mr-3"></i>Layanan Bisnis
+                            </a>
+                            <a href="{% url 'layanan:tourism_services' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-mountain mr-3"></i>Layanan Wisata
+                            </a>
+                            <a href="{% url 'layanan:chat_layanan' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-comments mr-3"></i>Chat Layanan
+                            </a>
+                            <a href="{% url 'layanan:document_request' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-file-upload mr-3"></i>Ajukan Dokumen
+                            </a>
+                            <a href="{% url 'layanan:request_status' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-search mr-3"></i>Cek Status
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Berita with submenu -->
+                    <div class="has-submenu">
+                        <a href="#" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target" onclick="toggleSubmenu(this)">
+                            <i class="fas fa-newspaper mr-3"></i>Berita
+                            <i class="fas fa-chevron-down float-right mt-1 text-xs"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{% url 'news:list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-newspaper mr-3"></i>Semua Berita
+                            </a>
+                            <a href="{% url 'news:announcements' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-bullhorn mr-3"></i>Pengumuman
+                            </a>
+                            <a href="{% url 'news:list' %}?featured=1" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-star mr-3"></i>Berita Utama
+                            </a>
+                            <a href="{% url 'news:list' %}?breaking=1" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-bolt mr-3"></i>Breaking News
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Ekonomi with submenu -->
+                    <div class="has-submenu">
+                        <a href="#" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target" onclick="toggleSubmenu(this)">
+                            <i class="fas fa-briefcase mr-3"></i>Ekonomi
+                            <i class="fas fa-chevron-down float-right mt-1 text-xs"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{% url 'business:business_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-store mr-3"></i>Semua Bisnis
+                            </a>
+                            <a href="{% url 'business:umkm_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-building mr-3"></i>UMKM
+                            </a>
+                            <a href="{% url 'business:koperasi_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-handshake mr-3"></i>Koperasi
+                            </a>
+                            <a href="{% url 'business:bumg_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-landmark mr-3"></i>BUMG
+                            </a>
+                            <a href="{% url 'business:toko_warung_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-shopping-cart mr-3"></i>Toko & Warung
+                            </a>
+                            <a href="{% url 'business:layanan_jasa_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-tools mr-3"></i>Layanan Jasa
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Wisata with submenu -->
+                    <div class="has-submenu">
+                        <a href="#" class="block px-3 py-3 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors duration-200 touch-target" onclick="toggleSubmenu(this)">
+                            <i class="fas fa-mountain mr-3"></i>Wisata
+                            <i class="fas fa-chevron-down float-right mt-1 text-xs"></i>
+                        </a>
+                        <div class="submenu">
+                            <a href="{% url 'tourism:dashboard' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-mountain mr-3"></i>Dashboard Wisata
+                            </a>
+                            <a href="{% url 'tourism:location_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-map-marker-alt mr-3"></i>Destinasi Wisata
+                            </a>
+                            <a href="{% url 'tourism:category_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-tags mr-3"></i>Kategori Wisata
+                            </a>
+                            <a href="{% url 'tourism:event_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-calendar-alt mr-3"></i>Event Wisata
+                            </a>
+                            <a href="{% url 'tourism:package_list' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-suitcase mr-3"></i>Paket Wisata
+                            </a>
+                            <a href="{% url 'tourism:search' %}" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
+                                <i class="fas fa-search mr-3"></i>Cari Wisata
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay" onclick="closeMobileSidebar()"></div>
+    
+    <!-- Mobile Sidebar - Half Screen Right -->
+    <div class="mobile-sidebar" id="mobileSidebar">
+        <!-- Sidebar Header with Beautiful Blue Gradient -->
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                {% if website_settings.logo %}
+                    <img src="{{ website_settings.logo.url }}" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-6 w-auto">
+                {% else %}
+                    <img src="/static/images/logo-desa.svg" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-6 w-auto">
+                {% endif %}
+                <span class="ml-2 text-base font-semibold text-white">Pulosarok</span>
+            </div>
+            <button class="sidebar-close" onclick="closeMobileSidebar()">
+                <i class="fas fa-times text-white"></i>
+            </button>
+        </div>
+        
+        <!-- Sidebar Content -->
+        <div class="sidebar-content">
+            <ul class="sidebar-menu">
+                <!-- Beranda -->
+                <li class="sidebar-menu-item">
+                    <a href="{% url 'core:home' %}" class="sidebar-menu-link">
+                        <i class="fas fa-home"></i>
+                        Beranda
+                    </a>
+                </li>
+                
+                <!-- Profil Desa -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-menu-link" onclick="toggleSidebarSubmenu(this)">
+                        <i class="fas fa-info-circle"></i>
+                        Profil Desa
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="{% url 'village_profile:dashboard' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-home"></i>Dashboard Profil
+                        </a>
+                        <a href="{% url 'village_profile:vision_mission' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-bullseye"></i>Visi & Misi
+                        </a>
+                        <a href="{% url 'village_profile:officials' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-users"></i>Perangkat Desa
+                        </a>
+                        <a href="{% url 'village_profile:facilities' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-building"></i>Fasilitas Desa
+                        </a>
+                        <a href="{% url 'village_profile:geography' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-map-marker-alt"></i>Geografi
+                        </a>
+                        <a href="{% url 'village_profile:demography' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-chart-bar"></i>Demografi
+                        </a>
+                        <a href="{% url 'village_profile:history' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-scroll"></i>Sejarah Desa
+                        </a>
+                        <a href="{% url 'village_profile:gallery' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-images"></i>Galeri Foto
+                        </a>
+                    </div>
+                </li>
+                
+                <!-- Organisasi -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-menu-link" onclick="toggleSidebarSubmenu(this)">
+                        <i class="fas fa-users"></i>
+                        Organisasi
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="{% url 'organization:organization_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-users"></i>Semua Organisasi
+                        </a>
+                        <a href="{% url 'organization:perangkat_desa_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-user-tie"></i>Perangkat Desa
+                        </a>
+                        <a href="{% url 'organization:lembaga_adat_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-landmark"></i>Lembaga Adat
+                        </a>
+                        <a href="{% url 'organization:pkk_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-female"></i>PKK
+                        </a>
+                        <a href="{% url 'organization:kepemudaan_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-user-friends"></i>Kepemudaan
+                        </a>
+                        <a href="{% url 'organization:karang_taruna_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-users"></i>Karang Taruna
+                        </a>
+                    </div>
+                </li>
+                
+                <!-- Layanan -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-menu-link" onclick="toggleSidebarSubmenu(this)">
+                        <i class="fas fa-cogs"></i>
+                        Layanan
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="{% url 'layanan:index' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-home"></i>Dashboard Layanan
+                        </a>
+                        <a href="{% url 'layanan:document_services' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-file-alt"></i>Layanan Dokumen
+                        </a>
+                        <a href="{% url 'layanan:posyandu_services' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-heartbeat"></i>Layanan Posyandu
+                        </a>
+                        <a href="{% url 'layanan:business_services' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-briefcase"></i>Layanan Bisnis
+                        </a>
+                        <a href="{% url 'layanan:tourism_services' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-mountain"></i>Layanan Wisata
+                        </a>
+                        <a href="{% url 'layanan:chat_layanan' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-comments"></i>Chat Layanan
+                        </a>
+                        <a href="{% url 'layanan:document_request' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-file-upload"></i>Ajukan Dokumen
+                        </a>
+                        <a href="{% url 'layanan:request_status' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-search"></i>Cek Status
+                        </a>
+                    </div>
+                </li>
+                
+                <!-- Berita -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-menu-link" onclick="toggleSidebarSubmenu(this)">
+                        <i class="fas fa-newspaper"></i>
+                        Berita
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="{% url 'news:list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-newspaper"></i>Semua Berita
+                        </a>
+                        <a href="{% url 'news:announcements' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-bullhorn"></i>Pengumuman
+                        </a>
+                        <a href="{% url 'news:list' %}?featured=1" class="sidebar-submenu-link">
+                            <i class="fas fa-star"></i>Berita Utama
+                        </a>
+                        <a href="{% url 'news:list' %}?breaking=1" class="sidebar-submenu-link">
+                            <i class="fas fa-bolt"></i>Breaking News
+                        </a>
+                    </div>
+                </li>
+                
+                <!-- Ekonomi -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-menu-link" onclick="toggleSidebarSubmenu(this)">
+                        <i class="fas fa-briefcase"></i>
+                        Ekonomi
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="{% url 'business:business_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-store"></i>Semua Bisnis
+                        </a>
+                        <a href="{% url 'business:umkm_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-building"></i>UMKM
+                        </a>
+                        <a href="{% url 'business:koperasi_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-handshake"></i>Koperasi
+                        </a>
+                        <a href="{% url 'business:bumg_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-landmark"></i>BUMG
+                        </a>
+                        <a href="{% url 'business:toko_warung_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-shopping-cart"></i>Toko & Warung
+                        </a>
+                        <a href="{% url 'business:layanan_jasa_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-tools"></i>Layanan Jasa
+                        </a>
+                    </div>
+                </li>
+                
+                <!-- Wisata -->
+                <li class="sidebar-menu-item">
+                    <div class="sidebar-menu-link" onclick="toggleSidebarSubmenu(this)">
+                        <i class="fas fa-mountain"></i>
+                        Wisata
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="sidebar-submenu">
+                        <a href="{% url 'tourism:dashboard' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-mountain"></i>Dashboard Wisata
+                        </a>
+                        <a href="{% url 'tourism:location_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-map-marker-alt"></i>Destinasi Wisata
+                        </a>
+                        <a href="{% url 'tourism:category_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-tags"></i>Kategori Wisata
+                        </a>
+                        <a href="{% url 'tourism:event_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-calendar-alt"></i>Event Wisata
+                        </a>
+                        <a href="{% url 'tourism:package_list' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-suitcase"></i>Paket Wisata
+                        </a>
+                        <a href="{% url 'tourism:search' %}" class="sidebar-submenu-link">
+                            <i class="fas fa-search"></i>Cari Wisata
+                        </a>
+                    </div>
+                </li>
+            </ul>
+            
+            <!-- Social Media Section -->
+            <div class="sidebar-social">
+                <div class="sidebar-social-header">
+                    <h4 class="text-sm font-semibold text-white mb-3">Media Sosial</h4>
+                </div>
+                <div class="sidebar-social-links">
+                    {% if website_settings.facebook_url %}
+                        <a href="{{ website_settings.facebook_url }}" class="sidebar-social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    {% endif %}
+                    {% if website_settings.instagram_url %}
+                        <a href="{{ website_settings.instagram_url }}" class="sidebar-social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    {% endif %}
+                    {% if website_settings.twitter_url %}
+                        <a href="{{ website_settings.twitter_url }}" class="sidebar-social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    {% endif %}
+                    {% if website_settings.youtube_url %}
+                        <a href="{{ website_settings.youtube_url }}" class="sidebar-social-link" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <main class="pt-16 min-h-screen">
+        <!-- Back Button - Hidden on home page -->
+        {% if request.resolver_match.url_name != 'home' %}
+        <div class="fixed top-20 left-4 z-40">
+            <button onclick="goBack()" class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md hover:bg-white dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 touch-target" aria-label="Kembali">
+                <i class="fas fa-arrow-left mr-2"></i>
+                <span class="hidden sm:inline">Kembali</span>
+            </button>
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 dark:bg-gray-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
+            <!-- Mobile Footer - Single Column -->
+            <div class="block md:hidden mobile-footer">
+                <div class="text-center mb-4">
+                    <div class="flex items-center justify-center space-x-2 mb-2">
+                        {% if website_settings.logo %}
+                            <img src="{{ website_settings.logo.url }}" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="footer-logo">
+                        {% else %}
+                            <img src="/static/images/logo-desa.svg" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-6 w-auto">
+                        {% endif %}
+                        <h3 class="footer-title">{{ website_settings.site_name|default:'Desa Pulosarok' }}</h3>
+                    </div>
+                    <p class="footer-description">
+                        Website resmi Desa Pulosarok
+                    </p>
+                    <!-- Social Media - Mobile -->
+                    <div class="flex justify-center social-icons">
+                        {% if website_settings.facebook_url %}
+                            <a href="{{ website_settings.facebook_url }}" class="social-icon bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-facebook-f text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                        {% if website_settings.instagram_url %}
+                            <a href="{{ website_settings.instagram_url }}" class="social-icon bg-gray-800 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-instagram text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                        {% if website_settings.twitter_url %}
+                            <a href="{{ website_settings.twitter_url }}" class="social-icon bg-gray-800 hover:bg-blue-400 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-twitter text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                        {% if website_settings.youtube_url %}
+                            <a href="{{ website_settings.youtube_url }}" class="social-icon bg-gray-800 hover:bg-red-600 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-youtube text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Mobile Contact Info -->
+                <div class="space-y-2 mb-4">
+                    {% if website_settings.contact_phone %}
+                        <div class="flex items-center justify-center space-x-2 contact-item">
+                            <div class="contact-icon bg-primary-600 rounded flex items-center justify-center">
+                                <i class="fas fa-phone text-white"></i>
+                            </div>
+                            <span class="text-gray-300">{{ website_settings.contact_phone }}</span>
+                        </div>
+                    {% endif %}
+                    {% if website_settings.contact_email %}
+                        <div class="flex items-center justify-center space-x-2 contact-item">
+                            <div class="contact-icon bg-primary-600 rounded flex items-center justify-center">
+                                <i class="fas fa-envelope text-white"></i>
+                            </div>
+                            <span class="text-gray-300">{{ website_settings.contact_email }}</span>
+                        </div>
+                    {% endif %}
+                    {% if website_settings.contact_address %}
+                        <div class="flex items-start justify-center space-x-2 contact-item">
+                            <div class="contact-icon bg-primary-600 rounded flex items-center justify-center mt-0.5">
+                                <i class="fas fa-map-marker-alt text-white"></i>
+                            </div>
+                            <span class="text-gray-300 text-center">{{ website_settings.contact_address }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Desktop Footer - Multi Column -->
+            <div class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                <!-- Logo and Description -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        {% if website_settings.logo %}
+                            <img src="{{ website_settings.logo.url }}" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-10 w-auto">
+                        {% else %}
+                            <img src="/static/images/logo-desa.svg" alt="{{ website_settings.site_name|default:'Desa Pulosarok' }}" class="h-10 w-auto">
+                        {% endif %}
+                        <h3 class="text-xl font-bold">{{ website_settings.site_name|default:'Desa Pulosarok' }}</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6 max-w-md leading-relaxed text-sm">
+                        Website resmi Desa Pulosarok. Menyediakan informasi desa, layanan administrasi, dan berita terkini untuk masyarakat.
+                    </p>
+                    <div class="flex space-x-4">
+                        {% if website_settings.facebook_url %}
+                            <a href="{{ website_settings.facebook_url }}" class="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-facebook-f text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                        {% if website_settings.instagram_url %}
+                            <a href="{{ website_settings.instagram_url }}" class="w-10 h-10 bg-gray-800 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-instagram text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                        {% if website_settings.twitter_url %}
+                            <a href="{{ website_settings.twitter_url }}" class="w-10 h-10 bg-gray-800 hover:bg-blue-400 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-twitter text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                        {% if website_settings.youtube_url %}
+                            <a href="{{ website_settings.youtube_url }}" class="w-10 h-10 bg-gray-800 hover:bg-red-600 rounded-lg flex items-center justify-center transition-colors duration-200 group" target="_blank" rel="noopener noreferrer">
+                                <i class="fab fa-youtube text-gray-400 group-hover:text-white"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-base font-semibold mb-4 text-white">Menu Cepat</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'core:home' %}" class="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group text-sm">
+                            <i class="fas fa-home mr-2 group-hover:text-primary-400 text-xs"></i>Beranda
+                        </a></li>
+                        <li><a href="{% url 'core:profile' %}" class="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group text-sm">
+                            <i class="fas fa-info-circle mr-2 group-hover:text-primary-400 text-xs"></i>Profil Desa
+                        </a></li>
+                        <li><a href="{% url 'news:list' %}" class="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group text-sm">
+                            <i class="fas fa-newspaper mr-2 group-hover:text-primary-400 text-xs"></i>Berita
+                        </a></li>
+                        <li><a href="{% url 'business:business_list' %}" class="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group text-sm">
+                            <i class="fas fa-store mr-2 group-hover:text-primary-400 text-xs"></i>UMKM
+                        </a></li>
+                        <li><a href="{% url 'tourism:dashboard' %}" class="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group text-sm">
+                            <i class="fas fa-mountain mr-2 group-hover:text-primary-400 text-xs"></i>Wisata
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-base font-semibold mb-4 text-white">Kontak</h4>
+                    <div class="space-y-3">
+                        {% if website_settings.contact_phone %}
+                            <div class="flex items-center space-x-3">
+                                <div class="w-7 h-7 bg-primary-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-phone text-white text-xs"></i>
+                                </div>
+                                <span class="text-gray-300 text-sm">{{ website_settings.contact_phone }}</span>
+                            </div>
+                        {% endif %}
+                        {% if website_settings.contact_email %}
+                            <div class="flex items-center space-x-3">
+                                <div class="w-7 h-7 bg-primary-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-envelope text-white text-xs"></i>
+                                </div>
+                                <span class="text-gray-300 text-sm">{{ website_settings.contact_email }}</span>
+                            </div>
+                        {% endif %}
+                        {% if website_settings.contact_address %}
+                            <div class="flex items-start space-x-3">
+                                <div class="w-7 h-7 bg-primary-600 rounded-lg flex items-center justify-center mt-1">
+                                    <i class="fas fa-map-marker-alt text-white text-xs"></i>
+                                </div>
+                                <span class="text-gray-300 text-xs leading-relaxed">{{ website_settings.contact_address }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Bottom -->
+            <div class="border-t border-gray-800 mt-4 md:mt-8 lg:mt-12 pt-3 md:pt-6 lg:pt-8 footer-bottom">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+                    <div class="text-center md:text-left">
+                        <p class="text-gray-400 text-sm">
+                            &copy; {% now "Y" %} {{ website_settings.site_name|default:'Desa Pulosarok' }}. 
+                            Semua hak dilindungi undang-undang.
+                        </p>
+                        <p class="text-gray-400 text-sm mt-2 font-medium">
+                            Mahasiswa KKN TI Universitas Muhammadiyah Sumatera Utara
+                        </p>
+                        <!-- KKN Credit Added -->
+                    </div>
+                    <div class="flex footer-links space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200 text-sm">Kebijakan Privasi</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200 text-sm">Syarat & Ketentuan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+
+    <!-- JavaScript -->
+    <script>
+        // Theme management - DISABLED FOR DEVELOPMENT
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        // Mobile sidebar toggle with smooth animation
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            const hamburgerIcon = document.querySelector('.hamburger-icon');
+            
+            // Add smooth animation classes
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            hamburgerIcon.classList.toggle('open');
+            
+            // Add body scroll lock when sidebar is open
+            if (sidebar.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+        
+        // Close mobile sidebar with smooth animation
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            const hamburgerIcon = document.querySelector('.hamburger-icon');
+            
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+            hamburgerIcon.classList.remove('open');
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+        
+        // Toggle sidebar submenu
+        function toggleSidebarSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            const chevron = element.querySelector('.chevron');
+            
+            // Close other submenus
+            document.querySelectorAll('.sidebar-submenu').forEach(item => {
+                if (item !== submenu) {
+                    item.classList.remove('show');
+                }
+            });
+            
+            document.querySelectorAll('.sidebar-menu-link').forEach(item => {
+                if (item !== element) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Toggle current submenu
+            submenu.classList.toggle('show');
+            element.classList.toggle('active');
+        }
+        
+        // Submenu toggle
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            const chevron = element.querySelector('.fa-chevron-down');
+            const parent = element.parentElement;
+            
+            // Close other submenus
+            document.querySelectorAll('.has-submenu').forEach(item => {
+                if (item !== parent) {
+                    const otherSubmenu = item.querySelector('.submenu');
+                    const otherChevron = item.querySelector('.fa-chevron-down');
+                    if (otherSubmenu && otherChevron) {
+                        otherSubmenu.style.maxHeight = '0';
+                        otherChevron.style.transform = 'rotate(0deg)';
+                        item.classList.remove('open');
+                    }
+                }
+            });
+            
+            // Toggle current submenu
+            if (submenu.style.maxHeight === '0px' || submenu.style.maxHeight === '') {
+                submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                chevron.style.transform = 'rotate(180deg)';
+                parent.classList.add('open');
+            } else {
+                submenu.style.maxHeight = '0';
+                chevron.style.transform = 'rotate(0deg)';
+                parent.classList.remove('open');
+            }
+        }
+        
+        // Navbar scroll effect
+        function handleNavbarScroll() {
+            const navbar = document.getElementById('navbar');
+            
+            if (window.scrollY > 100) {
+                navbar.classList.add('shadow-lg');
+            } else {
+                navbar.classList.remove('shadow-lg');
+            }
+        }
+        
+        // Notifications toggle
+        function toggleNotifications() {
+            const modal = document.getElementById('notificationsModal');
+            if (modal) {
+                const isHidden = modal.classList.contains('hidden');
+                modal.classList.toggle('hidden');
+                
+                // Load notifications when opening modal
+                if (isHidden) {
+                    loadNotifications();
+                }
+            }
+        }
+        
+        // Load notifications from API
+        async function loadNotifications() {
+            const loading = document.getElementById('notificationsLoading');
+            const empty = document.getElementById('notificationsEmpty');
+            const list = document.getElementById('notificationsList');
+            
+            try {
+                loading.classList.remove('hidden');
+                empty.classList.add('hidden');
+                
+                const response = await fetch('/news/api/announcements/');
+                const data = await response.json();
+                
+                loading.classList.add('hidden');
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    renderNotifications(data.data);
+                    updateNotificationBadge(data.data.length);
+                } else {
+                    empty.classList.remove('hidden');
+                    updateNotificationBadge(0);
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                loading.classList.add('hidden');
+                empty.classList.remove('hidden');
+                updateNotificationBadge(0);
+            }
+        }
+        
+        // Update notification badge
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                const badgeText = badge.querySelector('span');
+                if (badgeText) {
+                    badgeText.textContent = count;
+                    if (count > 0) {
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            }
+        }
+        
+        // Render notifications
+        function renderNotifications(notifications) {
+            const list = document.getElementById('notificationsList');
+            const empty = document.getElementById('notificationsEmpty');
+            
+            if (notifications.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            
+            const notificationsHTML = notifications.map(notification => {
+                const typeColors = {
+                    'info': 'blue',
+                    'warning': 'orange', 
+                    'urgent': 'red',
+                    'schedule': 'purple',
+                    'event': 'green',
+                    'service': 'teal'
+                };
+                
+                const color = typeColors[notification.type] || 'blue';
+                const icons = {
+                    'info': 'fas fa-info',
+                    'warning': 'fas fa-exclamation-triangle',
+                    'urgent': 'fas fa-bolt',
+                    'schedule': 'fas fa-calendar',
+                    'event': 'fas fa-users',
+                    'service': 'fas fa-tools'
+                };
+                
+                const icon = icons[notification.type] || 'fas fa-info';
+                
+                return `
+                    <div class="bg-${color}-50 dark:bg-${color}-900/20 rounded-lg p-2 sm:p-3 border-l-4 border-${color}-500 cursor-pointer hover:bg-${color}-100 dark:hover:bg-${color}-900/30 transition-colors duration-200">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <div class="w-5 h-5 sm:w-6 sm:h-6 bg-${color}-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="${icon} text-white text-[10px] sm:text-xs"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white line-clamp-1 truncate">${notification.title}</h4>
+                                <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">${formatDate(notification.startDate)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            list.innerHTML = notificationsHTML;
+        }
+        
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) {
+                return 'Kemarin';
+            } else if (diffDays < 7) {
+                return `${diffDays} hari yang lalu`;
+            } else {
+                return date.toLocaleDateString('id-ID');
+            }
+        }
+        
+        // Close notifications when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('notificationsModal');
+            const button = event.target.closest('[onclick="toggleNotifications()"]');
+            
+            if (modal && !modal.contains(event.target) && !button) {
+                modal.classList.add('hidden');
+            }
+        });
+        
+        
+        // Go back function
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // If no history, redirect to home
+                window.location.href = '{% url "core:home" %}';
+            }
+        }
+        
+        // Smooth scrolling for anchor links
+        function initSmoothScrolling() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Loading states
+        function showLoading(element) {
+            if (element) {
+                element.innerHTML = '<div class="loading-spinner"></div>';
+            }
+        }
+        
+        function hideLoading(element, content) {
+            if (element) {
+                element.innerHTML = content;
+            }
+        }
+
+        // Fix dropdown behavior - ensure only one is open at a time
+        function initDropdownBehavior() {
+            const dropdownGroups = document.querySelectorAll('.group');
+            
+            dropdownGroups.forEach(group => {
+                group.addEventListener('mouseenter', function() {
+                    // Close all other dropdowns
+                    dropdownGroups.forEach(otherGroup => {
+                        if (otherGroup !== group) {
+                            const otherDropdown = otherGroup.querySelector('.desktop-dropdown');
+                            if (otherDropdown) {
+                                otherDropdown.classList.remove('opacity-100', 'visible');
+                                otherDropdown.classList.add('opacity-0', 'invisible');
+                            }
+                        }
+                    });
+                });
+            });
+        }
+        
+        // Load notification count only
+        async function loadNotificationCount() {
+            try {
+                const response = await fetch('/news/api/announcements/');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    updateNotificationBadge(data.data.length);
+                } else {
+                    updateNotificationBadge(0);
+                }
+            } catch (error) {
+                console.error('Error loading notification count:', error);
+                updateNotificationBadge(0);
+            }
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            initDropdownBehavior();
+            loadTheme();
+            initSmoothScrolling();
+            
+            // Load notification count on page load
+            loadNotificationCount();
+            
+            // Close mobile sidebar when clicking outside
+            document.addEventListener('click', function(e) {
+                const sidebar = document.getElementById('mobileSidebar');
+                const overlay = document.getElementById('mobileSidebarOverlay');
+                const menuButton = document.querySelector('[onclick="toggleMobileMenu()"]');
+                
+                if (sidebar && overlay && menuButton) {
+                    if (!sidebar.contains(e.target) && !menuButton.contains(e.target)) {
+                        closeMobileSidebar();
+                    }
+                }
+            });
+        });
+        
+        // Event listeners
+        window.addEventListener('scroll', handleNavbarScroll);
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                closeMobileSidebar();
+            }
+        });
+    </script>
+    
+    <!-- Google Analytics -->
+    {% if website_settings.google_analytics_id %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ website_settings.google_analytics_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ website_settings.google_analytics_id }}');
+    </script>
+    {% endif %}
+    
+    <!-- Google Tag Manager -->
+    {% if website_settings.google_tag_manager_id %}
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','{{ website_settings.google_tag_manager_id }}');</script>
+    {% endif %}
+    
+    <!-- Facebook Pixel -->
+    {% if website_settings.facebook_pixel_id %}
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '{{ website_settings.facebook_pixel_id }}');
+        fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id={{ website_settings.facebook_pixel_id }}&ev=PageView&noscript=1"
+    /></noscript>
+    {% endif %}
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

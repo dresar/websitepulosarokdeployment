@@ -1,0 +1,859 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Rekam Kesehatan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .patient-info-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .vital-signs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    .vital-sign-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        border-left: 4px solid #007bff;
+    }
+    .vital-sign-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    .vital-sign-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .medical-info-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .info-item {
+        margin-bottom: 15px;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .info-value {
+        color: #6c757d;
+        line-height: 1.5;
+    }
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+    .action-buttons {
+        position: sticky;
+        top: 20px;
+        z-index: 1000;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 20px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 3px #dee2e6;
+    }
+    .timeline-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    .timeline-content {
+        color: #495057;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    .print-button {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+        border-radius: 50px;
+        padding: 15px 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    @media print {
+        .action-buttons, .print-button {
+            display: none !important;
+        }
+        .detail-header {
+            background: #f8f9fa !important;
+            color: #000 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Detail Header -->
+    <div class="detail-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:health_records' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-heartbeat mr-3"></i>
+                        Detail Rekam Kesehatan
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Informasi lengkap rekam kesehatan pasien</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <span class="badge status-badge bg-light text-dark" id="patientTypeBadge">
+                    <!-- Patient type will be loaded here -->
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Patient Information -->
+            <div class="patient-info-card">
+                <h5 class="section-title">
+                    <i class="fas fa-user mr-2"></i>
+                    Informasi Pasien
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nama Lengkap</div>
+                            <div class="info-value" id="patientName">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">NIK</div>
+                            <div class="info-value" id="patientNik">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tanggal Lahir</div>
+                            <div class="info-value" id="patientBirthDate">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Jenis Kelamin</div>
+                            <div class="info-value" id="patientGender">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Alamat</div>
+                            <div class="info-value" id="patientAddress">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">No. Telepon</div>
+                            <div class="info-value" id="patientPhone">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visit Information -->
+            <div class="medical-info-section">
+                <h5 class="section-title">
+                    <i class="fas fa-calendar-check mr-2"></i>
+                    Informasi Kunjungan
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Tanggal Kunjungan</div>
+                            <div class="info-value" id="visitDate">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Posyandu</div>
+                            <div class="info-value" id="posyanduName">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Jenis Pasien</div>
+                            <div class="info-value" id="patientType">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Dokter/Petugas</div>
+                            <div class="info-value" id="recordedBy">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vital Signs -->
+            <div class="medical-info-section">
+                <h5 class="section-title">
+                    <i class="fas fa-heartbeat mr-2"></i>
+                    Tanda Vital
+                </h5>
+                <div class="vital-signs-grid">
+                    <div class="vital-sign-card">
+                        <div class="vital-sign-value" id="weightValue">-</div>
+                        <div class="vital-sign-label">Berat Badan (kg)</div>
+                    </div>
+                    <div class="vital-sign-card">
+                        <div class="vital-sign-value" id="heightValue">-</div>
+                        <div class="vital-sign-label">Tinggi Badan (cm)</div>
+                    </div>
+                    <div class="vital-sign-card">
+                        <div class="vital-sign-value" id="bloodPressureValue">-</div>
+                        <div class="vital-sign-label">Tekanan Darah</div>
+                    </div>
+                    <div class="vital-sign-card">
+                        <div class="vital-sign-value" id="temperatureValue">-</div>
+                        <div class="vital-sign-label">Suhu (°C)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Information -->
+            <div class="medical-info-section">
+                <h5 class="section-title">
+                    <i class="fas fa-stethoscope mr-2"></i>
+                    Informasi Medis
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Keluhan</div>
+                            <div class="info-value" id="complaints">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Diagnosis</div>
+                            <div class="info-value" id="diagnosis">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Pengobatan</div>
+                            <div class="info-value" id="treatment">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Kunjungan Berikutnya</div>
+                            <div class="info-value" id="nextVisit">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical History Timeline -->
+            <div class="medical-info-section">
+                <h5 class="section-title">
+                    <i class="fas fa-history mr-2"></i>
+                    Riwayat Kesehatan
+                </h5>
+                <div class="timeline" id="medicalHistory">
+                    <!-- Medical history will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="action-buttons">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tools mr-2"></i>
+                            Aksi
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="editHealthRecord()">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit Rekam
+                            </button>
+                            <button class="btn btn-success" onclick="printRecord()">
+                                <i class="fas fa-print mr-2"></i>
+                                Cetak Rekam
+                            </button>
+                            <button class="btn btn-info" onclick="exportRecord()">
+                                <i class="fas fa-download mr-2"></i>
+                                Export PDF
+                            </button>
+                            <button class="btn btn-warning" onclick="addFollowUp()">
+                                <i class="fas fa-plus mr-2"></i>
+                                Tambah Follow-up
+                            </button>
+                            <hr>
+                            <button class="btn btn-outline-danger" onclick="deleteHealthRecord()">
+                                <i class="fas fa-trash mr-2"></i>
+                                Hapus Rekam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Statistik Cepat
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h4 text-primary mb-1" id="totalVisits">0</div>
+                                <small class="text-muted">Total Kunjungan</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h4 text-success mb-1" id="lastVisitDays">-</div>
+                                <small class="text-muted">Hari Terakhir</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Records -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-link mr-2"></i>
+                            Rekam Terkait
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-syringe mr-2 text-info"></i>
+                                <span>Imunisasi</span>
+                                <span class="badge badge-info float-right">3</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-apple-alt mr-2 text-success"></i>
+                                <span>Data Gizi</span>
+                                <span class="badge badge-success float-right">5</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-chart-line mr-2 text-warning"></i>
+                                <span>Data Stunting</span>
+                                <span class="badge badge-warning float-right">2</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Button -->
+<button class="btn btn-primary print-button" onclick="printRecord()">
+    <i class="fas fa-print mr-2"></i>
+    Cetak
+</button>
+
+<!-- Edit Health Record Modal -->
+<div class="modal fade" id="editHealthRecordModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit text-primary mr-2"></i>
+                    Edit Rekam Kesehatan
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="editHealthRecordForm">
+                <input type="hidden" id="editRecordId">
+                <div class="modal-body">
+                    <!-- Form fields will be populated here -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editPatientType">Jenis Pasien <span class="text-danger">*</span></label>
+                                <select class="form-control" id="editPatientType" required>
+                                    <option value="">Pilih Jenis Pasien</option>
+                                    <option value="balita">Balita</option>
+                                    <option value="ibu_hamil">Ibu Hamil</option>
+                                    <option value="ibu_menyusui">Ibu Menyusui</option>
+                                    <option value="lansia">Lansia</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editVisitDate">Tanggal Kunjungan <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="editVisitDate" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vital Signs -->
+                    <div class="vital-signs">
+                        <h6 class="mb-3">
+                            <i class="fas fa-heartbeat text-primary mr-2"></i>
+                            Tanda Vital
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="editWeight">Berat Badan (kg)</label>
+                                    <input type="number" class="form-control" id="editWeight" step="0.1" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="editHeight">Tinggi Badan (cm)</label>
+                                    <input type="number" class="form-control" id="editHeight" step="0.1" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="editBloodPressure">Tekanan Darah</label>
+                                    <input type="text" class="form-control" id="editBloodPressure" placeholder="120/80">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="editTemperature">Suhu (°C)</label>
+                                    <input type="number" class="form-control" id="editTemperature" step="0.1" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medical Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editComplaints">Keluhan</label>
+                                <textarea class="form-control" id="editComplaints" rows="3" placeholder="Keluhan pasien..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editDiagnosis">Diagnosis</label>
+                                <textarea class="form-control" id="editDiagnosis" rows="3" placeholder="Diagnosis dokter..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editTreatment">Pengobatan</label>
+                                <textarea class="form-control" id="editTreatment" rows="3" placeholder="Resep obat atau pengobatan..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editNextVisit">Kunjungan Berikutnya</label>
+                                <input type="date" class="form-control" id="editNextVisit">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i>
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteHealthRecordModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus rekam kesehatan ini?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Tindakan ini tidak dapat dibatalkan.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const recordId = new URLSearchParams(window.location.search).get('id');
+    
+    if (recordId) {
+        loadHealthRecordDetail(recordId);
+        loadMedicalHistory(recordId);
+        loadQuickStats(recordId);
+    } else {
+        showAlert('ID rekam kesehatan tidak ditemukan', 'danger');
+    }
+
+    // Load health record detail
+    function loadHealthRecordDetail(id) {
+        $.ajax({
+            url: `{% url "posyandu:api_health_record_update" 0 %}`.replace('0', id),
+            method: 'GET',
+            success: function(response) {
+                displayHealthRecordDetail(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading health record detail:', error);
+                showAlert('Error loading health record detail', 'danger');
+            }
+        });
+    }
+
+    // Display health record detail
+    function displayHealthRecordDetail(record) {
+        // Patient information
+        $('#patientName').text(record.patient_name || '-');
+        $('#patientNik').text(record.patient_nik || '-');
+        $('#patientBirthDate').text(record.patient_birth_date || '-');
+        $('#patientGender').text(record.patient_gender || '-');
+        $('#patientAddress').text(record.patient_address || '-');
+        $('#patientPhone').text(record.patient_phone || '-');
+
+        // Visit information
+        $('#visitDate').text(record.visit_date || '-');
+        $('#posyanduName').text(record.posyandu_name || '-');
+        $('#patientType').text(getPatientTypeLabel(record.patient_type));
+        $('#recordedBy').text(record.recorded_by || '-');
+
+        // Patient type badge
+        $('#patientTypeBadge').text(getPatientTypeLabel(record.patient_type));
+        $('#patientTypeBadge').removeClass().addClass('badge status-badge ' + getPatientTypeClass(record.patient_type));
+
+        // Vital signs
+        $('#weightValue').text(record.weight || '-');
+        $('#heightValue').text(record.height || '-');
+        $('#bloodPressureValue').text(record.blood_pressure || '-');
+        $('#temperatureValue').text(record.temperature || '-');
+
+        // Medical information
+        $('#complaints').text(record.complaints || 'Tidak ada keluhan');
+        $('#diagnosis').text(record.diagnosis || 'Tidak ada diagnosis');
+        $('#treatment').text(record.treatment || 'Tidak ada pengobatan');
+        $('#nextVisit').text(record.next_visit || 'Tidak dijadwalkan');
+
+        // Populate edit form
+        $('#editRecordId').val(record.id);
+        $('#editPatientType').val(record.patient_type);
+        $('#editVisitDate').val(record.visit_date);
+        $('#editWeight').val(record.weight);
+        $('#editHeight').val(record.height);
+        $('#editBloodPressure').val(record.blood_pressure);
+        $('#editTemperature').val(record.temperature);
+        $('#editComplaints').val(record.complaints);
+        $('#editDiagnosis').val(record.diagnosis);
+        $('#editTreatment').val(record.treatment);
+        $('#editNextVisit').val(record.next_visit);
+    }
+
+    // Load medical history
+    function loadMedicalHistory(patientId) {
+        $.ajax({
+            url: '{% url "posyandu:api_health_record_list" %}',
+            method: 'GET',
+            data: {
+                patient_id: patientId,
+                limit: 10
+            },
+            success: function(response) {
+                displayMedicalHistory(response.results);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading medical history:', error);
+            }
+        });
+    }
+
+    // Display medical history
+    function displayMedicalHistory(records) {
+        const container = $('#medicalHistory');
+        
+        if (records.length === 0) {
+            container.html(`
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <h6>Tidak ada riwayat</h6>
+                    <p>Belum ada riwayat kunjungan sebelumnya.</p>
+                </div>
+            `);
+            return;
+        }
+
+        let html = '';
+        records.forEach(function(record) {
+            html += `
+                <div class="timeline-item">
+                    <div class="timeline-date">${record.visit_date}</div>
+                    <div class="timeline-content">
+                        <h6>${record.patient_type ? getPatientTypeLabel(record.patient_type) : 'Kunjungan'}</h6>
+                        <p class="mb-1">${record.complaints || 'Tidak ada keluhan'}</p>
+                        <small class="text-muted">${record.diagnosis || 'Tidak ada diagnosis'}</small>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Load quick stats
+    function loadQuickStats(patientId) {
+        $.ajax({
+            url: '{% url "posyandu:api_health_record_list" %}',
+            method: 'GET',
+            data: {
+                patient_id: patientId
+            },
+            success: function(response) {
+                $('#totalVisits').text(response.total || 0);
+                
+                if (response.results && response.results.length > 0) {
+                    const lastVisit = new Date(response.results[0].visit_date);
+                    const today = new Date();
+                    const diffTime = Math.abs(today - lastVisit);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    $('#lastVisitDays').text(diffDays + ' hari');
+                }
+            }
+        });
+    }
+
+    // Edit health record
+    window.editHealthRecord = function() {
+        $('#editHealthRecordModal').modal('show');
+    };
+
+    // Update health record
+    $('#editHealthRecordForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            patient_type: $('#editPatientType').val(),
+            visit_date: $('#editVisitDate').val(),
+            weight: $('#editWeight').val(),
+            height: $('#editHeight').val(),
+            blood_pressure: $('#editBloodPressure').val(),
+            temperature: $('#editTemperature').val(),
+            complaints: $('#editComplaints').val(),
+            diagnosis: $('#editDiagnosis').val(),
+            treatment: $('#editTreatment').val(),
+            next_visit: $('#editNextVisit').val()
+        };
+
+        $.ajax({
+            url: `{% url "posyandu:api_health_record_update" 0 %}`.replace('0', $('#editRecordId').val()),
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(formData),
+            success: function(response) {
+                $('#editHealthRecordModal').modal('hide');
+                showAlert('Rekam kesehatan berhasil diperbarui', 'success');
+                loadHealthRecordDetail(recordId);
+            },
+            error: function(xhr, status, error) {
+                showAlert('Error updating health record', 'danger');
+            }
+        });
+    });
+
+    // Delete health record
+    window.deleteHealthRecord = function() {
+        $('#deleteHealthRecordModal').modal('show');
+    };
+
+    $('#confirmDelete').on('click', function() {
+        $.ajax({
+            url: `{% url "posyandu:api_health_record_delete" 0 %}`.replace('0', recordId),
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                $('#deleteHealthRecordModal').modal('hide');
+                showAlert('Rekam kesehatan berhasil dihapus', 'success');
+                setTimeout(function() {
+                    window.location.href = '{% url "posyandu:health_records" %}';
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                showAlert('Error deleting health record', 'danger');
+            }
+        });
+    });
+
+    // Print record
+    window.printRecord = function() {
+        window.print();
+    };
+
+    // Export record
+    window.exportRecord = function() {
+        // Implementation for PDF export
+        showAlert('Fitur export PDF akan segera tersedia', 'info');
+    };
+
+    // Add follow-up
+    window.addFollowUp = function() {
+        // Implementation for adding follow-up
+        showAlert('Fitur follow-up akan segera tersedia', 'info');
+    };
+
+    // Helper functions
+    function getPatientTypeLabel(type) {
+        const labels = {
+            'balita': 'Balita',
+            'ibu_hamil': 'Ibu Hamil',
+            'ibu_menyusui': 'Ibu Menyusui',
+            'lansia': 'Lansia'
+        };
+        return labels[type] || type;
+    }
+
+    function getPatientTypeClass(type) {
+        const classes = {
+            'balita': 'bg-success',
+            'ibu_hamil': 'bg-info',
+            'ibu_menyusui': 'bg-warning',
+            'lansia': 'bg-secondary'
+        };
+        return classes[type] || 'bg-secondary';
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 2 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

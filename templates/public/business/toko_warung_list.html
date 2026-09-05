@@ -1,0 +1,364 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load hero_tags %}
+
+{% block title %}Toko & Warung Desa Pulosarok - {{ website_settings.site_name|default:'Desa Pulosarok' }}{% endblock %}
+{% block meta_description %}Daftar Toko dan Warung di Desa Pulosarok. Temukan toko dan warung terbaik yang melayani kebutuhan sehari-hari masyarakat desa.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .toko-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toko-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .dark .toko-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    .type-badge {
+        transition: all 0.2s ease-in-out;
+    }
+    .type-badge:hover {
+        transform: scale(1.05);
+    }
+    .stats-card {
+        background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+    }
+    .dark .stats-card {
+        background: linear-gradient(135deg, #1e40af 0%, #047857 100%);
+    }
+    .filter-chip {
+        transition: all 0.2s ease-in-out;
+    }
+    .filter-chip:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative overflow-hidden min-h-[60vh] sm:min-h-[70vh] lg:min-h-[80vh] flex items-center">
+    {% get_hero_image 'business' as hero_image %}
+    {% if hero_image %}
+        <div class="absolute inset-0">
+            <img src="{{ hero_image.image.url }}" alt="{{ hero_image.name }}" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-600/80 via-primary-700/80 to-secondary-600/80"></div>
+        </div>
+    {% else %}
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600"></div>
+    {% endif %}
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 w-full">
+        <div class="text-center">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 animate-fade-in">
+                Toko & Warung Desa Pulosarok
+            </h1>
+            <p class="text-lg sm:text-xl text-primary-100 mb-8 max-w-3xl mx-auto animate-slide-up">
+                Temukan toko dan warung terbaik yang melayani kebutuhan sehari-hari masyarakat desa dengan harga yang terjangkau.
+            </p>
+            
+            <!-- Search Bar -->
+            <div class="max-w-2xl mx-auto mb-8">
+                <form method="GET" class="relative">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ search_query }}" 
+                               placeholder="Cari toko, warung, atau produk..." 
+                               class="w-full px-4 py-3 pl-12 pr-4 text-gray-900 bg-white rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="stats-card rounded-lg p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-bold">{{ toko_list.count }}</div>
+                    <div class="text-sm opacity-90">Total Toko & Warung</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-bold">{{ toko_count }}</div>
+                    <div class="text-sm opacity-90">Toko</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-bold">{{ warung_count }}</div>
+                    <div class="text-sm opacity-90">Warung</div>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div class="text-2xl sm:text-3xl font-bold">24/7</div>
+                    <div class="text-sm opacity-90">Layanan</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section class="bg-gray-50 dark:bg-gray-800 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <!-- Type Filters -->
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'business:toko_warung_list' %}" 
+                   class="filter-chip px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                    <i class="fas fa-shopping-cart mr-2"></i>Semua
+                </a>
+                <a href="{% url 'business:toko_warung_list' %}?type=toko" 
+                   class="filter-chip px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                    <i class="fas fa-store mr-2"></i>Toko
+                </a>
+                <a href="{% url 'business:toko_warung_list' %}?type=warung" 
+                   class="filter-chip px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                    <i class="fas fa-home mr-2"></i>Warung
+                </a>
+                <a href="{% url 'business:toko_warung_list' %}?type=umkm" 
+                   class="filter-chip px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                    <i class="fas fa-building mr-2"></i>UMKM
+                </a>
+            </div>
+            
+            <!-- Category Filter -->
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Kategori:</label>
+                <select name="category" onchange="filterByCategory(this.value)" 
+                        class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <option value="">Semua Kategori</option>
+                    <option value="makanan">Makanan & Minuman</option>
+                    <option value="sembako">Sembako</option>
+                    <option value="fashion">Fashion & Pakaian</option>
+                    <option value="elektronik">Elektronik</option>
+                    <option value="peralatan">Peralatan Rumah</option>
+                    <option value="lainnya">Lainnya</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Toko & Warung List -->
+<section class="py-8 lg:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if toko_list %}
+        <!-- Results Count -->
+        <div class="mb-6">
+            <p class="text-gray-600 dark:text-gray-400">
+                Menampilkan {{ toko_list.start_index }}-{{ toko_list.end_index }} dari {{ toko_list.paginator.count }} toko & warung
+                {% if search_query %}
+                untuk "<span class="font-semibold text-primary-600">{{ search_query }}</span>"
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Toko & Warung Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for toko in toko_list %}
+            <div class="toko-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <!-- Toko Image Placeholder -->
+                <div class="h-48 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 flex items-center justify-center">
+                    {% if toko.business_type == 'warung' %}
+                    <i class="fas fa-home text-4xl text-primary-600 dark:text-primary-400"></i>
+                    {% else %}
+                    <i class="fas fa-store text-4xl text-primary-600 dark:text-primary-400"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Toko Info -->
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white line-clamp-2">
+                            {{ toko.name }}
+                        </h3>
+                        <span class="ml-2 px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 text-xs font-medium rounded-full flex-shrink-0 type-badge">
+                            {{ toko.get_business_type_display }}
+                        </span>
+                    </div>
+                    
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+                        {{ toko.description|truncatechars:100 }}
+                    </p>
+                    
+                    <!-- Toko Details -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-tag w-4 h-4 mr-2"></i>
+                            <span>{{ toko.category.name }}</span>
+                        </div>
+                        {% if toko.owners.exists %}
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-user w-4 h-4 mr-2"></i>
+                            <span>{{ toko.owners.first.owner.nama }}</span>
+                        </div>
+                        {% endif %}
+                        {% if toko.address %}
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-map-marker-alt w-4 h-4 mr-2"></i>
+                            <span>{{ toko.address|truncatechars:30 }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <a href="{% url 'business:business_detail' toko.id %}" 
+                       class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <i class="fas fa-eye mr-2"></i>
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if toko_list.has_other_pages %}
+        <div class="mt-12 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if toko_list.has_previous %}
+                <a href="?page={{ toko_list.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in toko_list.paginator.page_range %}
+                {% if toko_list.number == num %}
+                <span class="px-3 py-2 bg-primary-600 text-white rounded-lg font-medium">{{ num }}</span>
+                {% elif num > toko_list.number|add:'-3' and num < toko_list.number|add:'3' %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if toko_list.has_next %}
+                <a href="?page={{ toko_list.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16">
+            <div class="max-w-md mx-auto">
+                <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-shopping-cart text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Belum Ada Toko & Warung
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    {% if search_query %}
+                    Tidak ditemukan toko & warung untuk pencarian "<span class="font-semibold">{{ search_query }}</span>"
+                    {% else %}
+                    Belum ada toko & warung yang terdaftar di Desa Pulosarok.
+                    {% endif %}
+                </p>
+                {% if search_query %}
+                <a href="{% url 'business:toko_warung_list' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Lihat Semua Toko & Warung
+                </a>
+                {% else %}
+                <a href="{% url 'business:business_register' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Daftarkan Toko & Warung
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Local Business Benefits -->
+<section class="bg-gray-50 dark:bg-gray-900 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Mengapa Belanja di Toko & Warung Lokal?
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Dukung perekonomian lokal dengan berbelanja di toko dan warung terdekat
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-walking text-2xl text-primary-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Akses Mudah</h3>
+                <p class="text-gray-600 dark:text-gray-400">Lokasi yang dekat dan mudah dijangkau dari rumah</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-secondary-100 dark:bg-secondary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-handshake text-2xl text-secondary-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Hubungan Personal</h3>
+                <p class="text-gray-600 dark:text-gray-400">Layanan yang lebih personal dan ramah</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-heart text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Dukung Lokal</h3>
+                <p class="text-gray-600 dark:text-gray-400">Membantu mengembangkan perekonomian desa</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-primary-600 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-4">
+            Punya Toko atau Warung?
+        </h2>
+        <p class="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
+            Daftarkan toko atau warung Anda untuk mendapatkan visibilitas lebih dan terhubung dengan masyarakat desa.
+        </p>
+        <a href="{% url 'business:business_register' %}" 
+           class="inline-flex items-center px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200">
+            <i class="fas fa-plus mr-2"></i>
+            Daftarkan Toko & Warung Sekarang
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterByCategory(categoryId) {
+    const url = new URL(window.location);
+    if (categoryId) {
+        url.searchParams.set('category', categoryId);
+    } else {
+        url.searchParams.delete('category');
+    }
+    window.location.href = url.toString();
+}
+
+// Add smooth scrolling for anchor links
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animation to toko cards
+    const tokoCards = document.querySelectorAll('.toko-card');
+    tokoCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+    });
+});
+</script>
+{% endblock %}

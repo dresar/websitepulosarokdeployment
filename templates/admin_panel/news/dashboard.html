@@ -1,0 +1,502 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard Berita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-card .icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+    .stats-card .number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+    .stats-card .label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        min-height: 200px;
+    }
+    .recent-item {
+        border-left: 4px solid #007bff;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        border-radius: 0 8px 8px 0;
+        padding: 1rem;
+    }
+    .recent-item h6 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    .recent-item small {
+        color: #6c757d;
+    }
+    .badge-status {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .stat-item {
+        padding: 1rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+        height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .stat-item .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .stat-item .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+    .display-4 {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .chart-container h5 {
+        color: #495057;
+        font-weight: 600;
+    }
+    .chart-container .text-center {
+        padding: 1rem 0;
+    }
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        transition: background-color 0.2s ease;
+    }
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    .recent-news-item:hover,
+    .popular-news-item:hover {
+        background-color: #e3f2fd;
+    }
+    .badge-sm {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.4rem;
+    }
+    .dropdown-menu {
+        border: 1px solid #dee2e6;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .dropdown-toggle::after {
+        margin-left: 0.5em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Dashboard Berita</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2">
+                <a href="{% url 'admin_panel:news_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Berita
+                </a>
+                <a href="{% url 'admin_panel:news_list' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-list"></i> Lihat Semua
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ total_news }}</div>
+                        <div class="label">Total Berita</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ published_news }}</div>
+                        <div class="label">Dipublikasi</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ total_views }}</div>
+                        <div class="label">Total Views</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ total_comments }}</div>
+                        <div class="label">Total Komentar</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats Row -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ draft_news }}</div>
+                        <div class="label">Draft</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ total_categories }}</div>
+                        <div class="label">Kategori</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ total_likes }}</div>
+                        <div class="label">Total Likes</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="number">{{ pending_comments }}</div>
+                        <div class="label">Komentar Pending</div>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Statistics Diagram -->
+        <div class="col-lg-12">
+            <div class="chart-container mb-4" style="min-height: 150px;">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-pie text-primary"></i> Statistik Berita
+                </h5>
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-primary">{{ published_news }}</div>
+                            <div class="stat-label">Dipublikasi</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-warning">{{ draft_news }}</div>
+                            <div class="stat-label">Draft</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-info">{{ total_categories }}</div>
+                            <div class="stat-label">Kategori</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number text-success">{{ total_comments }}</div>
+                            <div class="stat-label">Komentar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Additional Statistics Cards -->
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="fas fa-calendar-day text-primary"></i> Views Hari Ini
+                        </h5>
+                        <div class="text-center">
+                            <div class="display-4 text-primary">{{ today_views|default:0 }}</div>
+                            <p class="text-muted">Total views hari ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="fas fa-calendar-week text-info"></i> Views Minggu Ini
+                        </h5>
+                        <div class="text-center">
+                            <div class="display-4 text-info">{{ week_views|default:0 }}</div>
+                            <p class="text-muted">Total views minggu ini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="fas fa-calendar-alt text-success"></i> Views Bulan Ini
+                        </h5>
+                        <div class="text-center">
+                            <div class="display-4 text-success">{{ month_views|default:0 }}</div>
+                            <p class="text-muted">Total views bulan ini</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">
+                            <i class="fas fa-users text-warning"></i> Penulis Aktif
+                        </h5>
+                        <div class="text-center">
+                            <div class="display-4 text-warning">{{ active_authors|default:0 }}</div>
+                            <p class="text-muted">Penulis yang aktif</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Recent News -->
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-clock text-info"></i> Berita Terbaru
+                </h5>
+                {% if recent_news %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary btn-sm dropdown-toggle w-100" type="button" id="recentNewsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-newspaper"></i> Pilih Berita Terbaru ({{ recent_news|length }})
+                    </button>
+                    <div class="dropdown-menu w-100" aria-labelledby="recentNewsDropdown" style="max-height: 300px; overflow-y: auto;">
+                        {% for news in recent_news %}
+                        <a class="dropdown-item recent-news-item" href="{% url 'admin_panel:news_detail' news.pk %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="font-weight-bold text-dark">{{ news.title|truncatechars:40 }}</div>
+                                    <small class="text-muted">{{ news.created_at|timesince }} yang lalu</small>
+                                </div>
+                                <span class="badge badge-sm badge-{% if news.status == 'published' %}success{% elif news.status == 'draft' %}warning{% else %}secondary{% endif %} ml-2">
+                                    {{ news.get_status_display }}
+                                </span>
+                            </div>
+                        </a>
+                        {% if not forloop.last %}<div class="dropdown-divider"></div>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Total {{ recent_news|length }} berita terbaru tersedia
+                    </small>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="fas fa-newspaper fa-2x mb-2"></i>
+                    <p>Belum ada berita</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Popular News -->
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-fire text-danger"></i> Berita Populer
+                </h5>
+                {% if popular_news %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-danger btn-sm dropdown-toggle w-100" type="button" id="popularNewsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-fire"></i> Pilih Berita Populer ({{ popular_news|length }})
+                    </button>
+                    <div class="dropdown-menu w-100" aria-labelledby="popularNewsDropdown" style="max-height: 300px; overflow-y: auto;">
+                        {% for news in popular_news %}
+                        <a class="dropdown-item popular-news-item" href="{% url 'admin_panel:news_detail' news.pk %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="font-weight-bold text-dark">{{ news.title|truncatechars:35 }}</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-eye"></i> {{ news.view_count }} views
+                                        • {{ news.created_at|date:"d M Y" }}
+                                    </small>
+                                </div>
+                                <span class="badge badge-danger badge-sm ml-2">
+                                    <i class="fas fa-fire"></i>
+                                </span>
+                            </div>
+                        </a>
+                        {% if not forloop.last %}<div class="dropdown-divider"></div>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Total {{ popular_news|length }} berita populer tersedia
+                    </small>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i class="fas fa-fire fa-2x mb-2"></i>
+                    <p>Belum ada data views</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Category Stats -->
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-pie text-warning"></i> Statistik Kategori
+                </h5>
+                {% for category in category_stats %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ category.name }}</span>
+                    <span class="badge badge-primary">{{ category.news_count }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted">Belum ada kategori.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Comments -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-comments text-info"></i> Komentar Terbaru
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Komentar</th>
+                                <th>Berita</th>
+                                <th>Penulis</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comment in recent_comments %}
+                            <tr>
+                                <td>{{ comment.content|truncatechars:50 }}</td>
+                                <td>
+                                    <a href="{% url 'admin_panel:news_detail' comment.news.pk %}" class="text-decoration-none">
+                                        {{ comment.news.title|truncatechars:30 }}
+                                    </a>
+                                </td>
+                                <td>{{ comment.author_name }}</td>
+                                <td>
+                                    <span class="badge badge-{% if comment.status == 'approved' %}success{% elif comment.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                        {{ comment.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ comment.created_at|timesince }} yang lalu</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'admin_panel:news_comments' %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Belum ada komentar.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

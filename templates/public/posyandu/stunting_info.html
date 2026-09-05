@@ -1,0 +1,516 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .stunting-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+    }
+    .stunting-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+    .risk-level-low { border-left: 4px solid #10b981; }
+    .risk-level-medium { border-left: 4px solid #f59e0b; }
+    .risk-level-high { border-left: 4px solid #ef4444; }
+    .progress-circle {
+        transform: rotate(-90deg);
+    }
+    .age-group-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+        border: 1px solid #e0f2fe;
+    }
+</style>
+
+{% block content %}
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-dark-800 dark:to-dark-900 min-h-screen">
+
+    <!-- Hero Section -->
+    <section class="relative py-12 md:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center" ="fade-up">
+                <div class="inline-flex items-center px-4 py-2 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-sm font-medium mb-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Data Stunting
+                </div>
+                <h1 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                    Informasi <span class="text-orange-600 dark:text-orange-400">Stunting</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+                    Data dan upaya pencegahan stunting di Desa Pulosarok
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stunting Overview -->
+    <section class="py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" ="fade-up">
+                <!-- Total Cases -->
+                <div class="stunting-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-red-100 dark:bg-red-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="total-stunting-cases">-</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Total Kasus</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Balita dengan stunting</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Dari total balita</span>
+                            <span id="stunting-percentage">-%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-red-500 h-2 rounded-full" id="stunting-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Severe Cases -->
+                <div class="stunting-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-red-100 dark:bg-red-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="severe-stunting-cases">-</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Stunting Berat</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Perlu penanganan segera</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Dari kasus stunting</span>
+                            <span id="severe-percentage">-%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-red-600 h-2 rounded-full" id="severe-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recovery Rate -->
+                <div class="stunting-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="recovery-rate">-%</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Tingkat Pemulihan</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">6 bulan terakhir</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Target 80%</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" id="recovery-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prevention Program -->
+                <div class="stunting-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="prevention-coverage">-%</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Cakupan Pencegahan</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Program aktif</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Balita terpantau</span>
+                            <span id="monitored-children">- anak</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" id="prevention-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Age Group Analysis -->
+    <section class="py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12" ="fade-up">
+                <h2 class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Analisis <span class="text-orange-600 dark:text-orange-400">Kelompok Usia</span>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Distribusi kasus stunting berdasarkan kelompok usia
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 0-12 months -->
+                <div class="age-group-card rounded-xl p-6 shadow-lg" ="fade-up" -delay="100">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 dark:bg-blue-900 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-baby text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">0-12 Bulan</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Bayi</p>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white" id="stunting-0-12">-</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Total balita:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="total-0-12">-</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Persentase:</span>
+                            <span class="font-medium text-orange-600 dark:text-orange-400" id="pct-0-12">-%</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" id="bar-0-12" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 13-24 months -->
+                <div class="age-group-card rounded-xl p-6 shadow-lg" ="fade-up" -delay="200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 dark:bg-green-900 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-child text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">13-24 Bulan</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Batita</p>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white" id="stunting-13-24">-</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Total balita:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="total-13-24">-</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Persentase:</span>
+                            <span class="font-medium text-orange-600 dark:text-orange-400" id="pct-13-24">-%</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" id="bar-13-24" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 25-60 months -->
+                <div class="age-group-card rounded-xl p-6 shadow-lg" ="fade-up" -delay="300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 dark:bg-purple-900 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-user-friends text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">25-60 Bulan</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">Balita</p>
+                            </div>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white" id="stunting-25-60">-</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Total balita:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="total-25-60">-</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-gray-300">Persentase:</span>
+                            <span class="font-medium text-orange-600 dark:text-orange-400" id="pct-25-60">-%</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" id="bar-25-60" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Risk Factors -->
+    <section class="py-8 md:py-12 bg-white dark:bg-dark-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12" ="fade-up">
+                <h2 class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Faktor <span class="text-red-600 dark:text-red-400">Risiko</span>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Faktor-faktor yang berkontribusi terhadap stunting
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Nutritional Factors -->
+                <div class="risk-level-high bg-gray-50 dark:bg-dark-700 rounded-xl p-6" ="fade-up" -delay="100">
+                    <div class="bg-red-100 dark:bg-red-900 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-utensils text-2xl text-red-600 dark:text-red-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Faktor Gizi</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-red-500 mr-2 mt-2"></i>
+                            <span>Kekurangan gizi kronis</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-red-500 mr-2 mt-2"></i>
+                            <span>ASI tidak eksklusif</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-red-500 mr-2 mt-2"></i>
+                            <span>MPASI tidak tepat</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-red-500 mr-2 mt-2"></i>
+                            <span>Defisiensi mikronutrien</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-red-50 dark:bg-red-900 rounded-lg">
+                        <span class="text-sm font-medium text-red-800 dark:text-red-200">Risiko Tinggi</span>
+                    </div>
+                </div>
+
+                <!-- Health Factors -->
+                <div class="risk-level-medium bg-gray-50 dark:bg-dark-700 rounded-xl p-6" ="fade-up" -delay="200">
+                    <div class="bg-yellow-100 dark:bg-yellow-900 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-heartbeat text-2xl text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Faktor Kesehatan</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-yellow-500 mr-2 mt-2"></i>
+                            <span>Infeksi berulang</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-yellow-500 mr-2 mt-2"></i>
+                            <span>Diare kronis</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-yellow-500 mr-2 mt-2"></i>
+                            <span>Imunisasi tidak lengkap</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-yellow-500 mr-2 mt-2"></i>
+                            <span>Berat badan lahir rendah</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900 rounded-lg">
+                        <span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Risiko Sedang</span>
+                    </div>
+                </div>
+
+                <!-- Environmental Factors -->
+                <div class="risk-level-low bg-gray-50 dark:bg-dark-700 rounded-xl p-6" ="fade-up" -delay="300">
+                    <div class="bg-green-100 dark:bg-green-900 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-home text-2xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Faktor Lingkungan</h3>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-green-500 mr-2 mt-2"></i>
+                            <span>Sanitasi buruk</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-green-500 mr-2 mt-2"></i>
+                            <span>Air bersih terbatas</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-green-500 mr-2 mt-2"></i>
+                            <span>Kemiskinan keluarga</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-circle text-xs text-green-500 mr-2 mt-2"></i>
+                            <span>Pendidikan ibu rendah</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-green-50 dark:bg-green-900 rounded-lg">
+                        <span class="text-sm font-medium text-green-800 dark:text-green-200">Dapat Dicegah</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prevention Programs -->
+    <section class="py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12" ="fade-up">
+                <h2 class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Program <span class="text-blue-600 dark:text-blue-400">Pencegahan</span>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Upaya pencegahan dan penanganan stunting di desa
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Prevention Programs -->
+                <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6" ="fade-up" -delay="100">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-shield-alt text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Program Pencegahan</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Edukasi gizi seimbang untuk ibu</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Promosi ASI eksklusif</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Pelatihan MPASI yang tepat</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Pemantauan pertumbuhan rutin</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Suplementasi gizi</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Treatment Programs -->
+                <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6" ="fade-up" -delay="200">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-medkit text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Program Penanganan</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Pemberian makanan tambahan</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Terapi gizi intensif</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Pengobatan infeksi penyerta</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Konseling keluarga</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Follow-up berkala</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-8 md:py-12 bg-gradient-to-r from-orange-500 to-red-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div ="fade-up">
+                <h2 class="text-2xl md:text-4xl font-bold text-white mb-4">
+                    Mari Bersama Cegah Stunting
+                </h2>
+                <p class="text-lg text-orange-100 mb-8 max-w-2xl mx-auto">
+                    Stunting dapat dicegah dengan upaya bersama. Dukung program posyandu dan jaga kesehatan anak-anak kita.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'posyandu:public_posyandu_services' %}" class="bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors">
+                        <i class="fas fa-calendar-check mr-2"></i>
+                        Jadwal Posyandu
+                    </a>
+                    <a href="{% url 'posyandu:public_health_info' %}" class="bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors border-2 border-white">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Data Kesehatan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+// Load stunting statistics
+fetch('/posyandu/api/health-stats/')
+    .then(response => response.json())
+    .then(data => {
+        // Update overview cards
+        const totalStunting = data.total_stunting || 0;
+        const severeStunting = data.stunting_berat || 0;
+        const totalBalita = data.total_balita || 1;
+        const recoveryRate = data.recovery_rate || 0;
+        const preventionCoverage = data.prevention_coverage || 0;
+        const monitoredChildren = data.monitored_children || 0;
+        
+        document.getElementById('total-stunting-cases').textContent = totalStunting;
+        document.getElementById('severe-stunting-cases').textContent = severeStunting;
+        document.getElementById('recovery-rate').textContent = recoveryRate + '%';
+        document.getElementById('prevention-coverage').textContent = preventionCoverage + '%';
+        document.getElementById('monitored-children').textContent = monitoredChildren + ' anak';
+        
+        // Calculate percentages
+        const stuntingPercentage = Math.round((totalStunting / totalBalita) * 100) || 0;
+        const severePercentage = totalStunting > 0 ? Math.round((severeStunting / totalStunting) * 100) : 0;
+        
+        document.getElementById('stunting-percentage').textContent = stuntingPercentage + '%';
+        document.getElementById('severe-percentage').textContent = severePercentage + '%';
+        
+        // Update progress bars
+        document.getElementById('stunting-bar').style.width = stuntingPercentage + '%';
+        document.getElementById('severe-bar').style.width = severePercentage + '%';
+        document.getElementById('recovery-bar').style.width = recoveryRate + '%';
+        document.getElementById('prevention-bar').style.width = preventionCoverage + '%';
+        
+        // Update age group data (sample data - replace with real API data)
+        const ageGroups = {
+            '0-12': { stunting: Math.floor(totalStunting * 0.3), total: Math.floor(totalBalita * 0.3) },
+            '13-24': { stunting: Math.floor(totalStunting * 0.4), total: Math.floor(totalBalita * 0.35) },
+            '25-60': { stunting: Math.floor(totalStunting * 0.3), total: Math.floor(totalBalita * 0.35) }
+        };
+        
+        Object.keys(ageGroups).forEach(ageGroup => {
+            const data = ageGroups[ageGroup];
+            const percentage = data.total > 0 ? Math.round((data.stunting / data.total) * 100) : 0;
+            
+            document.getElementById(`stunting-${ageGroup}`).textContent = data.stunting;
+            document.getElementById(`total-${ageGroup}`).textContent = data.total;
+            document.getElementById(`pct-${ageGroup}`).textContent = percentage + '%';
+            document.getElementById(`bar-${ageGroup}`).style.width = percentage + '%';
+        });
+    })
+    .catch(error => {
+        console.error('Error loading stunting stats:', error);
+        // Set default values on error
+        document.querySelectorAll('[id$="-cases"], [id$="-rate"], [id$="-coverage"]').forEach(el => {
+            if (el.textContent === '-' || el.textContent === '-%') {
+                el.textContent = el.id.includes('rate') || el.id.includes('coverage') ? '0%' : '0';
+            }
+        });
+    });
+
+</script>
+{% endblock content %}
+{% endblock extra_css %}

@@ -1,0 +1,285 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Laporan Posyandu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .report-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .report-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .report-icon {
+        font-size: 3rem;
+        color: #007bff;
+        margin-bottom: 15px;
+    }
+    .report-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    .report-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    .btn-report {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 25px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-report:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        color: white;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        border-left: 4px solid #007bff;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Report Header -->
+    <div class="report-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:posyandu_admin' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        Laporan Posyandu
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Laporan dan analitik data posyandu</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-light" onclick="printReport()">
+                    <i class="fas fa-print mr-2"></i>
+                    Cetak Laporan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalHealthRecords">0</div>
+            <div class="stat-label">Total Rekam Kesehatan</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalImmunizations">0</div>
+            <div class="stat-label">Total Imunisasi</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalNutritionData">0</div>
+            <div class="stat-label">Total Data Gizi</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalStuntingData">0</div>
+            <div class="stat-label">Total Data Stunting</div>
+        </div>
+    </div>
+
+    <!-- Report Cards -->
+    <div class="row">
+        <div class="col-md-6 col-lg-4">
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="report-title">Laporan Rekam Kesehatan</div>
+                <div class="report-description">
+                    Laporan lengkap data rekam kesehatan pasien posyandu
+                </div>
+                <a href="{% url 'admin_panel:posyandu:export_health_records' %}" class="btn btn-report">
+                    <i class="fas fa-download mr-2"></i>
+                    Download CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-syringe"></i>
+                </div>
+                <div class="report-title">Laporan Imunisasi</div>
+                <div class="report-description">
+                    Laporan data imunisasi dan vaksinasi
+                </div>
+                <a href="{% url 'admin_panel:posyandu:export_immunizations' %}" class="btn btn-report">
+                    <i class="fas fa-download mr-2"></i>
+                    Download CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-apple-alt"></i>
+                </div>
+                <div class="report-title">Laporan Data Gizi</div>
+                <div class="report-description">
+                    Laporan status gizi dan nutrisi
+                </div>
+                <a href="{% url 'admin_panel:posyandu:export_nutrition_data' %}" class="btn btn-report">
+                    <i class="fas fa-download mr-2"></i>
+                    Download CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="report-title">Laporan Data Stunting</div>
+                <div class="report-description">
+                    Laporan monitoring stunting
+                </div>
+                <a href="{% url 'admin_panel:posyandu:export_stunting_data' %}" class="btn btn-report">
+                    <i class="fas fa-download mr-2"></i>
+                    Download CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-baby"></i>
+                </div>
+                <div class="report-title">Laporan Ibu Hamil</div>
+                <div class="report-description">
+                    Laporan data ibu hamil dan pemeriksaan
+                </div>
+                <a href="#" class="btn btn-report disabled">
+                    <i class="fas fa-download mr-2"></i>
+                    Coming Soon
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="report-card">
+                <div class="report-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="report-title">Laporan Jadwal</div>
+                <div class="report-description">
+                    Laporan jadwal kegiatan posyandu
+                </div>
+                <a href="#" class="btn btn-report disabled">
+                    <i class="fas fa-download mr-2"></i>
+                    Coming Soon
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Report -->
+    <div class="report-card">
+        <h5 class="mb-4">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Ringkasan Laporan
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Data Terbaru</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success mr-2"></i>Rekam kesehatan: <span id="recentHealthRecords">0</span> hari ini</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Imunisasi: <span id="recentImmunizations">0</span> hari ini</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Data gizi: <span id="recentNutritionData">0</span> hari ini</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Status Sistem</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success mr-2"></i>Sistem berjalan normal</li>
+                    <li><i class="fas fa-check-circle text-success mr-2"></i>Database terhubung</li>
+                    <li><i class="fas fa-check-circle text-success mr-2"></i>Backup data aktif</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadReportData();
+});
+
+function loadReportData() {
+    // Load statistics
+    $.ajax({
+        url: '{% url "admin_panel:posyandu:api_statistics" %}',
+        method: 'GET',
+        success: function(response) {
+            $('#totalHealthRecords').text(response.total_health_records || 0);
+            $('#totalImmunizations').text(response.total_immunizations || 0);
+            $('#totalNutritionData').text(response.total_nutrition_data || 0);
+            $('#totalStuntingData').text(response.total_stunting_data || 0);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading report data:', error);
+        }
+    });
+}
+
+function printReport() {
+    window.print();
+}
+</script>
+{% endblock %}
+

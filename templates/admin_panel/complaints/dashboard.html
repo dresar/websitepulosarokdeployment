@@ -1,0 +1,378 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<!-- Using Bootstrap 5 from base template -->
+<style>
+    .complaint-card {
+        transition: all 0.3s ease;
+    border-left: 4px solid;
+    }
+    .complaint-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .complaint-card-danger { border-left-color: #dc3545; }
+    .complaint-card-warning { border-left-color: #ffc107; }
+    .complaint-card-info { border-left-color: #17a2b8; }
+    .complaint-card-success { border-left-color: #28a745; }
+    
+    .complaint-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+    .complaint-icon-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+    .complaint-icon-warning { background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%); }
+    .complaint-icon-info { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); }
+    .complaint-icon-success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+    
+    .hover-bg-danger:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h3 class="card-title mb-0 d-flex align-items-center">
+                <i class="fas fa-chart-pie me-3"></i>
+                Dashboard Keluhan
+        </h3>
+        </div>
+    </div>
+    
+        <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Complaints -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card complaint-card complaint-card-danger h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="display-4 fw-bold text-dark">{{ total_complaints|default:0 }}</div>
+                        <div class="text-muted text-uppercase small fw-semibold">Total Keluhan</div>
+                    </div>
+                    <div class="complaint-icon complaint-icon-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            
+        <!-- Pending -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card complaint-card complaint-card-warning h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="display-4 fw-bold text-dark">{{ pending_complaints|default:0 }}</div>
+                        <div class="text-muted text-uppercase small fw-semibold">Menunggu</div>
+                    </div>
+                    <div class="complaint-icon complaint-icon-warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            
+        <!-- In Progress -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card complaint-card complaint-card-info h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="display-4 fw-bold text-dark">{{ in_progress_complaints|default:0 }}</div>
+                        <div class="text-muted text-uppercase small fw-semibold">Diproses</div>
+                    </div>
+                    <div class="complaint-icon complaint-icon-info">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            
+        <!-- Resolved -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card complaint-card complaint-card-success h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="display-4 fw-bold text-dark">{{ resolved_complaints|default:0 }}</div>
+                        <div class="text-muted text-uppercase small fw-semibold">Selesai</div>
+                    </div>
+                    <div class="complaint-icon complaint-icon-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Category Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-list text-danger me-3"></i>
+                    <h5 class="card-title mb-0">Keluhan per Kategori</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for cat in category_stats %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                <span class="fw-medium">{{ cat.name }}</span>
+                                <span class="badge bg-danger fs-6">{{ cat.total_complaints }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </div>
+            
+    <!-- Status Distribution -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-tasks text-danger me-3"></i>
+                    <h5 class="card-title mb-0">Distribusi Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-6 mb-3">
+                            <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                                <div class="display-6 fw-bold text-warning">{{ pending_complaints|default:0 }}</div>
+                                <div class="small text-muted">Pending</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6 mb-3">
+                            <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                                <div class="display-6 fw-bold text-info">{{ in_review_complaints|default:0 }}</div>
+                                <div class="small text-muted">In Review</div>
+                        </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6 mb-3">
+                            <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                                <div class="display-6 fw-bold text-primary">{{ in_progress_complaints|default:0 }}</div>
+                                <div class="small text-muted">In Progress</div>
+                        </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6 mb-3">
+                            <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                                <div class="display-6 fw-bold text-success">{{ resolved_complaints|default:0 }}</div>
+                                <div class="small text-muted">Resolved</div>
+                </div>
+                        </div>
+                        <div class="col-md-2 col-sm-6 mb-3">
+                            <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                                <div class="display-6 fw-bold text-danger">{{ rejected_complaints|default:0 }}</div>
+                                <div class="small text-muted">Rejected</div>
+                        </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+    <div class="row mb-4">
+        <!-- Recent Complaints -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle text-danger me-3"></i>
+                    <h5 class="card-title mb-0">Keluhan Terbaru</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_complaints %}
+                        {% for complaint in recent_complaints %}
+                        <div class="d-flex align-items-center mb-3 p-3 bg-light rounded">
+                            <div class="me-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white" 
+                                     style="width: 40px; height: 40px; background: {% if complaint.priority == 'high' %}#dc3545{% elif complaint.priority == 'medium' %}#ffc107{% else %}#17a2b8{% endif %};">
+                                <i class="fas fa-exclamation-circle"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-medium">{{ complaint.title|truncatechars:30 }}</div>
+                                <small class="text-muted">{{ complaint.complainant_name }} - {{ complaint.created_at|timesince }} yang lalu</small>
+                            </div>
+                            <span class="badge 
+                                {% if complaint.status == 'resolved' %}bg-success
+                                {% elif complaint.status == 'in_progress' %}bg-info
+                                {% elif complaint.status == 'pending' %}bg-warning
+                                {% else %}bg-secondary{% endif %}">
+                                {{ complaint.get_status_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-exclamation-triangle fa-3x mb-3 opacity-50"></i>
+                            <p>Tidak ada keluhan terbaru</p>
+                        </div>
+                    {% endif %}
+                </div>
+                </div>
+            </div>
+            
+        <!-- Recent Updates -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-comment text-danger me-3"></i>
+                    <h5 class="card-title mb-0">Update Terbaru</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_updates %}
+                        {% for update in recent_updates %}
+                        <div class="d-flex align-items-center mb-3 p-3 bg-light rounded">
+                            <div class="me-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white bg-info" 
+                                     style="width: 40px; height: 40px;">
+                                <i class="fas fa-comment"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-medium">{{ update.complaint.title|truncatechars:25 }}</div>
+                                <small class="text-muted">{{ update.notes|truncatechars:50 }} - {{ update.created_at|timesince }} yang lalu</small>
+                            </div>
+                            <span class="badge bg-info">
+                                {{ update.updated_by.username }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-comment fa-3x mb-3 opacity-50"></i>
+                            <p>Tidak ada update terbaru</p>
+                        </div>
+                    {% endif %}
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-bolt text-danger me-3"></i>
+                    <h5 class="card-title mb-0">Aksi Cepat</h5>
+            </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <a href="{% url 'admin_panel:complaints_list' %}?status=pending" 
+                               class="d-flex align-items-center p-3 bg-light border rounded text-decoration-none text-dark hover-bg-danger">
+                                <i class="fas fa-clock me-3 text-lg"></i>
+                                <span class="fw-semibold">Keluhan Menunggu</span>
+                            </a>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <a href="{% url 'admin_panel:complaints_list' %}?priority=high" 
+                               class="d-flex align-items-center p-3 bg-light border rounded text-decoration-none text-dark hover-bg-danger">
+                                <i class="fas fa-exclamation me-3 text-lg"></i>
+                                <span class="fw-semibold">Prioritas Tinggi</span>
+                            </a>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <a href="{% url 'admin_panel:complaint_categories_list' %}" 
+                               class="d-flex align-items-center p-3 bg-light border rounded text-decoration-none text-dark hover-bg-danger">
+                                <i class="fas fa-tags me-3 text-lg"></i>
+                                <span class="fw-semibold">Kelola Kategori</span>
+                            </a>
+                        </div>
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <a href="#" 
+                               class="d-flex align-items-center p-3 bg-light border rounded text-decoration-none text-dark hover-bg-danger">
+                                <i class="fas fa-chart-bar me-3 text-lg"></i>
+                                <span class="fw-semibold">Laporan Keluhan</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Data Summary Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-table text-danger me-3"></i>
+                    <h5 class="card-title mb-0">Ringkasan Data</h5>
+            </div>
+                <div class="card-body">
+            <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-uppercase small fw-semibold">Kategori</th>
+                                    <th class="text-uppercase small fw-semibold">Total Keluhan</th>
+                                    <th class="text-uppercase small fw-semibold">Pending</th>
+                                    <th class="text-uppercase small fw-semibold">Diproses</th>
+                                    <th class="text-uppercase small fw-semibold">Selesai</th>
+                                    <th class="text-uppercase small fw-semibold">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in category_stats %}
+                        <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-tag text-danger me-2"></i>
+                                            <span class="fw-medium">{{ category.name }}</span>
+                                </div>
+                            </td>
+                                    <td>
+                                        <span class="badge bg-danger fs-6">{{ category.total_complaints }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning fs-6">{{ category.pending_complaints }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info fs-6">{{ category.in_progress_complaints }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success fs-6">{{ category.resolved_complaints }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'admin_panel:complaints_list' %}?category={{ category.id }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            Lihat
+                                        </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="fas fa-table fa-3x mb-3 opacity-50"></i>
+                                <p>Tidak ada data kategori</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

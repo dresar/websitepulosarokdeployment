@@ -1,0 +1,467 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block title %}{{ news.title }} - {{ website_settings.site_name|default:'Desa Pulosarok' }}{% endblock %}
+
+{% block meta_description %}{{ news.meta_description|default:news.excerpt|default:news.content|truncatewords:20 }}{% endblock %}
+
+{% block og_title %}{{ news.title }}{% endblock %}
+{% block og_description %}{{ news.meta_description|default:news.excerpt|default:news.content|truncatewords:20 }}{% endblock %}
+{% block og_image %}{% if news.featured_image %}{{ news.featured_image.url }}{% else %}{{ website_settings.site_logo.url }}{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .news-content {
+        line-height: 1.8;
+    }
+    
+    .news-content h1, .news-content h2, .news-content h3, .news-content h4, .news-content h5, .news-content h6 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .news-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .news-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+    
+    .news-content blockquote {
+        border-left: 4px solid var(--primary-color);
+        padding-left: 1.5rem;
+        margin: 1.5rem 0;
+        font-style: italic;
+        background-color: rgba(59, 130, 246, 0.05);
+        padding: 1rem 1.5rem;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .news-content ul, .news-content ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+    
+    .news-content li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .share-buttons {
+        position: sticky;
+        top: 100px;
+    }
+    
+    .share-button {
+        transition: all 0.3s ease;
+    }
+    
+    .share-button:hover {
+        transform: translateY(-2px);
+    }
+    
+    .comment-form {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05));
+    }
+    
+    .comment-item {
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    .author-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+    }
+    
+    .related-news-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .related-news-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .related-news-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .news-image {
+        aspect-ratio: 16/9;
+        object-fit: cover;
+    }
+    
+    @media (max-width: 640px) {
+        .share-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+        }
+        
+        .share-buttons .flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .share-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Main Article -->
+        <article class="lg:w-2/3">
+            <!-- Article Header -->
+            <header class="mb-8">
+                <!-- Category and Meta -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'news:by_category' news.category.slug %}" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white" style="background-color: {{ news.category.color }}">
+                            <i class="fas fa-tag mr-2"></i>{{ news.category.name }}
+                        </a>
+                        {% if news.is_featured %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-500 text-white">
+                            <i class="fas fa-star mr-1"></i>Berita Utama
+                        </span>
+                        {% endif %}
+                        {% if news.is_breaking %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500 text-white">
+                            <i class="fas fa-bolt mr-1"></i>Breaking News
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center">
+                            <i class="fas fa-eye mr-1"></i>{{ news.views_count }} views
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-comment mr-1"></i>{{ news.comments_count }} komentar
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>{{ news.reading_time }} min baca
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Title -->
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+                    {{ news.title }}
+                </h1>
+                
+                <!-- Excerpt -->
+                {% if news.excerpt %}
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                    {{ news.excerpt }}
+                </p>
+                {% endif %}
+                
+                <!-- Author and Date -->
+                <div class="flex items-center justify-between py-4 border-t border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ news.author.get_full_name|default:news.author.username }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Penulis</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-calendar mr-1"></i>
+                            {{ news.published_date|date:"d F Y" }}
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-clock mr-1"></i>
+                            {{ news.published_date|date:"H:i" }} WIB
+                        </p>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Featured Image -->
+            {% if news.featured_image %}
+            <div class="mb-8">
+                <img src="{{ news.featured_image.url }}" alt="{{ news.featured_image_alt|default:news.title }}" class="news-image w-full rounded-xl shadow-lg">
+                {% if news.featured_image_alt %}
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">{{ news.featured_image_alt }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- YouTube Video -->
+            {% if news.youtube_url %}
+            <div class="mb-8">
+                <div class="relative w-full" style="padding-bottom: 56.25%;">
+                    <iframe 
+                        src="{{ news.youtube_url|replace:'watch?v=','embed/'|replace:'youtu.be/','embed/' }}" 
+                        class="absolute top-0 left-0 w-full h-full rounded-xl"
+                        frameborder="0" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Article Content -->
+            <div class="news-content prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
+                {{ news.content|safe }}
+            </div>
+            
+            <!-- Tags -->
+            {% if news.tags.exists %}
+            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-hashtag mr-2 text-primary-600"></i>Tag
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in news.tags.all %}
+                    <a href="{% url 'news:by_tag' tag.slug %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200">
+                        #{{ tag.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Share Buttons -->
+            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-share-alt mr-2 text-primary-600"></i>Bagikan
+                </h3>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="shareOnFacebook()" class="share-button inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        <i class="fab fa-facebook-f mr-2"></i>Facebook
+                    </button>
+                    <button onclick="shareOnTwitter()" class="share-button inline-flex items-center px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors duration-200">
+                        <i class="fab fa-twitter mr-2"></i>Twitter
+                    </button>
+                    <button onclick="shareOnWhatsApp()" class="share-button inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                    </button>
+                    <button onclick="copyLink()" class="share-button inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                        <i class="fas fa-link mr-2"></i>Copy Link
+                    </button>
+                </div>
+            </div>
+        </article>
+        
+        <!-- Sidebar -->
+        <aside class="lg:w-1/3">
+            <!-- Author Card -->
+            <div class="author-card rounded-xl p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-user mr-2 text-primary-600"></i>Tentang Penulis
+                </h3>
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 dark:text-white">{{ news.author.get_full_name|default:news.author.username }}</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Penulis</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Penulis artikel ini dari tim redaksi Desa Pulosarok.
+                </p>
+            </div>
+            
+            <!-- Related News -->
+            {% if related_news %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-newspaper mr-2 text-primary-600"></i>Berita Terkait
+                </h3>
+                <div class="space-y-4">
+                    {% for related in related_news %}
+                    <article class="related-news-card bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div class="flex space-x-3">
+                            {% if related.featured_image %}
+                            <img src="{{ related.featured_image.url }}" alt="{{ related.title }}" class="w-16 h-16 object-cover rounded-lg flex-shrink-0">
+                            {% else %}
+                            <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-newspaper text-white text-sm"></i>
+                            </div>
+                            {% endif %}
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 mb-1">
+                                    <a href="{% url 'news:detail' related.slug %}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                                        {{ related.title }}
+                                    </a>
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ related.published_date|date:"d M Y" }}
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Share Buttons (Desktop) -->
+            <div class="hidden lg:block">
+                <div class="share-buttons">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            <i class="fas fa-share-alt mr-2 text-primary-600"></i>Bagikan
+                        </h3>
+                        <div class="flex flex-col space-y-3">
+                            <button onclick="shareOnFacebook()" class="share-button flex items-center justify-center w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                <i class="fab fa-facebook-f mr-2"></i>Facebook
+                            </button>
+                            <button onclick="shareOnTwitter()" class="share-button flex items-center justify-center w-full px-4 py-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors duration-200">
+                                <i class="fab fa-twitter mr-2"></i>Twitter
+                            </button>
+                            <button onclick="shareOnWhatsApp()" class="share-button flex items-center justify-center w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                                <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                            </button>
+                            <button onclick="copyLink()" class="share-button flex items-center justify-center w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                                <i class="fas fa-link mr-2"></i>Copy Link
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- Comments Section -->
+    {% if news.allow_comments %}
+    <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <div class="max-w-4xl">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <i class="fas fa-comments mr-2 text-primary-600"></i>Komentar ({{ news.comments_count }})
+            </h3>
+            
+            <!-- Comment Form -->
+            <div class="comment-form rounded-xl p-6 mb-8">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tulis Komentar</h4>
+                <form method="post" action="{% url 'news:add_comment' news.slug %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="author_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nama</label>
+                            <input type="text" name="author_name" id="author_name" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="author_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                            <input type="email" name="author_email" id="author_email" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Komentar</label>
+                        <textarea name="content" id="content" rows="4" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"></textarea>
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200">
+                        <i class="fas fa-paper-plane mr-2"></i>Kirim Komentar
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Comments List -->
+            <div class="space-y-6">
+                {% for comment in news.comments.all %}
+                <div class="comment-item bg-white dark:bg-gray-800 rounded-lg p-4 pl-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-xs"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-900 dark:text-white">{{ comment.author_name }}</h5>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ comment.created_at|date:"d M Y, H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300 ml-11">{{ comment.content }}</p>
+                </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <i class="fas fa-comments text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400">Belum ada komentar. Jadilah yang pertama berkomentar!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Share functions
+    function shareOnFacebook() {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent('{{ news.title }}');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank', 'width=600,height=400');
+    }
+    
+    function shareOnTwitter() {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent('{{ news.title }}');
+        window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank', 'width=600,height=400');
+    }
+    
+    function shareOnWhatsApp() {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent('{{ news.title }}');
+        window.open(`https://wa.me/?text=${title}%20${url}`, '_blank');
+    }
+    
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            // Show success message
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+            button.classList.add('bg-green-600', 'hover:bg-green-700');
+            button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-green-600', 'hover:bg-green-700');
+                button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+            }, 2000);
+        });
+    }
+    
+    // Track view
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple view tracking (you might want to implement proper analytics)
+        fetch('{% url "news:detail" news.slug %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'action': 'view'
+            })
+        }).catch(function(error) {
+            console.log('View tracking failed:', error);
+        });
+    });
+</script>
+{% endblock %}
+

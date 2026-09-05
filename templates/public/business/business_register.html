@@ -1,0 +1,460 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block title %}Daftar Bisnis Baru - {{ website_settings.site_name|default:'Desa Pulosarok' }}{% endblock %}
+{% block meta_description %}Daftarkan bisnis Anda di Desa Pulosarok. Formulir pendaftaran bisnis untuk UMKM, Koperasi, BUMG, dan layanan jasa.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .dark .form-section:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    .form-input {
+        transition: all 0.2s ease-in-out;
+    }
+    .form-input:focus {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .step-indicator {
+        transition: all 0.3s ease-in-out;
+    }
+    .step-indicator.active {
+        background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+        color: white;
+    }
+    .step-indicator.completed {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+    .business-type-card {
+        transition: all 0.3s ease-in-out;
+        cursor: pointer;
+    }
+    .business-type-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .business-type-card.selected {
+        border-color: #3B82F6;
+        background-color: #EFF6FF;
+    }
+    .dark .business-type-card.selected {
+        background-color: #1E3A8A;
+    }
+    .progress-bar {
+        transition: width 0.5s ease-in-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 text-white overflow-hidden">
+    <div class="absolute inset-0 bg-black/20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div class="text-center">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 animate-fade-in">
+                Daftarkan Bisnis Anda
+            </h1>
+            <p class="text-lg sm:text-xl text-primary-100 mb-8 max-w-3xl mx-auto animate-slide-up">
+                Bergabunglah dengan komunitas bisnis Desa Pulosarok. Daftarkan bisnis Anda untuk mendapatkan visibilitas dan dukungan dari masyarakat desa.
+            </p>
+            
+            <!-- Benefits -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <i class="fas fa-eye text-3xl mb-3"></i>
+                    <h3 class="font-semibold mb-2">Visibilitas Tinggi</h3>
+                    <p class="text-sm text-white/80">Dapatkan eksposur maksimal di website desa</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <i class="fas fa-users text-3xl mb-3"></i>
+                    <h3 class="font-semibold mb-2">Komunitas Lokal</h3>
+                    <p class="text-sm text-white/80">Terhubung dengan masyarakat desa</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <i class="fas fa-chart-line text-3xl mb-3"></i>
+                    <h3 class="font-semibold mb-2">Pertumbuhan Bisnis</h3>
+                    <p class="text-sm text-white/80">Dukungan untuk pengembangan usaha</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Registration Form -->
+<section class="py-8 lg:py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="step-indicator w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-sm font-semibold active" data-step="1">
+                    1
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 dark:bg-gray-600 mx-4">
+                    <div class="progress-bar h-full bg-primary-600" style="width: 0%"></div>
+                </div>
+                <div class="step-indicator w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-sm font-semibold" data-step="2">
+                    2
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 dark:bg-gray-600 mx-4">
+                    <div class="progress-bar h-full bg-primary-600" style="width: 0%"></div>
+                </div>
+                <div class="step-indicator w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-sm font-semibold" data-step="3">
+                    3
+                </div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>Informasi Bisnis</span>
+                <span>Kontak & Alamat</span>
+                <span>Konfirmasi</span>
+            </div>
+        </div>
+        
+        <form method="post" id="businessForm" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Step 1: Business Type Selection -->
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6" id="step1">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-store text-primary-600 mr-3"></i>
+                    Pilih Jenis Bisnis
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="business-type-card border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center" data-type="umkm">
+                        <i class="fas fa-building text-3xl text-primary-600 mb-3"></i>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">UMKM</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Usaha Mikro, Kecil, dan Menengah</p>
+                    </div>
+                    
+                    <div class="business-type-card border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center" data-type="koperasi">
+                        <i class="fas fa-handshake text-3xl text-primary-600 mb-3"></i>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Koperasi</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Badan usaha bersama</p>
+                    </div>
+                    
+                    <div class="business-type-card border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center" data-type="bumg">
+                        <i class="fas fa-landmark text-3xl text-primary-600 mb-3"></i>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">BUMG</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Badan Usaha Milik Gampong</p>
+                    </div>
+                    
+                    <div class="business-type-card border-2 border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center" data-type="layanan_jasa">
+                        <i class="fas fa-tools text-3xl text-primary-600 mb-3"></i>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Layanan Jasa</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Penyedia jasa profesional</p>
+                    </div>
+                </div>
+                
+                <input type="hidden" name="business_type" id="business_type" required>
+                
+                <div class="flex justify-end">
+                    <button type="button" onclick="nextStep(2)" 
+                            class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                            id="step1-next" disabled>
+                        Selanjutnya <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Business Information -->
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hidden" id="step2">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-info-circle text-primary-600 mr-3"></i>
+                    Informasi Bisnis
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nama Bisnis <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="name" id="business_name" 
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                               placeholder="Masukkan nama bisnis Anda" required>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Deskripsi Bisnis
+                        </label>
+                        <textarea name="description" id="business_description" rows="4" 
+                                  class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                                  placeholder="Jelaskan tentang bisnis Anda, produk atau layanan yang ditawarkan"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Kategori Bisnis
+                        </label>
+                        <select name="category" id="business_category" 
+                                class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">Pilih Kategori</option>
+                            <option value="makanan">Makanan & Minuman</option>
+                            <option value="fashion">Fashion & Pakaian</option>
+                            <option value="elektronik">Elektronik & Gadget</option>
+                            <option value="jasa">Jasa & Layanan</option>
+                            <option value="pertanian">Pertanian & Perkebunan</option>
+                            <option value="kerajinan">Kerajinan & Seni</option>
+                            <option value="lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Tanggal Mulai Usaha
+                        </label>
+                        <input type="date" name="start_date" id="start_date" 
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-6">
+                    <button type="button" onclick="prevStep(1)" 
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i> Sebelumnya
+                    </button>
+                    <button type="button" onclick="nextStep(3)" 
+                            class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200">
+                        Selanjutnya <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Contact Information -->
+            <div class="form-section bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hidden" id="step3">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                    <i class="fas fa-phone text-primary-600 mr-3"></i>
+                    Informasi Kontak
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Alamat Lengkap <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="address" id="business_address" rows="3" 
+                                  class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                                  placeholder="Masukkan alamat lengkap bisnis Anda" required></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nomor Telepon <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" name="phone" id="business_phone" 
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                               placeholder="08xxxxxxxxxx" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Email
+                        </label>
+                        <input type="email" name="email" id="business_email" 
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                               placeholder="bisnis@email.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Website (Opsional)
+                        </label>
+                        <input type="url" name="website" id="business_website" 
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                               placeholder="https://website-bisnis.com">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Jam Operasional
+                        </label>
+                        <input type="text" name="operating_hours" id="operating_hours" 
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" 
+                               placeholder="Senin - Jumat: 08:00 - 17:00">
+                    </div>
+                </div>
+                
+                <!-- Terms and Conditions -->
+                <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex items-start">
+                        <input type="checkbox" name="terms_accepted" id="terms_accepted" 
+                               class="mt-1 mr-3 text-primary-600 focus:ring-primary-500" required>
+                        <label for="terms_accepted" class="text-sm text-gray-700 dark:text-gray-300">
+                            Saya menyetujui <a href="#" class="text-primary-600 hover:text-primary-700 underline">syarat dan ketentuan</a> 
+                            pendaftaran bisnis di Desa Pulosarok dan menyatakan bahwa informasi yang diberikan adalah benar.
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-6">
+                    <button type="button" onclick="prevStep(2)" 
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i> Sebelumnya
+                    </button>
+                    <button type="submit" 
+                            class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-200">
+                        <i class="fas fa-paper-plane mr-2"></i> Daftarkan Bisnis
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Success Message (Hidden by default) -->
+<div id="successMessage" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md mx-auto m-4 text-center">
+        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-2xl text-green-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Pendaftaran Berhasil!</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Bisnis Anda telah berhasil didaftarkan. Tim kami akan memverifikasi informasi dan menghubungi Anda dalam 1-2 hari kerja.
+        </p>
+        <div class="flex space-x-3">
+            <a href="{% url 'business:business_list' %}" 
+               class="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200">
+                Lihat Daftar Bisnis
+            </a>
+            <button onclick="closeSuccessMessage()" 
+                    class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentStep = 1;
+let selectedBusinessType = '';
+
+// Business type selection
+document.querySelectorAll('.business-type-card').forEach(card => {
+    card.addEventListener('click', function() {
+        // Remove selected class from all cards
+        document.querySelectorAll('.business-type-card').forEach(c => c.classList.remove('selected'));
+        
+        // Add selected class to clicked card
+        this.classList.add('selected');
+        
+        // Set business type
+        selectedBusinessType = this.dataset.type;
+        document.getElementById('business_type').value = selectedBusinessType;
+        
+        // Enable next button
+        document.getElementById('step1-next').disabled = false;
+    });
+});
+
+// Step navigation
+function nextStep(step) {
+    if (validateCurrentStep()) {
+        // Hide current step
+        document.getElementById(`step${currentStep}`).classList.add('hidden');
+        
+        // Show next step
+        document.getElementById(`step${step}`).classList.remove('hidden');
+        
+        // Update progress
+        updateProgress(step);
+        
+        currentStep = step;
+    }
+}
+
+function prevStep(step) {
+    // Hide current step
+    document.getElementById(`step${currentStep}`).classList.add('hidden');
+    
+    // Show previous step
+    document.getElementById(`step${step}`).classList.remove('hidden');
+    
+    // Update progress
+    updateProgress(step);
+    
+    currentStep = step;
+}
+
+function updateProgress(step) {
+    const progress = ((step - 1) / 2) * 100;
+    document.querySelectorAll('.progress-bar').forEach(bar => {
+        bar.style.width = `${progress}%`;
+    });
+    
+    // Update step indicators
+    document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+        indicator.classList.remove('active', 'completed');
+        if (index + 1 < step) {
+            indicator.classList.add('completed');
+        } else if (index + 1 === step) {
+            indicator.classList.add('active');
+        }
+    });
+}
+
+function validateCurrentStep() {
+    if (currentStep === 1) {
+        return selectedBusinessType !== '';
+    } else if (currentStep === 2) {
+        const name = document.getElementById('business_name').value;
+        return name.trim() !== '';
+    } else if (currentStep === 3) {
+        const address = document.getElementById('business_address').value;
+        const phone = document.getElementById('business_phone').value;
+        const terms = document.getElementById('terms_accepted').checked;
+        return address.trim() !== '' && phone.trim() !== '' && terms;
+    }
+    return true;
+}
+
+function closeSuccessMessage() {
+    document.getElementById('successMessage').classList.add('hidden');
+}
+
+// Form submission
+document.getElementById('businessForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mendaftarkan...';
+    submitBtn.disabled = true;
+    
+    // Simulate form submission (replace with actual AJAX call)
+    setTimeout(() => {
+        // Show success message
+        document.getElementById('successMessage').classList.remove('hidden');
+        
+        // Reset form
+        this.reset();
+        currentStep = 1;
+        updateProgress(1);
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.add('hidden');
+        
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 2000);
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress(1);
+});
+</script>
+{% endblock %}

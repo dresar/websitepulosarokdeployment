@@ -1,0 +1,623 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Struktur Organisasi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hierarchy-container {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e3e6f0;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .hierarchy-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    
+    .hierarchy-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #5a5c69;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hierarchy-subtitle {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    
+    .org-level {
+        margin-bottom: 3rem;
+    }
+    
+    .level-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .level-title.pkk {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .level-title.karang-taruna {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .level-title.lembaga-adat {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .level-title.kepemudaan {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #333;
+    }
+    
+    .org-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .org-card {
+        background: white;
+        border: 1px solid #e3e6f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .org-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .org-card.pkk::before {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .org-card.karang-taruna::before {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .org-card.lembaga-adat::before {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .org-card.kepemudaan::before {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+    
+    .org-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border-color: #4e73df;
+    }
+    
+    .org-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .org-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        color: white;
+    }
+    
+    .org-icon.perangkat-desa {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .org-icon.pkk {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .org-icon.karang-taruna {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .org-icon.lembaga-adat {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .org-icon.kepemudaan {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #333;
+    }
+    
+    .org-info h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.25rem;
+    }
+    
+    .org-info p {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .org-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: #f8f9fc;
+        border-radius: 8px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #4e73df;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .org-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .org-action-btn {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .org-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .org-structure {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .structure-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.75rem;
+    }
+    
+    .structure-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .structure-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    
+    .structure-item:last-child {
+        border-bottom: none;
+    }
+    
+    .structure-item i {
+        width: 20px;
+        color: #6c757d;
+        margin-right: 0.5rem;
+    }
+    
+    .structure-item span {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .loading-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .loading-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .error-state {
+        text-align: center;
+        padding: 3rem;
+        color: #e74a3b;
+    }
+    
+    .error-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .refresh-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4e73df 0%, #36b9cc 100%);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(78, 115, 223, 0.4);
+    }
+    
+    @media (max-width: 768px) {
+        .hierarchy-container {
+            padding: 1rem;
+        }
+        
+        .hierarchy-title {
+            font-size: 1.5rem;
+        }
+        
+        .org-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .org-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .org-actions {
+            flex-direction: column;
+        }
+        
+        .refresh-btn {
+            bottom: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Struktur Organisasi</h1>
+            <p class="text-muted mb-0">Hierarki dan struktur organisasi desa</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <a href="{% url 'admin_panel:organization:organization_list' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-list"></i> Daftar Organisasi
+            </a>
+        </div>
+    </div>
+
+    <!-- Hierarchy Container -->
+    <div class="hierarchy-container">
+        <div class="hierarchy-header">
+            <h2 class="hierarchy-title">Struktur Organisasi Desa</h2>
+            <p class="hierarchy-subtitle">Pemerintahan Desa dan Organisasi Kemasyarakatan</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>Memuat struktur organisasi...</div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>Gagal memuat data struktur organisasi</div>
+            <button class="btn btn-primary btn-sm mt-2" onclick="refreshData()">
+                <i class="fas fa-retry"></i> Coba Lagi
+            </button>
+        </div>
+
+        <!-- Organization Structure -->
+        <div id="organizationStructure" style="display: none;">
+            <!-- Perangkat Desa -->
+            <div class="org-level">
+                <div class="level-title">Perangkat Desa</div>
+                <div class="org-grid" id="perangkatDesaGrid">
+                    <!-- Perangkat Desa cards will be loaded here -->
+                </div>
+            </div>
+
+            <!-- PKK -->
+            <div class="org-level">
+                <div class="level-title pkk">Penggerak PKK</div>
+                <div class="org-grid" id="pkkGrid">
+                    <!-- PKK cards will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Karang Taruna -->
+            <div class="org-level">
+                <div class="level-title karang-taruna">Karang Taruna</div>
+                <div class="org-grid" id="karangTarunaGrid">
+                    <!-- Karang Taruna cards will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Lembaga Adat -->
+            <div class="org-level">
+                <div class="level-title lembaga-adat">Lembaga Adat</div>
+                <div class="org-grid" id="lembagaAdatGrid">
+                    <!-- Lembaga Adat cards will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Kepemudaan -->
+            <div class="org-level">
+                <div class="level-title kepemudaan">Kepemudaan</div>
+                <div class="org-grid" id="kepemudaanGrid">
+                    <!-- Kepemudaan cards will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Refresh Button -->
+    <button class="refresh-btn" onclick="refreshData()" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/organization.js' %}"></script>
+<script>
+// Organization Hierarchy Handler
+class OrganizationHierarchy {
+    constructor() {
+        this.loadingState = document.getElementById('loadingState');
+        this.errorState = document.getElementById('errorState');
+        this.organizationStructure = document.getElementById('organizationStructure');
+        this.grids = {
+            perangkatDesa: document.getElementById('perangkatDesaGrid'),
+            pkk: document.getElementById('pkkGrid'),
+            karangTaruna: document.getElementById('karangTarunaGrid'),
+            lembagaAdat: document.getElementById('lembagaAdatGrid'),
+            kepemudaan: document.getElementById('kepemudaanGrid')
+        };
+    }
+
+    async loadHierarchy() {
+        try {
+            this.showLoading();
+            
+            // Load organization structure data
+            const structureData = await orgAPI.getStructure();
+            
+            if (structureData.success) {
+                this.renderHierarchy(structureData);
+                this.showStructure();
+            } else {
+                this.showError();
+            }
+        } catch (error) {
+            console.error('Error loading organization hierarchy:', error);
+            this.showError();
+        }
+    }
+
+    showLoading() {
+        this.loadingState.style.display = 'block';
+        this.errorState.style.display = 'none';
+        this.organizationStructure.style.display = 'none';
+    }
+
+    showError() {
+        this.loadingState.style.display = 'none';
+        this.errorState.style.display = 'block';
+        this.organizationStructure.style.display = 'none';
+    }
+
+    showStructure() {
+        this.loadingState.style.display = 'none';
+        this.errorState.style.display = 'none';
+        this.organizationStructure.style.display = 'block';
+    }
+
+    renderHierarchy(data) {
+        // Render Perangkat Desa
+        this.renderOrganizationCards('perangkatDesa', data.perangkat_desa || [], 'perangkat-desa');
+        
+        // Render PKK
+        this.renderOrganizationCards('pkk', data.pkk || [], 'pkk');
+        
+        // Render Karang Taruna
+        this.renderOrganizationCards('karangTaruna', data.karang_taruna || [], 'karang-taruna');
+        
+        // Render Lembaga Adat
+        this.renderOrganizationCards('lembagaAdat', data.lembaga_adat || [], 'lembaga-adat');
+        
+        // Render Kepemudaan
+        this.renderOrganizationCards('kepemudaan', data.kepemudaan || [], 'kepemudaan');
+    }
+
+    renderOrganizationCards(type, data, orgType) {
+        const grid = this.grids[type];
+        if (!grid) return;
+
+        if (data.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>Belum ada data ${this.getOrganizationName(type)}</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = data.map(item => this.createOrganizationCard(item, orgType)).join('');
+    }
+
+    createOrganizationCard(item, orgType) {
+        const iconClass = this.getOrganizationIcon(orgType);
+        const stats = this.getOrganizationStats(item);
+        
+        return `
+            <div class="org-card ${orgType}">
+                <div class="org-card-header">
+                    <div class="org-icon ${orgType}">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="org-info">
+                        <h5>${item.name || item.nama || item.penduduk_name || 'N/A'}</h5>
+                        <p>${item.jabatan || item.position || 'N/A'}</p>
+                    </div>
+                </div>
+                
+                <div class="org-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">${stats.active}</div>
+                        <div class="stat-label">Aktif</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${stats.total}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+                
+                <div class="org-structure">
+                    <div class="structure-title">Informasi</div>
+                    <ul class="structure-list">
+                        <li class="structure-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Bergabung: ${item.tanggal_bergabung || 'N/A'}</span>
+                        </li>
+                        <li class="structure-item">
+                            <i class="fas fa-user-tag"></i>
+                            <span>Status: ${item.status || 'N/A'}</span>
+                        </li>
+                        ${item.nomor_anggota ? `
+                        <li class="structure-item">
+                            <i class="fas fa-id-card"></i>
+                            <span>No. Anggota: ${item.nomor_anggota}</span>
+                        </li>
+                        ` : ''}
+                    </ul>
+                </div>
+                
+                <div class="org-actions">
+                    <a href="/admin-panel/organization/${orgType}/${item.id}/detail/" class="org-action-btn btn btn-primary">
+                        <i class="fas fa-eye"></i> Detail
+                    </a>
+                    <a href="/admin-panel/organization/${orgType}/${item.id}/edit/" class="org-action-btn btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    getOrganizationIcon(orgType) {
+        const icons = {
+            'perangkat-desa': 'fas fa-users-cog',
+            'pkk': 'fas fa-female',
+            'karang-taruna': 'fas fa-users-gear',
+            'lembaga-adat': 'fas fa-university',
+            'kepemudaan': 'fas fa-users-line'
+        };
+        return icons[orgType] || 'fas fa-users';
+    }
+
+    getOrganizationName(type) {
+        const names = {
+            'perangkatDesa': 'Perangkat Desa',
+            'pkk': 'Penggerak PKK',
+            'karangTaruna': 'Karang Taruna',
+            'lembagaAdat': 'Lembaga Adat',
+            'kepemudaan': 'Kepemudaan'
+        };
+        return names[type] || 'Organisasi';
+    }
+
+    getOrganizationStats(item) {
+        return {
+            active: item.status === 'aktif' ? 1 : 0,
+            total: 1
+        };
+    }
+}
+
+// Initialize hierarchy
+$(document).ready(function() {
+    const hierarchy = new OrganizationHierarchy();
+    hierarchy.loadHierarchy();
+    
+    // Make refreshData globally available
+    window.refreshData = function() {
+        hierarchy.loadHierarchy();
+    };
+});
+</script>
+{% endblock %}
+

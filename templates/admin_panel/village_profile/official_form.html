@@ -1,0 +1,1217 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Official Form Styles - Bootstrap 4 Compatible */
+.official-form-container {
+    background: #f8f9fa;
+    min-height: calc(100vh - 200px);
+    padding: 20px 0;
+}
+
+.official-form-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.official-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #dc3545;
+    border-radius: 8px 8px 0 0;
+}
+
+.official-form-card .card-header {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 20px;
+    border-radius: 8px 8px 0 0;
+}
+
+.official-form-card .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.25rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.official-form-card .card-body {
+    padding: 30px;
+    background: transparent;
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    position: relative;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #dc3545;
+    border-radius: 0 2px 2px 0;
+}
+
+.form-section h6 {
+    color: #dc3545;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+
+.form-section h6::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #dc3545;
+    border-radius: 1px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+.form-label .required {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.form-control {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    color: #495057;
+    transition: all 0.3s ease;
+    padding: 12px 15px;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background: #ffffff;
+    color: #495057;
+    outline: none;
+}
+
+.form-control:hover {
+    border-color: #adb5bd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+
+.help-text {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    margin-bottom: 15px;
+}
+
+.image-upload-area:hover {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.image-upload-area.dragover {
+    border-color: #dc3545;
+    background: #ffe6e6;
+}
+
+.image-upload-area i {
+    font-size: 2.5rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.image-upload-area p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #495057;
+}
+
+.image-upload-area small {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Penduduk Search Styles */
+.penduduk-search-container {
+    position: relative;
+}
+
+.penduduk-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.penduduk-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.penduduk-item:hover {
+    background-color: #f8f9fa;
+}
+
+.penduduk-item:last-child {
+    border-bottom: none;
+}
+
+.penduduk-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.penduduk-details {
+    font-size: 0.8rem;
+    color: #6c757d;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.penduduk-detail {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.penduduk-detail i {
+    font-size: 0.75rem;
+    width: 12px;
+}
+
+.penduduk-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    float: left;
+}
+
+.penduduk-info {
+    overflow: hidden;
+}
+
+.penduduk-no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.penduduk-loading {
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.penduduk-loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.image-preview {
+    width: 100%;
+    max-width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    display: none;
+    margin-bottom: 15px;
+}
+
+.form-actions {
+    background: #f8f9fa;
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .official-form-container {
+        padding: 15px 0;
+    }
+    
+    .official-form-card .card-header {
+        padding: 15px;
+    }
+    
+    .official-form-card .card-body {
+        padding: 20px;
+    }
+    
+    .form-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .form-section h6 {
+        font-size: 0.875rem;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-control {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+    
+    .image-upload-area {
+        padding: 30px 20px;
+    }
+    
+    .image-upload-area i {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .official-form-card .card-header {
+        padding: 12px;
+    }
+    
+    .official-form-card .card-body {
+        padding: 15px;
+    }
+    
+    .form-section {
+        padding: 12px;
+    }
+    
+    .form-control {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .image-upload-area {
+        padding: 20px 15px;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="official-form-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <div class="mb-3 mb-md-0">
+                <h4 class="text-danger mb-2" style="font-weight: 600; font-size: 1.5rem;">
+                    <i class="fas fa-user-{% if official %}edit{% else %}plus{% endif %} mr-2"></i>
+                    {% if official %}Edit Perangkat Desa{% else %}Tambah Perangkat Desa{% endif %}
+                </h4>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                    {% if official %}Ubah data perangkat desa{% else %}Tambahkan data perangkat desa baru{% endif %}
+                </p>
+            </div>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <a href="{% url "village_profile:admin_officials" %}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left mr-1"></i>Kembali
+                </a>
+                <button class="btn btn-outline-danger btn-sm" onclick="previewOfficial()">
+                    <i class="fas fa-eye mr-1"></i>Preview
+                </button>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="official-form-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-{% if official %}edit{% else %}plus{% endif %} mr-2"></i>
+                    {% if official %}Edit Data Perangkat Desa{% else %}Form Tambah Perangkat Desa{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="officialForm" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="officialId" name="official_id" value="{{ official.id|default:'' }}">
+                    <input type="hidden" id="villageId" name="village_id" value="{{ village_profile.id|default:'' }}">
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-user mr-2"></i>Informasi Dasar</h6>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="pendudukSearch" class="form-label">
+                                        Pilih Penduduk <span class="required">*</span>
+                                    </label>
+                                    <div class="penduduk-search-container">
+                                        <input type="text" class="form-control" id="pendudukSearch" 
+                                               placeholder="Cari nama atau NIK penduduk..." autocomplete="off">
+                                        <input type="hidden" id="pendudukId" name="penduduk_id" value="{{ official.penduduk_id|default:'' }}">
+                                        <div id="pendudukDropdown" class="penduduk-dropdown"></div>
+                                    </div>
+                                    <div class="help-text">Ketik nama atau NIK untuk mencari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialName" class="form-label">
+                                        Nama Lengkap <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="officialName" name="name" 
+                                           value="{{ official.name|default:'' }}" required readonly
+                                           placeholder="Nama akan terisi otomatis">
+                                    <div class="help-text">Nama akan terisi otomatis dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialPosition" class="form-label">
+                                        Jabatan <span class="required">*</span>
+                                    </label>
+                                    <select class="form-control" id="officialPosition" name="position" required>
+                                        <option value="">Pilih Jabatan</option>
+                                        <option value="KEPALA_DESA" {% if official.position == 'KEPALA_DESA' %}selected{% endif %}>Kepala Desa</option>
+                                        <option value="SEKRETARIS" {% if official.position == 'SEKRETARIS' %}selected{% endif %}>Sekretaris Desa</option>
+                                        <option value="BENDAHARA" {% if official.position == 'BENDAHARA' %}selected{% endif %}>Bendahara Desa</option>
+                                        <option value="KAUR_PEMERINTAHAN" {% if official.position == 'KAUR_PEMERINTAHAN' %}selected{% endif %}>Kaur Pemerintahan</option>
+                                        <option value="KAUR_PEMBANGUNAN" {% if official.position == 'KAUR_PEMBANGUNAN' %}selected{% endif %}>Kaur Pembangunan</option>
+                                        <option value="KAUR_KESRA" {% if official.position == 'KAUR_KESRA' %}selected{% endif %}>Kaur Kesejahteraan Rakyat</option>
+                                        <option value="KAUR_UMUM" {% if official.position == 'KAUR_UMUM' %}selected{% endif %}>Kaur Umum</option>
+                                        <option value="KAUR_KEUANGAN" {% if official.position == 'KAUR_KEUANGAN' %}selected{% endif %}>Kaur Keuangan</option>
+                                        <option value="KADUS" {% if official.position == 'KADUS' %}selected{% endif %}>Kepala Dusun</option>
+                                        <option value="RT" {% if official.position == 'RT' %}selected{% endif %}>Ketua RT</option>
+                                        <option value="RW" {% if official.position == 'RW' %}selected{% endif %}>Ketua RW</option>
+                                        <option value="LAINNYA" {% if official.position == 'LAINNYA' %}selected{% endif %}>Lainnya</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row" id="customPositionRow" style="display: {% if official.position == 'LAINNYA' %}block{% else %}none{% endif %};">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="customPosition" class="form-label">Jabatan Khusus</label>
+                                    <input type="text" class="form-control" id="customPosition" name="custom_position" 
+                                           value="{{ official.custom_position|default:'' }}"
+                                           placeholder="Masukkan jabatan khusus">
+                                    <div class="help-text">Isi jika memilih "Lainnya" pada jabatan</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-id-card mr-2"></i>Informasi Pribadi</h6>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialNik" class="form-label">NIK</label>
+                                    <input type="text" class="form-control" id="officialNik" name="nik" 
+                                           value="{{ official.nik|default:'' }}" readonly
+                                           placeholder="NIK akan terisi otomatis">
+                                    <div class="help-text">NIK dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialBirthDate" class="form-label">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="officialBirthDate" name="birth_date" 
+                                           value="{{ official.birth_date|default:'' }}" readonly
+                                           placeholder="Tanggal lahir akan terisi otomatis">
+                                    <div class="help-text">Tanggal lahir dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialBirthPlace" class="form-label">Tempat Lahir</label>
+                                    <input type="text" class="form-control" id="officialBirthPlace" name="birth_place" 
+                                           value="{{ official.birth_place|default:'' }}" readonly
+                                           placeholder="Tempat lahir akan terisi otomatis">
+                                    <div class="help-text">Tempat lahir dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialGender" class="form-label">Jenis Kelamin</label>
+                                    <input type="text" class="form-control" id="officialGender" name="gender" 
+                                           value="{{ official.gender|default:'' }}" readonly
+                                           placeholder="Jenis kelamin akan terisi otomatis">
+                                    <div class="help-text">Jenis kelamin dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialReligion" class="form-label">Agama</label>
+                                    <input type="text" class="form-control" id="officialReligion" name="religion" 
+                                           value="{{ official.religion|default:'' }}" readonly
+                                           placeholder="Agama akan terisi otomatis">
+                                    <div class="help-text">Agama dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialEducation" class="form-label">Pendidikan</label>
+                                    <input type="text" class="form-control" id="officialEducation" name="education" 
+                                           value="{{ official.education|default:'' }}" readonly
+                                           placeholder="Pendidikan akan terisi otomatis">
+                                    <div class="help-text">Pendidikan dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialOccupation" class="form-label">Pekerjaan</label>
+                                    <input type="text" class="form-control" id="officialOccupation" name="occupation" 
+                                           value="{{ official.occupation|default:'' }}" readonly
+                                           placeholder="Pekerjaan akan terisi otomatis">
+                                    <div class="help-text">Pekerjaan dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialMaritalStatus" class="form-label">Status Perkawinan</label>
+                                    <input type="text" class="form-control" id="officialMaritalStatus" name="marital_status" 
+                                           value="{{ official.marital_status|default:'' }}" readonly
+                                           placeholder="Status perkawinan akan terisi otomatis">
+                                    <div class="help-text">Status perkawinan dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="officialExperience" class="form-label">Pengalaman Kerja & Keahlian</label>
+                            <textarea class="form-control" id="officialExperience" name="experience" rows="4"
+                                      placeholder="Deskripsikan pengalaman kerja dan keahlian khusus untuk jabatan ini">{{ official.experience|default:'' }}</textarea>
+                            <div class="help-text">Pengalaman khusus untuk jabatan perangkat desa (dapat diedit)</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Foto Profil</label>
+                            <div class="image-upload-area" onclick="document.getElementById('officialPhoto').click()">
+                                <i class="fas fa-camera"></i>
+                                <p>Klik untuk memilih foto atau drag & drop</p>
+                                <small>Format: JPG, PNG (Max: 2MB)</small>
+                            </div>
+                            <input type="file" id="officialPhoto" name="photo" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                            {% if official.photo %}
+                            <img id="imagePreview" class="image-preview" src="{{ official.photo.url }}" alt="Preview">
+                            {% else %}
+                            <img id="imagePreview" class="image-preview" alt="Preview">
+                            {% endif %}
+                            <div class="help-text">Foto khusus untuk perangkat desa (tidak mengubah foto di data penduduk)</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-phone mr-2"></i>Informasi Kontak</h6>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialPhone" class="form-label">Telepon</label>
+                                    <input type="text" class="form-control" id="officialPhone" name="phone" 
+                                           value="{{ official.phone|default:'' }}"
+                                           placeholder="Contoh: 081234567890">
+                                    <div class="help-text">Nomor telepon dari data penduduk (dapat diedit)</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialMobile" class="form-label">Handphone</label>
+                                    <input type="text" class="form-control" id="officialMobile" name="mobile" 
+                                           value="{{ official.mobile|default:'' }}"
+                                           placeholder="Contoh: 081234567890">
+                                    <div class="help-text">Nomor handphone dari data penduduk (dapat diedit)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="officialEmail" name="email" 
+                                           value="{{ official.email|default:'' }}"
+                                           placeholder="Contoh: nama@email.com">
+                                    <div class="help-text">Email dari data penduduk (dapat diedit)</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialDusun" class="form-label">Dusun</label>
+                                    <input type="text" class="form-control" id="officialDusun" name="dusun" 
+                                           value="{{ official.dusun|default:'' }}" readonly
+                                           placeholder="Dusun akan terisi otomatis">
+                                    <div class="help-text">Dusun dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialLorong" class="form-label">Lorong</label>
+                                    <input type="text" class="form-control" id="officialLorong" name="lorong" 
+                                           value="{{ official.lorong|default:'' }}" readonly
+                                           placeholder="Lorong akan terisi otomatis">
+                                    <div class="help-text">Lorong dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialRtRw" class="form-label">RT/RW</label>
+                                    <input type="text" class="form-control" id="officialRtRw" name="rt_rw" 
+                                           value="{{ official.rt_rw|default:'' }}" readonly
+                                           placeholder="RT/RW akan terisi otomatis">
+                                    <div class="help-text">RT/RW dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="officialAddress" class="form-label">Alamat Lengkap</label>
+                            <textarea class="form-control" id="officialAddress" name="address" rows="3"
+                                      placeholder="Alamat lengkap tempat tinggal">{{ official.address|default:'' }}</textarea>
+                            <div class="help-text">Alamat lengkap dari data penduduk (dapat diedit)</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialHouseNumber" class="form-label">Nomor Rumah</label>
+                                    <input type="text" class="form-control" id="officialHouseNumber" name="house_number" 
+                                           value="{{ official.house_number|default:'' }}" readonly
+                                           placeholder="Nomor rumah akan terisi otomatis">
+                                    <div class="help-text">Nomor rumah dari data penduduk</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialPostalCode" class="form-label">Kode Pos</label>
+                                    <input type="text" class="form-control" id="officialPostalCode" name="postal_code" 
+                                           value="{{ official.postal_code|default:'' }}" readonly
+                                           placeholder="Kode pos akan terisi otomatis">
+                                    <div class="help-text">Kode pos dari data penduduk</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employment Details -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-briefcase mr-2"></i>Detail Jabatan</h6>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialStartDate" class="form-label">
+                                        Tanggal Mulai Jabatan <span class="required">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" id="officialStartDate" name="start_date" 
+                                           value="{{ official.start_date|default:'' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialEndDate" class="form-label">Tanggal Berakhir Jabatan</label>
+                                    <input type="date" class="form-control" id="officialEndDate" name="end_date" 
+                                           value="{{ official.end_date|default:'' }}">
+                                    <div class="help-text">Kosongkan jika masih menjabat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-cog mr-2"></i>Status & Pengaturan</h6>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <label for="officialDisplayOrder" class="form-label">Urutan Tampil</label>
+                                    <input type="number" class="form-control" id="officialDisplayOrder" name="display_order" 
+                                           value="{{ official.display_order|default:0 }}" min="0">
+                                    <div class="help-text">Urutan tampil dalam daftar (0 = pertama)</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <div class="form-group">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="officialIsActive" name="is_active" 
+                                               {% if not official or official.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="officialIsActive">
+                                            Status Aktif
+                                        </label>
+                                        <div class="help-text">Centang jika perangkat masih aktif</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <a href="{% url "village_profile:admin_officials" %}" class="btn btn-secondary">
+                                    <i class="fas fa-times mr-1"></i>Batal
+                                </a>
+                                {% if official %}
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteOfficial({{ official.id }})">
+                                    <i class="fas fa-trash mr-1"></i>Hapus
+                                </button>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save mr-1"></i>
+                                {% if official %}Update Perangkat{% else %}Simpan Perangkat{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-trash mr-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus data perangkat desa ini?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash mr-1"></i>Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+let currentOfficialId = null;
+
+$(document).ready(function() {
+    // Show/hide custom position field
+    $('#officialPosition').on('change', function() {
+        if ($(this).val() === 'LAINNYA') {
+            $('#customPositionRow').show();
+            $('#customPosition').prop('required', true);
+        } else {
+            $('#customPositionRow').hide();
+            $('#customPosition').prop('required', false);
+        }
+    });
+    
+    // Form submission
+    $('#officialForm').on('submit', function(e) {
+        e.preventDefault();
+        saveOfficial();
+    });
+    
+    // Penduduk search functionality
+    let searchTimeout;
+    $('#pendudukSearch').on('input', function() {
+        const query = $(this).val().trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+            hidePendudukDropdown();
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            searchPenduduk(query);
+        }, 300);
+    });
+    
+    // Hide dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.penduduk-search-container').length) {
+            hidePendudukDropdown();
+        }
+    });
+    
+    // Load existing penduduk data if editing
+    {% if official and official.penduduk_id %}
+    loadPendudukData({{ official.penduduk_id }});
+    {% endif %}
+});
+
+function searchPenduduk(query) {
+    const dropdown = $('#pendudukDropdown');
+    dropdown.html('<div class="penduduk-loading"><i class="fas fa-spinner fa-spin"></i> Mencari...</div>').show();
+    
+    $.ajax({
+        url: '{% url "village_profile:admin_api_search_penduduk" %}',
+        method: 'GET',
+        data: { q: query, limit: 10 },
+        success: function(response) {
+            if (response.success && response.results.length > 0) {
+                let html = '';
+                response.results.forEach(function(penduduk) {
+                    html += `
+                        <div class="penduduk-item" data-id="${penduduk.id}">
+                            <div class="penduduk-info">
+                                <div class="penduduk-name">${penduduk.name}</div>
+                                <div class="penduduk-details">
+                                    <div class="penduduk-detail">
+                                        <i class="fas fa-id-card"></i>
+                                        <span>${penduduk.nik}</span>
+                                    </div>
+                                    <div class="penduduk-detail">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>${penduduk.dusun}</span>
+                                    </div>
+                                    <div class="penduduk-detail">
+                                        <i class="fas fa-phone"></i>
+                                        <span>${penduduk.phone || 'Tidak ada'}</span>
+                                    </div>
+                                    <div class="penduduk-detail">
+                                        <i class="fas fa-home"></i>
+                                        <span>${penduduk.address}</span>
+                                    </div>
+                                    <div class="penduduk-detail">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>${penduduk.occupation || 'Tidak ada'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                dropdown.html(html);
+                
+                // Add click handlers
+                $('.penduduk-item').on('click', function() {
+                    const pendudukId = $(this).data('id');
+                    selectPenduduk(pendudukId);
+                });
+            } else {
+                dropdown.html('<div class="penduduk-no-results">Tidak ada data penduduk ditemukan</div>');
+            }
+        },
+        error: function() {
+            dropdown.html('<div class="penduduk-no-results">Gagal memuat data penduduk</div>');
+        }
+    });
+}
+
+function selectPenduduk(pendudukId) {
+    $.ajax({
+        url: `{% url "village_profile:api_get_penduduk_detail" 0 %}`.replace('0', pendudukId),
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const data = response.data;
+                
+                // Fill basic information
+                $('#pendudukId').val(data.id);
+                $('#pendudukSearch').val(data.name);
+                $('#officialName').val(data.name);
+                
+                // Fill personal information
+                $('#officialNik').val(data.nik);
+                $('#officialBirthDate').val(data.birth_date);
+                $('#officialBirthPlace').val(data.birth_place);
+                $('#officialGender').val(data.gender);
+                $('#officialReligion').val(data.religion);
+                $('#officialEducation').val(data.education);
+                $('#officialOccupation').val(data.occupation);
+                $('#officialMaritalStatus').val(data.marital_status);
+                
+                // Fill contact information
+                $('#officialPhone').val(data.phone);
+                $('#officialMobile').val(data.mobile || data.phone); // Use phone as mobile if mobile is empty
+                $('#officialEmail').val(data.email);
+                $('#officialDusun').val(data.dusun);
+                $('#officialLorong').val(data.lorong);
+                $('#officialRtRw').val(`${data.rt_number || ''}/${data.rw_number || ''}`.replace('//', '/').replace('^/', ''));
+                $('#officialAddress').val(data.address);
+                $('#officialHouseNumber').val(data.house_number);
+                $('#officialPostalCode').val(data.postal_code);
+                
+                // Set photo if available (from penduduk data)
+                if (data.photo) {
+                    $('#imagePreview').attr('src', data.photo).show();
+                } else {
+                    $('#imagePreview').hide();
+                }
+                
+                hidePendudukDropdown();
+                showAlert('success', 'Data penduduk berhasil dimuat ke form');
+            }
+        },
+        error: function() {
+            showAlert('error', 'Gagal memuat detail penduduk');
+        }
+    });
+}
+
+function loadPendudukData(pendudukId) {
+    $.ajax({
+        url: `{% url "village_profile:api_get_penduduk_detail" 0 %}`.replace('0', pendudukId),
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const data = response.data;
+                
+                // Fill search field
+                $('#pendudukSearch').val(data.name);
+                
+                // Fill all fields if they are empty (for edit mode)
+                if (!$('#officialNik').val()) $('#officialNik').val(data.nik);
+                if (!$('#officialBirthDate').val()) $('#officialBirthDate').val(data.birth_date);
+                if (!$('#officialBirthPlace').val()) $('#officialBirthPlace').val(data.birth_place);
+                if (!$('#officialGender').val()) $('#officialGender').val(data.gender);
+                if (!$('#officialReligion').val()) $('#officialReligion').val(data.religion);
+                if (!$('#officialEducation').val()) $('#officialEducation').val(data.education);
+                if (!$('#officialOccupation').val()) $('#officialOccupation').val(data.occupation);
+                if (!$('#officialMaritalStatus').val()) $('#officialMaritalStatus').val(data.marital_status);
+                
+                if (!$('#officialPhone').val()) $('#officialPhone').val(data.phone);
+                if (!$('#officialMobile').val()) $('#officialMobile').val(data.mobile || data.phone);
+                if (!$('#officialEmail').val()) $('#officialEmail').val(data.email);
+                if (!$('#officialDusun').val()) $('#officialDusun').val(data.dusun);
+                if (!$('#officialLorong').val()) $('#officialLorong').val(data.lorong);
+                if (!$('#officialRtRw').val()) $('#officialRtRw').val(`${data.rt_number || ''}/${data.rw_number || ''}`.replace('//', '/').replace('^/', ''));
+                if (!$('#officialAddress').val()) $('#officialAddress').val(data.address);
+                if (!$('#officialHouseNumber').val()) $('#officialHouseNumber').val(data.house_number);
+                if (!$('#officialPostalCode').val()) $('#officialPostalCode').val(data.postal_code);
+                
+                // Set photo if no official photo exists
+                if (!$('#imagePreview').attr('src') && data.photo) {
+                    $('#imagePreview').attr('src', data.photo).show();
+                }
+            }
+        }
+    });
+}
+
+function hidePendudukDropdown() {
+    $('#pendudukDropdown').hide();
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#imagePreview').attr('src', e.target.result).show();
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function saveOfficial() {
+    const form = $('#officialForm')[0];
+    const formData = new FormData(form);
+    
+    // Validate required fields
+    const name = $('#officialName').val().trim();
+    const position = $('#officialPosition').val();
+    const startDate = $('#officialStartDate').val();
+    
+    if (!name) {
+        showAlert('error', 'Nama lengkap harus diisi!');
+        $('#officialName').focus();
+        return;
+    }
+    
+    if (!position) {
+        showAlert('error', 'Jabatan harus dipilih!');
+        $('#officialPosition').focus();
+        return;
+    }
+    
+    if (!startDate) {
+        showAlert('error', 'Tanggal mulai jabatan harus diisi!');
+        $('#officialStartDate').focus();
+        return;
+    }
+    
+    // Show loading
+    const submitBtn = $('button[type="submit"]');
+    const originalText = submitBtn.html();
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+    
+    $.ajax({
+        url: '{% url "village_profile:admin_save_official" %}',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showAlert('success', response.message || 'Data perangkat berhasil disimpan!');
+                setTimeout(() => {
+                    window.location.href = '{% url "village_profile:admin_officials" %}';
+                }, 1500);
+            } else {
+                showAlert('error', response.message || 'Gagal menyimpan data perangkat!');
+            }
+        },
+        error: function(xhr) {
+            console.error('Save error:', xhr);
+            let errorMessage = 'Gagal menyimpan data perangkat!';
+            
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.responseJSON.errors) {
+                    errorMessage = 'Gagal menyimpan: ' + Object.values(xhr.responseJSON.errors).flat().join(', ');
+                }
+            }
+            
+            showAlert('error', errorMessage);
+        },
+        complete: function() {
+            submitBtn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function deleteOfficial(id) {
+    currentOfficialId = id;
+    $('#deleteModal').modal('show');
+}
+
+function confirmDelete() {
+    if (!currentOfficialId) return;
+    
+    $.ajax({
+        url: '{% url "village_profile:admin_delete_official" %}',
+        method: 'POST',
+        data: {
+            official_id: currentOfficialId,
+            csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                $('#deleteModal').modal('hide');
+                showAlert('success', 'Data perangkat berhasil dihapus!');
+                setTimeout(() => {
+                    window.location.href = '{% url "village_profile:admin_officials" %}';
+                }, 1500);
+            } else {
+                showAlert('error', response.message || 'Gagal menghapus data perangkat!');
+            }
+        },
+        error: function() {
+            showAlert('error', 'Gagal menghapus data perangkat!');
+        }
+    });
+}
+
+function previewOfficial() {
+    {% if official %}
+    window.open('{% url "village_profile:officials" %}', '_blank');
+    {% else %}
+    showAlert('info', 'Preview akan tersedia setelah data disimpan');
+    {% endif %}
+}
+
+// Show alert
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 'alert-info';
+    
+    const alert = $(`
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `);
+    
+    $('.official-form-container .container').prepend(alert);
+    
+    setTimeout(() => {
+        alert.alert('close');
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

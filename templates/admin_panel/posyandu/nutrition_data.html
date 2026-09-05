@@ -1,0 +1,772 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Data Gizi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nutrition-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .nutrition-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .nutrition-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    .stats-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .nutrition-list-container {
+        background: #fff;
+        border-radius: 15px;
+        padding: 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .nutrition-table {
+        margin-bottom: 0;
+    }
+    
+    .nutrition-table thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .nutrition-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    
+    .nutrition-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        transform: scale(1.01);
+    }
+    
+    .nutrition-table tbody td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        border: none;
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+    .nutrition-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .nutrition-status.normal { background: #e8f5e8; color: #2e7d32; }
+    .nutrition-status.undernourished { background: #fff3e0; color: #f57c00; }
+    .nutrition-status.severely-undernourished { background: #ffcdd2; color: #d32f2f; }
+    .nutrition-status.overweight { background: #e3f2fd; color: #1976d2; }
+    .nutrition-status.stunting { background: #f3e5f5; color: #7b1fa2; }
+    .nutrition-status.wasting { background: #ffebee; color: #c62828; }
+    .filter-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .filter-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .filter-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f3f4;
+    }
+    
+    .filter-title {
+        color: #495057;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box .form-control {
+        padding-left: 45px;
+        border-radius: 25px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    
+    .search-box .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .search-box .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    .quick-filters {
+        margin-top: 20px;
+    }
+    
+    .filter-group {
+        margin-bottom: 20px;
+    }
+    
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .filter-group-label {
+        display: block;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .filter-buttons .btn {
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid;
+    }
+    
+    .filter-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .filter-buttons .btn.active {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-outline-purple {
+        color: #7b1fa2;
+        border-color: #7b1fa2;
+    }
+    
+    .btn-outline-purple:hover,
+    .btn-outline-purple.active {
+        background-color: #7b1fa2;
+        border-color: #7b1fa2;
+        color: white;
+    }
+    
+    .btn-outline-pink {
+        color: #c2185b;
+        border-color: #c2185b;
+    }
+    
+    .btn-outline-pink:hover,
+    .btn-outline-pink.active {
+        background-color: #c2185b;
+        border-color: #c2185b;
+        color: white;
+    }
+    .nutrition-trend {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .trend-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .trend-item:last-child {
+        border-bottom: none;
+    }
+    .trend-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    .trend-value {
+        font-weight: 500;
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-apple-alt text-primary mr-2"></i>
+                        Data Gizi
+                    </h2>
+                    <p class="text-muted mb-0">Kelola data status gizi balita dan anak</p>
+                </div>
+                <div>
+                    <a href="{% url 'admin_panel:posyandu:nutrition_data_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Data
+                    </a>
+                    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-secondary ml-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalNutritionData">0</div>
+                <div class="stats-label">Total Data</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="stats-number" id="undernourished">0</div>
+                <div class="stats-label">Kurang Gizi</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="stats-number" id="overweight">0</div>
+                <div class="stats-label">Kelebihan Berat</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="stats-number" id="normalNutrition">0</div>
+                <div class="stats-label">Gizi Normal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <h5 class="filter-title">
+                <i class="fas fa-filter mr-2"></i>
+                Filter & Pencarian
+            </h5>
+        </div>
+        
+        <!-- Main Filter Row -->
+        <div class="row mb-3">
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari nama anak...">
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <select class="form-control" id="statusFilter">
+                    <option value="">Semua Status</option>
+                    <option value="normal">Normal</option>
+                    <option value="kurang">Kurang Gizi</option>
+                    <option value="buruk">Gizi Buruk</option>
+                    <option value="lebih">Gizi Lebih</option>
+                    <option value="stunting">Stunting</option>
+                    <option value="wasting">Wasting</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <select class="form-control" id="ageFilter">
+                    <option value="">Semua Usia</option>
+                    <option value="0-12">0-12 bulan</option>
+                    <option value="12-24">12-24 bulan</option>
+                    <option value="24-36">24-36 bulan</option>
+                    <option value="36-60">36-60 bulan</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <select class="form-control" id="posyanduFilter">
+                    <option value="">Semua Posyandu</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <button class="btn btn-outline-danger btn-block" id="clearFilters">
+                    <i class="fas fa-times mr-1"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quick Filter Buttons -->
+        <div class="quick-filters">
+            <div class="filter-group">
+                <label class="filter-group-label">Usia:</label>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-primary active" data-age="all">Semua</button>
+                    <button class="btn btn-outline-primary" data-age="0-12">0-12 bulan</button>
+                    <button class="btn btn-outline-primary" data-age="12-24">12-24 bulan</button>
+                    <button class="btn btn-outline-primary" data-age="24-36">24-36 bulan</button>
+                    <button class="btn btn-outline-primary" data-age="36-60">36-60 bulan</button>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-group-label">Status Gizi:</label>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-success active" data-status="all">Semua</button>
+                    <button class="btn btn-outline-success" data-status="normal">Normal</button>
+                    <button class="btn btn-outline-warning" data-status="kurang">Kurang Gizi</button>
+                    <button class="btn btn-outline-danger" data-status="buruk">Gizi Buruk</button>
+                    <button class="btn btn-outline-info" data-status="lebih">Gizi Lebih</button>
+                    <button class="btn btn-outline-purple" data-status="stunting">Stunting</button>
+                    <button class="btn btn-outline-pink" data-status="wasting">Wasting</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nutrition Data List -->
+    <div class="nutrition-list-container">
+        <div class="table-responsive">
+            <table class="table table-hover nutrition-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Anak</th>
+                        <th>Tanggal Pengukuran</th>
+                        <th>Usia</th>
+                        <th>Berat Badan</th>
+                        <th>Tinggi Badan</th>
+                        <th>BMI</th>
+                        <th>Status Gizi</th>
+                        <th>Posyandu</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="nutritionDataList">
+                    <!-- Nutrition data will be loaded here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <nav aria-label="Nutrition data pagination">
+            <ul class="pagination" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let currentPage = 1;
+    let currentFilters = {
+        search: '',
+        status: '',
+        age: '',
+        admin_panel:posyandu: ''
+    };
+
+    // Load initial data
+    loadNutritionData();
+    loadPosyanduOptions();
+
+    // Search functionality
+    $('#searchInput').on('input', function() {
+        currentFilters.search = $(this).val();
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    // Filter functionality
+    $('#statusFilter').on('change', function() {
+        currentFilters.status = $(this).val();
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    $('#ageFilter').on('change', function() {
+        currentFilters.age = $(this).val();
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    $('#posyanduFilter').on('change', function() {
+        currentFilters.posyandu = $(this).val();
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    // Age group filter buttons
+    $('.filter-buttons .btn[data-age]').on('click', function() {
+        $('.filter-buttons .btn[data-age]').removeClass('active');
+        $(this).addClass('active');
+        currentFilters.age = $(this).data('age');
+        $('#ageFilter').val(currentFilters.age === 'all' ? '' : currentFilters.age);
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    // Status filter buttons
+    $('.filter-buttons .btn[data-status]').on('click', function() {
+        $('.filter-buttons .btn[data-status]').removeClass('active');
+        $(this).addClass('active');
+        currentFilters.status = $(this).data('status');
+        $('#statusFilter').val(currentFilters.status === 'all' ? '' : currentFilters.status);
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    // Clear filters
+    $('#clearFilters').on('click', function() {
+        $('#searchInput').val('');
+        $('#statusFilter').val('');
+        $('#ageFilter').val('');
+        $('#posyanduFilter').val('');
+        
+        $('.filter-buttons .btn').removeClass('active');
+        $('.filter-buttons .btn[data-age="all"]').addClass('active');
+        $('.filter-buttons .btn[data-status="all"]').addClass('active');
+        
+        currentFilters = {
+            search: '',
+            status: '',
+            age: '',
+            admin_panel:posyandu: ''
+        };
+        currentPage = 1;
+        loadNutritionData();
+    });
+
+    // Load nutrition data
+    function loadNutritionData() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_nutrition_data_list" %}',
+            method: 'GET',
+            data: {
+                page: currentPage,
+                search: currentFilters.search,
+                status: currentFilters.status,
+                age: currentFilters.age,
+                admin_panel:posyandu: currentFilters.posyandu
+            },
+            success: function(response) {
+                displayNutritionData(response.results);
+                updatePagination(response.pagination);
+                updateStatistics(response.statistics);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading nutrition data:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+
+    // Display nutrition data
+    function displayNutritionData(nutritionData) {
+        const container = $('#nutritionDataList');
+        
+        if (nutritionData.length === 0) {
+            container.html(`
+                <tr>
+                    <td colspan="10" class="text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-apple-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Tidak ada data gizi</h5>
+                            <p class="text-muted">Belum ada data gizi yang tersedia.</p>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            return;
+        }
+
+        let html = '';
+        nutritionData.forEach(function(data, index) {
+            const statusLabels = {
+                'normal': 'Normal',
+                'kurang': 'Kurang Gizi',
+                'buruk': 'Gizi Buruk',
+                'lebih': 'Gizi Lebih',
+                'stunting': 'Stunting',
+                'wasting': 'Wasting'
+            };
+
+            const statusClasses = {
+                'normal': 'normal',
+                'kurang': 'undernourished',
+                'buruk': 'severely-undernourished',
+                'lebih': 'overweight',
+                'stunting': 'stunting',
+                'wasting': 'wasting'
+            };
+
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-2">
+                                <i class="fas fa-child"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">${data.child_name}</div>
+                                <small class="text-muted">${data.child_nik || ''}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${data.measurement_date}</td>
+                    <td>${data.age_months} bulan</td>
+                    <td>${data.weight} kg</td>
+                    <td>${data.height} cm</td>
+                    <td>${data.bmi || '-'}</td>
+                    <td>
+                        <span class="nutrition-status ${statusClasses[data.nutrition_status]}">
+                            ${statusLabels[data.nutrition_status]}
+                        </span>
+                    </td>
+                    <td>${data.posyandu_name || '-'}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'admin_panel:posyandu:nutrition_data_detail' 0 %}" class="btn btn-sm btn-outline-primary" onclick="this.href = this.href.replace('0', ${data.id})" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:posyandu:nutrition_data_update' 0 %}" class="btn btn-sm btn-outline-warning" onclick="this.href = this.href.replace('0', ${data.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteNutritionData(${data.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Get BMI category
+    function getBMICategory(bmi) {
+        if (bmi < 18.5) return 'Kurang berat badan';
+        if (bmi < 25) return 'Normal';
+        if (bmi < 30) return 'Kelebihan berat badan';
+        return 'Obesitas';
+    }
+
+    // Global functions for actions
+    window.viewNutritionData = function(id) {
+        window.location.href = `{% url 'admin_panel:posyandu:nutrition_data_detail' 0 %}`.replace('0', id);
+    };
+
+    window.deleteNutritionData = function(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus data gizi ini?')) {
+            $.ajax({
+                url: `{% url "admin_panel:posyandu:api_nutrition_data_delete" 0 %}`.replace('0', id),
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    showAlert('Data gizi berhasil dihapus', 'success');
+                    loadNutritionData();
+                },
+                error: function(xhr, status, error) {
+                    showAlert('Error deleting nutrition data', 'danger');
+                }
+            });
+        }
+    };
+
+    // Update statistics
+    function updateStatistics(stats) {
+        $('#totalNutritionData').text(stats.total || 0);
+        $('#undernourished').text(stats.undernourished || 0);
+        $('#overweight').text(stats.overweight || 0);
+        $('#normalNutrition').text(stats.normal || 0);
+    }
+
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Semua Posyandu</option>';
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+                $('#posyanduFilter').html(options);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading posyandu options:', error);
+            }
+        });
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        // Implementation for pagination
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 2 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

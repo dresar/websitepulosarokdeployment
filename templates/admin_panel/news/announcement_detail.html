@@ -1,0 +1,557 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Pengumuman{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-section {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .detail-section h5 {
+        color: #333;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #007bff;
+    }
+    .announcement-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #007bff;
+    }
+    .announcement-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    .announcement-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .meta-item i {
+        color: #007bff;
+    }
+    .priority-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    .priority-low { background-color: #6c757d; }
+    .priority-normal { background-color: #17a2b8; }
+    .priority-high { background-color: #ffc107; }
+    .priority-urgent { background-color: #dc3545; }
+    .type-indicator {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .type-info { background-color: #d1ecf1; color: #0c5460; }
+    .type-warning { background-color: #fff3cd; color: #856404; }
+    .type-urgent { background-color: #f8d7da; color: #721c24; }
+    .type-schedule { background-color: #d4edda; color: #155724; }
+    .type-event { background-color: #e2e3e5; color: #383d41; }
+    .type-service { background-color: #cce5ff; color: #004085; }
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    .status-active { background-color: #d4edda; color: #155724; }
+    .status-inactive { background-color: #f8d7da; color: #721c24; }
+    .announcement-content {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #007bff;
+    }
+    .info-card h6 {
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    .info-card p {
+        color: #333;
+        font-weight: 500;
+        margin: 0;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+    .action-buttons .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 500;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 2rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -0.5rem;
+        top: 0.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #007bff;
+    }
+    .timeline-item h6 {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .timeline-item p {
+        color: #6c757d;
+        margin: 0;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-top: 4px solid #007bff;
+    }
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 0.5rem;
+    }
+    .stat-card .label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .alert-custom {
+        border-radius: 10px;
+        border: none;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .alert-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+    }
+    .alert-info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #a8e6cf 100%);
+        color: #0c5460;
+    }
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da 0%, #ffb3ba 100%);
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Detail Pengumuman</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2">
+                <a href="{% url 'admin_panel:announcements_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <a href="{% url 'admin_panel:announcement_update' announcement.pk %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Header -->
+    <div class="announcement-header">
+        <h1 class="announcement-title">{{ announcement.title }}</h1>
+        
+        <div class="announcement-meta">
+            <div class="meta-item">
+                <i class="fas fa-tag"></i>
+                <span class="type-indicator type-{{ announcement.announcement_type }}">
+                    {{ announcement.get_announcement_type_display }}
+                </span>
+            </div>
+            
+            <div class="meta-item">
+                <i class="fas fa-exclamation-circle"></i>
+                <span class="priority-indicator priority-{{ announcement.priority }}"></span>
+                {{ announcement.get_priority_display }}
+            </div>
+            
+            <div class="meta-item">
+                <i class="fas fa-{% if announcement.is_active %}check-circle{% else %}pause-circle{% endif %}"></i>
+                <span class="status-badge status-{% if announcement.is_active %}active{% else %}inactive{% endif %}">
+                    {% if announcement.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                </span>
+            </div>
+            
+            {% if announcement.is_pinned %}
+            <div class="meta-item">
+                <i class="fas fa-thumbtack"></i>
+                <span class="badge bg-warning">Dipin</span>
+            </div>
+            {% endif %}
+            
+            {% if announcement.is_popup %}
+            <div class="meta-item">
+                <i class="fas fa-external-link-alt"></i>
+                <span class="badge bg-info">Popup</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="announcement-meta">
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                <span>Oleh: {{ announcement.author.username }}</span>
+            </div>
+            
+            <div class="meta-item">
+                <i class="fas fa-calendar-plus"></i>
+                <span>Dibuat: {{ announcement.created_at|date:"d M Y H:i" }}</span>
+            </div>
+            
+            {% if announcement.updated_at %}
+            <div class="meta-item">
+                <i class="fas fa-edit"></i>
+                <span>Diupdate: {{ announcement.updated_at|date:"d M Y H:i" }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Status Alerts -->
+    {% if not announcement.is_active %}
+    <div class="alert alert-warning alert-custom">
+        <i class="fas fa-pause-circle"></i>
+        <strong>Pengumuman Tidak Aktif</strong> - Pengumuman ini tidak ditampilkan kepada pengguna.
+    </div>
+    {% endif %}
+
+    {% if announcement.is_urgent %}
+    <div class="alert alert-danger alert-custom">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Pengumuman Mendesak</strong> - Pengumuman ini memiliki prioritas tinggi dan akan ditampilkan secara mencolok.
+    </div>
+    {% endif %}
+
+    {% if announcement.is_pinned %}
+    <div class="alert alert-info alert-custom">
+        <i class="fas fa-thumbtack"></i>
+        <strong>Pengumuman Dipin</strong> - Pengumuman ini akan selalu ditampilkan di bagian atas daftar.
+    </div>
+    {% endif %}
+
+    <!-- Content -->
+    <div class="detail-section">
+        <h5><i class="fas fa-file-text"></i> Isi Pengumuman</h5>
+        <div class="announcement-content">
+            {{ announcement.content|linebreaks }}
+        </div>
+    </div>
+
+    <!-- Information Grid -->
+    <div class="info-grid">
+        <div class="info-card">
+            <h6>Target Audiens</h6>
+            <p>{{ announcement.target_audience|default:"Semua Warga" }}</p>
+        </div>
+        
+        <div class="info-card">
+            <h6>Lokasi</h6>
+            <p>{{ announcement.location|default:"Tidak ditentukan" }}</p>
+        </div>
+        
+        <div class="info-card">
+            <h6>Narahubung</h6>
+            <p>{{ announcement.contact_person|default:"Tidak ditentukan" }}</p>
+        </div>
+        
+        <div class="info-card">
+            <h6>No. Telepon</h6>
+            <p>{{ announcement.contact_phone|default:"Tidak ditentukan" }}</p>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="detail-section">
+        <h5><i class="fas fa-clock"></i> Timeline</h5>
+        <div class="timeline">
+            <div class="timeline-item">
+                <h6>Dibuat</h6>
+                <p>{{ announcement.created_at|date:"d M Y H:i" }} oleh {{ announcement.author.username }}</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h6>Mulai Ditampilkan</h6>
+                <p>{{ announcement.start_date|date:"d M Y H:i" }}</p>
+            </div>
+            
+            {% if announcement.end_date %}
+            <div class="timeline-item">
+                <h6>Berakhir</h6>
+                <p>{{ announcement.end_date|date:"d M Y H:i" }}</p>
+            </div>
+            {% endif %}
+            
+            {% if announcement.updated_at %}
+            <div class="timeline-item">
+                <h6>Terakhir Diupdate</h6>
+                <p>{{ announcement.updated_at|date:"d M Y H:i" }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="detail-section">
+        <h5><i class="fas fa-chart-bar"></i> Statistik</h5>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">{{ announcement.view_count|default:0 }}</div>
+                <div class="label">Total Views</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">{{ announcement.unique_viewers|default:0 }}</div>
+                <div class="label">Unique Viewers</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">{{ announcement.click_count|default:0 }}</div>
+                <div class="label">Total Clicks</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">{{ announcement.share_count|default:0 }}</div>
+                <div class="label">Total Shares</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="detail-section">
+        <h5><i class="fas fa-cogs"></i> Aksi</h5>
+        <div class="action-buttons">
+            <a href="{% url 'admin_panel:announcement_update' announcement.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Pengumuman
+            </a>
+            
+            {% if announcement.is_active %}
+            <button class="btn btn-warning" onclick="toggleStatus('deactivate')">
+                <i class="fas fa-pause"></i> Nonaktifkan
+            </button>
+            {% else %}
+            <button class="btn btn-success" onclick="toggleStatus('activate')">
+                <i class="fas fa-play"></i> Aktifkan
+            </button>
+            {% endif %}
+            
+            {% if announcement.is_pinned %}
+            <button class="btn btn-secondary" onclick="togglePin(false)">
+                <i class="fas fa-thumbtack"></i> Unpin
+            </button>
+            {% else %}
+            <button class="btn btn-info" onclick="togglePin(true)">
+                <i class="fas fa-thumbtack"></i> Pin
+            </button>
+            {% endif %}
+            
+            <button class="btn btn-outline-info" onclick="duplicateAnnouncement()">
+                <i class="fas fa-copy"></i> Duplikat
+            </button>
+            
+            <button class="btn btn-danger" onclick="deleteAnnouncement()">
+                <i class="fas fa-trash"></i> Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Hapus</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus pengumuman <strong>{{ announcement.title }}</strong>?</p>
+                <p class="text-danger">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle status
+function toggleStatus(action) {
+    fetch('{% url "admin_panel:announcement_toggle_status" announcement.pk %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            action: action
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengubah status');
+    });
+}
+
+// Toggle pin
+function togglePin(pin) {
+    fetch('{% url "admin_panel:announcement_toggle_pin" announcement.pk %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            pin: pin
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengubah pin status');
+    });
+}
+
+// Duplicate announcement
+function duplicateAnnouncement() {
+    if (confirm('Apakah Anda yakin ingin menduplikasi pengumuman ini?')) {
+        // Redirect to create form with pre-filled data
+        const params = new URLSearchParams();
+        params.append('duplicate', '{{ announcement.id }}');
+        window.location.href = '{% url "admin_panel:announcement_create" %}?' + params.toString();
+    }
+}
+
+// Delete announcement
+function deleteAnnouncement() {
+    $('#deleteModal').modal('show');
+}
+
+// Confirm delete
+document.getElementById('confirmDelete').addEventListener('click', function() {
+    fetch('{% url "admin_panel:announcement_delete" announcement.pk %}', {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '{% url "admin_panel:announcements_list" %}';
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menghapus pengumuman');
+    });
+});
+
+// Auto-refresh stats every 30 seconds
+setInterval(function() {
+    // You can implement real-time stats update here
+    console.log('Refreshing stats...');
+}, 30000);
+</script>
+{% endblock %}

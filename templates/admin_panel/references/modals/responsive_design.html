@@ -1,0 +1,402 @@
+<!-- Responsive Design Enhancements -->
+<style>
+/* Mobile First Responsive Design */
+
+/* Mobile Styles (up to 768px) */
+@media (max-width: 768px) {
+    /* Card adjustments */
+    .card {
+        margin: 0.5rem;
+        border-radius: 0.5rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 0.5rem;
+    }
+    
+    /* Table responsive */
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.25rem 0.5rem;
+        white-space: nowrap;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table .d-none-mobile {
+        display: none !important;
+    }
+    
+    /* Action buttons */
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    
+    /* Search and filter */
+    .search-filter-container {
+        flex-direction: column;
+    }
+    
+    .search-filter-container .form-control {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Bulk actions */
+    .bulk-actions-bar {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .bulk-actions-bar .btn-group {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Pagination */
+    .pagination-container .row > div {
+        margin-bottom: 0.5rem;
+    }
+    
+    .pagination-container .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    /* Modal adjustments */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    /* Card view for mobile */
+    .card-view-item {
+        margin-bottom: 0.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+    }
+    
+    .card-view-item .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-view-item .item-title {
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .card-view-item .item-actions {
+        display: flex;
+        gap: 0.25rem;
+    }
+    
+    .card-view-item .item-details {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .card-view-item .item-details .badge {
+        font-size: 0.7rem;
+        margin-right: 0.25rem;
+    }
+}
+
+/* Tablet Styles (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* Card adjustments */
+    .card {
+        margin: 0.75rem;
+    }
+    
+    /* Table responsive */
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.4rem 0.6rem;
+    }
+    
+    /* Hide some columns on tablet */
+    .table .d-none-tablet {
+        display: none !important;
+    }
+    
+    /* Action buttons */
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Search and filter */
+    .search-filter-container {
+        flex-wrap: wrap;
+    }
+    
+    .search-filter-container .form-control {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Desktop Styles (1024px and up) */
+@media (min-width: 1024px) {
+    /* Full table display */
+    .table .d-none-desktop {
+        display: none !important;
+    }
+    
+    /* Enhanced spacing */
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    /* Better button spacing */
+    .btn-group-sm .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Universal responsive utilities */
+.responsive-hide-mobile {
+    display: block;
+}
+
+.responsive-hide-tablet {
+    display: block;
+}
+
+.responsive-hide-desktop {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .responsive-hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .responsive-hide-tablet {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .responsive-hide-desktop {
+        display: none !important;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .btn-group-sm .btn {
+        min-height: 36px;
+        min-width: 36px;
+    }
+    
+    .form-control {
+        min-height: 44px;
+    }
+    
+    .custom-control-label {
+        padding-left: 1.5rem;
+    }
+    
+    .custom-control-label::before,
+    .custom-control-label::after {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .bulk-actions-bar,
+    .pagination-container,
+    .btn-group,
+    .modal {
+        display: none !important;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.2rem;
+    }
+    
+    .card {
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .table {
+        border: 2px solid #000;
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    .badge {
+        border: 1px solid currentColor;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .table {
+        color: #e2e8f0;
+    }
+    
+    .table th {
+        background-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .table td {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+}
+</style>
+
+<!-- Responsive JavaScript -->
+<script>
+// Responsive utilities
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+function isTablet() {
+    return window.innerWidth > 768 && window.innerWidth <= 1024;
+}
+
+function isDesktop() {
+    return window.innerWidth > 1024;
+}
+
+// Responsive table handling
+function handleResponsiveTable() {
+    const table = $('.table-responsive table');
+    if (!table.length) return;
+    
+    if (isMobile()) {
+        // Hide less important columns on mobile
+        table.find('th, td').each(function() {
+            const $this = $(this);
+            if ($this.hasClass('d-none-mobile')) {
+                $this.hide();
+            }
+        });
+        
+        // Convert to card view if needed
+        if ($('#cardViewBtn').length && !$('#cardViewBtn').hasClass('active')) {
+            $('#cardViewBtn').click();
+        }
+    } else if (isTablet()) {
+        // Hide some columns on tablet
+        table.find('th, td').each(function() {
+            const $this = $(this);
+            if ($this.hasClass('d-none-tablet')) {
+                $this.hide();
+            }
+        });
+    } else {
+        // Show all columns on desktop
+        table.find('th, td').show();
+    }
+}
+
+// Responsive bulk actions
+function handleResponsiveBulkActions() {
+    const bulkBar = $('#bulkActionsBar');
+    if (!bulkBar.length) return;
+    
+    if (isMobile()) {
+        bulkBar.find('.d-flex').addClass('flex-column');
+        bulkBar.find('.btn-group').addClass('w-100');
+        bulkBar.find('.btn-group .btn').addClass('w-100');
+    } else {
+        bulkBar.find('.d-flex').removeClass('flex-column');
+        bulkBar.find('.btn-group').removeClass('w-100');
+        bulkBar.find('.btn-group .btn').removeClass('w-100');
+    }
+}
+
+// Responsive pagination
+function handleResponsivePagination() {
+    const pagination = $('.pagination-container');
+    if (!pagination.length) return;
+    
+    if (isMobile()) {
+        pagination.find('.row > div').addClass('mb-2');
+        pagination.find('.d-flex').addClass('flex-column');
+    } else {
+        pagination.find('.row > div').removeClass('mb-2');
+        pagination.find('.d-flex').removeClass('flex-column');
+    }
+}
+
+// Initialize responsive features
+function initResponsiveFeatures() {
+    handleResponsiveTable();
+    handleResponsiveBulkActions();
+    handleResponsivePagination();
+    
+    // Re-run on window resize
+    $(window).on('resize', function() {
+        setTimeout(function() {
+            handleResponsiveTable();
+            handleResponsiveBulkActions();
+            handleResponsivePagination();
+        }, 100);
+    });
+}
+
+// Initialize when document is ready
+$(document).ready(function() {
+    initResponsiveFeatures();
+});
+</script>

@@ -1,0 +1,355 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Imunisasi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .detail-container {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .info-section {
+        margin-bottom: 30px;
+    }
+    
+    .info-section h5 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f3f4;
+    }
+    
+    .info-row {
+        display: flex;
+        margin-bottom: 15px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        width: 200px;
+        flex-shrink: 0;
+    }
+    
+    .info-value {
+        color: #495057;
+        flex: 1;
+    }
+    
+    .vaccine-type {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .vaccine-type.bcg { background: #e3f2fd; color: #1976d2; }
+    .vaccine-type.dpt { background: #f3e5f5; color: #7b1fa2; }
+    .vaccine-type.polio { background: #e8f5e8; color: #388e3c; }
+    .vaccine-type.hepatitis { background: #fff3e0; color: #f57c00; }
+    .vaccine-type.campak { background: #fce4ec; color: #c2185b; }
+    .vaccine-type.other { background: #f5f5f5; color: #616161; }
+    
+    .status-badge {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.completed {
+        background: #c8e6c9;
+        color: #2e7d32;
+    }
+    
+    .status-badge.pending {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .status-badge.overdue {
+        background: #ffcdd2;
+        color: #d32f2f;
+    }
+    
+    .btn-custom {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .notes-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .notes-section h6 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .notes-content {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+    
+    .empty-notes {
+        color: #adb5bd;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Detail Header -->
+    <div class="detail-header">
+        <h2 class="mb-2">
+            <i class="fas fa-syringe mr-2"></i>
+            Detail Data Imunisasi
+        </h2>
+        <p class="mb-0">{{ immunization.patient.name if immunization.patient else "Unknown" }} - {{ immunization.get_vaccine_type_display }}</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-between mb-4">
+        <a href="{% url 'admin_panel:posyandu:immunizations' %}" class="btn btn-outline-secondary btn-custom">
+            <i class="fas fa-arrow-left mr-1"></i>
+            Kembali
+        </a>
+        <div>
+            <a href="{% url 'admin_panel:posyandu:immunization_update' immunization.id %}" class="btn btn-warning btn-custom mr-2">
+                <i class="fas fa-edit mr-1"></i>
+                Edit
+            </a>
+            <button class="btn btn-danger btn-custom" onclick="deleteImmunization({{ immunization.id }})">
+                <i class="fas fa-trash mr-1"></i>
+                Hapus
+            </button>
+        </div>
+    </div>
+
+    <!-- Child Information -->
+    <div class="detail-container">
+        <div class="info-section">
+            <h5>
+                <i class="fas fa-child text-primary mr-2"></i>
+                Informasi Anak
+            </h5>
+            <div class="info-row">
+                <div class="info-label">Nama Lengkap:</div>
+                <div class="info-value">{{ immunization.patient.name if immunization.patient else "Unknown" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">NIK:</div>
+                <div class="info-value">{{ immunization.patient.nik if immunization.patient else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Tanggal Lahir:</div>
+                <div class="info-value">{{ getattr(immunization.patient, 'birth_date', None)|date:"d F Y" if immunization.patient and getattr(immunization.patient, 'birth_date', None) else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Usia:</div>
+                <div class="info-value">
+                    {% if immunization.patient and getattr(immunization.patient, 'birth_date', None) %}
+                        {% with age=immunization.patient.age %}
+                            {{ age|default:"-" }} tahun
+                        {% endwith %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Jenis Kelamin:</div>
+                <div class="info-value">
+                    {% if immunization.patient %}
+                        {% if immunization.patient.gender == 'L' %}Laki-laki{% else %}Perempuan{% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Alamat:</div>
+                <div class="info-value">{{ immunization.patient.address if immunization.patient else "-" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Immunization Information -->
+    <div class="detail-container">
+        <div class="info-section">
+            <h5>
+                <i class="fas fa-syringe text-primary mr-2"></i>
+                Data Imunisasi
+            </h5>
+            <div class="info-row">
+                <div class="info-label">Jenis Vaksin:</div>
+                <div class="info-value">
+                    <span class="vaccine-type {{ immunization.vaccine_type }}">
+                        {{ immunization.get_vaccine_type_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Tanggal Imunisasi:</div>
+                <div class="info-value">{{ immunization.immunization_date|date:"d F Y" if immunization.immunization_date else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Status:</div>
+                <div class="info-value">
+                    <span class="status-badge {{ immunization.status }}">
+                        {{ immunization.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Posyandu:</div>
+                <div class="info-value">{{ immunization.posyandu.name if immunization.posyandu else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Petugas Kesehatan:</div>
+                <div class="info-value">{{ immunization.health_worker if immunization.health_worker else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">No. Batch Vaksin:</div>
+                <div class="info-value">{{ immunization.batch_number if immunization.batch_number else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Jadwal Berikutnya:</div>
+                <div class="info-value">{{ immunization.next_schedule|date:"d F Y" if immunization.next_schedule else "-" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    {% if immunization.notes %}
+    <div class="detail-container">
+        <div class="notes-section">
+            <h6>
+                <i class="fas fa-sticky-note text-primary mr-2"></i>
+                Catatan
+            </h6>
+            <div class="notes-content">{{ immunization.notes }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- System Information -->
+    <div class="detail-container">
+        <div class="info-section">
+            <h5>
+                <i class="fas fa-info-circle text-primary mr-2"></i>
+                Informasi Sistem
+            </h5>
+            <div class="info-row">
+                <div class="info-label">Dibuat Oleh:</div>
+                <div class="info-value">{{ immunization.recorded_by.get_full_name if immunization.recorded_by else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Tanggal Dibuat:</div>
+                <div class="info-value">{{ immunization.created_at|date:"d F Y H:i" if immunization.created_at else "-" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Terakhir Diperbarui:</div>
+                <div class="info-value">{{ immunization.updated_at|date:"d F Y H:i" if immunization.updated_at else "-" }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteImmunization(id) {
+    if (confirm('Apakah Anda yakin ingin menghapus data imunisasi ini?')) {
+        $.ajax({
+            url: `{% url 'posyandu:api_immunization_delete' 0 %}`.replace('0', id),
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                showAlert('Data imunisasi berhasil dihapus', 'success');
+                setTimeout(function() {
+                    window.location.href = '{% url "admin_panel:posyandu:immunizations" %}';
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.error || 'Terjadi kesalahan saat menghapus data';
+                showAlert(errorMsg, 'danger');
+            }
+        });
+    }
+}
+
+// Show alert with spam prevention
+let alertCount = 0;
+const maxAlerts = 2;
+const alertMessages = new Set();
+
+function showAlert(message, type) {
+    if (alertMessages.has(message)) {
+        return;
+    }
+    
+    if (alertCount >= maxAlerts) {
+        return;
+    }
+    
+    alertMessages.add(message);
+    alertCount++;
+    
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    $('.container-fluid').prepend(alertHtml);
+    
+    setTimeout(function() {
+        $('.alert').first().fadeOut(function() {
+            $(this).remove();
+            alertCount--;
+            alertMessages.delete(message);
+        });
+    }, 3000);
+}
+</script>
+{% endblock %}

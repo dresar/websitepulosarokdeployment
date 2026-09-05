@@ -1,0 +1,484 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Jadwal Kegiatan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .detail-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 15px;
+    }
+    .status-upcoming { background: #e3f2fd; color: #1976d2; }
+    .status-ongoing { background: #e8f5e8; color: #2e7d32; }
+    .status-completed { background: #f3e5f5; color: #7b1fa2; }
+    .status-cancelled { background: #ffcdd2; color: #d32f2f; }
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 120px;
+    }
+    .detail-value {
+        color: #6c757d;
+        text-align: right;
+    }
+    .action-buttons .btn {
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 15px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 3px #dee2e6;
+    }
+    .timeline-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    .timeline-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .timeline-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .participants-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .participant-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .participant-item:last-child {
+        border-bottom: none;
+    }
+    .participant-info {
+        display: flex;
+        align-items: center;
+    }
+    .participant-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-weight: bold;
+    }
+    .participant-name {
+        font-weight: 600;
+        color: #495057;
+    }
+    .participant-role {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="detail-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1" id="scheduleTitle">Loading...</h2>
+                <p class="mb-0" id="scheduleDate">Loading...</p>
+            </div>
+            <div>
+                <a href="{% url 'admin_panel:posyandu:schedules' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="detail-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Informasi Dasar
+                </h5>
+                <div class="detail-item">
+                    <span class="detail-label">Jenis Kegiatan:</span>
+                    <span class="detail-value" id="activityType">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Tanggal:</span>
+                    <span class="detail-value" id="scheduleDateDetail">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Waktu:</span>
+                    <span class="detail-value" id="scheduleTime">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Lokasi:</span>
+                    <span class="detail-value" id="scheduleLocation">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Penanggung Jawab:</span>
+                    <span class="detail-value" id="scheduleOrganizer">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Maksimal Peserta:</span>
+                    <span class="detail-value" id="maxParticipants">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Peserta Terdaftar:</span>
+                    <span class="detail-value" id="registeredParticipants">-</span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="detail-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    Deskripsi Kegiatan
+                </h5>
+                <p id="scheduleDescription" class="mb-0">-</p>
+            </div>
+
+            <!-- Notes -->
+            <div class="detail-card" id="notesSection" style="display: none;">
+                <h5 class="mb-3">
+                    <i class="fas fa-sticky-note mr-2"></i>
+                    Catatan
+                </h5>
+                <p id="scheduleNotes" class="mb-0">-</p>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Status and Actions -->
+            <div class="detail-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-cog mr-2"></i>
+                    Status & Aksi
+                </h5>
+                <div class="mb-3">
+                    <span class="status-badge" id="statusBadge">Loading...</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-primary" id="editScheduleBtn">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Jadwal
+                    </a>
+                    <a href="#" class="btn btn-outline-danger" id="deleteScheduleBtn">
+                        <i class="fas fa-trash mr-2"></i>
+                        Hapus
+                    </a>
+                </div>
+            </div>
+
+            <!-- Participants -->
+            <div class="detail-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-users mr-2"></i>
+                    Informasi Peserta
+                </h5>
+                <div class="participants-section">
+                    <div class="text-center mb-3">
+                        <h6 class="mb-1" id="participantsCount">0 Peserta</h6>
+                        <small class="text-muted">Terdaftar</small>
+                    </div>
+                    <div id="participantsList">
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <p>Belum ada peserta terdaftar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="detail-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-clock mr-2"></i>
+                    Timeline Kegiatan
+                </h5>
+                <div class="timeline" id="scheduleTimeline">
+                    <div class="timeline-item">
+                        <div class="timeline-time">00:00</div>
+                        <div class="timeline-title">Persiapan</div>
+                        <div class="timeline-description">Persiapan peralatan dan ruangan</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">00:30</div>
+                        <div class="timeline-title">Registrasi Peserta</div>
+                        <div class="timeline-description">Pendaftaran dan pengecekan identitas</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">01:00</div>
+                        <div class="timeline-title">Kegiatan Utama</div>
+                        <div class="timeline-description">Pelaksanaan kegiatan sesuai jadwal</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">02:00</div>
+                        <div class="timeline-title">Penutupan</div>
+                        <div class="timeline-description">Evaluasi dan penutupan kegiatan</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadScheduleDetail();
+});
+
+// Load schedule detail
+function loadScheduleDetail() {
+    const scheduleId = getScheduleIdFromUrl();
+    
+    $.ajax({
+        url: `{% url "posyandu:api_schedule_detail" 0 %}`.replace('0', scheduleId),
+        method: 'GET',
+        success: function(response) {
+            displayScheduleDetail(response);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading schedule detail:', error);
+            showAlert('Error loading schedule detail', 'danger');
+        }
+    });
+}
+
+// Get schedule ID from URL
+function getScheduleIdFromUrl() {
+    const pathParts = window.location.pathname.split('/');
+    return pathParts[pathParts.length - 2];
+}
+
+// Display schedule detail
+function displayScheduleDetail(schedule) {
+    // Basic information
+    $('#scheduleTitle').text(schedule.title || 'Tidak ada judul');
+    $('#scheduleDate').text(schedule.schedule_date || 'Tidak ada tanggal');
+    $('#activityType').text(schedule.activity_type || 'Tidak diketahui');
+    $('#scheduleDateDetail').text(schedule.schedule_date || 'Tidak ada tanggal');
+    $('#scheduleTime').text(formatTime(schedule.start_time, schedule.end_time));
+    $('#scheduleLocation').text(schedule.location_name || 'Tidak ada lokasi');
+    $('#scheduleOrganizer').text(schedule.organizer || 'Tidak ada penanggung jawab');
+    $('#maxParticipants').text(schedule.max_participants || 'Tidak terbatas');
+    $('#registeredParticipants').text(schedule.participants || 0);
+    $('#scheduleDescription').text(schedule.description || 'Tidak ada deskripsi');
+    
+    // Notes
+    if (schedule.notes) {
+        $('#scheduleNotes').text(schedule.notes);
+        $('#notesSection').show();
+    }
+    
+    // Status
+    updateStatusBadge(schedule.status);
+    
+    // Participants
+    updateParticipants(schedule.participants || 0, schedule.max_participants);
+    
+    // Update button URLs
+    $('#editScheduleBtn').attr('href', `{% url "admin_panel:posyandu:schedule_update" 0 %}`.replace('0', schedule.id));
+    $('#deleteScheduleBtn').attr('href', `{% url "admin_panel:posyandu_schedule_delete" 0 %}`.replace('0', schedule.id));
+}
+
+// Format time
+function formatTime(startTime, endTime) {
+    if (!startTime) return 'Tidak ada waktu';
+    if (!endTime) return startTime;
+    return `${startTime} - ${endTime}`;
+}
+
+// Update status badge
+function updateStatusBadge(status) {
+    const statusLabels = {
+        'upcoming': 'Mendatang',
+        'ongoing': 'Sedang Berlangsung',
+        'completed': 'Selesai',
+        'cancelled': 'Dibatalkan'
+    };
+    
+    const statusClasses = {
+        'upcoming': 'status-upcoming',
+        'ongoing': 'status-ongoing',
+        'completed': 'status-completed',
+        'cancelled': 'status-cancelled'
+    };
+    
+    const label = statusLabels[status] || 'Tidak diketahui';
+    const className = statusClasses[status] || 'status-upcoming';
+    
+    $('#statusBadge').text(label).removeClass().addClass('status-badge ' + className);
+}
+
+// Update participants
+function updateParticipants(registered, max) {
+    const count = registered || 0;
+    const maxCount = max || 'Tidak terbatas';
+    
+    $('#participantsCount').text(`${count} Peserta`);
+    
+    if (count > 0) {
+        // Generate participant list (mock data for now)
+        let participantsHtml = '';
+        for (let i = 1; i <= Math.min(count, 5); i++) {
+            participantsHtml += `
+                <div class="participant-item">
+                    <div class="participant-info">
+                        <div class="participant-avatar">${i}</div>
+                        <div>
+                            <div class="participant-name">Peserta ${i}</div>
+                            <div class="participant-role">Warga Desa</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (count > 5) {
+            participantsHtml += `
+                <div class="participant-item">
+                    <div class="participant-info">
+                        <div class="participant-avatar">+</div>
+                        <div>
+                            <div class="participant-name">${count - 5} peserta lainnya</div>
+                            <div class="participant-role">Warga Desa</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        $('#participantsList').html(participantsHtml);
+    } else {
+        $('#participantsList').html(`
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>Belum ada peserta terdaftar</p>
+            </div>
+        `);
+    }
+}
+
+// Show alert with spam prevention
+let alertCount = 0;
+const maxAlerts = 2;
+const alertMessages = new Set();
+
+function showAlert(message, type) {
+    if (alertMessages.has(message)) {
+        return;
+    }
+    
+    if (alertCount >= maxAlerts) {
+        return;
+    }
+    
+    alertMessages.add(message);
+    alertCount++;
+    
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    $('.container-fluid').prepend(alertHtml);
+    
+    setTimeout(function() {
+        $('.alert').first().fadeOut(function() {
+            $(this).remove();
+            alertCount--;
+            alertMessages.delete(message);
+        });
+    }, 3000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,280 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Ensure good contrast for all text elements */
+.badge {
+    color: white !important;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+/* Ensure table text is dark */
+.table td, .table th {
+    color: #333 !important;
+}
+
+.table-sm td, .table-sm th {
+    padding: 0.3rem;
+    font-size: 0.875rem;
+}
+
+/* Ensure all text is visible */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Button text contrast */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-primary">
+                <i class="fas fa-cogs mr-2"></i>Manajemen Layanan Jasa
+            </h1>
+            <p class="text-muted">Kelola data layanan jasa di Desa Pulosari</p>
+        </div>
+        <div>
+            <a href="{% url 'admin_panel:layanan_jasa_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i>Tambah Layanan Jasa
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="search" class="form-label">Pencarian</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ search }}" placeholder="Cari nama layanan, penyedia, atau alamat...">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="kategori" class="form-label">Kategori</label>
+                    <select class="form-control" id="kategori" name="kategori">
+                        <option value="">Semua Kategori</option>
+                        {% for value, label in kategori_choices %}
+                            <option value="{{ value }}" {% if kategori_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="">Semua Status</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search mr-2"></i>Cari
+                        </button>
+                        <a href="{% url 'admin_panel:layanan_jasa_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times mr-2"></i>Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-cogs mr-2"></i>Daftar Layanan Jasa 
+                <span class="badge badge-primary ml-2">{{ page_obj.paginator.count }} data</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Layanan</th>
+                        <th>Penyedia</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Pengalaman</th>
+                        <th>Rating</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for layanan in page_obj %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td>
+                            <div>
+                                <strong>{{ layanan.nama }}</strong>
+                                {% if layanan.sertifikat %}
+                                    <br><small class="business-text-muted">
+                                        <a href="{{ layanan.sertifikat.url }}" target="_blank" class="text-primary">
+                                            <i class="fas fa-file-pdf"></i> Lihat Sertifikat
+                                        </a>
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                {{ layanan.penyedia }}
+                                <br><small class="business-text-muted">{{ layanan.telepon }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="business-badge business-badge-{{ layanan.kategori }}">
+                                {{ layanan.get_kategori_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if layanan.harga_min and layanan.harga_max %}
+                                <div class="business-price-range">
+                                    Rp {{ layanan.harga_min|floatformat:0 }} - {{ layanan.harga_max|floatformat:0 }}
+                                    <br><small class="business-text-muted">{{ layanan.get_satuan_harga_display }}</small>
+                                </div>
+                            {% else %}
+                                <span class="business-text-muted">Hubungi penyedia</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ layanan.pengalaman }} tahun</td>
+                        <td>
+                            {% if layanan.rating %}
+                                <div class="business-rating-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= layanan.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="business-ms-1">{{ layanan.rating }}</span>
+                                </div>
+                            {% else %}
+                                <span class="business-text-muted">Belum ada rating</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="business-badge business-badge-{{ layanan.status }}">
+                                {{ layanan.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'admin_panel:layanan_jasa_detail' layanan.id %}" 
+                                   class="btn btn-sm btn-outline-info" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:layanan_jasa_edit' layanan.id %}" 
+                                   class="btn btn-sm btn-outline-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:layanan_jasa_delete' layanan.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   onclick="return confirm('Apakah Anda yakin ingin menghapus layanan jasa {{ layanan.nama }}?')" 
+                                   title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Tidak ada data layanan jasa ditemukan</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div class="d-flex justify-content-center mt-4">
+            <nav aria-label="Pagination">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if kategori_filter %}&kategori={{ kategori_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if kategori_filter %}&kategori={{ kategori_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if kategori_filter %}&kategori={{ kategori_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if kategori_filter %}&kategori={{ kategori_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh status badge color
+document.addEventListener('DOMContentLoaded', function() {
+    const statusBadges = document.querySelectorAll('.status-badge');
+    statusBadges.forEach(badge => {
+        const status = badge.classList[1].replace('status-', '');
+        console.log('Layanan Status:', status);
+    });
+});
+</script>
+{% endblock extra_js %}

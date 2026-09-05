@@ -1,0 +1,639 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Lokasi Posyandu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .location-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .stats-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .location-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .location-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .location-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .location-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .location-amenities {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .amenity-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .amenity-item i {
+        width: 20px;
+        color: #1976d2;
+        margin-right: 8px;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .status-badge.active { background: #e8f5e8; color: #2e7d32; }
+    .status-badge.inactive { background: #ffcdd2; color: #d32f2f; }
+    .status-badge.maintenance { background: #fff3e0; color: #f57c00; }
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box .form-control {
+        padding-left: 40px;
+    }
+    .search-box .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    .location-chart {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .location-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+    }
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 8px;
+    }
+    .map-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .map-placeholder {
+        width: 100%;
+        height: 200px;
+        background: #e9ecef;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    .contact-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        margin-top: 10px;
+    }
+    .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    .contact-item i {
+        width: 20px;
+        color: #6c757d;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'admin_panel:posyandu:posyandu_admin' %}" class="btn btn-outline-primary btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+                            Lokasi Posyandu
+                        </h2>
+                        <p class="text-muted mb-0">Kelola data lokasi posyandu</p>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'admin_panel:posyandu:location_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Lokasi
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalLocations">0</div>
+                <div class="stats-label">Total Lokasi</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="stats-number" id="activeLocations">0</div>
+                <div class="stats-label">Aktif</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="stats-number" id="maintenanceLocations">0</div>
+                <div class="stats-label">Maintenance</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="stats-number" id="totalCapacity">0</div>
+                <div class="stats-label">Total Kapasitas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari nama lokasi...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="statusFilter">
+                    <option value="">Semua Status</option>
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Tidak Aktif</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="capacityFilter">
+                    <option value="">Semua Kapasitas</option>
+                    <option value="small">Kecil (< 50)</option>
+                    <option value="medium">Sedang (50-100)</option>
+                    <option value="large">Besar (> 100)</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary btn-block" id="clearFilters">
+                    <i class="fas fa-times mr-1"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Chart -->
+    <div class="location-chart">
+        <h5 class="mb-3">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Distribusi Status Lokasi
+        </h5>
+        <div class="chart-container">
+            <canvas id="locationChart"></canvas>
+        </div>
+        <div class="location-legend" id="locationLegend">
+            <!-- Legend will be generated here -->
+        </div>
+    </div>
+
+    <!-- Locations List -->
+    <div class="row" id="locationsList">
+        <!-- Locations will be loaded here via JavaScript -->
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <nav aria-label="Locations pagination">
+            <ul class="pagination" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    let currentPage = 1;
+    let currentFilters = {
+        search: '',
+        status: '',
+        capacity: ''
+    };
+
+    // Load initial data
+    loadLocations();
+    initializeChart();
+    
+    // Event delegation for action buttons
+    $(document).on('click', '.view-location', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        window.location.href = `{% url 'admin_panel:posyandu:locations_detail' 0 %}`.replace('0', id);
+    });
+    
+    $(document).on('click', '.edit-location', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        window.location.href = `{% url 'admin_panel:posyandu:location_update' 0 %}`.replace('0', id);
+    });
+    
+    $(document).on('click', '.show-map', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        showMap(id);
+    });
+    
+    $(document).on('click', '.delete-location', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        if (confirm('Apakah Anda yakin ingin menghapus lokasi ini?')) {
+            window.location.href = `{% url 'admin_panel:posyandu:location_delete' 0 %}`.replace('0', id);
+        }
+    });
+
+    // Search functionality
+    $('#searchInput').on('input', function() {
+        currentFilters.search = $(this).val();
+        currentPage = 1;
+        loadLocations();
+    });
+
+    // Filter functionality
+    $('#statusFilter').on('change', function() {
+        currentFilters.status = $(this).val();
+        currentPage = 1;
+        loadLocations();
+    });
+
+    $('#capacityFilter').on('change', function() {
+        currentFilters.capacity = $(this).val();
+        currentPage = 1;
+        loadLocations();
+    });
+
+    // Clear filters
+    $('#clearFilters').on('click', function() {
+        $('#searchInput').val('');
+        $('#statusFilter').val('');
+        $('#capacityFilter').val('');
+        
+        currentFilters = {
+            search: '',
+            status: '',
+            capacity: ''
+        };
+        currentPage = 1;
+        loadLocations();
+    });
+
+    // Load locations
+    function loadLocations() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_location_list" %}',
+            method: 'GET',
+            data: {
+                page: currentPage,
+                search: currentFilters.search,
+                status: currentFilters.status,
+                capacity: currentFilters.capacity
+            },
+            success: function(response) {
+                displayLocations(response.results);
+                updatePagination(response.pagination);
+                updateStatistics(response.statistics);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading locations:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+
+    // Display locations
+    function displayLocations(locations) {
+        const container = $('#locationsList');
+        
+        if (locations.length === 0) {
+            container.html(`
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h4>Tidak ada lokasi</h4>
+                        <p>Belum ada data lokasi posyandu yang tersedia.</p>
+                    </div>
+                </div>
+            `);
+            return;
+        }
+
+        let html = '';
+        locations.forEach(function(location) {
+            const statusLabels = {
+                'active': 'Aktif',
+                'inactive': 'Tidak Aktif',
+                'maintenance': 'Maintenance'
+            };
+
+            const statusClasses = {
+                'active': 'active',
+                'inactive': 'inactive',
+                'maintenance': 'maintenance'
+            };
+
+            const amenities = location.amenities ? location.amenities.split(',').map(a => a.trim()) : [];
+
+            html += `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="location-card">
+                        <img src="${location.image}" 
+                             alt="${location.name}" class="location-image">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-1">${location.name}</h6>
+                                <small class="text-muted">${location.code || '-'}</small>
+                            </div>
+                            <span class="status-badge ${statusClasses[location.status]}">
+                                ${statusLabels[location.status]}
+                            </span>
+                        </div>
+                        
+                        <div class="location-info">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Kapasitas:</small><br>
+                                    <strong>${location.capacity || '-'} orang</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Status:</small><br>
+                                    <strong class="text-${location.status === 'active' ? 'success' : location.status === 'maintenance' ? 'warning' : 'danger'}">
+                                        ${statusLabels[location.status]}
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-info">
+                            ${location.phone ? `
+                                <div class="contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>${location.phone}</span>
+                                </div>
+                            ` : ''}
+                            ${location.email ? `
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>${location.email}</span>
+                                </div>
+                            ` : ''}
+                            <div class="contact-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${location.address}</span>
+                            </div>
+                        </div>
+
+                        ${amenities.length > 0 ? `
+                            <div class="location-amenities">
+                                <h6 class="mb-2">Fasilitas</h6>
+                                ${amenities.map(amenity => `
+                                    <div class="amenity-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>${amenity}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <div class="action-buttons mt-3">
+                            <a href="#" class="btn btn-sm btn-outline-primary view-location" data-id="${location.id || 0}">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-outline-warning edit-location" data-id="${location.id || 0}">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-info show-map" data-id="${location.id || 0}">
+                                <i class="fas fa-map"></i>
+                            </button>
+                            <a href="#" class="btn btn-sm btn-outline-danger delete-location" data-id="${location.id || 0}">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Initialize chart
+    function initializeChart() {
+        const ctx = document.getElementById('locationChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aktif', 'Tidak Aktif', 'Maintenance'],
+                datasets: [{
+                    data: [8, 2, 1],
+                    backgroundColor: [
+                        '#e8f5e8',
+                        '#ffcdd2',
+                        '#fff3e0'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Global functions for actions
+    window.showMap = function(id) {
+        // Load location data to get coordinates
+        $.ajax({
+            url: `{% url "admin_panel:posyandu:api_location_update" 0 %}`.replace('0', id),
+            method: 'GET',
+            success: function(response) {
+                const lat = response.latitude;
+                const lng = response.longitude;
+                
+                if (lat && lng) {
+                    const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                    window.open(mapsUrl, '_blank');
+                } else {
+                    showAlert('Koordinat tidak tersedia untuk menampilkan peta', 'warning');
+                }
+            },
+            error: function(xhr, status, error) {
+                showAlert('Error loading location data', 'danger');
+            }
+        });
+    };
+
+    // Update statistics
+    function updateStatistics(stats) {
+        if (!stats) {
+            console.warn('Statistics data is undefined');
+            return;
+        }
+        $('#totalLocations').text(stats.total || 0);
+        $('#activeLocations').text(stats.active || 0);
+        $('#maintenanceLocations').text(stats.maintenance || 0);
+        $('#totalCapacity').text(stats.total_capacity || 0);
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        // Implementation for pagination
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 2 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

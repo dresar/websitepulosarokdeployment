@@ -1,0 +1,934 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Manajemen Kategori Berita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-card {
+        border: none;
+        border-radius: 20px;
+        padding: 0;
+        margin-bottom: 1.5rem;
+        background: white;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+        opacity: 0.1;
+    }
+    .category-header {
+        display: flex;
+        justify-content-between;
+        align-items: flex-start;
+        padding: 2rem 2rem 1rem 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #e9ecef;
+    }
+    .category-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .category-color {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        border: 3px solid white;
+        position: relative;
+    }
+    .category-color::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #007bff, #28a745, #ffc107, #dc3545);
+        z-index: -1;
+        opacity: 0.2;
+    }
+    .category-icon {
+        font-size: 1.5rem;
+        color: #6c757d;
+        margin-right: 0.5rem;
+    }
+    .category-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    }
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #007bff, #28a745);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.3rem;
+    }
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .category-actions {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+    }
+    .category-description {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-top: 1px solid #e9ecef;
+        color: #495057;
+        font-style: italic;
+        line-height: 1.6;
+    }
+    .category-footer {
+        padding: 1rem 2rem 2rem 2rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content-between;
+        align-items: center;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        color: #dee2e6;
+    }
+    .empty-state h5 {
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .create-category-form {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .create-category-form h5 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .color-picker {
+        width: 60px;
+        height: 60px;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .color-picker:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .icon-picker {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 0.8rem;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    .icon-option {
+        padding: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    .icon-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,123,255,0.1), transparent);
+        transition: left 0.5s;
+    }
+    .icon-option:hover::before {
+        left: 100%;
+    }
+    .icon-option:hover {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+        border-color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,123,255,0.2);
+    }
+    .icon-option.selected {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border-color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,123,255,0.3);
+    }
+    .icon-option i {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.8rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .form-control {
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        padding: 0.8rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+    .page-header h1 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-overview-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-overview-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+    }
+    .stat-overview-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    .stat-overview-card .number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #007bff, #28a745);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    .stat-overview-card .label {
+        color: #6c757d;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 20px 20px 0 0;
+    }
+    .modal-title {
+        color: #2c3e50;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    .modal-body {
+        padding: 2rem;
+    }
+    .modal-footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        border-radius: 0 0 20px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+            <h1>
+                <i class="fas fa-folder text-primary"></i> Manajemen Kategori Berita
+            </h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group mr-2">
+                    <button class="btn btn-primary btn-modern" data-toggle="modal" data-target="#createCategoryModal">
+                        <i class="fas fa-plus"></i> Tambah Kategori
+                    </button>
+                    <a href="{% url 'admin_panel:news_dashboard' %}" class="btn btn-outline-primary btn-modern">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-overview">
+        <div class="stat-overview-card">
+            <div class="number">{{ categories.paginator.count|default:0 }}</div>
+            <div class="label">Total Kategori</div>
+        </div>
+        <div class="stat-overview-card">
+            <div class="number">{{ categories|length|default:0 }}</div>
+            <div class="label">Ditampilkan</div>
+        </div>
+        <div class="stat-overview-card">
+            <div class="number">{{ categories|length|default:0 }}</div>
+            <div class="label">Aktif</div>
+        </div>
+        <div class="stat-overview-card">
+            <div class="number">{{ categories|length|default:0 }}</div>
+            <div class="label">Populer</div>
+        </div>
+    </div>
+
+    <!-- Create Category Form -->
+    <div class="create-category-form">
+        <h5><i class="fas fa-plus-circle"></i> Tambah Kategori Baru</h5>
+        <form id="createCategoryForm">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="categoryName" class="form-label">Nama Kategori</label>
+                        <input type="text" class="form-control" id="categoryName" name="name" required>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="categoryColor" class="form-label">Warna</label>
+                        <input type="color" class="form-control color-picker" id="categoryColor" name="color" value="#007bff">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="categoryIcon" class="form-label">Icon</label>
+                        <button type="button" class="btn btn-outline-secondary btn-modern w-100" data-toggle="modal" data-target="#iconPickerModal">
+                            <i class="fas fa-icons"></i> Pilih Icon
+                        </button>
+                        <input type="hidden" id="selectedIcon" name="icon">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="categoryDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="categoryDescription" name="description" rows="1"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="categoryOrder" class="form-label">Urutan</label>
+                        <input type="number" class="form-control" id="categoryOrder" name="order" value="0">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input type="checkbox" class="form-check-input" id="categoryActive" name="is_active" checked>
+                        <label class="form-check-label" for="categoryActive">
+                            <i class="fas fa-check-circle text-success"></i> Aktif
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary btn-modern">
+                    <i class="fas fa-save"></i> Simpan Kategori
+                </button>
+                <button type="reset" class="btn btn-outline-secondary btn-modern">
+                    <i class="fas fa-times"></i> Reset
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Categories List -->
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-lg-4 col-md-6">
+            <div class="category-card">
+                <div class="category-header">
+                    <h5 class="category-name">
+                        <span class="category-color" style="background-color: {{ category.color }}"></span>
+                        {% if category.icon %}
+                        <i class="{{ category.icon }} category-icon"></i>
+                        {% endif %}
+                        {{ category.name }}
+                    </h5>
+                    <div class="category-actions">
+                        <button class="btn btn-sm btn-outline-primary btn-modern" onclick="editCategory({{ category.id }})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger btn-modern" onclick="deleteCategory({{ category.id }}, '{{ category.name|escapejs }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                {% if category.description %}
+                <div class="category-description">
+                    {{ category.description }}
+                </div>
+                {% endif %}
+                
+                <div class="category-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ category.news_count }}</div>
+                        <div class="stat-label">Berita</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ category.views_count|default:0 }}</div>
+                        <div class="stat-label">Views</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ category.likes_count|default:0 }}</div>
+                        <div class="stat-label">Likes</div>
+                    </div>
+                </div>
+                
+                <div class="category-footer">
+                    <div>
+                        {% if category.is_active %}
+                        <span class="badge badge-modern" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
+                            <i class="fas fa-check-circle"></i> Aktif
+                        </span>
+                        {% else %}
+                        <span class="badge badge-modern" style="background: linear-gradient(135deg, #6c757d, #495057); color: white;">
+                            <i class="fas fa-times-circle"></i> Tidak Aktif
+                        </span>
+                        {% endif %}
+                        {% if category.icon %}
+                        <span class="badge badge-modern" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white;">
+                            <i class="fas fa-icons"></i> {{ category.icon }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> Dibuat: {{ category.created_at|date:"d M Y" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h5>Belum ada kategori</h5>
+                <p>Mulai dengan membuat kategori pertama Anda.</p>
+                <button class="btn btn-primary btn-modern" data-toggle="modal" data-target="#createCategoryModal">
+                    <i class="fas fa-plus"></i> Tambah Kategori
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create Category Modal -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle text-primary"></i> Tambah Kategori Baru
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="modalCreateCategoryForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="modalCategoryName" class="form-label">Nama Kategori</label>
+                                <input type="text" class="form-control" id="modalCategoryName" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="modalCategoryColor" class="form-label">Warna</label>
+                                <input type="color" class="form-control color-picker" id="modalCategoryColor" name="color" value="#007bff">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="modalCategoryIcon" class="form-label">Icon</label>
+                                <button type="button" class="btn btn-outline-secondary btn-modern w-100" onclick="openIconPicker()">
+                                    <i class="fas fa-icons"></i> Pilih Icon
+                                </button>
+                                <input type="hidden" id="modalSelectedIcon" name="icon">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="modalCategoryOrder" class="form-label">Urutan</label>
+                                <input type="number" class="form-control" id="modalCategoryOrder" name="order" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalCategoryDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="modalCategoryDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="modalCategoryActive" name="is_active" checked>
+                        <label class="form-check-label" for="modalCategoryActive">
+                            <i class="fas fa-check-circle text-success"></i> Aktif
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary btn-modern" onclick="createCategory()">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit text-primary"></i> Edit Kategori
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editCategoryForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="editCategoryId" name="id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editCategoryName" class="form-label">Nama Kategori</label>
+                                <input type="text" class="form-control" id="editCategoryName" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editCategoryColor" class="form-label">Warna</label>
+                                <input type="color" class="form-control color-picker" id="editCategoryColor" name="color">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editCategoryIcon" class="form-label">Icon</label>
+                                <button type="button" class="btn btn-outline-secondary btn-modern w-100" onclick="openIconPicker('edit')">
+                                    <i class="fas fa-icons"></i> Pilih Icon
+                                </button>
+                                <input type="hidden" id="editSelectedIcon" name="icon">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="editCategoryOrder" class="form-label">Urutan</label>
+                                <input type="number" class="form-control" id="editCategoryOrder" name="order">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCategoryDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="editCategoryDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="editCategoryActive" name="is_active">
+                        <label class="form-check-label" for="editCategoryActive">
+                            <i class="fas fa-check-circle text-success"></i> Aktif
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary btn-modern" onclick="updateCategory()">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Icon Picker Modal -->
+<div class="modal fade" id="iconPickerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-icons text-primary"></i> Pilih Icon
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="icon-picker" id="iconPicker">
+                    <!-- Icons will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary btn-modern" onclick="selectIcon()">Pilih</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus kategori <strong id="deleteCategoryName"></strong>?</p>
+                <p class="text-danger">
+                    <i class="fas fa-warning"></i> Semua berita dalam kategori ini akan kehilangan kategorinya.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-modern" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger btn-modern" id="confirmDelete">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Available icons
+const availableIcons = [
+    'fas fa-newspaper', 'fas fa-globe', 'fas fa-home', 'fas fa-user', 'fas fa-users',
+    'fas fa-heart', 'fas fa-star', 'fas fa-thumbs-up', 'fas fa-comment', 'fas fa-share',
+    'fas fa-calendar', 'fas fa-clock', 'fas fa-map-marker-alt', 'fas fa-phone',
+    'fas fa-envelope', 'fas fa-link', 'fas fa-download', 'fas fa-upload',
+    'fas fa-camera', 'fas fa-video', 'fas fa-music', 'fas fa-gamepad',
+    'fas fa-car', 'fas fa-plane', 'fas fa-train', 'fas fa-ship',
+    'fas fa-utensils', 'fas fa-coffee', 'fas fa-pizza-slice', 'fas fa-hamburger',
+    'fas fa-shopping-cart', 'fas fa-credit-card', 'fas fa-money-bill', 'fas fa-chart-line',
+    'fas fa-graduation-cap', 'fas fa-book', 'fas fa-pen', 'fas fa-pencil-alt',
+    'fas fa-hammer', 'fas fa-wrench', 'fas fa-tools', 'fas fa-cog',
+    'fas fa-lock', 'fas fa-unlock', 'fas fa-key', 'fas fa-shield-alt',
+    'fas fa-fire', 'fas fa-bolt', 'fas fa-sun', 'fas fa-moon',
+    'fas fa-cloud', 'fas fa-umbrella', 'fas fa-snowflake', 'fas fa-leaf',
+    'fas fa-folder', 'fas fa-folder-open', 'fas fa-file', 'fas fa-file-alt',
+    'fas fa-tag', 'fas fa-tags', 'fas fa-bookmark', 'fas fa-flag',
+    'fas fa-gift', 'fas fa-birthday-cake', 'fas fa-baby', 'fas fa-child',
+    'fas fa-running', 'fas fa-swimmer', 'fas fa-bicycle', 'fas fa-football-ball'
+];
+
+let selectedIcon = '';
+let currentMode = 'create';
+
+// Populate icon picker
+function populateIconPicker() {
+    const iconPicker = document.getElementById('iconPicker');
+    iconPicker.innerHTML = '';
+    
+    availableIcons.forEach(iconClass => {
+        const iconOption = document.createElement('div');
+        iconOption.className = 'icon-option';
+        iconOption.innerHTML = `<i class="${iconClass}"></i>`;
+        iconOption.onclick = () => selectIconOption(iconOption, iconClass);
+        iconPicker.appendChild(iconOption);
+    });
+}
+
+function selectIconOption(element, iconClass) {
+    // Remove previous selection
+    document.querySelectorAll('.icon-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // Add selection to clicked element
+    element.classList.add('selected');
+    selectedIcon = iconClass;
+}
+
+function openIconPicker(mode = 'create') {
+    currentMode = mode;
+    selectedIcon = '';
+    populateIconPicker();
+    $('#iconPickerModal').modal('show');
+}
+
+function selectIcon() {
+    if (selectedIcon) {
+        if (currentMode === 'create') {
+            document.getElementById('selectedIcon').value = selectedIcon;
+            document.querySelector('#createCategoryForm button[data-toggle="modal"]').innerHTML = 
+                `<i class="${selectedIcon}"></i> Pilih Icon`;
+        } else {
+            document.getElementById('editSelectedIcon').value = selectedIcon;
+            document.querySelector('#editCategoryForm button[onclick*="openIconPicker"]').innerHTML = 
+                `<i class="${selectedIcon}"></i> Pilih Icon`;
+        }
+    }
+    $('#iconPickerModal').modal('hide');
+}
+
+// Create category
+function createCategory() {
+    const form = document.getElementById('modalCreateCategoryForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "admin_panel:news_category_create" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat membuat kategori');
+    });
+}
+
+// Edit category
+function editCategory(id) {
+    fetch(`{% url 'admin_panel:news_category_update' 0 %}`.replace('0', id), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.category) {
+            document.getElementById('editCategoryId').value = data.category.id;
+            document.getElementById('editCategoryName').value = data.category.name;
+            document.getElementById('editCategoryColor').value = data.category.color;
+            document.getElementById('editCategoryDescription').value = data.category.description;
+            document.getElementById('editCategoryOrder').value = data.category.order || 0;
+            document.getElementById('editCategoryActive').checked = data.category.is_active;
+            
+            if (data.category.icon) {
+                document.getElementById('editSelectedIcon').value = data.category.icon;
+                document.querySelector('#editCategoryForm button[onclick*="openIconPicker"]').innerHTML = 
+                    `<i class="${data.category.icon}"></i> Pilih Icon`;
+            }
+            
+            $('#editCategoryModal').modal('show');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengambil data kategori');
+    });
+}
+
+// Update category
+function updateCategory() {
+    const form = document.getElementById('editCategoryForm');
+    const formData = new FormData(form);
+    const categoryId = document.getElementById('editCategoryId').value;
+    
+    fetch(`{% url 'admin_panel:news_category_update' 0 %}`.replace('0', categoryId), {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memperbarui kategori');
+    });
+}
+
+// Delete category
+function deleteCategory(id, name) {
+    document.getElementById('deleteCategoryName').textContent = name;
+    document.getElementById('confirmDelete').onclick = function() {
+        fetch(`{% url 'admin_panel:news_category_delete' 0 %}`.replace('0', id), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus kategori');
+        });
+    };
+    $('#deleteModal').modal('show');
+}
+
+// Form submission
+document.getElementById('createCategoryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    createCategory();
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    populateIconPicker();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,399 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Penerima Bantuan{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/beneficiaries.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="beneficiaries-dashboard">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Dashboard Penerima Bantuan</h4>
+                            <p class="text-muted mb-0">Ringkasan data penerima bantuan di Desa Pulosari</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:beneficiary_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus mr-1"></i>Tambah Penerima
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="stats-card success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="stats-value">{{ total_beneficiaries|default:0 }}</div>
+                                        <div class="stats-label">Total Penerima</div>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="stats-card info">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="stats-value">{{ active_beneficiaries|default:0 }}</div>
+                                        <div class="stats-label">Aktif</div>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="stats-card warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="stats-value">{{ pending_verifications|default:0 }}</div>
+                                        <div class="stats-label">Menunggu Verifikasi</div>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="stats-card danger">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <div class="stats-value">{{ total_categories|default:0 }}</div>
+                                        <div class="stats-label">Kategori Bantuan</div>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-tags"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="row">
+                    <!-- Beneficiaries by Category Chart -->
+                    <div class="col-xl-8 col-lg-7">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Penerima Bantuan per Kategori</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartDataCategory" data-beneficiaries-category='{"labels": [{% for c in category_stats %}"{{ c.name }}"{% if not forloop.last %}, {% endif %}{% endfor %}], "data": [{% for c in category_stats %}{{ c.total_beneficiaries }}{% if not forloop.last %}, {% endif %}{% endfor %}]}'></div>
+                                <canvas id="categoryChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Distribution Chart -->
+                    <div class="col-xl-4 col-lg-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Distribusi Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartDataStatus" data-beneficiaries-status='{"labels": ["Aktif","Nonaktif","Pending"], "data": [{{ active_beneficiaries|default:0 }}, {{ inactive_beneficiaries|default:0 }}, {{ pending_verifications|default:0 }}]}'></div>
+                                <canvas id="statusChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aid Distribution Chart -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Distribusi Bantuan Bulanan</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="chartDataMonthly" data-beneficiaries-monthly='{"labels": ["Jan","Feb","Mar","Apr","Mei","Jun"], "data": [0,0,0,0,0,0]}'></div>
+                                <canvas id="distributionChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="row mt-4">
+                    <div class="col-xl-6 col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Penerima Terbaru</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_beneficiaries %}
+                                    {% for beneficiary in recent_beneficiaries %}
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="flex-shrink-0">
+                                            {% if beneficiary.photo %}
+                                                <img src="{{ beneficiary.photo.url }}" alt="{{ beneficiary.name }}" 
+                                                     class="beneficiary-photo">
+                                            {% else %}
+                                                <div class="beneficiary-photo-placeholder">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1 ml-3">
+                                            <h6 class="mb-1">{{ beneficiary.name }}</h6>
+                                            <small class="text-muted">{{ beneficiary.category.name }} - {{ beneficiary.created_at|timesince }} yang lalu</small>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <span class="badge badge-{% if beneficiary.status == 'active' %}success{% elif beneficiary.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                                {{ beneficiary.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted text-center">Tidak ada penerima bantuan terbaru</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-6 col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Distribusi Terbaru</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_distributions %}
+                                    {% for distribution in recent_distributions %}
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-gift text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ml-3">
+                                            <h6 class="mb-1">{{ distribution.aid.name }}</h6>
+                                            <small class="text-muted">{{ distribution.distribution_date|timesince }} yang lalu</small>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <span class="badge badge-success">{{ distribution.quantity }} {{ distribution.aid.unit }}</span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted text-center">Tidak ada distribusi terbaru</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Aksi Cepat</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="{% url 'admin_panel:beneficiary_create' %}" class="btn btn-outline-primary btn-block">
+                                            <i class="fas fa-user-plus mr-2"></i>Tambah Penerima
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="{% url 'admin_panel:aid_distribution_create' %}" class="btn btn-outline-success btn-block">
+                                            <i class="fas fa-gift mr-2"></i>Distribusi Bantuan
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="{% url 'admin_panel:category_create' %}" class="btn btn-outline-warning btn-block">
+                                            <i class="fas fa-tags mr-2"></i>Tambah Kategori
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <a href="{% url 'admin_panel:beneficiaries_list' %}" class="btn btn-outline-info btn-block">
+                                            <i class="fas fa-list mr-2"></i>Daftar Penerima
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Summary Table -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Ringkasan Data</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Kategori</th>
+                                                <th>Total Penerima</th>
+                                                <th>Aktif</th>
+                                                <th>Non-Aktif</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for category in category_stats %}
+                                            <tr>
+                                                <td><i class="fas fa-tag mr-2"></i>{{ category.name }}</td>
+                                                <td><span class="badge badge-primary">{{ category.total_beneficiaries }}</span></td>
+                                                <td><span class="badge badge-success">{{ category.active_beneficiaries }}</span></td>
+                                                <td><span class="badge badge-secondary">{{ category.inactive_beneficiaries }}</span></td>
+                                                <td>
+                                                    <a href="{% url 'admin_panel:beneficiaries_list' %}?category={{ category.id }}" 
+                                                       class="btn btn-sm btn-outline-primary">Lihat</a>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">Tidak ada data kategori</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') { return; }
+    // Category Chart
+    var categoryCanvas = document.getElementById('categoryChart');
+    if (categoryCanvas) {
+    var categoryCtx = categoryCanvas.getContext('2d');
+    var categoryChart = new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for cat in category_stats %}'{{ cat.name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Jumlah Penerima',
+                data: [{% for cat in category_stats %}{{ cat.total_beneficiaries }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                backgroundColor: '#3498db',
+                borderColor: '#2980b9',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{ ticks: { beginAtZero: true } }]
+            },
+            legend: {
+                labels: { fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }
+            }
+        }
+    });
+    }
+
+    // Status Chart
+    var statusCanvas = document.getElementById('statusChart');
+    if (statusCanvas) {
+    var statusCtx = statusCanvas.getContext('2d');
+    var statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Aktif', 'Tidak Aktif', 'Pending'],
+            datasets: [{
+                data: [{{ active_beneficiaries }}, {{ inactive_beneficiaries }}, {{ pending_verifications }}],
+                backgroundColor: [
+                    '#28a745',
+                    '#6c757d',
+                    '#ffc107'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'bottom',
+                labels: { fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }
+            }
+        }
+    });
+    }
+
+    // Distribution Chart (example with dummy data)
+    var distributionCanvas = document.getElementById('distributionChart');
+    if (distributionCanvas) {
+    var distributionCtx = distributionCanvas.getContext('2d');
+    var distributionChart = new Chart(distributionCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+            datasets: [{
+                label: 'Distribusi Bantuan',
+                data: [0, 0, 0, 0, 0, 0], // This should be populated from backend
+                borderColor: '#17a2b8',
+                backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{ ticks: { beginAtZero: true } }]
+            },
+            legend: {
+                labels: { fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }
+            }
+        }
+    });
+    }
+});
+</script>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script>
+// Initialize tooltips for Bootstrap 4
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[title]').tooltip({
+        placement: 'top',
+        trigger: 'hover'
+    });
+});
+</script>
+{% endblock extra_js %}

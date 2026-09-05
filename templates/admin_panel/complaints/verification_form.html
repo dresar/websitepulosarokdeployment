@@ -1,0 +1,539 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Compact Verification Form Styles */
+.verification-form-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.verification-form-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1rem;
+    border-bottom: none;
+}
+
+.verification-form-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.verification-form-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.verification-form-body {
+    padding: 1.5rem;
+}
+
+.verification-form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.verification-form-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+}
+
+.verification-form-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.verification-form-btn-primary {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-color: #dc3545;
+}
+
+.verification-form-btn-primary:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    border-color: #c82333;
+    color: white;
+}
+
+.verification-form-btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.verification-form-btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.verification-form-group {
+    margin-bottom: 1rem;
+}
+
+.verification-form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.verification-form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    width: 100%;
+}
+
+.verification-form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background: white;
+    outline: none;
+}
+
+.verification-form-control:hover {
+    border-color: #dc3545;
+    background: white;
+}
+
+.verification-form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.verification-form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.verification-form-feedback {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.verification-form-feedback-invalid {
+    color: #dc3545;
+}
+
+.verification-form-feedback-valid {
+    color: #28a745;
+}
+
+.verification-form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.verification-form-check-input {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #dc3545;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.verification-form-check-input:checked {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.verification-form-check-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+}
+
+.verification-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.verification-form-complaint-info {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid #dc3545;
+}
+
+.verification-form-complaint-info h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+}
+
+.verification-form-complaint-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.8rem;
+}
+
+.verification-form-complaint-item:last-child {
+    border-bottom: none;
+}
+
+.verification-form-complaint-label {
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.verification-form-complaint-value {
+    color: #495057;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .verification-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .verification-form-body {
+        padding: 1rem;
+    }
+    
+    .verification-form-header {
+        padding: 0.75rem;
+    }
+    
+    .verification-form-title {
+        font-size: 1rem;
+    }
+    
+    .verification-form-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .verification-form-body {
+        padding: 0.75rem;
+    }
+    
+    .verification-form-header {
+        padding: 0.75rem;
+    }
+    
+    .verification-form-title {
+        font-size: 0.9rem;
+    }
+    
+    .verification-form-complaint-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="verification-form-container">
+    <div class="verification-form-header">
+        <h3 class="verification-form-title">
+            <i class="fas fa-{% if verification %}edit{% else %}plus{% endif %}"></i>
+            {% if verification %}Edit Verifikasi{% else %}Tambah Verifikasi{% endif %}
+        </h3>
+    </div>
+    <div class="verification-form-body">
+        <div class="verification-form-actions">
+            <a href="{% if verification %}{% url 'admin_panel:verification_detail' verification.pk %}{% else %}{% url 'admin_panel:verifications_list' %}{% endif %}" 
+               class="verification-form-btn verification-form-btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>Kembali
+            </a>
+        </div>
+        
+        {% if complaint %}
+        <div class="verification-form-complaint-info">
+            <h6><i class="fas fa-exclamation-triangle"></i> Informasi Pengaduan</h6>
+            <div class="verification-form-complaint-item">
+                <span class="verification-form-complaint-label">ID Pengaduan:</span>
+                <span class="verification-form-complaint-value">{{ complaint.complaint_id }}</span>
+            </div>
+            <div class="verification-form-complaint-item">
+                <span class="verification-form-complaint-label">Judul:</span>
+                <span class="verification-form-complaint-value">{{ complaint.title }}</span>
+            </div>
+            <div class="verification-form-complaint-item">
+                <span class="verification-form-complaint-label">Kategori:</span>
+                <span class="verification-form-complaint-value">{{ complaint.category.name|default:"-" }}</span>
+            </div>
+            <div class="verification-form-complaint-item">
+                <span class="verification-form-complaint-label">Status:</span>
+                <span class="verification-form-complaint-value">{{ complaint.get_status_display }}</span>
+            </div>
+            <div class="verification-form-complaint-item">
+                <span class="verification-form-complaint-label">Prioritas:</span>
+                <span class="verification-form-complaint-value">{{ complaint.get_priority_display }}</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="post" id="verificationForm">
+            {% csrf_token %}
+            
+            <div class="verification-form-row">
+                <div class="verification-form-group">
+                    <label class="verification-form-label" for="id_verification_type">Jenis Verifikasi</label>
+                    {{ form.verification_type }}
+                    {% if form.verification_type.errors %}
+                        <div class="verification-form-feedback verification-form-feedback-invalid">
+                            {{ form.verification_type.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="verification-form-group">
+                    <label class="verification-form-label" for="id_status">Status Verifikasi</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div class="verification-form-feedback verification-form-feedback-invalid">
+                            {{ form.status.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="verification-form-row">
+                <div class="verification-form-group">
+                    <label class="verification-form-label" for="id_priority_level">Tingkat Prioritas</label>
+                    {{ form.priority_level }}
+                    {% if form.priority_level.errors %}
+                        <div class="verification-form-feedback verification-form-feedback-invalid">
+                            {{ form.priority_level.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="verification-form-group">
+                <label class="verification-form-label" for="id_verification_notes">Catatan Verifikasi</label>
+                {{ form.verification_notes }}
+                {% if form.verification_notes.errors %}
+                    <div class="verification-form-feedback verification-form-feedback-invalid">
+                        {{ form.verification_notes.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-form-group">
+                <label class="verification-form-label" for="id_verification_result">Hasil Verifikasi</label>
+                {{ form.verification_result }}
+                {% if form.verification_result.errors %}
+                    <div class="verification-form-feedback verification-form-feedback-invalid">
+                        {{ form.verification_result.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-form-group">
+                <label class="verification-form-label" for="id_supporting_evidence">Bukti Pendukung</label>
+                {{ form.supporting_evidence }}
+                {% if form.supporting_evidence.errors %}
+                    <div class="verification-form-feedback verification-form-feedback-invalid">
+                        {{ form.supporting_evidence.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-form-group">
+                <label class="verification-form-label" for="id_recommended_action">Rekomendasi Tindakan</label>
+                {{ form.recommended_action }}
+                {% if form.recommended_action.errors %}
+                    <div class="verification-form-feedback verification-form-feedback-invalid">
+                        {{ form.recommended_action.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-form-check">
+                {{ form.requires_follow_up }}
+                <label class="verification-form-check-label" for="id_requires_follow_up">
+                    Memerlukan Tindak Lanjut
+                </label>
+            </div>
+            
+            <div class="verification-form-group" id="followUpDateGroup" style="display: none;">
+                <label class="verification-form-label" for="id_follow_up_date">Tanggal Tindak Lanjut</label>
+                {{ form.follow_up_date }}
+                {% if form.follow_up_date.errors %}
+                    <div class="verification-form-feedback verification-form-feedback-invalid">
+                        {{ form.follow_up_date.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-form-group" id="followUpNotesGroup" style="display: none;">
+                <label class="verification-form-label" for="id_follow_up_notes">Catatan Tindak Lanjut</label>
+                {{ form.follow_up_notes }}
+                {% if form.follow_up_notes.errors %}
+                    <div class="verification-form-feedback verification-form-feedback-invalid">
+                        {{ form.follow_up_notes.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-form-actions">
+                <button type="submit" class="verification-form-btn verification-form-btn-primary">
+                    <i class="fas fa-save"></i>Simpan
+                </button>
+                <a href="{% if verification %}{% url 'admin_panel:verification_detail' verification.pk %}{% else %}{% url 'admin_panel:verifications_list' %}{% endif %}" 
+                   class="verification-form-btn verification-form-btn-outline-secondary">
+                    <i class="fas fa-times"></i>Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Handle follow-up checkbox
+    $('#id_requires_follow_up').change(function() {
+        if ($(this).is(':checked')) {
+            $('#followUpDateGroup').show();
+            $('#followUpNotesGroup').show();
+        } else {
+            $('#followUpDateGroup').hide();
+            $('#followUpNotesGroup').hide();
+        }
+    });
+    
+    // Initialize form controls
+    $('.verification-form-control').addClass('form-control');
+    
+    // Set initial state
+    if ($('#id_requires_follow_up').is(':checked')) {
+        $('#followUpDateGroup').show();
+        $('#followUpNotesGroup').show();
+    }
+    
+    // Form validation
+    $('#verificationForm').on('submit', function(e) {
+        var isValid = true;
+        
+        // Clear previous errors
+        $('.verification-form-control').removeClass('is-invalid');
+        $('.verification-form-feedback').hide();
+        
+        // Validate required fields
+        if (!$('#id_verification_notes').val().trim()) {
+            showFieldError('id_verification_notes', 'Catatan verifikasi harus diisi');
+            isValid = false;
+        }
+        
+        if (!$('#id_verification_type').val()) {
+            showFieldError('id_verification_type', 'Jenis verifikasi harus dipilih');
+            isValid = false;
+        }
+        
+        if (!$('#id_status').val()) {
+            showFieldError('id_status', 'Status verifikasi harus dipilih');
+            isValid = false;
+        }
+        
+        if (!$('#id_priority_level').val()) {
+            showFieldError('id_priority_level', 'Tingkat prioritas harus dipilih');
+            isValid = false;
+        }
+        
+        // Validate follow-up fields if required
+        if ($('#id_requires_follow_up').is(':checked')) {
+            if (!$('#id_follow_up_date').val()) {
+                showFieldError('id_follow_up_date', 'Tanggal tindak lanjut harus diisi jika memerlukan tindak lanjut');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            showAlert('Mohon lengkapi semua field yang wajib diisi', 'error');
+        }
+    });
+});
+
+function showFieldError(fieldId, message) {
+    var field = $('#' + fieldId);
+    field.addClass('is-invalid');
+    
+    var feedback = field.closest('.verification-form-group').find('.verification-form-feedback');
+    if (feedback.length === 0) {
+        feedback = $('<div class="verification-form-feedback verification-form-feedback-invalid"></div>');
+        field.closest('.verification-form-group').append(feedback);
+    }
+    
+    feedback.text(message).show();
+}
+
+function showAlert(message, type) {
+    var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    var alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.verification-form-body').prepend(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}
+

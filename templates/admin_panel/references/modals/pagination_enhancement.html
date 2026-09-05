@@ -1,0 +1,278 @@
+<!-- Enhanced Pagination -->
+<div class="pagination-container">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <!-- Items per page selector -->
+            <div class="d-flex align-items-center">
+                <label for="itemsPerPage" class="mr-2 mb-0">Tampilkan:</label>
+                <select class="form-control form-control-sm" id="itemsPerPage" style="width: auto;">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Semua</option>
+                </select>
+                <span class="ml-2 text-muted">item per halaman</span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- Jump to page -->
+            <div class="d-flex align-items-center justify-content-end">
+                <label for="jumpToPage" class="mr-2 mb-0">Lompat ke halaman:</label>
+                <input type="number" class="form-control form-control-sm" id="jumpToPage" 
+                       min="1" max="1" value="1" style="width: 80px;">
+                <button type="button" class="btn btn-sm btn-outline-primary ml-2" id="jumpToPageBtn">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination controls -->
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <div class="pagination-info">
+                <span class="text-muted">
+                    Menampilkan <span id="paginationStart">1</span> - <span id="paginationEnd">25</span> 
+                    dari <span id="paginationTotal">0</span> item
+                </span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Pagination">
+                <ul class="pagination pagination-sm justify-content-end mb-0" id="paginationControls">
+                    <!-- Pagination buttons will be generated here -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced Pagination JavaScript
+let currentPage = 1;
+let itemsPerPage = 25;
+let totalItems = 0;
+let totalPages = 1;
+
+function initPagination() {
+    // Items per page change
+    $('#itemsPerPage').change(function() {
+        const value = $(this).val();
+        if (value === 'all') {
+            itemsPerPage = totalItems;
+        } else {
+            itemsPerPage = parseInt(value);
+        }
+        currentPage = 1;
+        updatePagination();
+        if (typeof loadData === 'function') {
+            loadData(currentPage);
+        }
+    });
+    
+    // Jump to page
+    $('#jumpToPageBtn').click(function() {
+        const page = parseInt($('#jumpToPage').val());
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            updatePagination();
+            if (typeof loadData === 'function') {
+                loadData(currentPage);
+            }
+        } else {
+            showAlert('warning', 'Halaman tidak valid!');
+        }
+    });
+    
+    // Enter key on jump to page input
+    $('#jumpToPage').keypress(function(e) {
+        if (e.which === 13) {
+            $('#jumpToPageBtn').click();
+        }
+    });
+}
+
+function updatePagination() {
+    totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    // Update jump to page input
+    $('#jumpToPage').attr('max', totalPages);
+    $('#jumpToPage').val(currentPage);
+    
+    // Update pagination info
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, totalItems);
+    $('#paginationStart').text(start);
+    $('#paginationEnd').text(end);
+    $('#paginationTotal').text(totalItems);
+    
+    // Generate pagination buttons
+    generatePaginationButtons();
+}
+
+function generatePaginationButtons() {
+    const pagination = $('#paginationControls');
+    pagination.empty();
+    
+    if (totalPages <= 1) {
+        return;
+    }
+    
+    // Previous button
+    const prevDisabled = currentPage === 1 ? 'disabled' : '';
+    pagination.append(`
+        <li class="page-item ${prevDisabled}">
+            <a class="page-link" href="#" onclick="goToPage(${currentPage - 1})" ${prevDisabled}>
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+    `);
+    
+    // Page numbers
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    // First page
+    if (startPage > 1) {
+        pagination.append(`
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="goToPage(1)">1</a>
+            </li>
+        `);
+        if (startPage > 2) {
+            pagination.append(`
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `);
+        }
+    }
+    
+    // Middle pages
+    for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? 'active' : '';
+        pagination.append(`
+            <li class="page-item ${activeClass}">
+                <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+            </li>
+        `);
+    }
+    
+    // Last page
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            pagination.append(`
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            `);
+        }
+        pagination.append(`
+            <li class="page-item">
+                <a class="page-link" href="#" onclick="goToPage(${totalPages})">${totalPages}</a>
+            </li>
+        `);
+    }
+    
+    // Next button
+    const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+    pagination.append(`
+        <li class="page-item ${nextDisabled}">
+            <a class="page-link" href="#" onclick="goToPage(${currentPage + 1})" ${nextDisabled}>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    `);
+}
+
+function goToPage(page) {
+    if (page >= 1 && page <= totalPages && page !== currentPage) {
+        currentPage = page;
+        updatePagination();
+        if (typeof loadData === 'function') {
+            loadData(currentPage);
+        }
+    }
+}
+
+function setPaginationData(total) {
+    totalItems = total;
+    updatePagination();
+}
+
+// Initialize pagination when document is ready
+$(document).ready(function() {
+    initPagination();
+});
+</script>
+
+<style>
+.pagination-container {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.pagination-container .form-control-sm {
+    height: calc(1.5em + 0.5rem + 2px);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.pagination-container .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.pagination .page-link {
+    color: #007bff;
+    border: 1px solid #dee2e6;
+    padding: 0.375rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    color: #0056b3;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .pagination-container .row > div {
+        margin-bottom: 0.5rem;
+    }
+    
+    .pagination-container .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .pagination-container .d-flex > * {
+        margin-bottom: 0.25rem;
+    }
+}
+</style>

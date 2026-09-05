@@ -1,0 +1,363 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Daftar Dokumen{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fix white text issues in documents list */
+.table td, .table th {
+    color: #212529 !important;
+    background-color: #fff !important;
+}
+
+.table-light th {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+    font-weight: 600;
+}
+
+/* Ensure badge text is visible */
+.badge {
+    color: white !important;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.badge-primary {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.badge-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+/* Ensure all text in table cells is dark */
+.table td .text-sm {
+    color: #212529 !important;
+}
+
+.table td .text-muted {
+    color: #6c757d !important;
+}
+
+/* Fix any white text issues */
+.table td span {
+    color: #212529 !important;
+}
+
+/* Ensure all text elements are dark */
+.table td div {
+    color: #212529 !important;
+}
+
+.table td small {
+    color: #6c757d !important;
+}
+
+/* Fix any inherited white text */
+.table td * {
+    color: inherit !important;
+}
+
+/* Override any white text from parent styles */
+.table td {
+    color: #212529 !important;
+}
+
+/* Ensure font weight is normal for readability */
+.table td {
+    font-weight: normal !important;
+}
+
+/* Ensure button text is visible */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-list text-primary mr-2"></i>
+            Daftar Dokumen
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'admin_panel:document_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus mr-1"></i> Tambah Dokumen
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Pencarian</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ current_search }}" placeholder="Cari dokumen...">
+                </div>
+                <div class="col-md-3">
+                    <label for="category" class="form-label">Kategori</label>
+                    <select class="form-control" id="category" name="category">
+                        <option value="">Semua Kategori</option>
+                        {% for value, label in categories %}
+                        <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="">Semua Status</option>
+                        {% for value, label in statuses %}
+                        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search mr-1"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="card shadow">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-file-alt mr-2"></i>
+                Data Dokumen
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if documents %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">#</th>
+                                <th width="25%">Judul Dokumen</th>
+                                <th width="15%">Kategori</th>
+                                <th width="10%">Status</th>
+                                <th width="10%">Prioritas</th>
+                                <th width="15%">Pemohon</th>
+                                <th width="10%">Tanggal</th>
+                                <th width="10%">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for document in documents %}
+                            <tr>
+                                <td>{{ forloop.counter0|add:documents.start_index }}</td>
+                                <td>
+                                    <div class="font-weight-bold">{{ document.title }}</div>
+                                    {% if document.document_number %}
+                                        <small class="text-muted">{{ document.document_number }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ document.get_category_display_color }}">
+                                        {{ document.get_category_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ document.get_status_display_color }}">
+                                        {{ document.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ document.get_priority_display_color }}">
+                                        {{ document.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if document.applicant %}
+                                        <div class="text-sm">{{ document.applicant.name }}</div>
+                                        <small class="text-muted">{{ document.applicant.nik }}</small>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="text-sm">{{ document.document_date|date:"d M Y" }}</div>
+                                    <small class="text-muted">{{ document.created_at|date:"H:i" }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'admin_panel:document_detail' document.pk %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Lihat">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if document.file_attachment %}
+                                        <a href="{% url 'admin_panel:document_preview' document.pk %}" 
+                                           class="btn btn-sm btn-outline-info" title="Preview">
+                                            <i class="fas fa-search"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{% url 'admin_panel:document_edit' document.pk %}" 
+                                           class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteDocument({{ document.pk }})" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if documents.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if documents.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ documents.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ documents.number }} of {{ documents.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if documents.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ documents.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ documents.paginator.num_pages }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-file-alt fa-4x text-gray-300 mb-3"></i>
+                    <h5 class="text-muted">Tidak ada dokumen ditemukan</h5>
+                    <p class="text-muted">
+                        {% if current_search or current_category or current_status %}
+                            Coba ubah filter pencarian atau
+                        {% endif %}
+                        <a href="{% url 'admin_panel:document_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus mr-1"></i> Tambah Dokumen Baru
+                        </a>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus dokumen ini?</p>
+                <p class="text-danger"><strong>Perhatian:</strong> Tindakan ini tidak dapat dibatalkan!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteDocument(documentId) {
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = '{% url "admin_panel:document_delete" 0 %}'.replace('0', documentId);
+    
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+
+// Auto-submit form on filter change
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category');
+    const statusSelect = document.getElementById('status');
+    
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+    
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+});
+</script>
+{% endblock %}

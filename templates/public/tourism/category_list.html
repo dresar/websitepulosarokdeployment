@@ -1,0 +1,444 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Category List Specific Styles */
+    .category-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .category-card {
+        border-color: #374151;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .category-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .featured-badge {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .category-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 640px) {
+        .category-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .category-card .p-6 {
+            padding: 0.75rem;
+        }
+        
+        .category-card h3 {
+            font-size: 0.875rem;
+            line-height: 1rem;
+        }
+        
+        .category-card p {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .filter-section {
+            padding: 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .filter-section .grid {
+            min-width: max-content;
+        }
+    }
+    
+    /* Loading States */
+    .loading-skeleton {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Statistics Cards */
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+        color: white;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .dark .stat-card:hover {
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Filter and Search Styles */
+    .filter-section {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .dark .filter-section {
+        background: rgba(17, 24, 39, 0.8);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-600/80 to-pink-600/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+                Kategori Wisata Desa Pulosarok
+            </h1>
+            <p class="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl mx-auto">
+                Jelajahi berbagai kategori wisata yang tersedia di desa kami
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Filter and Search Section -->
+<div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="grid grid-cols-1 gap-2">
+            <!-- Search Bar -->
+            <div class="relative">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Cari kategori wisata..." 
+                       class="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                       value="{{ search_query|default:'' }}">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 text-sm"></i>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <!-- Status Filter -->
+                <select id="statusFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                    <option value="">Status</option>
+                    <option value="active" {% if current_status == 'active' %}selected{% endif %}>Aktif</option>
+                    <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Tidak Aktif</option>
+                </select>
+                
+                <!-- Featured Filter -->
+                <select id="featuredFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-purple-500 focus:border-transparent transition-all duration-200">
+                    <option value="">Tipe</option>
+                    <option value="featured" {% if current_featured == 'featured' %}selected{% endif %}>Unggulan</option>
+                    <option value="regular" {% if current_featured == 'regular' %}selected{% endif %}>Biasa</option>
+                </select>
+                
+                <!-- Clear Filters -->
+                <button id="clearFilters" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+                    <i class="fas fa-times mr-1"></i>Reset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="bg-gray-50 dark:bg-gray-800 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ total_categories }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Total Kategori</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ active_categories }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Aktif</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ featured_categories }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Unggulan</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ total_locations }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Total Destinasi</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories List -->
+<div class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for i in "12345678"|make_list %}
+                <div class="category-card bg-white dark:bg-gray-800 rounded-lg p-6 loading-skeleton">
+                    <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded-full mb-4"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Categories Grid -->
+        <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for category in categories %}
+            <div class="category-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <!-- Category Icon -->
+                <div class="category-icon" style="background-color: {{ category.color }}20; color: {{ category.color }};">
+                    {% if category.icon %}
+                    <i class="{{ category.icon }}"></i>
+                    {% else %}
+                    <i class="fas fa-tag"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Category Info -->
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        {{ category.name }}
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
+                        {{ category.description|default:"Tidak ada deskripsi" }}
+                    </p>
+                </div>
+                
+                <!-- Category Stats -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>{{ category.location_count }} destinasi</span>
+                    </div>
+                    {% if category.is_featured %}
+                    <div class="flex justify-center">
+                        <span class="featured-badge">Unggulan</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Category Actions -->
+                <div class="flex gap-2">
+                    <a href="{% url 'tourism:category_detail' category.id %}" 
+                       class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                        <i class="fas fa-eye mr-1"></i>Jelajahi
+                    </a>
+                    {% if category.youtube_link %}
+                    <a href="{{ category.youtube_link }}" target="_blank" 
+                       class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full empty-state">
+                <div class="text-center">
+                    <i class="fas fa-tags text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Belum Ada Kategori</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Belum ada kategori wisata yang tersedia saat ini.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if categories.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if categories.has_previous %}
+                <a href="?page={{ categories.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_featured %}&featured={{ current_featured }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-purple-50 dark:bg-purple-900 border border-purple-300 dark:border-purple-700 rounded-lg">
+                    {{ categories.number }} dari {{ categories.paginator.num_pages }}
+                </span>
+                
+                {% if categories.has_next %}
+                <a href="?page={{ categories.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_featured %}&featured={{ current_featured }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="bg-purple-50 dark:bg-purple-900/20 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Temukan Destinasi Impian Anda!
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+            Jelajahi berbagai kategori wisata dan temukan destinasi yang sesuai dengan minat Anda.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'tourism:location_list' %}" 
+               class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <i class="fas fa-map-marker-alt mr-2"></i>Lihat Semua Destinasi
+            </a>
+            <a href="{% url 'tourism:search' %}" 
+               class="inline-flex items-center px-6 py-3 bg-transparent border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-medium rounded-lg transition-colors duration-200">
+                <i class="fas fa-search mr-2"></i>Cari Destinasi
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class CategoryList {
+    constructor() {
+        this.searchInput = document.getElementById('searchInput');
+        this.statusFilter = document.getElementById('statusFilter');
+        this.featuredFilter = document.getElementById('featuredFilter');
+        this.clearFilters = document.getElementById('clearFilters');
+        this.loadingState = document.getElementById('loadingState');
+        this.categoriesGrid = document.getElementById('categoriesGrid');
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Search functionality
+        let searchTimeout;
+        this.searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.performSearch();
+            }, 500);
+        });
+        
+        // Filter functionality
+        this.statusFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        this.featuredFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        // Clear filters
+        this.clearFilters.addEventListener('click', () => {
+            this.searchInput.value = '';
+            this.statusFilter.value = '';
+            this.featuredFilter.value = '';
+            this.performSearch();
+        });
+    }
+    
+    async performSearch() {
+        const searchQuery = this.searchInput.value;
+        const statusFilter = this.statusFilter.value;
+        const featuredFilter = this.featuredFilter.value;
+        
+        // Show loading state
+        this.showLoading();
+        
+        try {
+            // Build URL with parameters
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (statusFilter) params.append('status', statusFilter);
+            if (featuredFilter) params.append('featured', featuredFilter);
+            
+            // Reload page with new parameters
+            const url = window.location.pathname + '?' + params.toString();
+            window.location.href = url;
+        } catch (error) {
+            console.error('Error performing search:', error);
+            this.hideLoading();
+        }
+    }
+    
+    showLoading() {
+        this.loadingState.classList.remove('hidden');
+        this.categoriesGrid.classList.add('hidden');
+    }
+    
+    hideLoading() {
+        this.loadingState.classList.add('hidden');
+        this.categoriesGrid.classList.remove('hidden');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    new CategoryList();
+});
+</script>
+{% endblock %}
+

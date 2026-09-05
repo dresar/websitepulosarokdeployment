@@ -1,0 +1,496 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Daftar Kategori Wisata{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+<style>
+/* Custom Category List Styles */
+.tourism-admin {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+.tourism-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tourism-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.25rem;
+}
+
+.tourism-text-muted {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+/* Enhanced Filter Section */
+.tourism-filter-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.tourism-filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.tourism-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.tourism-form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.tourism-form-control {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.tourism-form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced Cards */
+.tourism-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tourism-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.tourism-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.tourism-image-preview {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.tourism-image-placeholder {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+}
+
+.tourism-card-body {
+    padding: 1.25rem;
+}
+
+.tourism-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tourism-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.tourism-action-btn-view {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tourism-action-btn-view:hover {
+    background: #bfdbfe;
+    color: #1e40af;
+}
+
+.tourism-action-btn-edit {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.tourism-action-btn-edit:hover {
+    background: #fde68a;
+    color: #b45309;
+}
+
+.tourism-action-btn-delete {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    cursor: pointer;
+}
+
+.tourism-action-btn-delete:hover {
+    background: #fecaca;
+    color: #b91c1c;
+}
+
+/* Statistics Grid */
+.tourism-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.tourism-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.tourism-text-center {
+    text-align: center;
+}
+
+/* Buttons */
+.tourism-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.tourism-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.tourism-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+}
+
+.tourism-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.tourism-btn-secondary:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.tourism-btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+/* Pagination */
+.tourism-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.tourism-pagination-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    background: white;
+    color: #475569;
+    text-decoration: none;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.tourism-pagination-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.tourism-pagination-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Empty State */
+.tourism-card .tourism-text-center {
+    padding: 3rem 2rem;
+}
+
+.tourism-card .tourism-text-center i {
+    color: #94a3b8;
+    margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tourism-filter-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tourism-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tourism-admin {
+        padding: 1rem;
+    }
+}
+
+/* Icon Colors */
+.category-icon {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+/* Status Indicators */
+.tourism-text-success {
+    color: #059669;
+}
+
+.tourism-text-danger {
+    color: #dc2626;
+}
+
+.tourism-text-primary {
+    color: #3b82f6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 2rem;">
+        <div>
+            <h1 class="tourism-title">🏷️ Daftar Kategori Wisata</h1>
+            <p class="tourism-text-muted">Kelola semua kategori wisata Desa Pulosarok</p>
+        </div>
+        <div class="tourism-actions">
+            <a href="{% url 'admin_panel:tourism_category_create' %}" class="tourism-btn tourism-btn-primary">
+                <i class="fas fa-plus"></i>
+                Tambah Kategori
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="tourism-filter-section">
+        <h6 class="tourism-subtitle">🔍 Filter & Pencarian</h6>
+        <form method="get" class="tourism-filter-row">
+            <div class="tourism-form-group">
+                <label for="search" class="tourism-form-label">Pencarian</label>
+                <input type="text" class="tourism-form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Cari kategori wisata...">
+            </div>
+            <div class="tourism-form-group">
+                <label for="sort" class="tourism-form-label">Urutkan</label>
+                <select class="tourism-form-control" id="sort" name="sort">
+                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Terbaru</option>
+                    <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Nama A-Z</option>
+                    <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Nama Z-A</option>
+                    <option value="location_count" {% if current_sort == 'location_count' %}selected{% endif %}>Jumlah Lokasi</option>
+                </select>
+            </div>
+            <div class="tourism-form-group" style="display: flex; gap: 0.5rem; align-items: end;">
+                <button type="submit" class="tourism-btn tourism-btn-primary">
+                    <i class="fas fa-search"></i>
+                    Filter
+                </button>
+                <a href="{% url 'admin_panel:tourism_categories_list' %}" class="tourism-btn tourism-btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Categories Grid -->
+    <div class="tourism-grid">
+        {% for category in page_obj.object_list %}
+        <div class="tourism-card">
+            {% if category.image %}
+                <img src="{{ category.image.url }}" alt="{{ category.name }}" 
+                     class="tourism-image-preview">
+            {% else %}
+                <div class="tourism-image-placeholder">
+                    <i class="fas fa-tags" style="font-size: 2rem; color: #94a3b8;"></i>
+                </div>
+            {% endif %}
+            
+            <div class="tourism-card-body">
+                <div class="d-flex justify-content-between align-items-start" style="margin-bottom: 1rem;">
+                    <h6 class="tourism-subtitle" style="margin: 0; font-size: 1.1rem;">{{ category.name|truncatechars:25 }}</h6>
+                    <div class="tourism-actions">
+                        <a href="{% url 'admin_panel:tourism_category_detail' category.id %}" class="tourism-action-btn tourism-action-btn-view" title="Lihat Detail">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'admin_panel:tourism_category_edit' category.id %}" class="tourism-action-btn tourism-action-btn-edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="tourism-action-btn tourism-action-btn-delete" 
+                                onclick="deleteCategory({{ category.id }})" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <p class="tourism-text-muted" style="font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.4;">
+                    {{ category.description|truncatechars:80|default:"Tidak ada deskripsi" }}
+                </p>
+                
+                <div class="tourism-grid-2" style="margin-bottom: 1rem;">
+                    <div class="tourism-text-center">
+                        <div class="tourism-stat-value tourism-text-primary">{{ category.location_count|default:0 }}</div>
+                        <div class="tourism-text-muted" style="font-size: 0.75rem;">Lokasi</div>
+                    </div>
+                    <div class="tourism-text-center">
+                        <div class="tourism-stat-value">
+                            {% if category.is_active %}
+                                <i class="fas fa-check-circle tourism-text-success" style="font-size: 1.2rem;"></i>
+                            {% else %}
+                                <i class="fas fa-times-circle tourism-text-danger" style="font-size: 1.2rem;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="tourism-text-muted" style="font-size: 0.75rem;">Status</div>
+                    </div>
+                </div>
+                
+                {% if category.icon %}
+                <div class="tourism-text-center" style="margin-bottom: 1rem;">
+                    <i class="{{ category.icon }} category-icon" style="color: {{ category.color|default:'#3b82f6' }};"></i>
+                </div>
+                {% endif %}
+                
+                <div class="tourism-text-muted" style="font-size: 0.75rem; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 0.75rem;">
+                    📅 Dibuat: {{ category.created_at|date:"d M Y" }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="tourism-card" style="grid-column: 1 / -1; max-width: 500px; margin: 0 auto;">
+            <div class="tourism-card-body tourism-text-center" style="padding: 3rem 2rem;">
+                <i class="fas fa-tags" style="font-size: 4rem; color: #94a3b8; margin-bottom: 1.5rem;"></i>
+                <h5 style="color: #64748b; margin-bottom: 1rem;">Belum ada kategori wisata</h5>
+                <p style="color: #94a3b8; margin-bottom: 2rem;">Mulai dengan menambahkan kategori wisata pertama Anda.</p>
+                <a href="{% url 'admin_panel:tourism_category_create' %}" class="tourism-btn tourism-btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Tambah Kategori
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="tourism-pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">
+                    <i class="fas fa-angle-double-left"></i> First
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">
+                    <i class="fas fa-angle-left"></i> Previous
+                </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="tourism-pagination-btn active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">
+                    Next <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">
+                    Last <i class="fas fa-angle-double-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function deleteCategory(categoryId) {
+    if (confirm('Apakah Anda yakin ingin menghapus kategori ini?\n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
+        fetch(`{% url 'admin_panel:tourism_category_delete' 0 %}`.replace('0', categoryId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menghapus kategori: ' + (data.error || 'Terjadi kesalahan'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus kategori');
+        });
+    }
+}
+</script>
+{% endblock %}
+

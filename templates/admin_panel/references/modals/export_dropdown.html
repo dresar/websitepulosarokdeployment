@@ -1,0 +1,492 @@
+<!-- Export Dropdown -->
+<div class="dropdown" id="exportDropdown">
+    <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-download mr-1"></i>
+        Export Data
+    </button>
+    <div class="dropdown-menu" aria-labelledby="exportDropdownBtn">
+        <h6 class="dropdown-header">
+            <i class="fas fa-file mr-1"></i>
+            Pilih Format Export
+        </h6>
+        <div class="dropdown-divider"></div>
+        
+        <!-- Quick Export Options -->
+        <a class="dropdown-item export-option" href="#" data-format="excel" data-action="quick">
+            <i class="fas fa-file-excel text-success mr-2"></i>
+            <span>Excel (.xlsx)</span>
+            <small class="text-muted d-block">Format Excel dengan formatting</small>
+        </a>
+        
+        <a class="dropdown-item export-option" href="#" data-format="csv" data-action="quick">
+            <i class="fas fa-file-csv text-info mr-2"></i>
+            <span>CSV (.csv)</span>
+            <small class="text-muted d-block">Format CSV untuk analisis data</small>
+        </a>
+        
+        <a class="dropdown-item export-option" href="#" data-format="json" data-action="quick">
+            <i class="fas fa-file-code text-warning mr-2"></i>
+            <span>JSON (.json)</span>
+            <small class="text-muted d-block">Format JSON untuk integrasi API</small>
+        </a>
+        
+        <a class="dropdown-item export-option" href="#" data-format="pdf" data-action="quick">
+            <i class="fas fa-file-pdf text-danger mr-2"></i>
+            <span>PDF (.pdf)</span>
+            <small class="text-muted d-block">Format PDF untuk laporan</small>
+        </a>
+        
+        <div class="dropdown-divider"></div>
+        
+        <!-- Advanced Export Options -->
+        <h6 class="dropdown-header">
+            <i class="fas fa-cog mr-1"></i>
+            Export Lanjutan
+        </h6>
+        
+        <a class="dropdown-item" href="#" onclick="showAdvancedExportModal()">
+            <i class="fas fa-sliders-h text-primary mr-2"></i>
+            <span>Export dengan Filter</span>
+            <small class="text-muted d-block">Export dengan filter dan opsi lanjutan</small>
+        </a>
+        
+        <a class="dropdown-item" href="#" onclick="exportSelectedData()">
+            <i class="fas fa-check-square text-success mr-2"></i>
+            <span>Export Data Terpilih</span>
+            <small class="text-muted d-block">Export hanya data yang dipilih</small>
+        </a>
+        
+        <a class="dropdown-item" href="#" onclick="exportStatistics()">
+            <i class="fas fa-chart-bar text-info mr-2"></i>
+            <span>Export Statistik</span>
+            <small class="text-muted d-block">Export laporan statistik lengkap</small>
+        </a>
+    </div>
+</div>
+
+<!-- Advanced Export Modal -->
+<div class="modal fade" id="advancedExportModal" tabindex="-1" role="dialog" aria-labelledby="advancedExportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="advancedExportModalLabel">
+                    <i class="fas fa-sliders-h mr-2"></i>
+                    Export Lanjutan
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="advancedExportForm">
+                    <!-- Format Selection -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-file mr-1"></i>
+                            Format Export
+                        </label>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="formatExcel" name="format" value="excel" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="formatExcel">
+                                        <i class="fas fa-file-excel text-success mr-1"></i> Excel
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="formatCsv" name="format" value="csv" class="custom-control-input">
+                                    <label class="custom-control-label" for="formatCsv">
+                                        <i class="fas fa-file-csv text-info mr-1"></i> CSV
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="formatJson" name="format" value="json" class="custom-control-input">
+                                    <label class="custom-control-label" for="formatJson">
+                                        <i class="fas fa-file-code text-warning mr-1"></i> JSON
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" id="formatPdf" name="format" value="pdf" class="custom-control-input">
+                                    <label class="custom-control-label" for="formatPdf">
+                                        <i class="fas fa-file-pdf text-danger mr-1"></i> PDF
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Options -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-filter mr-1"></i>
+                            Filter Data
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="dateFrom" class="form-label">Tanggal Dari</label>
+                                <input type="date" class="form-control" id="dateFrom" name="date_from">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dateTo" class="form-label">Tanggal Sampai</label>
+                                <input type="date" class="form-control" id="dateTo" name="date_to">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="activeOnly" name="active_only" checked>
+                                    <label class="custom-control-label" for="activeOnly">
+                                        Hanya data aktif
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="includeRelated" name="include_related" checked>
+                                    <label class="custom-control-label" for="includeRelated">
+                                        Sertakan data terkait
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Options -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-cog mr-1"></i>
+                            Opsi Tambahan
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="filename" class="form-label">Nama File</label>
+                                <input type="text" class="form-control" id="filename" name="filename" placeholder="Nama file (opsional)">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="maxRows" class="form-label">Maksimal Baris</label>
+                                <input type="number" class="form-control" id="maxRows" name="max_rows" placeholder="Kosongkan untuk semua data">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-success" onclick="executeAdvancedExport()">
+                    <i class="fas fa-download mr-1"></i>
+                    Export Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.export-dropdown .dropdown-menu {
+    min-width: 300px;
+    padding: 0.5rem 0;
+}
+
+.export-dropdown .dropdown-item {
+    padding: 0.75rem 1rem;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.export-dropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.export-dropdown .dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.export-dropdown .dropdown-header {
+    font-weight: 600;
+    color: #495057;
+    padding: 0.5rem 1rem 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.export-dropdown .dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+.export-dropdown .dropdown-item small {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Advanced Export Modal Styles */
+#advancedExportModal .modal-body {
+    padding: 2rem;
+}
+
+#advancedExportModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#advancedExportModal .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+#advancedExportModal .custom-control-label {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+#advancedExportModal .custom-control-input:checked ~ .custom-control-label {
+    color: #28a745;
+    font-weight: 600;
+}
+
+/* Loading States */
+.export-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.export-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.export-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #007bff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1001;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+// Export functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle quick export
+    document.querySelectorAll('.export-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            const format = this.dataset.format;
+            const action = this.dataset.action;
+            
+            if (action === 'quick') {
+                executeQuickExport(format);
+            }
+        });
+    });
+});
+
+function executeQuickExport(format) {
+    const modelName = getCurrentModelName();
+    const button = document.getElementById('exportDropdownBtn');
+    
+    // Show loading state
+    button.classList.add('export-loading');
+    button.disabled = true;
+    
+    const formData = new FormData();
+    formData.append('format', format);
+    
+    fetch(`{% url "admin_panel:references_quick_export" "penduduk" %}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Create download link
+            const blob = response.blob();
+            return blob.then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${modelName}_export_${new Date().toISOString().slice(0, 10)}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            });
+        } else {
+            throw new Error('Export failed');
+        }
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        alert('Error saat mengekspor data: ' + error.message);
+    })
+    .finally(() => {
+        // Remove loading state
+        button.classList.remove('export-loading');
+        button.disabled = false;
+    });
+}
+
+function showAdvancedExportModal() {
+    $('#advancedExportModal').modal('show');
+}
+
+function executeAdvancedExport() {
+    const form = document.getElementById('advancedExportForm');
+    const formData = new FormData(form);
+    const modelName = getCurrentModelName();
+    
+    // Add model name
+    formData.append('model_name', modelName);
+    
+    // Show loading
+    const button = document.querySelector('#advancedExportModal .btn-success');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Mengekspor...';
+    button.disabled = true;
+    
+    fetch(`{% url "admin_panel:references_export_data" "penduduk" %}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Create download link
+            const blob = response.blob();
+            return blob.then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const filename = formData.get('filename') || `${modelName}_export_${new Date().toISOString().slice(0, 10)}`;
+                const format = formData.get('format');
+                a.download = `${filename}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            });
+        } else {
+            throw new Error('Export failed');
+        }
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        alert('Error saat mengekspor data: ' + error.message);
+    })
+    .finally(() => {
+        // Reset button
+        button.innerHTML = originalText;
+        button.disabled = false;
+        $('#advancedExportModal').modal('hide');
+    });
+}
+
+function exportSelectedData() {
+    const selectedIds = getSelectedIds();
+    if (selectedIds.length === 0) {
+        alert('Pilih data yang akan diekspor terlebih dahulu!');
+        return;
+    }
+    
+    // Show format selection
+    const format = prompt('Pilih format export (excel, csv, json, pdf):', 'excel');
+    if (!format) return;
+    
+    const formData = new FormData();
+    formData.append('selected_ids[]', selectedIds);
+    formData.append('model_name', getCurrentModelName());
+    formData.append('format', format);
+    
+    fetch('{% url "admin_panel:references_bulk_export_selected" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            const blob = response.blob();
+            return blob.then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `selected_data_export.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            });
+        } else {
+            throw new Error('Export failed');
+        }
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        alert('Error saat mengekspor data: ' + error.message);
+    });
+}
+
+function exportStatistics() {
+    window.open('{% url "admin_panel:references_export_statistics" %}', '_blank');
+}
+
+function getCurrentModelName() {
+    return window.currentModelName || 'penduduk';
+}
+
+function getSelectedIds() {
+    const checkboxes = document.querySelectorAll('input[name="selected_ids"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>

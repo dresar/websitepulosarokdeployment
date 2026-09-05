@@ -1,0 +1,775 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Enhanced Complaints Categories Styles */
+.complaints-categories-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.complaints-categories-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.complaints-categories-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.complaints-categories-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.complaints-categories-body {
+    padding: 2rem;
+}
+
+.complaints-categories-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.complaints-categories-search {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.complaints-categories-search input {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    width: 300px;
+}
+
+.complaints-categories-search input:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background: white;
+    outline: none;
+}
+
+.complaints-categories-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.complaints-categories-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.complaints-categories-btn:hover::before {
+    left: 100%;
+}
+
+.complaints-categories-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.complaints-categories-btn-primary {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-color: #dc3545;
+}
+
+.complaints-categories-btn-primary:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    border-color: #c82333;
+    color: white;
+}
+
+.complaints-categories-btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.complaints-categories-btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.complaints-categories-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.complaints-categories-table table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.complaints-categories-table thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.complaints-categories-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-categories-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: middle;
+}
+
+.complaints-categories-table tbody tr:hover {
+    background: #f8f9fa;
+    transition: background 0.3s ease;
+}
+
+.complaints-categories-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.complaints-categories-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-categories-badge-active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.complaints-categories-badge-inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.complaints-categories-actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.complaints-categories-btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+}
+
+.complaints-categories-btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.complaints-categories-btn-outline-primary:hover {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.complaints-categories-btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.complaints-categories-btn-outline-warning:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.complaints-categories-btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.complaints-categories-btn-outline-danger:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.complaints-categories-empty {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.complaints-categories-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.complaints-categories-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 0.5rem;
+}
+
+.complaints-categories-pagination .page-link {
+    border: 2px solid #e2e8f0;
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.complaints-categories-pagination .page-link:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: #f8f9fa;
+}
+
+.complaints-categories-pagination .page-item.active .page-link {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.complaints-categories-pagination .page-item.disabled .page-link {
+    background: #f8f9fa;
+    border-color: #e2e8f0;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.complaints-categories-modal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.complaints-categories-modal .modal-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 1.5rem;
+}
+
+.complaints-categories-modal .modal-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.complaints-categories-modal .modal-body {
+    padding: 2rem;
+}
+
+.complaints-categories-modal .modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+.complaints-categories-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.complaints-categories-form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-categories-form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    width: 100%;
+}
+
+.complaints-categories-form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background: white;
+    outline: none;
+}
+
+.complaints-categories-form-control:hover {
+    border-color: #dc3545;
+    background: white;
+}
+
+.complaints-categories-form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.complaints-categories-form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.complaints-categories-form-feedback {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.complaints-categories-form-feedback-invalid {
+    color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .complaints-categories-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .complaints-categories-search {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .complaints-categories-search input {
+        width: 100%;
+    }
+    
+    .complaints-categories-body {
+        padding: 1.5rem;
+    }
+    
+    .complaints-categories-table {
+        overflow-x: auto;
+    }
+    
+    .complaints-categories-actions-cell {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .complaints-categories-btn-sm {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .complaints-categories-body {
+        padding: 1rem;
+    }
+    
+    .complaints-categories-header {
+        padding: 1rem;
+    }
+    
+    .complaints-categories-title {
+        font-size: 1.1rem;
+    }
+    
+    .complaints-categories-table th,
+    .complaints-categories-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="complaints-categories-container">
+    <div class="complaints-categories-header">
+        <h3 class="complaints-categories-title">
+            <i class="fas fa-tags"></i>Kelola Kategori Keluhan
+        </h3>
+    </div>
+    <div class="complaints-categories-body">
+        <div class="complaints-categories-actions">
+            <div class="complaints-categories-search">
+                <input type="text" id="searchCategories" placeholder="Cari kategori..." class="form-control">
+                <button type="button" class="complaints-categories-btn complaints-categories-btn-outline-secondary" onclick="clearSearch()">
+                    <i class="fas fa-times"></i>Clear
+                </button>
+            </div>
+            <button type="button" class="complaints-categories-btn complaints-categories-btn-primary" onclick="openAddModal()">
+                <i class="fas fa-plus"></i>Tambah Kategori
+            </button>
+        </div>
+        
+        <div class="complaints-categories-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="5%">No</th>
+                        <th width="25%">Nama Kategori</th>
+                        <th width="35%">Deskripsi</th>
+                        <th width="15%">Status</th>
+                        <th width="10%">Jumlah Keluhan</th>
+                        <th width="10%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <strong>{{ category.name }}</strong>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ category.description|truncatechars:50|default:"-" }}</span>
+                        </td>
+                        <td>
+                            <span class="complaints-categories-badge {% if category.is_active %}complaints-categories-badge-active{% else %}complaints-categories-badge-inactive{% endif %}">
+                                {% if category.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-info">{{ category.complaint_set.count }}</span>
+                        </td>
+                        <td>
+                            <div class="complaints-categories-actions-cell">
+                                <button type="button" class="complaints-categories-btn complaints-categories-btn-sm complaints-categories-btn-outline-primary" 
+                                        onclick="editCategory({{ category.id }})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="complaints-categories-btn complaints-categories-btn-sm complaints-categories-btn-outline-warning" 
+                                        onclick="toggleCategory({{ category.id }}, {{ category.is_active|yesno:'false,true' }})" 
+                                        title="{% if category.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}">
+                                    <i class="fas fa-{% if category.is_active %}eye-slash{% else %}eye{% endif %}"></i>
+                                </button>
+                                <button type="button" class="complaints-categories-btn complaints-categories-btn-sm complaints-categories-btn-outline-danger" 
+                                        onclick="deleteCategory({{ category.id }})" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="complaints-categories-empty">
+                            <i class="fas fa-tags"></i>
+                            <p>Tidak ada kategori ditemukan</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Category Modal -->
+<div class="modal fade complaints-categories-modal" id="categoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalTitle">
+                    <i class="fas fa-tag"></i>Tambah Kategori
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    {% csrf_token %}
+                    <div class="complaints-categories-form-group">
+                        <label class="complaints-categories-form-label" for="categoryName">Nama Kategori</label>
+                        <input type="text" class="complaints-categories-form-control" id="categoryName" name="name" required>
+                        <div class="complaints-categories-form-feedback complaints-categories-form-feedback-invalid" id="nameError" style="display: none;"></div>
+                    </div>
+                    <div class="complaints-categories-form-group">
+                        <label class="complaints-categories-form-label" for="categoryDescription">Deskripsi</label>
+                        <textarea class="complaints-categories-form-control" id="categoryDescription" name="description" rows="4"></textarea>
+                    </div>
+                    <div class="complaints-categories-form-group">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="categoryActive" name="is_active" checked>
+                            <label class="form-check-label" for="categoryActive">
+                                Kategori Aktif
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="complaints-categories-btn complaints-categories-btn-outline-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i>Batal
+                </button>
+                <button type="button" class="complaints-categories-btn complaints-categories-btn-primary" onclick="saveCategory()">
+                    <i class="fas fa-save"></i>Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus kategori ini?</p>
+                <p class="text-muted">Kategori yang memiliki keluhan tidak dapat dihapus.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+let currentCategoryId = null;
+let deleteCategoryId = null;
+
+$(document).ready(function() {
+    // Search functionality
+    $('#searchCategories').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        $('tbody tr').each(function() {
+            const text = $(this).text().toLowerCase();
+            if (text.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+});
+
+function clearSearch() {
+    $('#searchCategories').val('');
+    $('tbody tr').show();
+}
+
+function openAddModal() {
+    currentCategoryId = null;
+    $('#categoryModalTitle').html('<i class="fas fa-tag"></i>Tambah Kategori');
+    $('#categoryForm')[0].reset();
+    $('#categoryActive').prop('checked', true);
+    $('#categoryModal').modal('show');
+}
+
+function editCategory(id) {
+    currentCategoryId = id;
+    $('#categoryModalTitle').html('<i class="fas fa-edit"></i>Edit Kategori');
+    
+    // Get category data
+    $.get(`/pengaduan/admin/categories/${id}/update/`, function(data) {
+        if (data.category) {
+            $('#categoryName').val(data.category.name);
+            $('#categoryDescription').val(data.category.description);
+            $('#categoryActive').prop('checked', data.category.is_active);
+            $('#categoryModal').modal('show');
+        } else {
+            showAlert('Gagal memuat data kategori', 'error');
+        }
+    }).fail(function() {
+        showAlert('Gagal memuat data kategori', 'error');
+    });
+}
+
+function saveCategory() {
+    const formData = {
+        name: $('#categoryName').val(),
+        description: $('#categoryDescription').val(),
+        is_active: $('#categoryActive').is(':checked')
+    };
+    
+    if (!formData.name.trim()) {
+        showFieldError('nameError', 'Nama kategori harus diisi');
+        return;
+    }
+    
+    const url = currentCategoryId ? 
+        `/pengaduan/admin/categories/${currentCategoryId}/update/` : 
+        '/pengaduan/admin/categories/create/';
+    const method = currentCategoryId ? 'POST' : 'POST';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(data) {
+            if (data.success) {
+                $('#categoryModal').modal('hide');
+                showAlert(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert(data.message, 'error');
+            }
+        },
+        error: function() {
+            showAlert('Terjadi kesalahan saat menyimpan kategori', 'error');
+        }
+    });
+}
+
+function toggleCategory(id, currentStatus) {
+    const newStatus = !currentStatus;
+    const action = newStatus ? 'mengaktifkan' : 'menonaktifkan';
+    
+    if (confirm(`Apakah Anda yakin ingin ${action} kategori ini?`)) {
+        $.ajax({
+            url: `/pengaduan/admin/categories/${id}/update/`,
+            method: 'POST',
+            data: JSON.stringify({ is_active: newStatus }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data) {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            },
+            error: function() {
+                showAlert('Terjadi kesalahan saat mengubah status kategori', 'error');
+            }
+        });
+    }
+}
+
+function deleteCategory(id) {
+    deleteCategoryId = id;
+    $('#deleteModal').modal('show');
+}
+
+function confirmDelete() {
+    if (deleteCategoryId) {
+        $.ajax({
+            url: `/pengaduan/admin/categories/${deleteCategoryId}/delete/`,
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(data) {
+                if (data.success) {
+                    $('#deleteModal').modal('hide');
+                    showAlert(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            },
+            error: function() {
+                showAlert('Terjadi kesalahan saat menghapus kategori', 'error');
+            }
+        });
+    }
+}
+
+function showFieldError(fieldId, message) {
+    $(`#${fieldId}`).text(message).show();
+    $(`#${fieldId}`).closest('.complaints-categories-form-group').find('.complaints-categories-form-control').addClass('is-invalid');
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.complaints-categories-body').prepend(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

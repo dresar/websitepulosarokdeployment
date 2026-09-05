@@ -1,0 +1,190 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Ensure good contrast for all text elements */
+.badge {
+    color: white !important;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+/* Ensure table text is dark */
+.table td, .table th {
+    color: #333 !important;
+}
+
+.table-sm td, .table-sm th {
+    padding: 0.3rem;
+    font-size: 0.875rem;
+}
+
+/* Ensure all text is visible */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Button text contrast */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 text-primary">
+                <i class="fas fa-store mr-2"></i>UMKM
+            </h4>
+        </div>
+        <div>
+            <a href="{% url 'admin_panel:umkm_create' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus mr-1"></i>Tambah
+            </a>
+        </div>
+    </div>
+
+    <!-- Minimal search bar -->
+    <div class="mb-3">
+        <form method="GET" class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" name="search" 
+                   value="{{ search }}" placeholder="Cari UMKM..." style="max-width: 300px;">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'admin_panel:umkm_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times"></i>
+            </a>
+        </form>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-2">
+            <h6 class="m-0 text-primary">
+                <i class="fas fa-list mr-1"></i>Data UMKM 
+                <span class="badge badge-primary ml-1">{{ page_obj.paginator.count }}</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-striped table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Usaha</th>
+                        <th>Pemilik</th>
+                        <th>Jenis Usaha</th>
+                        <th>Skala</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for umkm in page_obj %}
+                    <tr>
+                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                        <td>
+                            <div>
+                                <strong>{{ umkm.nama_usaha }}</strong>
+                                {% if umkm.nomor_izin %}
+                                    <br><small class="text-muted">Izin: {{ umkm.nomor_izin }}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                {{ umkm.pemilik }}
+                                <br><small class="text-muted">{{ umkm.nik_pemilik }}</small>
+                            </div>
+                        </td>
+                        <td>{{ umkm.jenis_usaha }}</td>
+                        <td>
+                            <span class="badge {% if umkm.skala_usaha == 'mikro' %}badge-info{% elif umkm.skala_usaha == 'kecil' %}badge-warning{% else %}badge-success{% endif %}">
+                                {{ umkm.get_skala_usaha_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'admin_panel:umkm_detail' umkm.id %}" class="btn btn-outline-info btn-sm" title="Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:umkm_edit' umkm.id %}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:umkm_delete' umkm.id %}" class="btn btn-outline-danger btn-sm" 
+                                   onclick="return confirm('Hapus {{ umkm.nama_usaha }}?')" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-3">
+                            <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Tidak ada data UMKM</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div class="d-flex justify-content-center mt-2">
+            <nav aria-label="Pagination">
+                <ul class="pagination pagination-sm">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">‹</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">›</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

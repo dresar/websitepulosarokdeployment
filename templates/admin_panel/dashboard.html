@@ -1,0 +1,577 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stats-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .role-badge {
+        background: linear-gradient(135deg, #28a745 0%, #2ecc71 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .welcome-section {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+
+    .welcome-section h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-section p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        border: none;
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .action-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #007bff;
+    }
+
+    .action-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .action-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .user-info {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border: none;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+                <!-- CSRF Token for AJAX requests -->
+                {% csrf_token %}
+                
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1>Selamat Datang!</h1>
+                            <p>Halo {{ user.get_full_name|default:user.username }}, selamat datang di Admin Panel Desa Pulosarok</p>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <div class="role-badge">
+                                <i class="fas fa-user-tag mr-1"></i>
+                                {{ role_name }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-penduduk">{{ total_penduduk|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Total Penduduk</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-keluarga">{{ total_keluarga|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Total Keluarga</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-businesses">{{ total_businesses|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Usaha Terdaftar</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-beneficiaries">{{ total_beneficiaries|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Penerima Bantuan</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-complaints">{{ total_complaints|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Total Keluhan</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-documents">{{ total_documents|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Dokumen</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-tourism">{{ total_tourism_locations|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Wisata</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <div class="stats-number" id="total-posyandu">{{ total_posyandu_locations|default:0|floatformat:0 }}</div>
+                                <div class="stats-label">Posyandu</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="mb-3">
+                            <i class="fas fa-bolt mr-2"></i>Quick Actions
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <a href="{% url 'admin_panel:references_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="action-title">Data Referensi</div>
+                        <div class="action-description">Kelola data penduduk, keluarga, dan referensi lainnya</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:beneficiaries_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="action-title">Penerima Bantuan</div>
+                        <div class="action-description">Kelola data penerima bantuan dan program bantuan</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:business_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="action-title">Usaha</div>
+                        <div class="action-description">Kelola data usaha dan UMKM desa</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:complaints_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="action-title">Keluhan</div>
+                        <div class="action-description">Kelola keluhan dan feedback masyarakat</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:documents_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="action-title">Dokumen</div>
+                        <div class="action-description">Kelola dokumen dan surat menyurat</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:tourism_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                        <div class="action-title">Wisata</div>
+                        <div class="action-description">Kelola data wisata dan destinasi</div>
+                    </a>
+
+                    <a href="{% url 'posyandu:posyandu_admin' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="action-title">Posyandu</div>
+                        <div class="action-description">Kelola data posyandu dan kesehatan</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:news_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <div class="action-title">Berita</div>
+                        <div class="action-description">Kelola berita dan pengumuman</div>
+                    </a>
+
+                    <a href="/admin-panel/village-profile/admin/dashboard/" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="action-title">Profil Desa</div>
+                        <div class="action-description">Kelola profil dan informasi desa</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:organization:organization_list' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <div class="action-title">Organisasi</div>
+                        <div class="action-description">Kelola organisasi dan kelembagaan desa</div>
+                    </a>
+
+                    <a href="{% url 'admin_panel:reports_dashboard' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="action-title">Laporan</div>
+                        <div class="action-description">Lihat laporan dan statistik</div>
+                    </a>
+
+                    <a href="{% url 'core:settings' %}" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="action-title">Pengaturan</div>
+                        <div class="action-description">Konfigurasi sistem dan pengguna</div>
+                    </a>
+                </div>
+
+                <!-- User Info -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="user-info">
+                            <h5 class="mb-3">
+                                <i class="fas fa-user mr-2"></i>Informasi Pengguna
+                            </h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="user-avatar">
+                                    {{ user.username|first|upper }}
+                                </div>
+                                <div class="ml-3">
+                                    <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Username:</small><br>
+                                    <strong>{{ user.username }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Role:</small><br>
+                                    <strong>{{ role_name }}</strong>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Pelajar:</small><br>
+                                    <strong>{{ total_pelajar|default:0 }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Disabilitas:</small><br>
+                                    <strong>{{ total_disabilitas|default:0 }}</strong>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Berita:</small><br>
+                                    <strong>{{ total_news|default:0 }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Aktif:</small><br>
+                                    <span class="badge badge-success">Online</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="user-info">
+                            <h5 class="mb-3">
+                                <i class="fas fa-info-circle mr-2"></i>Sistem Informasi
+                            </h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Database:</small><br>
+                                    <strong>MySQL</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Status:</small><br>
+                                    <span class="badge badge-success">Online</span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Total Role:</small><br>
+                                    <strong>{{ roles.count|default:0 }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Akses:</small><br>
+                                    <span class="badge badge-primary">Multi-Role</span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Dusun:</small><br>
+                                    <strong>{{ total_dusun|default:0 }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Lorong:</small><br>
+                                    <strong>{{ total_lorong|default:0 }}</strong>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-6">
+                                    <small class="text-muted">RT:</small><br>
+                                    <strong>{{ total_rt|default:0 }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">RW:</small><br>
+                                    <strong>{{ total_rw|default:0 }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load dashboard statistics from API
+    loadDashboardStats();
+});
+
+function loadDashboardStats() {
+    console.log('Loading dashboard stats...');
+    fetch('/admin-panel/api/dashboard-stats/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('API Response:', data);
+        if (data.success && data.data) {
+            console.log('Updating dashboard with data:', data.data);
+            updateDashboardStats(data.data);
+        } else {
+            console.error('Error loading dashboard stats:', data.error || 'No data received');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading dashboard stats:', error);
+        // Fallback: try to update with static data from template
+        console.log('Using fallback static data');
+    });
+}
+
+function updateDashboardStats(stats) {
+    // Update main statistics cards using IDs
+    updateStatCard('#total-penduduk', stats.total_penduduk);
+    updateStatCard('#total-keluarga', stats.total_keluarga);
+    updateStatCard('#total-businesses', stats.total_businesses);
+    updateStatCard('#total-beneficiaries', stats.total_beneficiaries);
+    
+    // Update additional statistics cards using IDs
+    updateStatCard('#total-complaints', stats.total_complaints);
+    updateStatCard('#total-documents', stats.total_documents);
+    updateStatCard('#total-tourism', stats.total_tourism_locations);
+    updateStatCard('#total-posyandu', stats.total_posyandu_locations);
+    
+    // Update user info statistics
+    updateUserInfoStats(stats);
+}
+
+function updateStatCard(selector, value) {
+    const element = document.querySelector(selector);
+    console.log(`Selector: ${selector}, Element found:`, element, 'Value:', value);
+    if (element) {
+        console.log(`Successfully updating element with value: ${value}`);
+        // Update immediately first
+        element.textContent = value.toLocaleString('id-ID');
+        // Then animate the number change
+        animateValue(element, 0, value, 1000);
+    } else {
+        console.warn(`Element not found for selector: ${selector}`);
+    }
+}
+
+function updateUserInfoStats(stats) {
+    // Update pelajar count
+    const pelajarElement = document.querySelector('.user-info .row:nth-child(2) .col-6:nth-child(1) strong');
+    if (pelajarElement) {
+        animateValue(pelajarElement, 0, stats.total_pelajar, 1000);
+    }
+    
+    // Update disabilitas count
+    const disabilitasElement = document.querySelector('.user-info .row:nth-child(2) .col-6:nth-child(2) strong');
+    if (disabilitasElement) {
+        animateValue(disabilitasElement, 0, stats.total_disabilitas, 1000);
+    }
+    
+    // Update news count
+    const newsElement = document.querySelector('.user-info .row:nth-child(3) .col-6:nth-child(1) strong');
+    if (newsElement) {
+        animateValue(newsElement, 0, stats.total_news, 1000);
+    }
+    
+    // Update dusun count
+    const dusunElement = document.querySelector('.user-info .row:nth-child(4) .col-6:nth-child(1) strong');
+    if (dusunElement) {
+        animateValue(dusunElement, 0, stats.total_dusun, 1000);
+    }
+    
+    // Update lorong count
+    const lorongElement = document.querySelector('.user-info .row:nth-child(4) .col-6:nth-child(2) strong');
+    if (lorongElement) {
+        animateValue(lorongElement, 0, stats.total_lorong, 1000);
+    }
+    
+    // Update RT count
+    const rtElement = document.querySelector('.user-info .row:nth-child(5) .col-6:nth-child(1) strong');
+    if (rtElement) {
+        animateValue(rtElement, 0, stats.total_rt, 1000);
+    }
+    
+    // Update RW count
+    const rwElement = document.querySelector('.user-info .row:nth-child(5) .col-6:nth-child(2) strong');
+    if (rwElement) {
+        animateValue(rwElement, 0, stats.total_rw, 1000);
+    }
+}
+
+function animateValue(element, start, end, duration) {
+    const startTime = performance.now();
+    const startValue = start;
+    const endValue = end;
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function (ease-out)
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentValue = Math.floor(startValue + (endValue - startValue) * easeOut);
+        
+        element.textContent = currentValue.toLocaleString('id-ID');
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            element.textContent = endValue.toLocaleString('id-ID');
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+// Auto-refresh dashboard stats every 5 minutes
+setInterval(loadDashboardStats, 5 * 60 * 1000);
+</script>
+{% endblock %}

@@ -1,0 +1,466 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .bantuna-card {
+        transition: all 0.3s ease;
+    }
+    .bantuna-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .service-icon {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .bantuna-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    
+    .bantuna-section.dark {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .bantuna-card {
+            margin-bottom: 1rem;
+        }
+        .py-16 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+        .text-4xl {
+            font-size: 2rem !important;
+        }
+        .text-2xl {
+            font-size: 1.5rem !important;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+            grid-template-columns: 1fr !important;
+            gap: 1rem;
+        }
+        .py-12 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+    }
+</style>
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/80 to-blue-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Bantuan Sosial</h1>
+            <p class="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl mx-auto leading-relaxed">
+                Program bantuan sosial yang tersedia untuk masyarakat Desa Pulosarok
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Bantuan Sosial Section -->
+<section class="py-16 bg-white dark:bg-dark-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Bantuan Sosial</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                Program bantuan sosial yang tersedia untuk masyarakat Desa Pulosarok
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- BLT Card -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center mb-4">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-money-bill-wave text-2xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Bantuan Langsung Tunai (BLT)</h3>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Bantuan keuangan langsung untuk keluarga yang membutuhkan
+                </p>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1 mb-6">
+                    <li>• Bantuan Rp 200.000 per bulan</li>
+                    <li>• Untuk keluarga miskin</li>
+                    <li>• Pencairan bulanan</li>
+                </ul>
+                <a href="/beneficiaries/" class="w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg font-semibold transition-colors duration-200 block">
+                    Lihat Detail
+                </a>
+            </div>
+            
+            <!-- PKH Card -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center mb-4">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-home text-2xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Program Keluarga Harapan (PKH)</h3>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Program bantuan bersyarat untuk keluarga sangat miskin
+                </p>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1 mb-6">
+                    <li>• Bantuan pendidikan & kesehatan</li>
+                    <li>• Syarat: anak sekolah & imunisasi</li>
+                    <li>• Pencairan triwulanan</li>
+                </ul>
+                <a href="/beneficiaries/" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg font-semibold transition-colors duration-200 block">
+                    Lihat Detail
+                </a>
+            </div>
+            
+            <!-- BPNT Card -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center mb-4">
+                    <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shopping-cart text-2xl text-orange-600 dark:text-orange-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Bantuan Pangan Non Tunai (BPNT)</h3>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Bantuan pangan dalam bentuk voucher belanja
+                </p>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1 mb-6">
+                    <li>• Voucher belanja Rp 200.000</li>
+                    <li>• Dapat digunakan di toko mitra</li>
+                    <li>• Pencairan bulanan</li>
+                </ul>
+                <a href="/beneficiaries/" class="w-full bg-orange-600 hover:bg-orange-700 text-white text-center py-2 rounded-lg font-semibold transition-colors duration-200 block">
+                    Lihat Detail
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Layanan Administrasi Section -->
+<section class="py-16 bantuna-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Layanan Administrasi</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                Layanan administrasi dan surat menyurat yang dapat diakses masyarakat
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Surat Keterangan -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-file-alt text-xl text-primary-600 dark:text-primary-400"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Surat Keterangan</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Surat keterangan domisili, tidak mampu, dll
+                    </p>
+                    <a href="/layanan/" class="text-primary-600 hover:text-primary-700 font-semibold text-sm">
+                        Ajukan Permohonan →
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Surat Izin -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-clipboard-check text-xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Surat Izin</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Izin usaha, keramaian, dll
+                    </p>
+                    <a href="/layanan/" class="text-primary-600 hover:text-primary-700 font-semibold text-sm">
+                        Ajukan Permohonan →
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Akta Kelahiran -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-baby text-xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Akta Kelahiran</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Pengurusan akta kelahiran
+                    </p>
+                    <a href="/layanan/" class="text-primary-600 hover:text-primary-700 font-semibold text-sm">
+                        Ajukan Permohonan →
+                    </a>
+                </div>
+            </div>
+            
+            <!-- KTP -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-6 bantuna-card">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-id-card text-xl text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">KTP</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                        Pengurusan KTP baru/perpanjangan
+                    </p>
+                    <a href="/layanan/" class="text-primary-600 hover:text-primary-700 font-semibold text-sm">
+                        Ajukan Permohonan →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Layanan Kesehatan Section -->
+<section class="py-16 bg-white dark:bg-dark-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Layanan Kesehatan</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                Layanan kesehatan dan posyandu untuk masyarakat Desa Pulosarok
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Posyandu -->
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-8 text-white" ="fade-right">
+                <div class="flex items-center mb-6">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-heart text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">Posyandu</h3>
+                        <p class="text-green-100">Layanan kesehatan ibu dan anak</p>
+                    </div>
+                </div>
+                <ul class="space-y-2 mb-6">
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Pemeriksaan kesehatan balita
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Imunisasi rutin
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Konsultasi gizi
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Pemeriksaan ibu hamil
+                    </li>
+                </ul>
+                <a href="/posyandu/" class="bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 inline-block">
+                    Lihat Jadwal
+                </a>
+            </div>
+            
+            <!-- KIS -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-8 text-white" ="fade-left">
+                <div class="flex items-center mb-6">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-id-card text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">Kartu Indonesia Sehat (KIS)</h3>
+                        <p class="text-blue-100">Asuransi kesehatan gratis</p>
+                    </div>
+                </div>
+                <ul class="space-y-2 mb-6">
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Rawat inap gratis
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Rawat jalan gratis
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Obat-obatan gratis
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle mr-3"></i>
+                        Tindakan medis gratis
+                    </li>
+                </ul>
+                <a href="/beneficiaries/" class="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 inline-block">
+                    Daftar KIS
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Informasi Penting Section -->
+<section class="py-16 bantuna-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Informasi Penting</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                Informasi penting yang perlu diketahui masyarakat
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Syarat & Ketentuan -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-xl text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold">Syarat & Ketentuan</h3>
+                </div>
+                <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                        <span>Membawa dokumen asli dan fotokopi</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                        <span>Mengisi formulir dengan data yang benar</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                        <span>Mengikuti prosedur yang berlaku</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                        <span>Menunggu proses verifikasi</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Jam Layanan -->
+            <div class="bg-white dark:bg-dark-700 rounded-xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold">Jam Layanan</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <span class="font-semibold">Senin - Kamis</span>
+                        <span class="text-gray-600 dark:text-gray-400">08:00 - 16:00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <span class="font-semibold">Jumat</span>
+                        <span class="text-gray-600 dark:text-gray-400">08:00 - 11:00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <span class="font-semibold">Sabtu</span>
+                        <span class="text-gray-600 dark:text-gray-400">08:00 - 12:00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2">
+                        <span class="font-semibold">Minggu</span>
+                        <span class="text-red-500">Tutup</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Kontak Section -->
+<section class="py-16 bg-primary-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Butuh Bantuan?</h2>
+            <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+                Hubungi kami untuk informasi lebih lanjut tentang bantuan dan layanan yang tersedia
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div>
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-phone text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Telepon</h3>
+                <p class="text-primary-100">+62 xxx-xxxx-xxxx</p>
+            </div>
+            
+            <div>
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-envelope text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Email</h3>
+                <p class="text-primary-100">info@pulosarok.desa.id</p>
+            </div>
+            
+            <div>
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fab fa-whatsapp text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">WhatsApp</h3>
+                <p class="text-primary-100">+62 xxx-xxxx-xxxx</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="/kontak/" class="bg-white text-primary-600 hover:bg-primary-50 px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200 inline-block">
+                <i class="fas fa-map-marker-alt mr-2"></i>
+                Kunjungi Kantor Desa
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-in');
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all bantuna cards
+    document.querySelectorAll('.bantuna-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
+{% endblock %}

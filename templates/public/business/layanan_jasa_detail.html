@@ -1,0 +1,211 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load business_filters %}
+
+{% block title %}Detail Layanan Jasa - {{ layanan.nama }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header Section -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ layanan.nama }}</h1>
+                    <p class="mt-2 text-lg text-gray-600 dark:text-gray-300">{{ layanan.kategori }}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if layanan.status == 'aktif' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                        {% elif layanan.status == 'tidak_aktif' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                        {% else %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% endif %}">
+                        {{ layanan.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Information -->
+            <div class="lg:col-span-2">
+                <!-- Basic Information -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Informasi Layanan</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Layanan</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.nama }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Kategori</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.kategori }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Penyedia</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.penyedia }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Rating</label>
+                            <p class="text-gray-900 dark:text-white">
+                                {% if layanan.rating > 0 %}
+                                    {{ layanan.rating|rating_stars }}
+                                {% else %}
+                                    Belum ada rating
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Deskripsi Layanan</h2>
+                    <p class="text-gray-700 dark:text-gray-300">{{ layanan.deskripsi }}</p>
+                </div>
+
+                <!-- Pricing Information -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Informasi Harga</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Harga Minimum</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.harga_min|rupiah }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Harga Maksimum</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.harga_max|rupiah }}</p>
+                        </div>
+                        {% if layanan.satuan_harga %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Satuan Harga</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.satuan_harga }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Service Information -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Informasi Layanan</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if layanan.pengalaman %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Pengalaman</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.pengalaman }}</p>
+                        </div>
+                        {% endif %}
+                        {% if layanan.waktu_layanan %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Waktu Layanan</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.waktu_layanan }}</p>
+                        </div>
+                        {% endif %}
+                        {% if layanan.area_layanan %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Area Layanan</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.area_layanan }}</p>
+                        </div>
+                        {% endif %}
+                        {% if layanan.sertifikat %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Sertifikat</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.sertifikat }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Kontak</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Alamat</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.alamat }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Telepon</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.telepon }}</p>
+                        </div>
+                        {% if layanan.email %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.email }}</p>
+                        </div>
+                        {% endif %}
+                        {% if layanan.website %}
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Website</label>
+                            <p class="text-gray-900 dark:text-white">{{ layanan.website }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Advantages -->
+                {% if layanan.keunggulan %}
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Keunggulan</h2>
+                    <p class="text-gray-700 dark:text-gray-300">{{ layanan.keunggulan }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Terms and Conditions -->
+                {% if layanan.syarat_ketentuan %}
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Syarat & Ketentuan</h2>
+                    <p class="text-gray-700 dark:text-gray-300">{{ layanan.syarat_ketentuan }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Status Card -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Status</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Status</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ layanan.get_status_display }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">Terdaftar</span>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ layanan.created_at|date:"d M Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Actions -->
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Hubungi Kami</h3>
+                    <div class="space-y-3">
+                        <a href="tel:{{ layanan.telepon }}" 
+                           class="flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fas fa-phone mr-2"></i>
+                            {{ layanan.telepon }}
+                        </a>
+                        {% if layanan.email %}
+                        <a href="mailto:{{ layanan.email }}" 
+                           class="flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Kirim Email
+                        </a>
+                        {% endif %}
+                        {% if layanan.website %}
+                        <a href="{{ layanan.website }}" target="_blank"
+                           class="flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <i class="fas fa-globe mr-2"></i>
+                            Kunjungi Website
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,320 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .layanan-wrapper {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .form-card .card-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .form-card .card-title {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .form-card .card-body {
+        padding: 2rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .form-check-input {
+        border-radius: 5px;
+        border: 2px solid #e9ecef;
+    }
+
+    .form-check-input:checked {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .form-check-label {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .icon-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+        color: white;
+        background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .layanan-wrapper {
+            padding: 1rem 0;
+        }
+        
+        .page-header {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-card .card-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="layanan-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>{% if service %}Edit Layanan{% else %}Tambah Layanan{% endif %}</h4>
+                            <p class="text-muted mb-0">{% if service %}Edit layanan yang tersedia{% else %}Tambah layanan yang tersedia{% endif %}</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:layanan:service_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="fas fa-cogs mr-2"></i>Form Layanan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="serviceForm">
+                            {% csrf_token %}
+                            {% if service %}
+                            <input type="hidden" name="id" value="{{ service.id }}">
+                            {% endif %}
+                            
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Nama Layanan</label>
+                                    <input type="text" class="form-control" name="name" 
+                                           value="{% if service %}{{ service.name }}{% endif %}" 
+                                           placeholder="Masukkan nama layanan..." required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Kategori</label>
+                                    <select class="form-control" name="category" required>
+                                        <option value="documents" {% if service and service.category == 'documents' %}selected{% endif %}>Dokumen</option>
+                                        <option value="health" {% if service and service.category == 'health' %}selected{% endif %}>Kesehatan</option>
+                                        <option value="business" {% if service and service.category == 'business' %}selected{% endif %}>Bisnis</option>
+                                        <option value="tourism" {% if service and service.category == 'tourism' %}selected{% endif %}>Pariwisata</option>
+                                        <option value="other" {% if service and service.category == 'other' %}selected{% endif %}>Lainnya</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Icon</label>
+                                    <input type="text" class="form-control" name="icon" 
+                                           value="{% if service %}{{ service.icon }}{% endif %}" 
+                                           placeholder="fas fa-icon">
+                                    <small class="form-text text-muted">Contoh: fas fa-file, fas fa-heart, fas fa-briefcase</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">URL (Opsional)</label>
+                                    <input type="url" class="form-control" name="url" 
+                                           value="{% if service %}{{ service.url }}{% endif %}" 
+                                           placeholder="https://example.com">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Urutan</label>
+                                    <input type="number" class="form-control" name="order" 
+                                           value="{% if service %}{{ service.order }}{% else %}0{% endif %}" 
+                                           min="0" placeholder="0">
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Deskripsi</label>
+                                    <textarea class="form-control" name="description" rows="6" 
+                                              placeholder="Masukkan deskripsi layanan..." required>{% if service %}{{ service.description }}{% endif %}</textarea>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="is_active" 
+                                               id="is_active" {% if not service or service.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_active">
+                                            Aktif
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                {% if service and service.icon %}
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Preview Icon</label>
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-preview">
+                                            <i class="fas fa-{{ service.icon }}"></i>
+                                        </div>
+                                        <span class="text-muted">Preview icon yang akan ditampilkan</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="text-end">
+                                <a href="{% url 'admin_panel:layanan:service_list' %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times mr-1"></i>Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i>{% if service %}Update{% else %}Simpan{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Form submission
+    $('#serviceForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $.ajax({
+            url: '{% url "admin_panel:layanan:service_form" %}',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    setTimeout(() => {
+                        window.location.href = '{% url "admin_panel:layanan:service_list" %}';
+                    }, 1500);
+                } else {
+                    showAlert('error', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                showAlert('error', 'Terjadi kesalahan saat menyimpan data');
+            }
+        });
+    });
+    
+    // Icon preview
+    $('input[name="icon"]').on('input', function() {
+        const iconValue = $(this).val();
+        if (iconValue) {
+            // Update preview if exists
+            $('.icon-preview i').removeClass().addClass('fas fa-' + iconValue);
+        }
+    });
+});
+
+// Alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('body').prepend(alertHtml);
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

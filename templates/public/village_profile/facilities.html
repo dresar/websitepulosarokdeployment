@@ -1,0 +1,78 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 overflow-hidden">
+    {% if village_profile.profile_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ village_profile.profile_image.url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-orange-600/80 to-red-600/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-orange-600 to-red-600"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Fasilitas Desa</h1>
+            <p class="text-sm sm:text-base opacity-90">Infrastruktur dan fasilitas umum Desa Pulosarok</p>
+        </div>
+    </div>
+</section>
+
+<!-- Facilities Content -->
+<section class="py-4 sm:py-6 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if facilities %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {% for facility in facilities %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                {% if facility.image %}
+                    <img src="{{ facility.image.url }}" alt="{{ facility.name }}" class="w-full h-32 sm:h-40 object-cover">
+                {% else %}
+                    <div class="w-full h-32 sm:h-40 bg-orange-500 flex items-center justify-center text-white">
+                        <i class="fas fa-building text-2xl sm:text-3xl"></i>
+                    </div>
+                {% endif %}
+                <div class="p-3 sm:p-4">
+                    <h4 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-1">{{ facility.name }}</h4>
+                    <p class="text-xs sm:text-sm text-orange-600 dark:text-orange-400 mb-2">{{ facility.get_type_display }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{{ facility.description|truncatewords:15 }}</p>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {% if facility.condition == 'BAIK' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% elif facility.condition == 'CUKUP' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200{% else %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% endif %}">
+                            {{ facility.get_condition_display }}
+                        </span>
+                        <small class="text-xs text-gray-500 dark:text-gray-400">{{ facility.location }}</small>
+                    </div>
+                    {% if facility.manager %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <i class="fas fa-user mr-1"></i>{{ facility.manager }}
+                    </p>
+                    {% endif %}
+                    {% if facility.operational_hours %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <i class="fas fa-clock mr-1"></i>{{ facility.operational_hours }}
+                    </p>
+                    {% endif %}
+                    {% if facility.capacity %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <i class="fas fa-users mr-1"></i>{{ facility.capacity }}
+                    </p>
+                    {% endif %}
+                    {% if facility.contact_person and facility.contact_phone %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-phone mr-1"></i>{{ facility.contact_person }} ({{ facility.contact_phone }})
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 sm:py-12">
+            <i class="fas fa-building text-4xl sm:text-5xl text-gray-400 mb-3"></i>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">Data fasilitas belum tersedia</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-500">Informasi fasilitas desa akan segera ditambahkan</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

@@ -1,0 +1,47 @@
+RewriteEngine On
+
+# Handle static files
+RewriteRule ^static/(.*)$ /static/$1 [L]
+RewriteRule ^media/(.*)$ /media/$1 [L]
+
+# Handle admin static files
+RewriteRule ^admin-panel/static/(.*)$ /static/$1 [L]
+
+# Handle favicon and robots.txt
+RewriteRule ^favicon\.ico$ /static/images/favicon.ico [L]
+RewriteRule ^robots\.txt$ /static/robots.txt [L]
+RewriteRule ^sitemap\.xml$ /static/sitemap.xml [L]
+
+# Handle Django URLs - redirect everything else to passenger_wsgi.py
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /passenger_wsgi.py/$1 [QSA,L]
+
+# Security headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options SAMEORIGIN
+Header always set X-XSS-Protection "1; mode=block"
+
+# Cache control for static files
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    Header set Cache-Control "public, max-age=2592000"
+</FilesMatch>
+
+# Gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Error pages
+ErrorDocument 404 /passenger_wsgi.py/
+ErrorDocument 500 /passenger_wsgi.py/

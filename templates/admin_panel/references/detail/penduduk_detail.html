@@ -1,0 +1,646 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Detail Penduduk{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Detail Page Styling */
+.detail-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.detail-card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.detail-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.detail-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.detail-card-header i {
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.detail-card-body {
+    padding: 2rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    background: #e3f2fd;
+    transform: translateX(5px);
+}
+
+.info-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    word-break: break-word;
+}
+
+.info-value.badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.profile-photo-container {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.profile-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+}
+
+.profile-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    margin: 0 auto 1rem;
+    border: 5px solid white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.profile-photo-placeholder:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+.status-badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-decoration: none;
+}
+
+.action-btn i {
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.action-btn.edit {
+    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+    color: white;
+}
+
+.action-btn.export {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
+.action-btn.delete {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.action-btn.back {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: white;
+}
+
+.quick-actions {
+    position: sticky;
+    top: 2rem;
+}
+
+.section-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #dee2e6 50%, transparent 100%);
+    margin: 2rem 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .detail-container {
+        padding: 1rem 0;
+    }
+    
+    .detail-card-body {
+        padding: 1.5rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .info-item {
+        padding: 0.75rem;
+    }
+    
+    .profile-photo,
+    .profile-photo-placeholder {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .profile-photo-placeholder {
+        font-size: 2.5rem;
+    }
+    
+    .action-buttons {
+        gap: 0.75rem;
+    }
+    
+    .action-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+    
+    .quick-actions {
+        position: static;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .detail-card-header {
+        padding: 1rem;
+    }
+    
+    .detail-card-header h5 {
+        font-size: 1.1rem;
+    }
+    
+    .profile-photo-container {
+        padding: 1.5rem;
+    }
+    
+    .profile-photo,
+    .profile-photo-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .profile-photo-placeholder {
+        font-size: 2rem;
+    }
+    
+    .info-item {
+        padding: 0.5rem;
+    }
+    
+    .info-label {
+        font-size: 0.75rem;
+    }
+    
+    .info-value {
+        font-size: 0.9rem;
+    }
+}
+
+/* Loading Animation */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="container-fluid">
+
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    <div class="mb-3 mb-md-0">
+                        <h1 class="h3 mb-1 text-dark font-weight-bold">
+                            <i class="fas fa-user text-primary mr-2"></i>
+                            Detail Penduduk
+                        </h1>
+                        <p class="text-muted mb-0">Informasi lengkap data penduduk</p>
+                    </div>
+                    <div class="d-flex flex-wrap">
+                        <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-outline-secondary mr-2 mb-2">
+                            <i class="fas fa-arrow-left mr-1"></i>Kembali
+                        </a>
+                        {% if user|can_change:"references" %}
+                        <a href="{% url 'admin_panel:references_penduduk_edit' penduduk.id %}" class="btn btn-warning mr-2 mb-2">
+                            <i class="fas fa-edit mr-1"></i>Edit
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Personal Information -->
+                <div class="detail-card">
+                    <div class="detail-card-header">
+                        <h5>
+                            <i class="fas fa-user"></i>
+                            Informasi Personal
+                        </h5>
+                    </div>
+                    <div class="detail-card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">NIK</div>
+                                <div class="info-value">{{ penduduk.nik|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Nama Lengkap</div>
+                                <div class="info-value">{{ penduduk.name|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Tempat, Tanggal Lahir</div>
+                                <div class="info-value">
+                                    {{ penduduk.birth_place|default:"-" }}, 
+                                    {% if penduduk.birth_date %}
+                                        {{ penduduk.birth_date|date:"d F Y" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Jenis Kelamin</div>
+                                <div class="info-value">
+                                    <span class="badge badge-{% if penduduk.gender == 'L' %}primary{% else %}success{% endif %} status-badge">
+                                        <i class="fas fa-{% if penduduk.gender == 'L' %}male{% else %}female{% endif %} mr-1"></i>
+                                        {{ penduduk.get_gender_display|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Agama</div>
+                                <div class="info-value">{{ penduduk.religion|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Status Perkawinan</div>
+                                <div class="info-value">{{ penduduk.get_marital_status_display|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Pekerjaan</div>
+                                <div class="info-value">{{ penduduk.occupation|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Pendidikan Terakhir</div>
+                                <div class="info-value">{{ penduduk.get_education_display|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Alamat Lengkap</div>
+                                <div class="info-value">{{ penduduk.address|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="detail-card">
+                    <div class="detail-card-header">
+                        <h5>
+                            <i class="fas fa-map-marker-alt"></i>
+                            Informasi Alamat
+                        </h5>
+                    </div>
+                    <div class="detail-card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Dusun</div>
+                                <div class="info-value">{{ penduduk.dusun.name|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Lorong</div>
+                                <div class="info-value">{{ penduduk.lorong.name|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">RT</div>
+                                <div class="info-value">{{ penduduk.rt_number|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">RW</div>
+                                <div class="info-value">{{ penduduk.rw_number|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Nomor Rumah</div>
+                                <div class="info-value">{{ penduduk.house_number|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Kode Pos</div>
+                                <div class="info-value">{{ penduduk.postal_code|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="detail-card">
+                    <div class="detail-card-header">
+                        <h5>
+                            <i class="fas fa-phone"></i>
+                            Informasi Kontak
+                        </h5>
+                    </div>
+                    <div class="detail-card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Nomor Telepon</div>
+                                <div class="info-value">{{ penduduk.phone_number|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Nomor HP</div>
+                                <div class="info-value">{{ penduduk.mobile_number|default:"-" }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value">{{ penduduk.email|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Profile Photo -->
+                <div class="detail-card">
+                    <div class="detail-card-header">
+                        <h5>
+                            <i class="fas fa-camera"></i>
+                            Foto Profil
+                        </h5>
+                    </div>
+                    <div class="profile-photo-container">
+                        {% if penduduk.photo and penduduk.photo.url %}
+                            <img src="{{ penduduk.photo.url }}" alt="{{ penduduk.name }}" class="profile-photo">
+                        {% else %}
+                            <div class="profile-photo-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <p class="text-muted mb-3">
+                            {% if penduduk.photo %}
+                                Foto Profil
+                            {% else %}
+                                Tidak ada foto
+                            {% endif %}
+                        </p>
+                        {% if user|can_change:"references" %}
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-upload mr-1"></i>Ganti Foto
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Data Status -->
+                <div class="detail-card">
+                    <div class="detail-card-header">
+                        <h5>
+                            <i class="fas fa-info-circle"></i>
+                            Status Data
+                        </h5>
+                    </div>
+                    <div class="detail-card-body">
+                        <div class="text-center mb-3">
+                            <span class="status-badge {% if penduduk.is_active %}active{% else %}inactive{% endif %}">
+                                <i class="fas fa-{% if penduduk.is_active %}check-circle{% else %}times-circle{% endif %} mr-1"></i>
+                                {% if penduduk.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Dibuat</div>
+                            <div class="info-value">{{ penduduk.created_at|date:"d M Y" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Diupdate</div>
+                            <div class="info-value">{{ penduduk.updated_at|date:"d M Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="detail-card quick-actions">
+                    <div class="detail-card-header">
+                        <h5>
+                            <i class="fas fa-bolt"></i>
+                            Aksi Cepat
+                        </h5>
+                    </div>
+                    <div class="detail-card-body">
+                        <div class="action-buttons">
+                            {% if user|can_change:"references" %}
+                            <a href="{% url 'admin_panel:references_penduduk_edit' penduduk.id %}" class="action-btn edit">
+                                <i class="fas fa-edit"></i>Edit Data
+                            </a>
+                            {% endif %}
+                            <button onclick="exportData()" class="action-btn export">
+                                <i class="fas fa-download"></i>Export Data
+                            </button>
+                            {% if user|can_delete:"references" %}
+                            <a href="{% url 'admin_panel:references_penduduk_delete' penduduk.id %}" class="action-btn delete">
+                                <i class="fas fa-trash"></i>Hapus Data
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportData() {
+    showLoading('Mengekspor data...');
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('Data berhasil diekspor');
+    }, 2000);
+}
+
+function showLoading(message) {
+    const overlay = $('<div class="loading-overlay"><div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>' + message + '</p></div></div>');
+    $('body').append(overlay);
+}
+
+function hideLoading() {
+    $('.loading-overlay').remove();
+}
+
+function showSuccess(message) {
+    const notification = $(`
+        <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">
+            <i class="fas fa-check-circle mr-2"></i>${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `);
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.alert('close');
+    }, 3000);
+}
+
+// Initialize tooltips
+$(document).ready(function() {
+    $('[title]').tooltip();
+});
+</script>
+{% endblock %}

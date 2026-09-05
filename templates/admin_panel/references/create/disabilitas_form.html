@@ -1,0 +1,462 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}{% if disabilitas %}Edit Disabilitas{% else %}Tambah Disabilitas{% endif %} - Admin Panel{% endblock %}
+{% block page_title %}{% if disabilitas %}Edit Disabilitas{% else %}Tambah Disabilitas{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Dropdown styling */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar-placeholder i {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.penduduk-item:hover .avatar-placeholder i {
+    color: #007bff;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_disabilitas_list' %}">Disabilitas</a>
+                            </li>
+                            <li class="breadcrumb-item active">{{ form_title|default:"Tambah" }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-{{ form_icon|default:'plus' }} text-primary mr-2"></i>
+                        {{ form_title|default:"Tambah Disabilitas" }}
+                    </h1>
+                    <p class="text-muted mb-0">{{ form_subtitle|default:"Lengkapi data disabilitas baru" }}</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'admin_panel:references_disabilitas_list' %}" class="btn btn-outline-secondary mr-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                    <a href="{% url 'admin_panel:references_disabilitas_list' %}" class="btn btn-success mr-2">
+                        <i class="fas fa-file-import mr-1"></i>
+                        Import Data
+                    </a>
+                    <button type="submit" form="disabilitasForm" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i>
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="disabilitasForm" method="post" novalidate>
+        {% csrf_token %}
+        {% if disabilitas %}
+        <input type="hidden" name="disabilitas_id" value="{{ disabilitas.id }}">
+        {% endif %}
+        
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-wheelchair mr-2"></i>
+                            Informasi Disabilitas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Nama/NIK Penduduk -->
+                            <div class="col-12 mb-3">
+                                <label for="disPendudukSearch" class="form-label">
+                                    Nama/NIK Penduduk <span class="text-danger">*</span>
+                                </label>
+                                <input type="hidden" name="penduduk_id" id="disPendudukId" value="{% if disabilitas %}{{ disabilitas.penduduk_id }}{% endif %}">
+                                <div class="position-relative">
+                                    <input type="text" class="form-control" id="disPendudukSearch" 
+                                           placeholder="Ketik nama atau NIK penduduk..." 
+                                           value="{% if disabilitas %}{{ disabilitas.penduduk.name }} - {{ disabilitas.penduduk.nik }}{% endif %}" 
+                                           autocomplete="off" required>
+                                    <div id="disPendudukDropdown" class="dropdown-menu" style="display: none; width: 100%; max-height: 300px; overflow-y: auto; z-index: 1000;">
+                                        <!-- Dropdown items will be populated here -->
+                                    </div>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Penduduk harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- Jenis Disabilitas -->
+                            <div class="col-md-6 mb-3">
+                                <label for="disability_type_id" class="form-label">
+                                    Jenis Disabilitas <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="disability_type_id" name="disability_type_id" required>
+                                    <option value="">Pilih Jenis</option>
+                                    {% for t in type_options %}
+                                    <option value="{{ t.id }}" {% if disabilitas and disabilitas.disability_type_id == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Jenis disabilitas harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- Tingkat Keparahan -->
+                            <div class="col-md-6 mb-3">
+                                <label for="severity" class="form-label">
+                                    Tingkat Keparahan
+                                </label>
+                                <select class="form-control" id="severity" name="severity">
+                                    <option value="RINGAN" {% if disabilitas and disabilitas.severity == 'RINGAN' %}selected{% endif %}>Ringan</option>
+                                    <option value="SEDANG" {% if disabilitas and disabilitas.severity == 'SEDANG' %}selected{% endif %}>Sedang</option>
+                                    <option value="BERAT" {% if disabilitas and disabilitas.severity == 'BERAT' %}selected{% endif %}>Berat</option>
+                                </select>
+                            </div>
+
+                            <!-- Tanggal Diagnosis -->
+                            <div class="col-md-6 mb-3">
+                                <label for="diagnosis_date" class="form-label">
+                                    Tanggal Diagnosis
+                                </label>
+                                <input type="date" class="form-control" id="diagnosis_date" name="diagnosis_date" 
+                                       value="{% if disabilitas and disabilitas.diagnosis_date %}{{ disabilitas.diagnosis_date|date:'Y-m-d' }}{% endif %}">
+                            </div>
+
+                            <!-- Kebutuhan Bantuan -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kebutuhan Bantuan</label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="needs_assistance" name="needs_assistance" 
+                                           {% if disabilitas and disabilitas.needs_assistance %}checked{% endif %}>
+                                    <label class="form-check-label" for="needs_assistance">
+                                        Ya, membutuhkan bantuan
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Deskripsi -->
+                            <div class="col-12 mb-3">
+                                <label for="description" class="form-label">
+                                    Deskripsi
+                                </label>
+                                <textarea class="form-control" id="description" name="description" rows="3" 
+                                          placeholder="Deskripsi kondisi disabilitas...">{% if disabilitas %}{{ disabilitas.description }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Status -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-toggle-on mr-2"></i>
+                            Status
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" 
+                                       {% if not disabilitas or disabilitas.is_active %}checked{% endif %}>
+                                <label class="custom-control-label" for="is_active">
+                                    Data Aktif
+                                </label>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            Data yang tidak aktif tidak akan muncul dalam laporan.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i>
+                                Simpan Data
+                            </button>
+                            <a href="{% url 'admin_panel:references_disabilitas_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times mr-1"></i>
+                                Batal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    var searchTimeout;
+    var input = $('#disPendudukSearch');
+    var hidden = $('#disPendudukId');
+    var dropdown = $('#disPendudukDropdown');
+    
+    // Clear dropdown
+    function clearDropdown() {
+        dropdown.empty().hide();
+    }
+    
+    // Fetch penduduk data
+    function fetchPendudukData(query) {
+        if (!query || query.length < 2) {
+            clearDropdown();
+            return;
+        }
+        
+        // Show loading indicator
+        dropdown.html('<div class="dropdown-item"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari...</div>').show();
+        
+        $.ajax({
+            url: '{% url "admin_panel:api_references_residents_search" %}',
+            method: 'GET',
+            data: { q: query },
+            success: function(response) {
+                clearDropdown();
+                
+                if (response.success && response.data && Array.isArray(response.data)) {
+                    var results = response.data;
+                    if (results.length > 0) {
+                        results.slice(0, 10).forEach(function(item) {
+                            var dropdownItem = $(`
+                                <div class="dropdown-item penduduk-item" data-id="${item.id}" data-name="${item.name}" data-nik="${item.nik}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-placeholder me-2">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">${item.name}</div>
+                                            <small class="text-muted">NIK: ${item.nik || '-'} | ${item.dusun || '-'}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `);
+                            dropdown.append(dropdownItem);
+                        });
+                        dropdown.show();
+                    } else {
+                        dropdown.html('<div class="dropdown-item text-muted">Tidak ada penduduk ditemukan</div>').show();
+                    }
+                } else {
+                    console.error('API returned error or invalid data structure:', response);
+                    dropdown.html('<div class="dropdown-item text-danger">Error: Tidak dapat memuat data penduduk</div>').show();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error);
+                clearDropdown();
+                dropdown.html('<div class="dropdown-item text-danger">Error: Gagal memuat data penduduk</div>').show();
+            }
+        });
+    }
+    
+    // Input event
+    input.on('input', function() {
+        clearTimeout(searchTimeout);
+        var query = $(this).val().trim();
+        searchTimeout = setTimeout(function() {
+            fetchPendudukData(query);
+        }, 300);
+    });
+    
+    // Click event for dropdown items
+    dropdown.on('click', '.penduduk-item', function() {
+        var id = $(this).data('id');
+        var name = $(this).data('name');
+        var nik = $(this).data('nik');
+        
+        hidden.val(id);
+        input.val(name + ' - ' + nik);
+        clearDropdown();
+        
+        // Remove validation error
+        input.removeClass('is-invalid');
+    });
+    
+    // Hide dropdown when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#disPendudukSearch, #disPendudukDropdown').length) {
+            clearDropdown();
+        }
+    });
+    
+    // Form validation
+    $('#disabilitasForm').on('submit', function(e) {
+        var pendudukId = hidden.val();
+        var disabilityTypeId = $('#disability_type_id').val();
+        var isValid = true;
+        
+        // Clear previous validation
+        $('.form-control').removeClass('is-invalid');
+        $('.invalid-feedback').hide();
+        
+        if (!pendudukId) {
+            input.addClass('is-invalid');
+            input.siblings('.invalid-feedback').show();
+            isValid = false;
+        }
+        
+        if (!disabilityTypeId) {
+            $('#disability_type_id').addClass('is-invalid');
+            $('#disability_type_id').siblings('.invalid-feedback').show();
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            showAlert('Mohon lengkapi semua field yang wajib diisi.', 'error');
+            return false;
+        }
+    });
+});
+
+// Function to show notification toast
+function showAlert(message, type) {
+    // Remove existing notifications
+    $('.notification-toast').remove();
+    
+    // Set colors and icons
+    let bgColor, icon, title;
+    if (type === 'success') {
+        bgColor = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+        icon = 'fa-check-circle';
+        title = 'Berhasil';
+    } else if (type === 'error') {
+        bgColor = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+        icon = 'fa-times-circle';
+        title = 'Error';
+    } else if (type === 'warning') {
+        bgColor = 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)';
+        icon = 'fa-exclamation-triangle';
+        title = 'Peringatan';
+    } else {
+        bgColor = 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)';
+        icon = 'fa-info-circle';
+        title = 'Informasi';
+    }
+    
+    // Create notification toast
+    const toast = $(`
+        <div class="notification-toast" style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${bgColor};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        ">
+            <div class="d-flex align-items-center">
+                <i class="fas ${icon} fa-lg mr-3"></i>
+                <div class="flex-grow-1">
+                    <div class="font-weight-bold mb-1">${title}</div>
+                    <div class="small">${message}</div>
+                </div>
+                <button type="button" class="btn-close text-white ml-2" style="
+                    background: none;
+                    border: none;
+                    font-size: 1.2rem;
+                    opacity: 0.8;
+                    cursor: pointer;
+                ">&times;</button>
+            </div>
+        </div>
+    `);
+    
+    // Add to body
+    $('body').append(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.css('transform', 'translateX(0)');
+    }, 100);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        toast.css('transform', 'translateX(100%)');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+    
+    // Manual close
+    toast.find('.btn-close').on('click', function() {
+        toast.css('transform', 'translateX(100%)');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    });
+}
+</script>
+{% endblock extra_js %}
+

@@ -1,0 +1,478 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Tambah{% endif %} Penggerak PKK{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e3e6f0;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h4 {
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #d1d3e2;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .required {
+        color: #e74a3b;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .photo-upload {
+        border: 2px dashed #d1d3e2;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .photo-upload:hover {
+        border-color: #4e73df;
+        background-color: #f8f9fc;
+    }
+    
+    .photo-upload.dragover {
+        border-color: #4e73df;
+        background-color: #e3f2fd;
+    }
+    
+    .photo-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #e3e6f0;
+        margin: 0 auto 1rem;
+        display: block;
+    }
+    
+    .photo-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: #f8f9fc;
+        border: 3px solid #e3e6f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #6c757d;
+        margin: 0 auto 1rem;
+    }
+    
+    .validation-error {
+        color: #e74a3b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .row {
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1rem;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .photo-upload {
+            padding: 1rem;
+        }
+        
+        .photo-preview,
+        .photo-placeholder {
+            width: 120px;
+            height: 120px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Form Header -->
+    <div class="form-header">
+        <h4>
+            <i class="fas fa-female me-2"></i>
+            {% if form.instance.pk %}Edit{% else %}Tambah{% endif %} Penggerak PKK
+        </h4>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data" id="pkkForm">
+            {% csrf_token %}
+            
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h5 class="section-title">Informasi Personal</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.penduduk_search.id_for_label }}" class="form-label">
+                                Penduduk <span class="required">*</span>
+                            </label>
+                            {{ form.penduduk_search }}
+                            {{ form.penduduk }}
+                            {% if form.penduduk.errors %}
+                                <div class="validation-error">{{ form.penduduk.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Pilih penduduk yang akan menjadi penggerak PKK</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.jabatan.id_for_label }}" class="form-label">
+                                Jabatan <span class="required">*</span>
+                            </label>
+                            {{ form.jabatan }}
+                            {% if form.jabatan.errors %}
+                                <div class="validation-error">{{ form.jabatan.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                Status <span class="required">*</span>
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="validation-error">{{ form.status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.tanggal_bergabung.id_for_label }}" class="form-label">
+                                Tanggal Bergabung <span class="required">*</span>
+                            </label>
+                            {{ form.tanggal_bergabung }}
+                            {% if form.tanggal_bergabung.errors %}
+                                <div class="validation-error">{{ form.tanggal_bergabung.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.tanggal_keluar.id_for_label }}" class="form-label">
+                                Tanggal Keluar
+                            </label>
+                            {{ form.tanggal_keluar }}
+                            {% if form.tanggal_keluar.errors %}
+                                <div class="validation-error">{{ form.tanggal_keluar.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Kosongkan jika masih aktif</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nomor_anggota.id_for_label }}" class="form-label">
+                                Nomor Anggota
+                            </label>
+                            {{ form.nomor_anggota }}
+                            {% if form.nomor_anggota.errors %}
+                                <div class="validation-error">{{ form.nomor_anggota.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-section">
+                <h5 class="section-title">Informasi Kontak</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.kontak_whatsapp.id_for_label }}" class="form-label">
+                                WhatsApp
+                            </label>
+                            {{ form.kontak_whatsapp }}
+                            {% if form.kontak_whatsapp.errors %}
+                                <div class="validation-error">{{ form.kontak_whatsapp.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-help">Nomor WhatsApp dengan format 08xxxxxxxxxx</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                Email
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="validation-error">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.alamat_lengkap.id_for_label }}" class="form-label">
+                        Alamat Lengkap
+                    </label>
+                    {{ form.alamat_lengkap }}
+                    {% if form.alamat_lengkap.errors %}
+                        <div class="validation-error">{{ form.alamat_lengkap.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="form-section">
+                <h5 class="section-title">Informasi Tambahan</h5>
+                <div class="form-group">
+                    <label for="{{ form.deskripsi_tugas.id_for_label }}" class="form-label">
+                        Deskripsi Tugas
+                    </label>
+                    {{ form.deskripsi_tugas }}
+                    {% if form.deskripsi_tugas.errors %}
+                        <div class="validation-error">{{ form.deskripsi_tugas.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.sk_pengangkatan.id_for_label }}" class="form-label">
+                        SK Pengangkatan
+                    </label>
+                    {{ form.sk_pengangkatan }}
+                    {% if form.sk_pengangkatan.errors %}
+                        <div class="validation-error">{{ form.sk_pengangkatan.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Skills and Experience -->
+            <div class="form-section">
+                <h5 class="section-title">Keahlian dan Pengalaman</h5>
+                <div class="form-group">
+                    <label for="{{ form.keahlian.id_for_label }}" class="form-label">
+                        Keahlian
+                    </label>
+                    {{ form.keahlian }}
+                    {% if form.keahlian.errors %}
+                        <div class="validation-error">{{ form.keahlian.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.pengalaman_organisasi.id_for_label }}" class="form-label">
+                        Pengalaman Organisasi
+                    </label>
+                    {{ form.pengalaman_organisasi }}
+                    {% if form.pengalaman_organisasi.errors %}
+                        <div class="validation-error">{{ form.pengalaman_organisasi.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.prestasi.id_for_label }}" class="form-label">
+                        Prestasi
+                    </label>
+                    {{ form.prestasi }}
+                    {% if form.prestasi.errors %}
+                        <div class="validation-error">{{ form.prestasi.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Photo Upload -->
+            <div class="form-section">
+                <h5 class="section-title">Foto Profil</h5>
+                <div class="form-group">
+                    <div class="photo-upload" onclick="document.getElementById('id_foto_profil').click()">
+                        {% if form.instance.foto_profil %}
+                            <img src="{{ form.instance.foto_profil.url }}" alt="Foto Profil" class="photo-preview" id="photoPreview">
+                        {% else %}
+                            <div class="photo-placeholder" id="photoPlaceholder">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                            <p class="mb-1">Klik untuk upload foto</p>
+                            <small class="text-muted">Format: JPG, PNG, WEBP (Max 2MB)</small>
+                        </div>
+                    </div>
+                    {{ form.foto_profil }}
+                    {% if form.foto_profil.errors %}
+                        <div class="validation-error">{{ form.foto_profil.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="btn-group">
+                <a href="{% url 'admin_panel:organization:admin_pkk_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/organization.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Photo upload handling
+    $('#id_foto_profil').on('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#photoPreview').attr('src', e.target.result).show();
+                $('#photoPlaceholder').hide();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and drop for photo upload
+    $('.photo-upload').on('dragover', function(e) {
+        e.preventDefault();
+        $(this).addClass('dragover');
+    });
+
+    $('.photo-upload').on('dragleave', function(e) {
+        e.preventDefault();
+        $(this).removeClass('dragover');
+    });
+
+    $('.photo-upload').on('drop', function(e) {
+        e.preventDefault();
+        $(this).removeClass('dragover');
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            $('#id_foto_profil')[0].files = files;
+            $('#id_foto_profil').trigger('change');
+        }
+    });
+
+    // Form validation
+    $('#pkkForm').on('submit', function(e) {
+        let isValid = true;
+        
+        // Clear previous errors
+        $('.validation-error').remove();
+        
+        // Validate required fields
+        $('input[required], select[required], textarea[required]').each(function() {
+            if (!$(this).val()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+                $(this).after('<div class="validation-error">Field ini wajib diisi</div>');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            orgAPI.showError('Mohon lengkapi semua field yang wajib diisi');
+        }
+    });
+
+    // Initialize responsive features
+    orgAPI.initResponsive();
+});
+</script>
+{% endblock %}

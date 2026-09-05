@@ -1,0 +1,604 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<style>
+    /* Location List Specific Styles */
+    .location-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .location-card {
+        border-color: #374151;
+    }
+    
+    .location-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .location-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .location-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+    
+    .location-type-natural {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .dark .location-type-natural {
+        background-color: #14532d;
+        color: #dcfce7;
+    }
+    
+    .location-type-cultural {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    
+    .dark .location-type-cultural {
+        background-color: #78350f;
+        color: #fde68a;
+    }
+    
+    .location-type-historical {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .dark .location-type-historical {
+        background-color: #1e3a8a;
+        color: #dbeafe;
+    }
+    
+    .location-type-religious {
+        background-color: #e0e7ff;
+        color: #3730a3;
+    }
+    
+    .dark .location-type-religious {
+        background-color: #312e81;
+        color: #c7d2fe;
+    }
+    
+    .location-type-culinary {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .dark .location-type-culinary {
+        background-color: #7f1d1d;
+        color: #fecaca;
+    }
+    
+    .location-type-adventure {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+    
+    .dark .location-type-adventure {
+        background-color: #4b5563;
+        color: #d1d5db;
+    }
+    
+    .location-type-education {
+        background-color: #fce7f3;
+        color: #be185d;
+    }
+    
+    .dark .location-type-education {
+        background-color: #831843;
+        color: #fce7f3;
+    }
+    
+    .location-type-other {
+        background-color: #f3f4f6;
+        color: #6b7280;
+    }
+    
+    .dark .location-type-other {
+        background-color: #4b5563;
+        color: #9ca3af;
+    }
+    
+    .featured-badge {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .rating-stars {
+        color: #fbbf24;
+    }
+    
+    .dark .rating-stars {
+        color: #f59e0b;
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 640px) {
+        .location-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .location-card .p-4 {
+            padding: 0.5rem;
+        }
+        
+        .location-card h3 {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .location-card p {
+            font-size: 0.625rem;
+            line-height: 0.875rem;
+        }
+        
+        .location-type-badge {
+            font-size: 0.5rem;
+            padding: 0.125rem 0.25rem;
+        }
+        
+        .filter-section {
+            padding: 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .filter-section .grid {
+            min-width: max-content;
+        }
+    }
+    
+    /* Loading States */
+    .loading-skeleton {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Statistics Cards */
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+        color: white;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .dark .stat-card:hover {
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Filter and Search Styles */
+    .filter-section {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+    
+    .dark .filter-section {
+        background: rgba(17, 24, 39, 0.8);
+    }
+    
+    /* Price Badge */
+    .price-badge {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .dark .price-badge {
+        background: linear-gradient(135deg, #059669, #047857);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-green-600/80 to-blue-600/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-green-500 to-blue-500"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+                Destinasi Wisata Desa Pulosarok
+            </h1>
+            <p class="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl mx-auto">
+                Jelajahi keindahan alam, kekayaan budaya, dan kelezatan kuliner yang menanti Anda
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Filter and Search Section -->
+<div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="grid grid-cols-1 gap-2">
+            <!-- Search Bar -->
+            <div class="relative">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="Cari destinasi wisata..." 
+                       class="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                       value="{{ search_query|default:'' }}">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400 text-sm"></i>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <!-- Category Filter -->
+                <select id="categoryFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-green-500 focus:border-transparent transition-all duration-200">
+                    <option value="">Kategori</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if current_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Type Filter -->
+                <select id="typeFilter" class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-green-500 focus:border-transparent transition-all duration-200">
+                    <option value="">Jenis</option>
+                    <option value="natural" {% if current_type == 'natural' %}selected{% endif %}>Alam</option>
+                    <option value="cultural" {% if current_type == 'cultural' %}selected{% endif %}>Budaya</option>
+                    <option value="historical" {% if current_type == 'historical' %}selected{% endif %}>Sejarah</option>
+                    <option value="religious" {% if current_type == 'religious' %}selected{% endif %}>Religi</option>
+                    <option value="culinary" {% if current_type == 'culinary' %}selected{% endif %}>Kuliner</option>
+                    <option value="adventure" {% if current_type == 'adventure' %}selected{% endif %}>Petualangan</option>
+                    <option value="education" {% if current_type == 'education' %}selected{% endif %}>Edukasi</option>
+                    <option value="other" {% if current_type == 'other' %}selected{% endif %}>Lainnya</option>
+                </select>
+                
+                <!-- Clear Filters -->
+                <button id="clearFilters" class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+                    <i class="fas fa-times mr-1"></i>Reset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="bg-gray-50 dark:bg-gray-800 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ total_locations }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Total Destinasi</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ featured_locations }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Unggulan</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ total_categories }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Kategori</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ avg_rating|floatformat:1 }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Rating Rata-rata</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Locations List -->
+<div class="py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for i in "123456"|make_list %}
+                <div class="location-card bg-white dark:bg-gray-800 rounded-lg p-4 loading-skeleton">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Locations Grid -->
+        <div id="locationsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for location in locations %}
+            <div class="location-card bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                <div class="relative">
+                    {% if location.get_featured_image %}
+                    <img src="{{ location.get_featured_image }}" 
+                         alt="{{ location.title }}" 
+                         class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-image text-4xl text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-4 right-4 flex flex-col gap-2">
+                        <span class="location-type-badge location-type-{{ location.location_type }}">
+                            {{ location.location_type_display }}
+                        </span>
+                        {% if location.featured %}
+                        <span class="featured-badge">Unggulan</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        {{ location.title }}
+                    </h3>
+                    
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+                        {{ location.short_description }}
+                    </p>
+                    
+                    <!-- Location Details -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-tag mr-2"></i>
+                            <span>{{ location.category.name }}</span>
+                        </div>
+                        
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span class="truncate">{{ location.address|truncatechars:30 }}</span>
+                        </div>
+                        
+                        {% if location.opening_hours %}
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>{{ location.opening_hours }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if location.entry_fee %}
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-ticket-alt mr-2"></i>
+                            <span>{{ location.entry_fee|currency_idr }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Rating -->
+                    {% if location.average_rating > 0 %}
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="rating-stars">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= location.average_rating %}
+                                        <i class="fas fa-star text-xs"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-xs"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">
+                                {{ location.average_rating|floatformat:1 }}
+                            </span>
+                        </div>
+                        {% if location.total_reviews %}
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            ({{ location.total_reviews }} review)
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Location Actions -->
+                    <div class="flex gap-2">
+                        <a href="{% url 'tourism:location_detail' location.slug %}" 
+                           class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-eye mr-1"></i>Detail
+                        </a>
+                        {% if location.contact_phone %}
+                        <a href="tel:{{ location.contact_phone }}" 
+                           class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-phone"></i>
+                        </a>
+                        {% endif %}
+                        {% if location.website %}
+                        <a href="{{ location.website }}" target="_blank" 
+                           class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full empty-state">
+                <div class="text-center">
+                    <i class="fas fa-map-marker-alt text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Belum Ada Destinasi</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Belum ada destinasi wisata yang tersedia saat ini.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if locations.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if locations.has_previous %}
+                <a href="?page={{ locations.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-lg">
+                    {{ locations.number }} dari {{ locations.paginator.num_pages }}
+                </span>
+                
+                {% if locations.has_next %}
+                <a href="?page={{ locations.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="bg-green-50 dark:bg-green-900/20 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Temukan Destinasi Impian Anda!
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+            Jelajahi berbagai destinasi wisata yang menawarkan pengalaman tak terlupakan.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'tourism:search' %}" 
+               class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200">
+                <i class="fas fa-search mr-2"></i>Cari Destinasi
+            </a>
+            <a href="{% url 'tourism:package_list' %}" 
+               class="inline-flex items-center px-6 py-3 bg-transparent border-2 border-green-600 text-green-600 hover:bg-green-600 hover:text-white font-medium rounded-lg transition-colors duration-200">
+                <i class="fas fa-suitcase mr-2"></i>Lihat Paket
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class LocationList {
+    constructor() {
+        this.searchInput = document.getElementById('searchInput');
+        this.categoryFilter = document.getElementById('categoryFilter');
+        this.typeFilter = document.getElementById('typeFilter');
+        this.clearFilters = document.getElementById('clearFilters');
+        this.loadingState = document.getElementById('loadingState');
+        this.locationsGrid = document.getElementById('locationsGrid');
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Search functionality
+        let searchTimeout;
+        this.searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.performSearch();
+            }, 500);
+        });
+        
+        // Filter functionality
+        this.categoryFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        this.typeFilter.addEventListener('change', () => {
+            this.performSearch();
+        });
+        
+        // Clear filters
+        this.clearFilters.addEventListener('click', () => {
+            this.searchInput.value = '';
+            this.categoryFilter.value = '';
+            this.typeFilter.value = '';
+            this.performSearch();
+        });
+    }
+    
+    async performSearch() {
+        const searchQuery = this.searchInput.value;
+        const categoryFilter = this.categoryFilter.value;
+        const typeFilter = this.typeFilter.value;
+        
+        // Show loading state
+        this.showLoading();
+        
+        try {
+            // Build URL with parameters
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (categoryFilter) params.append('category', categoryFilter);
+            if (typeFilter) params.append('type', typeFilter);
+            
+            // Reload page with new parameters
+            const url = window.location.pathname + '?' + params.toString();
+            window.location.href = url;
+        } catch (error) {
+            console.error('Error performing search:', error);
+            this.hideLoading();
+        }
+    }
+    
+    showLoading() {
+        this.loadingState.classList.remove('hidden');
+        this.locationsGrid.classList.add('hidden');
+    }
+    
+    hideLoading() {
+        this.loadingState.classList.add('hidden');
+        this.locationsGrid.classList.remove('hidden');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    new LocationList();
+});
+</script>
+{% endblock %}
+

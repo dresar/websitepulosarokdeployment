@@ -1,0 +1,146 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 overflow-hidden">
+    {% if village_profile.profile_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ village_profile.profile_image.url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/80 to-indigo-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Galeri Foto Desa</h1>
+            <p class="text-sm sm:text-base opacity-90">Koleksi foto-foto desa Pulosarok</p>
+        </div>
+    </div>
+</section>
+
+<!-- Search and Filter -->
+<section class="py-4 sm:py-6 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
+            <form method="GET" class="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-12 sm:gap-3">
+                <div class="sm:col-span-6">
+                    <label for="search" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cari Foto</label>
+                    <input type="text" class="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white" 
+                           id="search" name="search" value="{{ search_query }}" placeholder="Cari foto...">
+                </div>
+                <div class="sm:col-span-4">
+                    <label for="type" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
+                    <select class="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white" 
+                            id="type" name="type">
+                        <option value="">Semua Kategori</option>
+                        {% for type_code, type_name in photo_types %}
+                        <option value="{{ type_code }}" {% if selected_type == type_code %}selected{% endif %}>{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <i class="fas fa-search mr-1 text-xs"></i>Cari
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Gallery Content -->
+<section class="py-4 sm:py-6 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if photos %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            {% for photo in photos %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                {% if photo.image %}
+                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" class="w-full h-32 sm:h-40 object-cover">
+                {% else %}
+                    <div class="w-full h-32 sm:h-40 bg-blue-600 flex items-center justify-center text-white">
+                        <i class="fas fa-camera text-2xl"></i>
+                    </div>
+                {% endif %}
+                <div class="p-2 sm:p-3">
+                    <h4 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">{{ photo.title }}</h4>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{{ photo.description|truncatewords:8 }}</p>
+                    <div class="flex flex-wrap gap-1 mb-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            {{ photo.get_photo_type_display }}
+                        </span>
+                        {% if photo.is_featured %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                            Unggulan
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if photo.photographer %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <i class="fas fa-user mr-1"></i>{{ photo.photographer }}
+                    </p>
+                    {% endif %}
+                    {% if photo.location %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1"></i>{{ photo.location }}
+                    </p>
+                    {% endif %}
+                    {% if photo.photo_date %}
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-calendar mr-1"></i>{{ photo.photo_date|date:"d M Y" }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if photos.has_other_pages %}
+        <nav aria-label="Gallery pagination" class="mt-4 sm:mt-6">
+            <div class="flex justify-center">
+                <div class="flex items-center space-x-1">
+                    {% if photos.has_previous %}
+                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}" 
+                       class="px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?page={{ photos.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}" 
+                       class="px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in photos.paginator.page_range %}
+                        {% if photos.number == num %}
+                        <span class="px-2 py-1 text-xs sm:text-sm bg-blue-600 text-white rounded">{{ num }}</span>
+                        {% elif num > photos.number|add:'-3' and num < photos.number|add:'3' %}
+                        <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}" 
+                           class="px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if photos.has_next %}
+                    <a href="?page={{ photos.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}" 
+                       class="px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?page={{ photos.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_type %}&type={{ selected_type }}{% endif %}" 
+                       class="px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-8 sm:py-12">
+            <i class="fas fa-camera text-4xl sm:text-5xl text-gray-400 mb-3"></i>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">Galeri foto belum tersedia</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-500">Foto-foto desa akan segera ditambahkan</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

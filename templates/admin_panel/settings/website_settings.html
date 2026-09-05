@@ -1,0 +1,202 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan Website{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-cog mr-2"></i>
+                        Pengaturan Website
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">Kelola semua pengaturan website dari halaman ini. Pilih kategori pengaturan yang ingin Anda kelola.</p>
+                </div>
+            </div>
+
+            <!-- Settings Navigation -->
+            <div class="row">
+                <!-- Website Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-globe fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Pengaturan Website</h5>
+                            <p class="card-text">Konfigurasi dasar website, logo, dan informasi umum.</p>
+                            <a href="{% url 'core:website_settings' %}" class="btn btn-primary">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cache Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-database fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Pengaturan Cache</h5>
+                            <p class="card-text">Kelola cache untuk meningkatkan performa website.</p>
+                            <a href="{% url 'core:cache_settings' %}" class="btn btn-info">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Media Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-image fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Pengaturan Media</h5>
+                            <p class="card-text">Kelola upload dan pengaturan media files.</p>
+                            <a href="{% url 'core:media_settings' %}" class="btn btn-success">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title">Pengaturan Keamanan</h5>
+                            <p class="card-text">Konfigurasi keamanan dan perlindungan website.</p>
+                            <a href="{% url 'core:security_settings' %}" class="btn btn-warning">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-envelope fa-3x text-danger mb-3"></i>
+                            <h5 class="card-title">Pengaturan Email</h5>
+                            <p class="card-text">Konfigurasi email dan sistem notifikasi.</p>
+                            <a href="{% url 'core:email_settings' %}" class="btn btn-danger">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-search fa-3x text-dark mb-3"></i>
+                            <h5 class="card-title">Pengaturan SEO</h5>
+                            <p class="card-text">Optimasi untuk mesin pencari dan analytics.</p>
+                            <a href="{% url 'core:seo_settings' %}" class="btn btn-dark">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup Settings -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-save fa-3x text-secondary mb-3"></i>
+                            <h5 class="card-title">Pengaturan Backup</h5>
+                            <p class="card-text">Kelola backup database dan file website.</p>
+                            <a href="{% url 'core:backup_settings' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Mode -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-tools fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Mode Maintenance</h5>
+                            <p class="card-text">Kelola mode maintenance website.</p>
+                            <a href="{% url 'core:maintenance_mode' %}" class="btn btn-primary">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Kelola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-server fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Informasi Sistem</h5>
+                            <p class="card-text">Monitor performa dan status sistem.</p>
+                            <a href="{% url 'core:system_info' %}" class="btn btn-info">
+                                <i class="fas fa-arrow-right mr-1"></i>
+                                Lihat
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt mr-2"></i>
+                        Aksi Cepat
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'core:clear_cache' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-trash mr-1"></i>
+                                Clear Cache
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'core:clear_static_files' %}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-file mr-1"></i>
+                                Clear Static Files
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'core:clear_media_cache' %}" class="btn btn-outline-danger btn-block">
+                                <i class="fas fa-image mr-1"></i>
+                                Clear Media Cache
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'core:system_info' %}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-heartbeat mr-1"></i>
+                                System Health
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

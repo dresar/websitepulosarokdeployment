@@ -1,0 +1,457 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan Media & Upload{% endblock %}
+
+{% block extra_css %}
+<style>
+    .media-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .media-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .media-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .media-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .media-stats {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .media-settings {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    
+    .media-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .media-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .media-btn.primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .media-btn.primary:hover {
+        background: #5a6fd8;
+        transform: translateY(-2px);
+    }
+    
+    .media-btn.danger {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .media-btn.danger:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+    }
+    
+    .media-btn.warning {
+        background: #f39c12;
+        color: white;
+    }
+    
+    .media-btn.warning:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+    }
+    
+    .media-btn.success {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .media-btn.success:hover {
+        background: #229954;
+        transform: translateY(-2px);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .settings-info {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .settings-info h4 {
+        margin: 0 0 10px 0;
+        color: #667eea;
+    }
+    
+    .settings-info p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .file-preview {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 10px;
+        background: #f8f9fa;
+    }
+    
+    .file-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="media-container">
+    <!-- Header -->
+    <div class="media-header">
+        <h1><i class="fas fa-image"></i> Pengaturan Media & Upload</h1>
+        <p>Kelola pengaturan media files dan upload</p>
+    </div>
+    
+    <!-- Media Statistics -->
+    <div class="media-stats">
+        <h4 class="mb-3">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Statistik Media
+        </h4>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ media_stats.total_files|default:"0" }}</div>
+                    <div class="stat-label">Total Files</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ media_stats.total_size|default:"0 MB" }}</div>
+                    <div class="stat-label">Total Size</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ media_stats.images|default:"0" }}</div>
+                    <div class="stat-label">Images</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ media_stats.documents|default:"0" }}</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Media Settings Form -->
+    <div class="media-settings">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <h3><i class="fas fa-cog"></i> Pengaturan Upload</h3>
+            
+            <div class="settings-info">
+                <h4>Informasi Upload</h4>
+                <p>Konfigurasi pengaturan untuk upload file, format yang diizinkan, dan kompresi gambar otomatis.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="max_upload_size">Maksimal Ukuran Upload (MB)</label>
+                <input type="number" id="max_upload_size" name="max_upload_size" value="{{ settings.max_upload_size|default:10 }}" min="1" max="100">
+                <div class="help-text">Maksimal ukuran file yang dapat diupload (1-100 MB)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="allowed_image_formats">Format Gambar Diizinkan</label>
+                <input type="text" id="allowed_image_formats" name="allowed_image_formats" value="{{ settings.allowed_image_formats|default:'jpg,jpeg,png,gif,webp' }}" placeholder="jpg,jpeg,png,gif,webp">
+                <div class="help-text">Pisahkan dengan koma, contoh: jpg,jpeg,png,gif,webp</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="allowed_document_formats">Format Dokumen Diizinkan</label>
+                <input type="text" id="allowed_document_formats" name="allowed_document_formats" value="{{ settings.allowed_document_formats|default:'pdf,doc,docx,xls,xlsx' }}" placeholder="pdf,doc,docx,xls,xlsx">
+                <div class="help-text">Pisahkan dengan koma, contoh: pdf,doc,docx,xls,xlsx</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_image_compression" name="enable_image_compression" {% if settings.enable_image_compression %}checked{% endif %}>
+                    <label for="enable_image_compression">Kompresi Gambar Otomatis</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="image_quality">Kualitas Gambar (%)</label>
+                <input type="number" id="image_quality" name="image_quality" value="{{ settings.image_quality|default:85 }}" min="10" max="100">
+                <div class="help-text">Kualitas kompresi gambar (10-100%)</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_watermark" name="enable_watermark" {% if settings.enable_watermark %}checked{% endif %}>
+                    <label for="enable_watermark">Tambahkan Watermark</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="watermark_text">Text Watermark</label>
+                <input type="text" id="watermark_text" name="watermark_text" value="{{ settings.watermark_text|default:'Pulosarok' }}" placeholder="Text watermark">
+            </div>
+            
+            <div class="form-group">
+                <label for="watermark_position">Posisi Watermark</label>
+                <select id="watermark_position" name="watermark_position">
+                    <option value="bottom-right" {% if settings.watermark_position == 'bottom-right' %}selected{% endif %}>Bottom Right</option>
+                    <option value="bottom-left" {% if settings.watermark_position == 'bottom-left' %}selected{% endif %}>Bottom Left</option>
+                    <option value="top-right" {% if settings.watermark_position == 'top-right' %}selected{% endif %}>Top Right</option>
+                    <option value="top-left" {% if settings.watermark_position == 'top-left' %}selected{% endif %}>Top Left</option>
+                    <option value="center" {% if settings.watermark_position == 'center' %}selected{% endif %}>Center</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_thumbnail" name="enable_thumbnail" {% if settings.enable_thumbnail %}checked{% endif %}>
+                    <label for="enable_thumbnail">Buat Thumbnail Otomatis</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="thumbnail_size">Ukuran Thumbnail (px)</label>
+                <input type="text" id="thumbnail_size" name="thumbnail_size" value="{{ settings.thumbnail_size|default:'300x300' }}" placeholder="300x300">
+                <div class="help-text">Format: width x height, contoh: 300x300</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_auto_resize" name="enable_auto_resize" {% if settings.enable_auto_resize %}checked{% endif %}>
+                    <label for="enable_auto_resize">Resize Gambar Otomatis</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="max_image_width">Maksimal Lebar Gambar (px)</label>
+                <input type="number" id="max_image_width" name="max_image_width" value="{{ settings.max_image_width|default:1920 }}" min="100" max="4000">
+            </div>
+            
+            <div class="form-group">
+                <label for="max_image_height">Maksimal Tinggi Gambar (px)</label>
+                <input type="number" id="max_image_height" name="max_image_height" value="{{ settings.max_image_height|default:1080 }}" min="100" max="4000">
+            </div>
+            
+            <!-- Media Actions -->
+            <div class="media-actions">
+                <a href="{% url 'core:clear_media_cache' %}" class="media-btn danger">
+                    <i class="fas fa-trash"></i> Clear Media Cache
+                </a>
+                <a href="{% url 'core:optimize_images' %}" class="media-btn warning">
+                    <i class="fas fa-compress"></i> Optimize Images
+                </a>
+                <a href="{% url 'core:generate_thumbnails' %}" class="media-btn success">
+                    <i class="fas fa-images"></i> Generate Thumbnails
+                </a>
+                <a href="{% url 'core:media_dashboard' %}" class="media-btn primary">
+                    <i class="fas fa-chart-bar"></i> Media Dashboard
+                </a>
+            </div>
+            
+            <!-- Save Button -->
+            <div style="text-align: center; margin-top: 40px;">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Simpan Pengaturan Media
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Media action confirmations
+    document.querySelectorAll('.media-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const action = this.textContent.trim();
+            if (!confirm(`Apakah Anda yakin ingin ${action.toLowerCase()}?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const maxUploadSize = document.getElementById('max_upload_size').value;
+        const imageQuality = document.getElementById('image_quality').value;
+        const maxWidth = document.getElementById('max_image_width').value;
+        const maxHeight = document.getElementById('max_image_height').value;
+        
+        if (maxUploadSize < 1 || maxUploadSize > 100) {
+            e.preventDefault();
+            alert('Maksimal ukuran upload harus antara 1-100 MB!');
+            return;
+        }
+        
+        if (imageQuality < 10 || imageQuality > 100) {
+            e.preventDefault();
+            alert('Kualitas gambar harus antara 10-100%!');
+            return;
+        }
+        
+        if (maxWidth < 100 || maxWidth > 4000) {
+            e.preventDefault();
+            alert('Maksimal lebar gambar harus antara 100-4000 px!');
+            return;
+        }
+        
+        if (maxHeight < 100 || maxHeight > 4000) {
+            e.preventDefault();
+            alert('Maksimal tinggi gambar harus antara 100-4000 px!');
+            return;
+        }
+    });
+    
+    // Thumbnail size validation
+    document.getElementById('thumbnail_size').addEventListener('input', function() {
+        const value = this.value;
+        const pattern = /^\d+x\d+$/;
+        if (value && !pattern.test(value)) {
+            this.style.borderColor = '#e74c3c';
+        } else {
+            this.style.borderColor = '#e1e5e9';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,471 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+            </div>
+            <div class="card-body bg-white">
+                <form method="post" enctype="multipart/form-data" id="reviewForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.tourism_location.id_for_label }}" class="form-label">Lokasi Wisata *</label>
+                                {{ form.tourism_location }}
+                                {% if form.tourism_location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.tourism_location.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.rating.id_for_label }}" class="form-label">Rating *</label>
+                                {{ form.rating }}
+                                {% if form.rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Pilih rating dari 1-5 bintang</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.reviewer_name.id_for_label }}" class="form-label">Nama Reviewer *</label>
+                                {{ form.reviewer_name }}
+                                {% if form.reviewer_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.reviewer_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.reviewer_email.id_for_label }}" class="form-label">Email Reviewer</label>
+                                {{ form.reviewer_email }}
+                                {% if form.reviewer_email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.reviewer_email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.review_text.id_for_label }}" class="form-label">Review Text *</label>
+                        {{ form.review_text }}
+                        {% if form.review_text.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.review_text.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Review Details -->
+                    <h6 class="text-primary mt-4 mb-3">Detail Review</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.visit_date.id_for_label }}" class="form-label">Tanggal Kunjungan</label>
+                                {{ form.visit_date }}
+                                {% if form.visit_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.visit_date.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.group_size.id_for_label }}" class="form-label">Jumlah Orang</label>
+                                {{ form.group_size }}
+                                {% if form.group_size.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.group_size.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.travel_type.id_for_label }}" class="form-label">Jenis Perjalanan</label>
+                                {{ form.travel_type }}
+                                {% if form.travel_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.travel_type.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.visit_purpose.id_for_label }}" class="form-label">Tujuan Kunjungan</label>
+                                {{ form.visit_purpose }}
+                                {% if form.visit_purpose.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.visit_purpose.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating Breakdown -->
+                    <h6 class="text-primary mt-4 mb-3">Detail Rating</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.cleanliness_rating.id_for_label }}" class="form-label">Kebersihan</label>
+                                {{ form.cleanliness_rating }}
+                                {% if form.cleanliness_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.cleanliness_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.service_rating.id_for_label }}" class="form-label">Pelayanan</label>
+                                {{ form.service_rating }}
+                                {% if form.service_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.service_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.value_rating.id_for_label }}" class="form-label">Nilai Uang</label>
+                                {{ form.value_rating }}
+                                {% if form.value_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.value_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.accessibility_rating.id_for_label }}" class="form-label">Aksesibilitas</label>
+                                {{ form.accessibility_rating }}
+                                {% if form.accessibility_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.accessibility_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.safety_rating.id_for_label }}" class="form-label">Keamanan</label>
+                                {{ form.safety_rating }}
+                                {% if form.safety_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.safety_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.overall_rating.id_for_label }}" class="form-label">Rating Keseluruhan</label>
+                                {{ form.overall_rating }}
+                                {% if form.overall_rating.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.overall_rating.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media Upload -->
+                    <h6 class="text-primary mt-4 mb-3">Media</h6>
+                    <div class="form-group">
+                        <label for="{{ form.images.id_for_label }}" class="form-label">Gambar Review</label>
+                        {{ form.images }}
+                        {% if form.images.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.images.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">Pilih beberapa gambar untuk review</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.video.id_for_label }}" class="form-label">Video Review</label>
+                        {{ form.video }}
+                        {% if form.video.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.video.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Status Settings -->
+                    <h6 class="text-primary mt-4 mb-3">Pengaturan Status</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.is_approved }}
+                                <label class="form-check-label" for="{{ form.is_approved.id_for_label }}">
+                                    Disetujui
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.is_featured }}
+                                <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                    Review Unggulan
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-2"></i>Simpan
+                        </button>
+                        <a href="{% url 'admin_panel:tourism_reviews_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>Batal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Sidebar -->
+    <div class="col-lg-4">
+        <div class="card shadow bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Preview</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div id="preview-content">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-star fa-3x mb-3"></i>
+                        <p>Preview akan muncul di sini</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Guide -->
+        <div class="card shadow mt-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Panduan Rating</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-star text-warning mr-2"></i>
+                            <strong>1 Bintang</strong>
+                        </div>
+                        <small class="text-muted">Sangat Buruk</small>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-star text-warning mr-2"></i>
+                            <strong>2 Bintang</strong>
+                        </div>
+                        <small class="text-muted">Buruk</small>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-star text-warning mr-2"></i>
+                            <strong>3 Bintang</strong>
+                        </div>
+                        <small class="text-muted">Biasa</small>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-star text-warning mr-2"></i>
+                            <strong>4 Bintang</strong>
+                        </div>
+                        <small class="text-muted">Baik</small>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-star text-warning mr-2"></i>
+                            <strong>5 Bintang</strong>
+                        </div>
+                        <small class="text-muted">Sangat Baik</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="card shadow mt-4 bg-white">
+            <div class="card-header py-3 bg-white">
+                <h6 class="m-0 font-weight-bold text-primary">Bantuan</h6>
+            </div>
+            <div class="card-body bg-white">
+                <h6>Tips:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success mr-2"></i>Isi review yang jujur dan objektif</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Berikan rating yang sesuai dengan pengalaman</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Gunakan bahasa yang sopan dan konstruktif</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Upload gambar yang relevan</li>
+                    <li><i class="fas fa-check text-success mr-2"></i>Isi informasi kontak yang valid</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/tourism-responsive.css' %}">
+{% endblock extra_css %}
+
+{% block extra_js %}
+<script>
+// Preview functionality
+function updatePreview() {
+    const reviewerName = document.querySelector('input[name="reviewer_name"]').value;
+    const reviewText = document.querySelector('textarea[name="review_text"]').value;
+    const rating = document.querySelector('select[name="rating"]').value;
+    const visitDate = document.querySelector('input[name="visit_date"]').value;
+    const groupSize = document.querySelector('input[name="group_size"]').value;
+    const images = document.querySelector('input[name="images"]').files;
+    
+    const preview = document.getElementById('preview-content');
+    
+    if (reviewerName || reviewText) {
+        let previewHtml = '<div class="card">';
+        
+        if (images && images.length > 0) {
+            const imageUrl = URL.createObjectURL(images[0]);
+            previewHtml += `<img src="${imageUrl}" class="card-img-top" style="height: 200px; object-fit: cover;">`;
+        } else {
+            previewHtml += `<div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="fas fa-star fa-3x text-muted"></i>
+            </div>`;
+        }
+        
+        previewHtml += '<div class="card-body">';
+        
+        if (reviewerName) {
+            previewHtml += `<h6 class="card-title">${reviewerName}</h6>`;
+        }
+        
+        if (rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<i class="fas fa-star text-warning"></i>';
+                } else {
+                    stars += '<i class="far fa-star text-muted"></i>';
+                }
+            }
+            previewHtml += `<div class="mb-2">${stars} <span class="text-muted">(${rating}/5)</span></div>`;
+        }
+        
+        if (visitDate) {
+            const date = new Date(visitDate);
+            previewHtml += `<div class="text-muted mb-2"><i class="fas fa-calendar mr-1"></i>${date.toLocaleDateString('id-ID')}</div>`;
+        }
+        
+        if (groupSize) {
+            previewHtml += `<div class="text-muted mb-2"><i class="fas fa-users mr-1"></i>${groupSize} orang</div>`;
+        }
+        
+        if (reviewText) {
+            previewHtml += `<p class="card-text">${reviewText.substring(0, 100)}${reviewText.length > 100 ? '...' : ''}</p>`;
+        }
+        
+        previewHtml += '</div></div>';
+        preview.innerHTML = previewHtml;
+    }
+}
+
+// Add event listeners for preview
+document.querySelector('input[name="reviewer_name"]').addEventListener('input', updatePreview);
+document.querySelector('textarea[name="review_text"]').addEventListener('input', updatePreview);
+document.querySelector('select[name="rating"]').addEventListener('change', updatePreview);
+document.querySelector('input[name="visit_date"]').addEventListener('change', updatePreview);
+document.querySelector('input[name="group_size"]').addEventListener('input', updatePreview);
+document.querySelector('input[name="images"]').addEventListener('change', updatePreview);
+
+// Auto-calculate overall rating
+function calculateOverallRating() {
+    const cleanliness = parseInt(document.querySelector('select[name="cleanliness_rating"]').value) || 0;
+    const service = parseInt(document.querySelector('select[name="service_rating"]').value) || 0;
+    const value = parseInt(document.querySelector('select[name="value_rating"]').value) || 0;
+    const accessibility = parseInt(document.querySelector('select[name="accessibility_rating"]').value) || 0;
+    const safety = parseInt(document.querySelector('select[name="safety_rating"]').value) || 0;
+    
+    const ratings = [cleanliness, service, value, accessibility, safety].filter(r => r > 0);
+    
+    if (ratings.length > 0) {
+        const average = Math.round(ratings.reduce((a, b) => a + b, 0) / ratings.length);
+        document.querySelector('select[name="overall_rating"]').value = average;
+    }
+}
+
+// Add event listeners for overall rating calculation
+document.querySelector('select[name="cleanliness_rating"]').addEventListener('change', calculateOverallRating);
+document.querySelector('select[name="service_rating"]').addEventListener('change', calculateOverallRating);
+document.querySelector('select[name="value_rating"]').addEventListener('change', calculateOverallRating);
+document.querySelector('select[name="accessibility_rating"]').addEventListener('change', calculateOverallRating);
+document.querySelector('select[name="safety_rating"]').addEventListener('change', calculateOverallRating);
+</script>
+{% endblock extra_js %}
+
+{% block extra_css %}
+<style>
+/* Light theme styling for review form */
+.card { background-color: #ffffff; border: 1px solid #e3e6f0; }
+.card-header { background-color: #ffffff; border-bottom: 1px solid #e3e6f0; }
+.card-body { background-color: #ffffff; }
+.form-control { background-color: #ffffff; border: 1px solid #d1d3e2; color: #5a5c69; }
+.form-control:focus { background-color: #ffffff; border-color: #bac8f3; box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25); }
+.form-label { color: #5a5c69; font-weight: 600; }
+.text-primary { color: #007bff !important; }
+.text-success { color: #28a745 !important; }
+.text-info { color: #17a2b8 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-danger { color: #dc3545 !important; }
+.text-secondary { color: #6c757d !important; }
+.text-dark { color: #5a5c69 !important; }
+.text-muted { color: #858796 !important; }
+.btn-primary { background-color: #007bff; border-color: #007bff; }
+.btn-primary:hover { background-color: #0056b3; border-color: #004085; }
+.btn-secondary { background-color: #6c757d; border-color: #6c757d; }
+.btn-secondary:hover { background-color: #545b62; border-color: #4e555b; }
+.form-check-input { background-color: #ffffff; border: 1px solid #d1d3e2; }
+.form-check-input:checked { background-color: #007bff; border-color: #007bff; }
+.form-text { color: #858796 !important; }
+.invalid-feedback { color: #dc3545; }
+.list-group-item { background-color: #ffffff; border-color: #e3e6f0; }
+</style>
+{% endblock extra_css %}
+

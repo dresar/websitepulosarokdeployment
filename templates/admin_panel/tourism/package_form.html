@@ -1,0 +1,558 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}
+    {% if form.instance.pk %}Edit Paket Wisata{% else %}Tambah Paket Wisata{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+<style>
+/* Compact Form Styles */
+.tourism-admin {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    min-height: 100vh;
+    padding: 1rem !important;
+    margin: 0 !important;
+}
+
+.tourism-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 0.5rem !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.2 !important;
+}
+
+.tourism-text-muted {
+    color: #64748b !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+}
+
+/* Compact Form Container */
+.tourism-form-container {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    max-width: 700px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+}
+
+.tourism-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+    border-radius: 12px 12px 0 0;
+}
+
+/* Compact Form Groups */
+.tourism-form-group {
+    margin-bottom: 1.25rem !important;
+    position: relative;
+}
+
+.tourism-form-label {
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem !important;
+    display: block !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Compact Form Controls */
+.tourism-form-container input[type="text"],
+.tourism-form-container input[type="number"],
+.tourism-form-container textarea,
+.tourism-form-container select {
+    width: 100% !important;
+    padding: 0.75rem !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    transition: all 0.3s ease !important;
+    background: #fafbfc !important;
+    font-family: inherit !important;
+    line-height: 1.4 !important;
+}
+
+.tourism-form-container input[type="text"]:focus,
+.tourism-form-container input[type="number"]:focus,
+.tourism-form-container textarea:focus,
+.tourism-form-container select:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    background: white !important;
+    transform: translateY(-1px);
+}
+
+.tourism-form-container textarea {
+    resize: vertical !important;
+    min-height: 80px !important;
+}
+
+/* Compact Form Row Layout */
+.tourism-form-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem !important;
+    margin-bottom: 0 !important;
+}
+
+/* Compact Buttons */
+.tourism-btn {
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.tourism-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 8px -2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.tourism-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4) !important;
+}
+
+.tourism-btn-secondary {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    color: #475569 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.tourism-btn-secondary:hover {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%) !important;
+    color: #334155 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Compact Form Actions */
+.tourism-form-actions {
+    display: flex !important;
+    gap: 1rem !important;
+    justify-content: flex-end !important;
+    margin-top: 2rem !important;
+    padding-top: 1.5rem !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+/* Compact Help Text */
+.tourism-help-text {
+    font-size: 0.7rem !important;
+    color: #64748b !important;
+    margin-top: 0.25rem !important;
+    font-style: italic !important;
+    background: #f8fafc !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    border-left: 2px solid #3b82f6 !important;
+}
+
+/* Required Field Indicator */
+.tourism-required {
+    color: #dc2626 !important;
+    font-weight: 900 !important;
+}
+
+/* Compact Form Header */
+.tourism-form-header {
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 2px solid #f1f5f9 !important;
+    position: relative !important;
+}
+
+.tourism-form-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 1px;
+}
+
+/* Compact Checkbox */
+.tourism-form-container input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 0.5rem !important;
+    accent-color: #3b82f6 !important;
+}
+
+/* Compact File Input */
+.tourism-form-container input[type="file"] {
+    padding: 0.5rem !important;
+    border: 2px dashed #cbd5e1 !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.8rem !important;
+}
+
+.tourism-form-container input[type="file"]:hover {
+    border-color: #3b82f6 !important;
+    background: #f0f9ff !important;
+}
+
+/* Compact Image Preview */
+.tourism-image-preview {
+    max-width: 150px !important;
+    max-height: 100px !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-top: 0.5rem !important;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Compact Alert Messages */
+.alert {
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.8rem !important;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+    color: #166534 !important;
+    border-left: 3px solid #22c55e !important;
+}
+
+.alert-error {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    color: #991b1b !important;
+    border-left: 3px solid #ef4444 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tourism-form-row {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    .tourism-form-actions {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    
+    .tourism-admin {
+        padding: 0.75rem !important;
+    }
+    
+    .tourism-form-container {
+        padding: 1rem !important;
+        margin: 0 0.5rem !important;
+    }
+    
+    .tourism-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* Compact Status Display */
+.tourism-status-display {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tourism-status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Package Type Badge */
+.tourism-package-type {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.tourism-package-type-day_trip {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tourism-package-type-weekend {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.tourism-package-type-week_long {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.tourism-package-type-custom {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Form Header -->
+    <div class="tourism-form-header">
+        <h1 class="tourism-title">
+            {% if form.instance.pk %}
+                ✏️ Edit Paket Wisata
+            {% else %}
+                ➕ Tambah Paket Wisata
+            {% endif %}
+        </h1>
+        <p class="tourism-text-muted">
+            {% if form.instance.pk %}
+                Perbarui informasi paket wisata
+            {% else %}
+                Tambahkan paket wisata baru untuk Desa Pulosarok
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                    <button type="button" class="close" onclick="this.parentElement.style.display='none'" style="background: none; border: none; font-size: 1rem; color: inherit; opacity: 0.5; float: right; cursor: pointer;">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Form Container -->
+    <div class="tourism-form-container">
+        <form method="post" enctype="multipart/form-data" id="packageForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="tourism-form-group">
+                <label for="{{ form.title.id_for_label }}" class="tourism-form-label">
+                    Nama Paket <span class="tourism-required">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.title.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Masukkan nama paket wisata yang menarik</div>
+            </div>
+
+            <div class="tourism-form-group">
+                <label for="{{ form.description.id_for_label }}" class="tourism-form-label">
+                    Deskripsi Paket
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.description.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Jelaskan detail paket wisata ini</div>
+            </div>
+
+            <!-- Package Details -->
+            <div class="tourism-form-row">
+                <div class="tourism-form-group">
+                    <label for="{{ form.package_type.id_for_label }}" class="tourism-form-label">
+                        Jenis Paket
+                    </label>
+                    {{ form.package_type }}
+                    {% if form.package_type.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.package_type.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="tourism-form-group">
+                    <label for="{{ form.duration.id_for_label }}" class="tourism-form-label">
+                        Durasi
+                    </label>
+                    {{ form.duration }}
+                    {% if form.duration.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.duration.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="tourism-help-text">Contoh: 2 hari 1 malam</div>
+                </div>
+            </div>
+
+            <!-- Pricing and Location -->
+            <div class="tourism-form-row">
+                <div class="tourism-form-group">
+                    <label for="{{ form.price.id_for_label }}" class="tourism-form-label">
+                        Harga (Rp)
+                    </label>
+                    {{ form.price }}
+                    {% if form.price.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.price.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="tourism-form-group">
+                    <label for="{{ form.tourism_location.id_for_label }}" class="tourism-form-label">
+                        Lokasi Wisata
+                    </label>
+                    {{ form.tourism_location }}
+                    {% if form.tourism_location.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.tourism_location.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Image -->
+            <div class="tourism-form-group">
+                <label for="{{ form.image.id_for_label }}" class="tourism-form-label">
+                    Gambar Paket
+                </label>
+                {{ form.image }}
+                {% if form.image.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.image.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Upload gambar representatif paket wisata</div>
+                {% if form.instance.image %}
+                <img src="{{ form.instance.image.url }}" alt="Current image" class="tourism-image-preview">
+                {% endif %}
+            </div>
+
+            <!-- Status Options -->
+            <div class="tourism-form-group">
+                <label class="tourism-form-label">Status</label>
+                <div class="tourism-status-display">
+                    <div class="tourism-status-item">
+                        {{ form.is_active }}
+                        <span>Aktif</span>
+                    </div>
+                    <div class="tourism-status-item">
+                        {{ form.is_featured }}
+                        <span>Unggulan</span>
+                    </div>
+                </div>
+                <div class="tourism-help-text">Paket aktif akan ditampilkan di halaman publik</div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="tourism-form-actions">
+                <a href="{% url 'admin_panel:tourism_packages_list' %}" class="tourism-btn tourism-btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+                <button type="submit" class="tourism-btn tourism-btn-primary">
+                    <i class="fas fa-save"></i>
+                    {% if form.instance.pk %}Update Paket{% else %}Simpan Paket{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Alert dismissal
+    const alertCloseButtons = document.querySelectorAll('.close');
+    alertCloseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.parentElement.style.display = 'none';
+        });
+    });
+
+    // Form validation
+    const form = document.getElementById('packageForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+            if (!titleInput.value.trim()) {
+                e.preventDefault();
+                alert('Nama paket harus diisi!');
+                titleInput.focus();
+                return false;
+            }
+        });
+    }
+
+    // Auto-format price
+    const priceInput = document.getElementById('{{ form.price.id_for_label }}');
+    if (priceInput) {
+        priceInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            this.value = value;
+        });
+    }
+
+    // Package type change handler
+    const packageTypeSelect = document.getElementById('{{ form.package_type.id_for_label }}');
+    if (packageTypeSelect) {
+        packageTypeSelect.addEventListener('change', function() {
+            const durationInput = document.getElementById('{{ form.duration.id_for_label }}');
+            const type = this.value;
+            
+            // Auto-suggest duration based on package type
+            if (type === 'day_trip' && !durationInput.value) {
+                durationInput.value = '1 hari';
+            } else if (type === 'weekend' && !durationInput.value) {
+                durationInput.value = '2 hari 1 malam';
+            } else if (type === 'week_long' && !durationInput.value) {
+                durationInput.value = '7 hari 6 malam';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

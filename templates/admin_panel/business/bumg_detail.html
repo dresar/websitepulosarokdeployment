@@ -1,0 +1,264 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/business-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-components.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="business-container">
+    <div class="business-row">
+        <div class="business-col-lg-8">
+            <div class="business-page-header">
+                <div>
+                    <h1 class="business-page-title">{{ bumg.nama }}</h1>
+                    <p class="business-page-subtitle">Detail lengkap BUMG</p>
+                </div>
+                <div class="business-page-actions">
+                    <span class="business-status-badge business-status-{{ bumg.status }}">
+                        {% if bumg.status == 'aktif' %}
+                            <i class="fas fa-check-circle"></i>Aktif
+                        {% elif bumg.status == 'tidak_aktif' %}
+                            <i class="fas fa-times-circle"></i>Tidak Aktif
+                        {% else %}
+                            <i class="fas fa-clock"></i>Pending
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Informasi Dasar -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Informasi Dasar BUMG
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Nama BUMG:</div>
+                        <div class="business-detail-value">{{ bumg.nama|default:"-" }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Nomor SK:</div>
+                        <div class="business-detail-value">{{ bumg.nomor_sk|default:"-" }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Tanggal SK:</div>
+                        <div class="business-detail-value">
+                            {% if bumg.tanggal_sk %}
+                                {{ bumg.tanggal_sk|date:"d F Y" }}
+                            {% else %}
+                                <span class="business-empty-value">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Website:</div>
+                        <div class="business-detail-value">
+                            {% if bumg.website %}
+                                <a href="{{ bumg.website }}" target="_blank" class="text-primary">
+                                    {{ bumg.website }}
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            {% else %}
+                                <span class="business-empty-value">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Alamat:</div>
+                        <div class="business-detail-value">{{ bumg.alamat|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pimpinan BUMG -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-users"></i>
+                    Pimpinan BUMG
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Direktur:</div>
+                        <div class="business-detail-value">{{ bumg.direktur|default:"-" }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Komisaris:</div>
+                        <div class="business-detail-value">{{ bumg.komisaris|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Keuangan -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Data Keuangan
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Modal Dasar:</div>
+                        <div class="business-detail-value">
+                            {% if bumg.modal_dasar %}
+                                {{ bumg.modal_dasar|currency_idr }}
+                            {% else %}
+                                <span class="business-empty-value">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Modal Disetor:</div>
+                        <div class="business-detail-value">
+                            {% if bumg.modal_disetor %}
+                                {{ bumg.modal_disetor|currency_idr }}
+                            {% else %}
+                                <span class="business-empty-value">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bidang Usaha -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-briefcase"></i>
+                    Bidang Usaha
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Bidang Usaha:</div>
+                        <div class="business-detail-value">{{ bumg.bidang_usaha|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informasi Kontak -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-phone"></i>
+                    Informasi Kontak
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Telepon:</div>
+                        <div class="business-detail-value">
+                            {% if bumg.telepon %}
+                                <a href="tel:{{ bumg.telepon }}" class="text-primary">
+                                    {{ bumg.telepon }}
+                                </a>
+                            {% else %}
+                                <span class="business-empty-value">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Email:</div>
+                        <div class="business-detail-value">
+                            {% if bumg.email %}
+                                <a href="mailto:{{ bumg.email }}" class="text-primary">
+                                    {{ bumg.email }}
+                                </a>
+                            {% else %}
+                                <span class="business-empty-value">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keterangan -->
+            {% if bumg.keterangan %}
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-sticky-note"></i>
+                    Keterangan
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-value">{{ bumg.keterangan }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Action Buttons Sidebar -->
+        <div class="business-col-lg-4">
+            <div class="business-action-buttons-sticky">
+                <div class="business-detail-card">
+                    <h5 class="business-section-title">
+                        <i class="fas fa-cogs"></i>
+                        Aksi
+                    </h5>
+                    <a href="{% url 'admin_panel:bumg_edit' bumg.id %}" class="business-btn-action business-btn-warning">
+                        <i class="fas fa-edit"></i>
+                        Edit BUMG
+                    </a>
+                    <a href="{% url 'admin_panel:bumg_list' %}" class="business-btn-action business-btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Kembali ke Daftar
+                    </a>
+                    <a href="{% url 'admin_panel:bumg_delete' bumg.id %}" 
+                       class="business-btn-action business-btn-danger"
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus BUMG {{ bumg.nama }}?')">
+                        <i class="fas fa-trash"></i>
+                        Hapus BUMG
+                    </a>
+                </div>
+
+                <!-- Informasi Tambahan -->
+                <div class="business-detail-card">
+                    <h5 class="business-section-title">
+                        <i class="fas fa-info"></i>
+                        Informasi Tambahan
+                    </h5>
+                    <div class="business-detail-section">
+                        <div class="business-detail-item">
+                            <div class="business-detail-label">ID BUMG:</div>
+                            <div class="business-detail-value">#{{ bumg.id }}</div>
+                        </div>
+                        <div class="business-detail-item">
+                            <div class="business-detail-label">Dibuat:</div>
+                            <div class="business-detail-value">
+                                {% if bumg.created_at %}
+                                    {{ bumg.created_at|date:"d F Y, H:i" }}
+                                {% else %}
+                                    <span class="business-empty-value">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="business-detail-item">
+                            <div class="business-detail-label">Diperbarui:</div>
+                            <div class="business-detail-value">
+                                {% if bumg.updated_at %}
+                                    {{ bumg.updated_at|date:"d F Y, H:i" }}
+                                {% else %}
+                                    <span class="business-empty-value">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh status badge color
+document.addEventListener('DOMContentLoaded', function() {
+    const statusBadge = document.querySelector('.status-badge');
+    if (statusBadge) {
+        const status = statusBadge.classList[1].replace('status-', '');
+        console.log('BUMG Status:', status);
+    }
+});
+</script>
+{% endblock extra_js %}

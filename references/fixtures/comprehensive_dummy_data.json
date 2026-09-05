@@ -1,0 +1,568 @@
+[
+  {
+    "model": "references.dusun",
+    "pk": 1,
+    "fields": {
+      "name": "Dusun Pesisir",
+      "code": "DP01",
+      "description": "Wilayah pesisir pantai dengan mayoritas nelayan",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.dusun",
+    "pk": 2,
+    "fields": {
+      "name": "Dusun Tengah",
+      "code": "DT01",
+      "description": "Wilayah tengah desa dengan berbagai profesi",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.dusun",
+    "pk": 3,
+    "fields": {
+      "name": "Dusun Hutan",
+      "code": "DH01",
+      "description": "Wilayah dekat hutan dengan mayoritas petani",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 1,
+    "fields": {
+      "kk_number": "1234567890123456",
+      "head": 1,
+      "family_status": "NORMAL",
+      "total_members": 4,
+      "address": "Jl. Pesisir No. 1",
+      "dusun": 1,
+      "rt_number": "001",
+      "rw_number": "001",
+      "house_number": "001",
+      "postal_code": "12345",
+      "phone_number": "081234567890",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 2,
+    "fields": {
+      "kk_number": "1234567890123457",
+      "head": 5,
+      "family_status": "NORMAL",
+      "total_members": 3,
+      "address": "Jl. Tengah No. 2",
+      "dusun": 2,
+      "rt_number": "002",
+      "rw_number": "001",
+      "house_number": "002",
+      "postal_code": "12345",
+      "phone_number": "081234567891",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 3,
+    "fields": {
+      "kk_number": "1234567890123458",
+      "head": 8,
+      "family_status": "NORMAL",
+      "total_members": 2,
+      "address": "Jl. Hutan No. 3",
+      "dusun": 3,
+      "rt_number": "003",
+      "rw_number": "001",
+      "house_number": "003",
+      "postal_code": "12345",
+      "phone_number": "081234567892",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 4,
+    "fields": {
+      "kk_number": "1234567890123459",
+      "head": 10,
+      "family_status": "NORMAL",
+      "total_members": 3,
+      "address": "Jl. Pesisir No. 4",
+      "dusun": 1,
+      "rt_number": "001",
+      "rw_number": "001",
+      "house_number": "004",
+      "postal_code": "12345",
+      "phone_number": "081234567893",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 5,
+    "fields": {
+      "kk_number": "1234567890123460",
+      "head": 11,
+      "family_status": "NORMAL",
+      "total_members": 4,
+      "address": "Jl. Tengah No. 5",
+      "dusun": 2,
+      "rt_number": "002",
+      "rw_number": "001",
+      "house_number": "005",
+      "postal_code": "12345",
+      "phone_number": "081234567894",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 6,
+    "fields": {
+      "kk_number": "1234567890123461",
+      "head": 16,
+      "family_status": "NORMAL",
+      "total_members": 2,
+      "address": "Jl. Hutan No. 6",
+      "dusun": 3,
+      "rt_number": "003",
+      "rw_number": "001",
+      "house_number": "006",
+      "postal_code": "12345",
+      "phone_number": "081234567895",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.family",
+    "pk": 7,
+    "fields": {
+      "kk_number": "1234567890123462",
+      "head": 17,
+      "family_status": "NORMAL",
+      "total_members": 2,
+      "address": "Jl. Pesisir No. 7",
+      "dusun": 1,
+      "rt_number": "001",
+      "rw_number": "001",
+      "house_number": "007",
+      "postal_code": "12345",
+      "phone_number": "081234567896",
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 1,
+    "fields": {
+      "nik": "1234567890123456",
+      "name": "Ahmad Suryadi",
+      "gender": "L",
+      "birth_date": "1985-03-15",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Nelayan",
+      "education": "SLTA",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 2,
+    "fields": {
+      "nik": "1234567890123457",
+      "name": "Siti Nurhaliza",
+      "gender": "P",
+      "birth_date": "1988-07-22",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Ibu Rumah Tangga",
+      "education": "SLTA",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 3,
+    "fields": {
+      "nik": "1234567890123458",
+      "name": "Rizki Pratama",
+      "gender": "L",
+      "birth_date": "2010-05-10",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "TAMAT_SD",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 4,
+    "fields": {
+      "nik": "1234567890123459",
+      "name": "Putri Sari",
+      "gender": "P",
+      "birth_date": "2015-12-03",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "TAMAT_SD",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 5,
+    "fields": {
+      "nik": "1234567890123460",
+      "name": "Budi Santoso",
+      "gender": "L",
+      "birth_date": "1980-11-18",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Petani",
+      "education": "SLTP",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 6,
+    "fields": {
+      "nik": "1234567890123461",
+      "name": "Rina Wulandari",
+      "gender": "P",
+      "birth_date": "1983-09-25",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Ibu Rumah Tangga",
+      "education": "SLTA",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 7,
+    "fields": {
+      "nik": "1234567890123462",
+      "name": "Ahmad Fauzi",
+      "gender": "L",
+      "birth_date": "2008-02-14",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "SLTP",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 8,
+    "fields": {
+      "nik": "1234567890123463",
+      "name": "Herman Wijaya",
+      "gender": "L",
+      "birth_date": "1955-04-30",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Petani",
+      "education": "TAMAT_SD",
+      "dusun": 3,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 9,
+    "fields": {
+      "nik": "1234567890123464",
+      "name": "Maya Sari",
+      "gender": "P",
+      "birth_date": "1960-08-12",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Ibu Rumah Tangga",
+      "education": "TAMAT_SD",
+      "dusun": 3,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 10,
+    "fields": {
+      "nik": "1234567890123465",
+      "name": "Sari Dewi",
+      "gender": "P",
+      "birth_date": "1990-01-20",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Nelayan",
+      "education": "SLTA",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 11,
+    "fields": {
+      "nik": "1234567890123466",
+      "name": "Rudi Hartono",
+      "gender": "L",
+      "birth_date": "1992-06-08",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Nelayan",
+      "education": "SLTA",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 12,
+    "fields": {
+      "nik": "1234567890123467",
+      "name": "Dewi Kartika",
+      "gender": "P",
+      "birth_date": "1995-03-12",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Ibu Rumah Tangga",
+      "education": "SLTA",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 13,
+    "fields": {
+      "nik": "1234567890123468",
+      "name": "Rizki Maulana",
+      "gender": "L",
+      "birth_date": "2012-10-05",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "TAMAT_SD",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 14,
+    "fields": {
+      "nik": "1234567890123469",
+      "name": "Sari Indah",
+      "gender": "P",
+      "birth_date": "2018-07-15",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "TAMAT_SD",
+      "dusun": 2,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 15,
+    "fields": {
+      "nik": "1234567890123470",
+      "name": "Dedi Kurniawan",
+      "gender": "L",
+      "birth_date": "1970-12-03",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Petani",
+      "education": "SLTP",
+      "dusun": 3,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 16,
+    "fields": {
+      "nik": "1234567890123471",
+      "name": "Maya Sari",
+      "gender": "P",
+      "birth_date": "1975-05-18",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Ibu Rumah Tangga",
+      "education": "SLTP",
+      "dusun": 3,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 17,
+    "fields": {
+      "nik": "1234567890123472",
+      "name": "Dedi Kurniawan",
+      "gender": "L",
+      "birth_date": "2005-09-22",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "SLTA",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 18,
+    "fields": {
+      "nik": "1234567890123473",
+      "name": "Lina Marlina",
+      "gender": "P",
+      "birth_date": "2007-11-30",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Belum Kawin",
+      "occupation": "Pelajar",
+      "education": "SLTP",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 19,
+    "fields": {
+      "nik": "1234567890123474",
+      "name": "Budi Setiawan",
+      "gender": "L",
+      "birth_date": "1940-04-15",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Petani",
+      "education": "TAMAT_SD",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  },
+  {
+    "model": "references.penduduk",
+    "pk": 20,
+    "fields": {
+      "nik": "1234567890123475",
+      "name": "Siti Aminah",
+      "gender": "P",
+      "birth_date": "1945-08-20",
+      "birth_place": "Jakarta",
+      "religion": "Islam",
+      "marital_status": "Kawin",
+      "occupation": "Ibu Rumah Tangga",
+      "education": "TAMAT_SD",
+      "dusun": 1,
+      "is_active": true,
+      "is_alive": true,
+      "created_at": "2024-01-01T00:00:00",
+      "updated_at": "2024-01-01T00:00:00"
+    }
+  }
+]

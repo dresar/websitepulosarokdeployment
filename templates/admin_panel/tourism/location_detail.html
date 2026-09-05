@@ -1,0 +1,223 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Lokasi Wisata{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+            {{ location.title }}
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'admin_panel:tourism_locations_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
+            </a>
+            <a href="{% url 'admin_panel:tourism_location_edit' location.id %}" class="btn btn-primary ml-2">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Location Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Informasi Lokasi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nama:</strong> {{ location.title }}</p>
+                            <p><strong>Kategori:</strong> 
+                                <span class="badge badge-primary">{{ location.category.name }}</span>
+                            </p>
+                            <p><strong>Alamat:</strong> {{ location.address }}</p>
+                            {% if location.contact_phone %}
+                                <p><strong>Telepon:</strong> {{ location.contact_phone }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> 
+                                {% if location.is_active %}
+                                    <span class="badge badge-success">Aktif</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Tidak Aktif</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Unggulan:</strong> 
+                                {% if location.featured %}
+                                    <span class="badge badge-warning">Ya</span>
+                                {% else %}
+                                    <span class="badge badge-light">Tidak</span>
+                                {% endif %}
+                            </p>
+                            {% if location.latitude and location.longitude %}
+                                <p><strong>Koordinat:</strong> {{ location.latitude }}, {{ location.longitude }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if location.full_description %}
+                        <hr>
+                        <h6><strong>Deskripsi:</strong></h6>
+                        <p class="text-muted">{{ location.full_description|linebreaks }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Location Image -->
+            {% if location.main_image %}
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-image mr-2"></i>
+                            Gambar Lokasi
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ location.main_image.url }}" alt="{{ location.title }}" class="img-fluid rounded" style="max-height: 400px;">
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Location Map -->
+            {% if location.latitude and location.longitude %}
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-map mr-2"></i>
+                            Peta Lokasi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="map" style="height: 400px; width: 100%;"></div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tools mr-2"></i>
+                        Aksi Cepat
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'admin_panel:tourism_location_edit' location.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit mr-1"></i> Edit Lokasi
+                        </a>
+                        <a href="{% url 'admin_panel:tourism_location_toggle_status' location.id %}" class="btn btn-{% if location.is_active %}warning{% else %}success{% endif %}">
+                            <i class="fas fa-{% if location.is_active %}pause{% else %}play{% endif %} mr-1"></i>
+                            {% if location.is_active %}Nonaktifkan{% else %}Aktifkan{% endif %}
+                        </a>
+                        <a href="{% url 'admin_panel:tourism_location_toggle_featured' location.id %}" class="btn btn-{% if location.featured %}secondary{% else %}warning{% endif %}">
+                            <i class="fas fa-star mr-1"></i>
+                            {% if location.featured %}Hapus Unggulan{% else %}Jadikan Unggulan{% endif %}
+                        </a>
+                        <a href="{% url 'admin_panel:tourism_location_delete' location.id %}" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus lokasi ini?')">
+                            <i class="fas fa-trash mr-1"></i> Hapus Lokasi
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Statistics -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Statistik
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ location.reviews.count }}</h4>
+                            <small class="text-muted">Review</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ location.ratings.count }}</h4>
+                            <small class="text-muted">Rating</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Details -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info mr-2"></i>
+                        Detail
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Dibuat:</strong> {{ location.created_at|date:"d M Y H:i" }}</p>
+                    <p><strong>Diperbarui:</strong> {{ location.updated_at|date:"d M Y H:i" }}</p>
+                    {% if location.created_by %}
+                        <p><strong>Dibuat oleh:</strong> {{ location.created_by.get_full_name|default:location.created_by.username }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if location.latitude and location.longitude %}
+<script>
+    // Initialize map
+    function initMap() {
+        const location = {
+            lat: {{ location.latitude }},
+            lng: {{ location.longitude }}
+        };
+        
+        const map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: location
+        });
+        
+        const marker = new google.maps.Marker({
+            position: location,
+            map: map,
+            title: '{{ location.title }}'
+        });
+    }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-title {
+        color: #333;
+    }
+    
+    .text-muted {
+        color: #6c757d !important;
+    }
+    
+    .badge {
+        font-size: 0.875em;
+    }
+    
+    .btn {
+        border-radius: 0.375rem;
+    }
+</style>
+{% endblock %}
+

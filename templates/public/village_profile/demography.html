@@ -1,0 +1,151 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 overflow-hidden">
+    {% if village_profile.profile_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ village_profile.profile_image.url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-600/80 to-indigo-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Informasi Demografi</h1>
+            <p class="text-sm sm:text-base opacity-90">Data kependudukan Desa Pulosarok</p>
+        </div>
+    </div>
+</section>
+
+<!-- Demography Content -->
+<section class="py-4 sm:py-6 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if demography %}
+        <!-- Population Overview -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 text-center">
+                <div class="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">{{ demography.total_population|floatformat:0 }}</div>
+                <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Penduduk</div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 text-center">
+                <div class="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-500 dark:text-blue-300 mb-1">{{ demography.male_population|floatformat:0 }}</div>
+                <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Laki-laki</div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 text-center">
+                <div class="text-lg sm:text-2xl lg:text-3xl font-bold text-pink-500 dark:text-pink-300 mb-1">{{ demography.female_population|floatformat:0 }}</div>
+                <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Perempuan</div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 text-center">
+                <div class="text-lg sm:text-2xl lg:text-3xl font-bold text-orange-500 dark:text-orange-300 mb-1">{{ demography.total_families|floatformat:0 }}</div>
+                <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Jumlah KK</div>
+            </div>
+        </div>
+        
+        <!-- Age Groups -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-users mr-2 text-blue-600"></i>Kelompok Usia
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div class="text-center">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">{{ demography.age_0_14|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Usia 0-14 tahun</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{{ demography.age_15_64|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Usia 15-64 tahun</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">{{ demography.age_65_plus|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Usia 65+ tahun</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Education Levels -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                <i class="fas fa-graduation-cap mr-2 text-purple-600"></i>Tingkat Pendidikan
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="text-center">
+                    <div class="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 dark:text-red-400 mb-1">{{ demography.education_none|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Tidak Sekolah</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">{{ demography.education_elementary|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">SD</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">{{ demography.education_junior|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">SMP</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg sm:text-xl lg:text-2xl font-bold text-indigo-600 dark:text-indigo-400 mb-1">{{ demography.education_senior|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">SMA</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 dark:text-green-400 mb-1">{{ demography.education_higher|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Perguruan Tinggi</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-1">{{ demography.employed|floatformat:0 }}</div>
+                    <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Bekerja</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Info -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-purple-600"></i>Statistik Penduduk
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600 dark:text-gray-400"><strong>Kepadatan Penduduk:</strong></span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ demography.population_density|floatformat:2 }} jiwa/km²</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600 dark:text-gray-400"><strong>Tingkat Pertumbuhan:</strong></span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ demography.growth_rate|floatformat:2 }}%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600 dark:text-gray-400"><strong>Tahun Data:</strong></span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ demography.year }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-briefcase mr-2 text-purple-600"></i>Status Pekerjaan
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600 dark:text-gray-400"><strong>Bekerja:</strong></span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ demography.employed|floatformat:0 }} orang</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600 dark:text-gray-400"><strong>Tidak Bekerja:</strong></span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ demography.unemployed|floatformat:0 }} orang</span>
+                    </div>
+                    {% if demography.employed and demography.unemployed %}
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600 dark:text-gray-400"><strong>Tingkat Pengangguran:</strong></span>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ demography.unemployed|add:demography.employed|div:demography.unemployed|mul:100|floatformat:1 }}%</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-8 sm:py-12">
+            <i class="fas fa-chart-pie text-4xl sm:text-5xl text-gray-400 mb-3"></i>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">Data demografi belum tersedia</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-500">Informasi demografi desa akan segera ditambahkan</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

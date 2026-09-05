@@ -1,0 +1,202 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency %}
+
+{% block extra_css %}
+<style>
+/* Ensure good contrast for all text elements */
+.badge {
+    color: white !important;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+/* Ensure table text is dark */
+.table td, .table th {
+    color: #333 !important;
+}
+
+.table-sm td, .table-sm th {
+    padding: 0.3rem;
+    font-size: 0.875rem;
+}
+
+/* Ensure all text is visible */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Button text contrast */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-info {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-outline-warning {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="mb-0 text-primary">
+                <i class="fas fa-building mr-2"></i>BUMG
+            </h4>
+        </div>
+        <div>
+            <a href="{% url 'admin_panel:bumg_create' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus mr-1"></i>Tambah
+            </a>
+        </div>
+    </div>
+
+    <!-- Minimal search bar -->
+    <div class="mb-3">
+        <form method="GET" class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" name="search" 
+                   value="{{ search }}" placeholder="Cari BUMG..." style="max-width: 300px;">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-search"></i>
+            </button>
+            <a href="{% url 'admin_panel:bumg_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times"></i>
+            </a>
+        </form>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-building mr-2"></i>Daftar BUMG
+                <span class="badge badge-primary ml-2">{{ page_obj.paginator.count }} data</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama BUMG</th>
+                                <th>Direktur</th>
+                                <th>Nomor SK</th>
+                                <th>Tanggal SK</th>
+                                <th>Modal Dasar</th>
+                                <th>Modal Disetor</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bumg in page_obj %}
+                            <tr>
+                                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                                <td>
+                                    <div class="business-table-cell-content">
+                                        <div class="business-table-cell-primary">{{ bumg.nama }}</div>
+                                        <div class="business-table-cell-secondary">{{ bumg.bidang_usaha|truncatechars:50 }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="business-table-cell-content">
+                                        <div class="business-table-cell-primary">{{ bumg.direktur }}</div>
+                                        <div class="business-table-cell-secondary">Komisaris: {{ bumg.komisaris }}</div>
+                                    </div>
+                                </td>
+                                <td>{{ bumg.nomor_sk }}</td>
+                                <td>{{ bumg.tanggal_sk|date:"d M Y" }}</td>
+                                <td>{{ bumg.modal_dasar|rupiah }}</td>
+                                <td>{{ bumg.modal_disetor|rupiah }}</td>
+                                <td>
+                                    <span class="business-table-status-badge business-table-status-{{ bumg.status }}">
+                                        {{ bumg.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'admin_panel:bumg_detail' bumg.id %}" class="btn btn-sm btn-outline-info" title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'admin_panel:bumg_edit' bumg.id %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'admin_panel:bumg_delete' bumg.id %}" class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('Apakah Anda yakin ingin menghapus BUMG {{ bumg.nama }}?')" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Tidak ada data BUMG ditemukan</h5>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Pagination">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tahun_filter %}&tahun={{ tahun_filter }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tahun_filter %}&tahun={{ tahun_filter }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tahun_filter %}&tahun={{ tahun_filter }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if tahun_filter %}&tahun={{ tahun_filter }}{% endif %}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

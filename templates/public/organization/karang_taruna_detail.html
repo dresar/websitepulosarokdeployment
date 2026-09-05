@@ -1,0 +1,224 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Profile Header -->
+<section class="py-4 sm:py-6 md:py-8 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-gray-800 dark:to-gray-900">
+    <div class="container mx-auto px-3 sm:px-4 lg:px-6">
+        <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+            <!-- Photo -->
+            <div class="flex-shrink-0">
+                {% if anggota.foto_profil %}
+                <img src="{{ anggota.foto_profil.url }}" alt="{{ anggota.penduduk.name }}" class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover shadow-lg border-4 border-white dark:border-gray-700">
+                {% else %}
+                <div class="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-700">
+                    <i class="fas fa-users text-white text-2xl md:text-3xl"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Profile Info -->
+            <div class="flex-1 text-center md:text-left">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+                    {{ anggota.penduduk.name }}
+                </h1>
+                <p class="text-lg sm:text-xl text-orange-600 dark:text-orange-400 font-semibold mb-3">
+                    {{ anggota.get_jabatan_display }}
+                </p>
+                
+                {% if anggota.nomor_anggota %}
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    <i class="fas fa-id-card mr-2"></i>No. Anggota: {{ anggota.nomor_anggota }}
+                </p>
+                {% endif %}
+                
+                {% if anggota.penduduk.dusun %}
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <i class="fas fa-map-marker-alt mr-2"></i>{{ anggota.penduduk.dusun.name }}
+                </p>
+                {% endif %}
+                
+                <div class="flex items-center justify-center md:justify-start space-x-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold {% if anggota.status == 'aktif' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% elif anggota.status == 'alumni' %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% else %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% endif %}">
+                        {{ anggota.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Profile Details -->
+<section class="py-4 sm:py-6 md:py-8 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-3 sm:px-4 lg:px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Personal Information -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-user mr-2 text-orange-600"></i>
+                    Informasi Pribadi
+                </h3>
+                
+                <div class="space-y-3">
+                    {% if anggota.penduduk.birth_date %}
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Tanggal Lahir:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.penduduk.birth_date|date:"d F Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.penduduk.gender %}
+                    <div class="flex items-center">
+                        <i class="fas fa-{% if anggota.penduduk.gender == 'L' %}male{% else %}female{% endif %} text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Jenis Kelamin:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.penduduk.get_gender_display }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.penduduk.education %}
+                    <div class="flex items-center">
+                        <i class="fas fa-graduation-cap text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Pendidikan:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.penduduk.get_education_display }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.penduduk.occupation %}
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Pekerjaan:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.penduduk.occupation }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Karang Taruna Information -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-users mr-2 text-orange-600"></i>
+                    Informasi Karang Taruna
+                </h3>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Jabatan:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.get_jabatan_display }}</span>
+                    </div>
+                    
+                    {% if anggota.tanggal_bergabung %}
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-check text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Bergabung:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.tanggal_bergabung|date:"d F Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.tanggal_keluar %}
+                    <div class="flex items-center">
+                        <i class="fas fa-calendar-times text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Keluar:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.tanggal_keluar|date:"d F Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.sk_pengangkatan %}
+                    <div class="flex items-center">
+                        <i class="fas fa-file-alt text-gray-400 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">SK Pengangkatan:</span>
+                        <span class="text-sm font-semibold text-gray-900 dark:text-white ml-2">{{ anggota.sk_pengangkatan }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Skills and Experience -->
+        {% if anggota.keahlian or anggota.pengalaman_organisasi or anggota.prestasi %}
+        <div class="mt-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-star mr-2 text-yellow-600"></i>
+                    Keahlian & Pengalaman
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% if anggota.keahlian %}
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Keahlian:</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ anggota.keahlian }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.pengalaman_organisasi %}
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Pengalaman Organisasi:</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ anggota.pengalaman_organisasi }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.prestasi %}
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Prestasi:</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ anggota.prestasi }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Contact Information -->
+        {% if anggota.kontak_whatsapp or anggota.email or anggota.alamat_lengkap %}
+        <div class="mt-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-phone mr-2 text-purple-600"></i>
+                    Informasi Kontak
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% if anggota.kontak_whatsapp %}
+                    <div class="flex items-center">
+                        <i class="fab fa-whatsapp text-green-500 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">WhatsApp:</span>
+                        <a href="https://wa.me/{{ anggota.kontak_whatsapp }}" class="text-sm font-semibold text-green-600 dark:text-green-400 ml-2 hover:underline">
+                            {{ anggota.kontak_whatsapp }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if anggota.email %}
+                    <div class="flex items-center">
+                        <i class="fas fa-envelope text-blue-500 w-5"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400 ml-3">Email:</span>
+                        <a href="mailto:{{ anggota.email }}" class="text-sm font-semibold text-blue-600 dark:text-blue-400 ml-2 hover:underline">
+                            {{ anggota.email }}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if anggota.alamat_lengkap %}
+                <div class="mt-4">
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Alamat Lengkap:</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ anggota.alamat_lengkap }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Back Button -->
+        <div class="mt-6 text-center">
+            <a href="{% url 'organization:karang_taruna_list' %}" class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                Kembali ke Daftar Karang Taruna
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock content %}

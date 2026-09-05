@@ -1,0 +1,302 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Preview Dokumen{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fix white text issues in document preview */
+.preview-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.preview-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+.preview-content {
+    padding: 0;
+    background-color: #fff;
+}
+
+.preview-iframe {
+    width: 100%;
+    height: 80vh;
+    border: none;
+    background-color: #fff;
+}
+
+.preview-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    background-color: #fff;
+}
+
+.preview-info {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+.file-icon {
+    font-size: 2rem;
+    margin-right: 0.5rem;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.file-details {
+    flex-grow: 1;
+}
+
+.file-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Ensure all text is dark */
+.preview-header h5 {
+    color: #212529 !important;
+}
+
+.preview-info {
+    color: #212529 !important;
+}
+
+.preview-info * {
+    color: inherit !important;
+}
+
+.preview-info .text-muted {
+    color: #6c757d !important;
+}
+
+/* Fix button text */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-eye text-primary mr-2"></i>
+            Preview Dokumen
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'admin_panel:document_detail' document.pk %}" class="btn btn-outline-secondary mr-2">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
+            <a href="{{ file_url }}" class="btn btn-primary" download>
+                <i class="fas fa-download mr-1"></i> Download
+            </a>
+        </div>
+    </div>
+
+    <!-- Document Info -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="file-info">
+                <div class="file-icon">
+                    {% if preview_type == 'pdf' %}
+                        <i class="fas fa-file-pdf text-danger"></i>
+                    {% elif preview_type == 'word' %}
+                        <i class="fas fa-file-word text-primary"></i>
+                    {% elif preview_type == 'image' %}
+                        <i class="fas fa-file-image text-success"></i>
+                    {% elif preview_type == 'excel' %}
+                        <i class="fas fa-file-excel text-success"></i>
+                    {% else %}
+                        <i class="fas fa-file text-secondary"></i>
+                    {% endif %}
+                </div>
+                <div class="file-details">
+                    <h5 class="mb-1">{{ document.title }}</h5>
+                    <p class="text-muted mb-0">
+                        <strong>File:</strong> {{ file_name }} 
+                        <span class="badge badge-secondary ml-2">{{ file_extension|upper }}</span>
+                    </p>
+                </div>
+                <div class="file-actions">
+                    <a href="{{ file_url }}" class="btn btn-outline-primary btn-sm" download>
+                        <i class="fas fa-download mr-1"></i> Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Container -->
+    <div class="preview-container">
+        <div class="preview-header">
+            <h5 class="mb-0">
+                <i class="fas fa-eye mr-2"></i>
+                Preview Dokumen
+            </h5>
+        </div>
+        
+        <div class="preview-content">
+            {% if preview_type == 'pdf' %}
+                <!-- PDF Preview -->
+                <iframe src="{{ file_url }}#toolbar=0&navpanes=0&scrollbar=1" 
+                        class="preview-iframe" 
+                        title="PDF Preview">
+                    <p>Browser Anda tidak mendukung preview PDF. 
+                       <a href="{{ file_url }}" target="_blank">Klik di sini untuk membuka file</a>
+                    </p>
+                </iframe>
+                
+            {% elif preview_type == 'image' %}
+                <!-- Image Preview -->
+                <div class="text-center p-4">
+                    <img src="{{ file_url }}" 
+                         alt="{{ document.title }}" 
+                         class="preview-image"
+                         style="max-height: 80vh;">
+                </div>
+                
+            {% elif preview_type == 'word' %}
+                <!-- Word Document Preview -->
+                <div class="text-center p-5">
+                    <i class="fas fa-file-word fa-5x text-primary mb-3"></i>
+                    <h4>Preview Word Document</h4>
+                    <p class="text-muted mb-4">
+                        Preview untuk file Word tidak tersedia di browser. 
+                        Silakan download file untuk membukanya.
+                    </p>
+                    <a href="{{ file_url }}" class="btn btn-primary" download>
+                        <i class="fas fa-download mr-2"></i> Download File Word
+                    </a>
+                </div>
+                
+            {% elif preview_type == 'excel' %}
+                <!-- Excel Preview -->
+                <div class="text-center p-5">
+                    <i class="fas fa-file-excel fa-5x text-success mb-3"></i>
+                    <h4>Preview Excel Document</h4>
+                    <p class="text-muted mb-4">
+                        Preview untuk file Excel tidak tersedia di browser. 
+                        Silakan download file untuk membukanya.
+                    </p>
+                    <a href="{{ file_url }}" class="btn btn-primary" download>
+                        <i class="fas fa-download mr-2"></i> Download File Excel
+                    </a>
+                </div>
+                
+            {% else %}
+                <!-- Unsupported File Type -->
+                <div class="text-center p-5">
+                    <i class="fas fa-file fa-5x text-secondary mb-3"></i>
+                    <h4>Preview Tidak Tersedia</h4>
+                    <p class="text-muted mb-4">
+                        Preview untuk file tipe .{{ file_extension }} tidak tersedia.
+                    </p>
+                    <a href="{{ file_url }}" class="btn btn-primary" download>
+                        <i class="fas fa-download mr-2"></i> Download File
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="preview-info">
+            <div class="row">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <strong>Dokumen:</strong> {{ document.title }}<br>
+                        <strong>Kategori:</strong> {{ document.get_category_display }}<br>
+                        <strong>Status:</strong> {{ document.get_status_display }}
+                    </small>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <strong>File:</strong> {{ file_name }}<br>
+                        <strong>Tipe:</strong> {{ file_extension|upper }}<br>
+                        <strong>Ukuran:</strong> <span id="file-size">-</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Get file size (if available)
+document.addEventListener('DOMContentLoaded', function() {
+    // Try to get file size from the file URL
+    fetch('{{ file_url }}', { method: 'HEAD' })
+        .then(response => {
+            if (response.headers.get('content-length')) {
+                const size = parseInt(response.headers.get('content-length'));
+                const sizeKB = (size / 1024).toFixed(1);
+                const sizeMB = (size / (1024 * 1024)).toFixed(1);
+                
+                let sizeText;
+                if (size < 1024 * 1024) {
+                    sizeText = sizeKB + ' KB';
+                } else {
+                    sizeText = sizeMB + ' MB';
+                }
+                
+                document.getElementById('file-size').textContent = sizeText;
+            }
+        })
+        .catch(error => {
+            console.log('Could not determine file size');
+        });
+});
+
+// Handle PDF loading errors
+document.addEventListener('DOMContentLoaded', function() {
+    const iframe = document.querySelector('.preview-iframe');
+    if (iframe) {
+        iframe.addEventListener('error', function() {
+            const container = this.parentElement;
+            container.innerHTML = `
+                <div class="text-center p-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h4>Gagal Memuat Preview</h4>
+                    <p class="text-muted mb-4">
+                        Tidak dapat memuat preview PDF. Silakan download file untuk membukanya.
+                    </p>
+                    <a href="{{ file_url }}" class="btn btn-primary" download>
+                        <i class="fas fa-download mr-2"></i> Download PDF
+                    </a>
+                </div>
+            `;
+        });
+    }
+});
+</script>
+{% endblock %}
+

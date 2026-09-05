@@ -1,0 +1,220 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Daftar Paket Wisata{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center tourism-mb-4">
+        <div>
+            <h1 class="tourism-title">Daftar Paket Wisata</h1>
+            <p class="tourism-text-muted">Kelola semua paket wisata Desa Pulosarok</p>
+        </div>
+        <div class="tourism-actions">
+            <a href="{% url 'admin_panel:tourism_package_create' %}" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                <i class="fas fa-plus"></i>
+                Tambah Paket
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="tourism-filter-section">
+        <h6 class="tourism-subtitle">Filter & Pencarian</h6>
+        <form method="get" class="tourism-filter-row">
+            <div class="tourism-form-group">
+                <label for="search" class="tourism-form-label">Pencarian</label>
+                <input type="text" class="tourism-form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Cari paket wisata...">
+            </div>
+            <div class="tourism-form-group">
+                <label for="type" class="tourism-form-label">Jenis Paket</label>
+                <select class="tourism-form-control" id="type" name="type">
+                    <option value="">Semua Jenis</option>
+                    <option value="day_trip" {% if current_type == 'day_trip' %}selected{% endif %}>Perjalanan Sehari</option>
+                    <option value="weekend" {% if current_type == 'weekend' %}selected{% endif %}>Paket Weekend</option>
+                    <option value="week_long" {% if current_type == 'week_long' %}selected{% endif %}>Paket Seminggu</option>
+                    <option value="custom" {% if current_type == 'custom' %}selected{% endif %}>Paket Kustom</option>
+                </select>
+            </div>
+            <div class="tourism-form-group">
+                <label for="status" class="tourism-form-label">Status</label>
+                <select class="tourism-form-control" id="status" name="status">
+                    <option value="">Semua Status</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktif</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Tidak Aktif</option>
+                </select>
+            </div>
+            <div class="tourism-form-group">
+                <label for="sort" class="tourism-form-label">Urutkan</label>
+                <select class="tourism-form-control" id="sort" name="sort">
+                    <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Harga Terendah</option>
+                    <option value="-price" {% if current_sort == '-price' %}selected{% endif %}>Harga Tertinggi</option>
+                    <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Nama A-Z</option>
+                    <option value="-name" {% if current_sort == '-name' %}selected{% endif %}>Nama Z-A</option>
+                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Terbaru</option>
+                </select>
+            </div>
+            <div class="tourism-form-group">
+                <button type="submit" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                    <i class="fas fa-search"></i>
+                    Filter
+                </button>
+                <a href="{% url 'admin_panel:tourism_packages_list' %}" class="tourism-btn tourism-btn-secondary tourism-btn-sm">
+                    <i class="fas fa-times"></i>
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="tourism-grid tourism-grid-4">
+        {% for package in page_obj.object_list %}
+        <div class="tourism-card">
+            {% if package.image %}
+                <img src="{{ package.image.url }}" alt="{{ package.title }}" 
+                     class="tourism-image-preview tourism-rounded-top">
+            {% else %}
+                <div class="tourism-image-placeholder tourism-rounded-top">
+                    <i class="fas fa-box tourism-text-muted" style="font-size: 1.5rem;"></i>
+                </div>
+            {% endif %}
+            
+            <div class="tourism-card-body">
+                <div class="d-flex justify-content-between align-items-start tourism-mb-2">
+                    <h6 class="tourism-subtitle">{{ package.title|truncatechars:20 }}</h6>
+                    <div class="tourism-actions">
+                        <a href="{% url 'admin_panel:tourism_package_detail' package.id %}" class="tourism-action-btn tourism-action-btn-view">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'admin_panel:tourism_package_edit' package.id %}" class="tourism-action-btn tourism-action-btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="tourism-action-btn tourism-action-btn-delete" 
+                                onclick="deletePackage({{ package.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <p class="tourism-text-muted tourism-mb-2" style="font-size: 0.75rem;">
+                    {{ package.description|truncatechars:60 }}
+                </p>
+                
+                <div class="tourism-grid tourism-grid-2 tourism-mb-2">
+                    <div class="tourism-text-center">
+                        <div class="tourism-stat-value tourism-text-primary" style="font-size: 0.875rem;">Rp {{ package.price|floatformat:0 }}</div>
+                        <div class="tourism-text-muted" style="font-size: 0.65rem;">Harga</div>
+                    </div>
+                    <div class="tourism-text-center">
+                        <div class="tourism-stat-value tourism-text-success" style="font-size: 0.875rem;">{{ package.duration }}</div>
+                        <div class="tourism-text-muted" style="font-size: 0.65rem;">Durasi</div>
+                    </div>
+                </div>
+                
+                <div class="tourism-grid tourism-grid-2 tourism-mb-2">
+                    <div class="tourism-text-center">
+                        <div class="tourism-stat-value">
+                            {% if package.is_active %}
+                                <i class="fas fa-check-circle tourism-text-success"></i>
+                            {% else %}
+                                <i class="fas fa-times-circle tourism-text-danger"></i>
+                            {% endif %}
+                        </div>
+                        <div class="tourism-text-muted" style="font-size: 0.65rem;">Status</div>
+                    </div>
+                    <div class="tourism-text-center">
+                        <div class="tourism-stat-value">
+                            {% if package.is_featured %}
+                                <i class="fas fa-star tourism-text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star tourism-text-muted"></i>
+                            {% endif %}
+                        </div>
+                        <div class="tourism-text-muted" style="font-size: 0.65rem;">Featured</div>
+                    </div>
+                </div>
+                
+                <div class="tourism-mb-2">
+                    <span class="tourism-badge tourism-badge-info">{{ package.get_package_type_display }}</span>
+                    {% if package.tourism_location %}
+                        <span class="tourism-badge tourism-badge-secondary">{{ package.tourism_location.title|truncatechars:10 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% empty %}
+    <div class="tourism-card">
+        <div class="tourism-card-body tourism-text-center tourism-p-4">
+            <i class="fas fa-box tourism-text-muted" style="font-size: 2rem;"></i>
+            <h5 class="tourism-text-muted tourism-mt-3">Belum ada paket wisata</h5>
+            <p class="tourism-text-muted">Mulai dengan menambahkan paket wisata pertama Anda.</p>
+            <a href="{% url 'admin_panel:tourism_package_create' %}" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                <i class="fas fa-plus"></i>
+                Tambah Paket
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="tourism-pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">Previous</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="tourism-pagination-btn active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">Last</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function deletePackage(packageId) {
+    if (confirm('Apakah Anda yakin ingin menghapus paket ini?\n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
+        fetch(`{% url 'admin_panel:tourism_package_delete' 0 %}`.replace('0', packageId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menghapus paket: ' + (data.error || 'Terjadi kesalahan'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus paket');
+        });
+    }
+}
+</script>
+{% endblock %}

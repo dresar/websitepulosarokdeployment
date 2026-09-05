@@ -1,0 +1,545 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Daftar Organisasi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .org-card {
+        background: white;
+        border: 1px solid #e3e6f0;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .org-card:hover {
+        border-color: #4e73df;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .org-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border: none;
+    }
+    
+    .org-card-body {
+        padding: 1.5rem;
+    }
+    
+    .org-stats {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .org-stat {
+        text-align: center;
+    }
+    
+    .org-stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #4e73df;
+    }
+    
+    .org-stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .org-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .org-action-btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .org-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e3e6f0;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-compact {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+    
+    .filter-compact .form-group {
+        margin-bottom: 0;
+        min-width: 150px;
+    }
+    
+    .search-input {
+        border-radius: 8px;
+        border: 1px solid #d1d3e2;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .stats-overview {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    @media (max-width: 768px) {
+        .filter-compact {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-compact .form-group {
+            min-width: auto;
+        }
+        
+        .org-actions {
+            flex-direction: column;
+        }
+        
+        .org-action-btn {
+            min-width: auto;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Daftar Organisasi</h1>
+            <p class="text-muted mb-0">Kelola semua organisasi desa</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshStats()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <a href="{% url 'admin_panel:organization:organization_hierarchy' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-sitemap"></i> Struktur Organisasi
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-overview">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" id="totalOrganizations">-</div>
+                <div class="stat-label">Total Organisasi</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="perangkatDesaCount">-</div>
+                <div class="stat-label">Perangkat Desa</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="pkkCount">-</div>
+                <div class="stat-label">Penggerak PKK</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="karangTarunaCount">-</div>
+                <div class="stat-label">Karang Taruna</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="lembagaAdatCount">-</div>
+                <div class="stat-label">Lembaga Adat</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="kepemudaanCount">-</div>
+                <div class="stat-label">Kepemudaan</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hierarchy Overview Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <i class="fas fa-sitemap fa-3x opacity-75"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-1">Struktur Organisasi</h3>
+                                    <p class="mb-0 opacity-75">Hierarki organisasi</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <div class="h4 mb-1" id="hierarchyTotalMembers">-</div>
+                                        <div class="small opacity-75">TOTAL ANGGOTA</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center">
+                                        <div class="h4 mb-1" id="hierarchyTotalOrganizations">-</div>
+                                        <div class="small opacity-75">ORGANISASI</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'admin_panel:organization:organization_hierarchy' %}" class="btn btn-light btn-lg">
+                                    <i class="fas fa-sitemap me-2"></i> Lihat Struktur
+                                </a>
+                                <a href="{% url 'admin_panel:organization:organization_list' %}" class="btn btn-outline-light">
+                                    <i class="fas fa-chart-bar me-2"></i> Statistik
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Organization Cards -->
+    <div class="row">
+        <!-- Perangkat Desa -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="org-card card h-100">
+                <div class="org-card-header">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users-cog fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Perangkat Desa</h5>
+                            <p class="mb-0 opacity-75">Kelola perangkat desa</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-card-body">
+                    <div class="org-stats">
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="perangkatDesaActive">-</div>
+                            <div class="org-stat-label">Aktif</div>
+                        </div>
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="perangkatDesaTotal">-</div>
+                            <div class="org-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="org-actions">
+                        <a href="{% url 'admin_panel:organization:admin_perangkat_desa_list' %}" class="org-action-btn btn btn-primary">
+                            <i class="fas fa-list"></i> Lihat Data
+                        </a>
+                        <a href="{% url 'admin_panel:organization:admin_perangkat_desa_create' %}" class="org-action-btn btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Tambah
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PKK -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="org-card card h-100">
+                <div class="org-card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-female fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Penggerak PKK</h5>
+                            <p class="mb-0 opacity-75">Kelola penggerak PKK</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-card-body">
+                    <div class="org-stats">
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="pkkActive">-</div>
+                            <div class="org-stat-label">Aktif</div>
+                        </div>
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="pkkTotal">-</div>
+                            <div class="org-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="org-actions">
+                        <a href="{% url 'admin_panel:organization:admin_pkk_list' %}" class="org-action-btn btn btn-primary">
+                            <i class="fas fa-list"></i> Lihat Data
+                        </a>
+                        <a href="{% url 'admin_panel:organization:admin_pkk_create' %}" class="org-action-btn btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Tambah
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karang Taruna -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="org-card card h-100">
+                <div class="org-card-header" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users-gear fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Karang Taruna</h5>
+                            <p class="mb-0 opacity-75">Kelola karang taruna</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-card-body">
+                    <div class="org-stats">
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="karangTarunaActive">-</div>
+                            <div class="org-stat-label">Aktif</div>
+                        </div>
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="karangTarunaTotal">-</div>
+                            <div class="org-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="org-actions">
+                        <a href="{% url 'admin_panel:organization:admin_karang_taruna_list' %}" class="org-action-btn btn btn-primary">
+                            <i class="fas fa-list"></i> Lihat Data
+                        </a>
+                        <a href="{% url 'admin_panel:organization:admin_karang_taruna_create' %}" class="org-action-btn btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Tambah
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lembaga Adat -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="org-card card h-100">
+                <div class="org-card-header" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-university fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Lembaga Adat</h5>
+                            <p class="mb-0 opacity-75">Kelola lembaga adat</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-card-body">
+                    <div class="org-stats">
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="lembagaAdatActive">-</div>
+                            <div class="org-stat-label">Aktif</div>
+                        </div>
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="lembagaAdatTotal">-</div>
+                            <div class="org-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="org-actions">
+                        <a href="{% url 'admin_panel:organization:admin_lembaga_adat_list' %}" class="org-action-btn btn btn-primary">
+                            <i class="fas fa-list"></i> Lihat Data
+                        </a>
+                        <a href="{% url 'admin_panel:organization:admin_lembaga_adat_create' %}" class="org-action-btn btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Tambah
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kepemudaan -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="org-card card h-100">
+                <div class="org-card-header" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users-line fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Kepemudaan</h5>
+                            <p class="mb-0 opacity-75">Kelola kepemudaan</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-card-body">
+                    <div class="org-stats">
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="kepemudaanActive">-</div>
+                            <div class="org-stat-label">Aktif</div>
+                        </div>
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="kepemudaanTotal">-</div>
+                            <div class="org-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="org-actions">
+                        <a href="{% url 'admin_panel:organization:admin_kepemudaan_list' %}" class="org-action-btn btn btn-primary">
+                            <i class="fas fa-list"></i> Lihat Data
+                        </a>
+                        <a href="{% url 'admin_panel:organization:admin_kepemudaan_create' %}" class="org-action-btn btn btn-outline-primary">
+                            <i class="fas fa-plus"></i> Tambah
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Struktur Organisasi -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="org-card card h-100">
+                <div class="org-card-header" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); color: #333;">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-sitemap fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Struktur Organisasi</h5>
+                            <p class="mb-0 opacity-75">Hierarki organisasi</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="org-card-body">
+                    <div class="org-stats">
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="totalMembers">-</div>
+                            <div class="org-stat-label">Total Anggota</div>
+                        </div>
+                        <div class="org-stat">
+                            <div class="org-stat-number" id="totalOrganizations">-</div>
+                            <div class="org-stat-label">Organisasi</div>
+                        </div>
+                    </div>
+                    <div class="org-actions">
+                        <a href="{% url 'admin_panel:organization:organization_hierarchy' %}" class="org-action-btn btn btn-primary">
+                            <i class="fas fa-sitemap"></i> Lihat Struktur
+                        </a>
+                        <a href="{% url 'admin_panel:organization:organization_list' %}" class="org-action-btn btn btn-outline-primary">
+                            <i class="fas fa-chart-bar"></i> Statistik
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/organization.js' %}"></script>
+<script src="{% static 'js/organization_dashboard.js' %}"></script>
+<script>
+// Initialize organization list
+$(document).ready(function() {
+    loadOrganizationStats();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadOrganizationStats, 30000);
+});
+
+async function loadOrganizationStats() {
+    try {
+        const data = await orgAPI.getStats();
+        if (data.success) {
+            // Update main stats
+            $('#totalOrganizations').text(data.total_members || 0);
+            $('#perangkatDesaCount').text(data.perangkat_desa || 0);
+            $('#pkkCount').text(data.penggerak_pkk || 0);
+            $('#karangTarunaCount').text(data.karang_taruna || 0);
+            $('#lembagaAdatCount').text(data.lembaga_adat || 0);
+            $('#kepemudaanCount').text(data.kepemudaan || 0);
+            
+            // Update hierarchy card
+            $('#hierarchyTotalMembers').text(data.total_members || 0);
+            $('#hierarchyTotalOrganizations').text((data.perangkat_desa || 0) + (data.penggerak_pkk || 0) + (data.karang_taruna || 0) + (data.lembaga_adat || 0) + (data.kepemudaan || 0));
+            
+            // Update card stats
+            $('#perangkatDesaActive').text(data.perangkat_desa || 0);
+            $('#perangkatDesaTotal').text(data.perangkat_desa || 0);
+            $('#pkkActive').text(data.penggerak_pkk || 0);
+            $('#pkkTotal').text(data.penggerak_pkk || 0);
+            $('#karangTarunaActive').text(data.karang_taruna || 0);
+            $('#karangTarunaTotal').text(data.karang_taruna || 0);
+            $('#lembagaAdatActive').text(data.lembaga_adat || 0);
+            $('#lembagaAdatTotal').text(data.lembaga_adat || 0);
+            $('#kepemudaanActive').text(data.kepemudaan || 0);
+            $('#kepemudaanTotal').text(data.kepemudaan || 0);
+        }
+    } catch (error) {
+        console.error('Failed to load organization statistics:', error);
+        console.log('Error details:', error);
+    }
+}
+
+function refreshStats() {
+    loadOrganizationStats();
+    showToast('success', 'Data berhasil diperbarui');
+}
+</script>
+{% endblock %}

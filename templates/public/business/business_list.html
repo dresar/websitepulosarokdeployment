@@ -1,0 +1,300 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load business_filters %}
+{% load hero_tags %}
+
+{% block title %}Daftar Bisnis Desa Pulosarok - {{ website_settings.site_name|default:'Desa Pulosarok' }}{% endblock %}
+{% block meta_description %}Daftar bisnis lokal di Desa Pulosarok. Temukan UMKM, Koperasi, BUMG, dan layanan jasa terbaik.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .business-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .business-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .dark .business-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    }
+    .filter-chip {
+        transition: all 0.2s ease-in-out;
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    .filter-chip:hover {
+        transform: scale(1.05);
+    }
+    .search-input {
+        font-size: 0.875rem;
+    }
+    /* FORCE MOBILE 2 GRID - OVERRIDE ALL CSS */
+    .grid {
+        display: grid !important;
+    }
+    
+    /* FORCE 2 COLUMNS ON MOBILE */
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+    }
+    
+    /* FORCE 2 COLUMNS ON SMALL MOBILE */
+    @media (max-width: 480px) {
+        .grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.25rem !important;
+        }
+    }
+    
+    /* OVERRIDE business-mobile.css */
+    .business-grid-mobile {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    /* OVERRIDE business-grid.css */
+    .business-col-sm-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+    
+    /* FORCE CARD SIZE */
+    .business-card {
+        width: 100% !important;
+        max-width: none !important;
+        flex: 0 0 50% !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section - Minimalis -->
+<section class="relative overflow-hidden min-h-[40vh] sm:min-h-[50vh] flex items-center">
+    {% get_hero_image 'business' as hero_image %}
+    {% if hero_image %}
+        <div class="absolute inset-0">
+            <img src="{{ hero_image.image.url }}" alt="{{ hero_image.name }}" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-600/80 via-primary-700/80 to-secondary-600/80"></div>
+        </div>
+    {% else %}
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600"></div>
+    {% endif %}
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
+        <div class="text-center">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-white">
+                Daftar Bisnis Desa Pulosarok
+            </h1>
+            <p class="text-sm sm:text-base text-primary-100 mb-6 max-w-2xl mx-auto">
+                Temukan berbagai bisnis lokal terbaik di Desa Pulosarok
+            </p>
+            
+            <!-- Search Bar - Minimalis -->
+            <div class="max-w-lg mx-auto mb-4">
+                <form method="GET" class="relative">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ search_query|default:'' }}" 
+                               placeholder="Cari bisnis..." 
+                               class="w-full px-3 py-2 pl-10 pr-3 text-gray-900 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <button type="submit" class="absolute right-1 top-1/2 transform -translate-y-1/2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded text-sm">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section - Minimalis -->
+<section class="bg-gray-50 dark:bg-gray-800 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+            <a href="{% url 'business:business_list' %}" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-store mr-1"></i>Semua
+            </a>
+            <a href="{% url 'business:umkm_list' %}" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-building mr-1"></i>UMKM
+            </a>
+            <a href="{% url 'business:koperasi_list' %}" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-handshake mr-1"></i>Koperasi
+            </a>
+            <a href="{% url 'business:bumg_list' %}" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-landmark mr-1"></i>BUMG
+            </a>
+            <a href="{% url 'business:layanan_jasa_list' %}" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-tools mr-1"></i>Layanan Jasa
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Business List -->
+<section class="py-6 lg:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if business_list %}
+        <!-- Results Count -->
+        <div class="mb-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+                Menampilkan {{ business_list.start_index }}-{{ business_list.end_index }} dari {{ business_list.paginator.count }} bisnis
+                {% if search_query %}
+                untuk "<span class="font-semibold text-primary-600">{{ search_query }}</span>"
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Business Grid - Mobile 2 Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {% for business in business_list %}
+            <div class="business-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <!-- Business Image Placeholder -->
+                <div class="h-24 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 flex items-center justify-center">
+                    <i class="fas fa-store text-lg text-primary-600 dark:text-primary-400"></i>
+                </div>
+                
+                <!-- Business Info -->
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight flex-1">
+                            {{ business.name }}
+                        </h3>
+                        <span class="ml-2 px-2 py-1 {% if business.status == 'approved' %}bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300{% else %}bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300{% endif %} text-xs font-medium rounded-full flex-shrink-0">
+                            {{ business.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Business Details - Compact -->
+                    <div class="space-y-1 mb-3">
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-tag w-3 h-3 mr-2"></i>
+                            <span class="truncate">{{ business.get_business_type_display }}</span>
+                        </div>
+                        {% if business.phone %}
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-phone w-3 h-3 mr-2"></i>
+                            <span class="truncate">{{ business.phone }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Button - Touch Friendly -->
+                    <a href="{% url 'business:business_detail' business.id %}" 
+                       class="w-full bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 flex items-center justify-center text-sm min-h-[36px] touch-manipulation">
+                        <i class="fas fa-eye mr-2"></i>
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if business_list.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if business_list.has_previous %}
+                <a href="?page={{ business_list.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-sm">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in business_list.paginator.page_range %}
+                {% if business_list.number == num %}
+                <span class="px-3 py-2 bg-primary-600 text-white rounded-lg font-medium text-sm">{{ num }}</span>
+                {% elif num > business_list.number|add:'-3' and num < business_list.number|add:'3' %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-sm">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if business_list.has_next %}
+                <a href="?page={{ business_list.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-sm">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="max-w-md mx-auto">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-store text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Belum Ada Bisnis
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+                    {% if search_query %}
+                    Tidak ditemukan bisnis untuk pencarian "<span class="font-semibold">{{ search_query }}</span>"
+                    {% else %}
+                    Belum ada bisnis yang terdaftar di Desa Pulosarok.
+                    {% endif %}
+                </p>
+                {% if search_query %}
+                <a href="{% url 'business:business_list' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Lihat Semua Bisnis
+                </a>
+                {% else %}
+                <a href="{% url 'business:business_register' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                    <i class="fas fa-plus mr-2"></i>
+                    Daftarkan Bisnis
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-primary-600 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-xl sm:text-2xl font-bold mb-3">
+            Punya Bisnis?
+        </h2>
+        <p class="text-sm text-primary-100 mb-6 max-w-xl mx-auto">
+            Daftarkan bisnis Anda untuk menjangkau lebih banyak pelanggan di Desa Pulosarok.
+        </p>
+        <a href="{% url 'business:business_register' %}" 
+           class="inline-flex items-center px-4 py-2 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm">
+            <i class="fas fa-plus mr-2"></i>
+            Daftarkan Bisnis Sekarang
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add smooth scrolling for anchor links
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animation to business cards
+    const businessCards = document.querySelectorAll('.business-card');
+    businessCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,482 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Compact Verification Detail Styles */
+.verification-detail-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.verification-detail-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1rem;
+    border-bottom: none;
+}
+
+.verification-detail-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.verification-detail-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.verification-detail-body {
+    padding: 1.5rem;
+}
+
+.verification-detail-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.verification-detail-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+}
+
+.verification-detail-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.verification-detail-btn-primary {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-color: #dc3545;
+}
+
+.verification-detail-btn-primary:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    border-color: #c82333;
+    color: white;
+}
+
+.verification-detail-btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.verification-detail-btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.verification-detail-btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.verification-detail-btn-outline-warning:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.verification-detail-btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.verification-detail-btn-outline-danger:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.verification-detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.verification-detail-info-card {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+    border-left: 3px solid #dc3545;
+}
+
+.verification-detail-info-card h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+}
+
+.verification-detail-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.85rem;
+}
+
+.verification-detail-info-item:last-child {
+    border-bottom: none;
+}
+
+.verification-detail-info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.verification-detail-info-value {
+    color: #495057;
+    font-size: 0.8rem;
+}
+
+.verification-detail-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.verification-detail-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.verification-detail-badge-in-progress {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.verification-detail-badge-verified {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.verification-detail-badge-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.verification-detail-badge-requires-info {
+    background: #e2e3f1;
+    color: #4a4a6a;
+    border: 1px solid #d1d3e2;
+}
+
+.verification-detail-badge-low {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.verification-detail-badge-medium {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.verification-detail-badge-high {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.verification-detail-badge-urgent {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.verification-detail-content {
+    background: white;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.verification-detail-content h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+}
+
+.verification-detail-content p {
+    color: #6c757d;
+    line-height: 1.5;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.verification-detail-follow-up {
+    background: #fff3cd;
+    border-radius: 6px;
+    padding: 1rem;
+    border: 1px solid #ffeaa7;
+}
+
+.verification-detail-follow-up h6 {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+}
+
+.verification-detail-follow-up p {
+    color: #856404;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .verification-detail-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .verification-detail-info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .verification-detail-body {
+        padding: 1rem;
+    }
+    
+    .verification-detail-header {
+        padding: 0.75rem;
+    }
+    
+    .verification-detail-title {
+        font-size: 1rem;
+    }
+    
+    .verification-detail-info-card {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .verification-detail-body {
+        padding: 0.75rem;
+    }
+    
+    .verification-detail-header {
+        padding: 0.75rem;
+    }
+    
+    .verification-detail-title {
+        font-size: 0.9rem;
+    }
+    
+    .verification-detail-info-card {
+        padding: 0.5rem;
+    }
+    
+    .verification-detail-info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="verification-detail-container">
+    <div class="verification-detail-header">
+        <h3 class="verification-detail-title">
+            <i class="fas fa-check-circle"></i>Detail Verifikasi Pengaduan
+        </h3>
+    </div>
+    <div class="verification-detail-body">
+        <div class="verification-detail-actions">
+            <a href="{% url 'admin_panel:verifications_list' %}" class="verification-detail-btn verification-detail-btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>Kembali
+            </a>
+            <div>
+                <a href="{% url 'admin_panel:verification_update' verification.pk %}" class="verification-detail-btn verification-detail-btn-outline-warning">
+                    <i class="fas fa-edit"></i>Edit
+                </a>
+                <a href="{% url 'admin_panel:verification_delete' verification.pk %}" 
+                   class="verification-detail-btn verification-detail-btn-outline-danger" 
+                   onclick="return confirm('Apakah Anda yakin ingin menghapus verifikasi ini?')">
+                    <i class="fas fa-trash"></i>Hapus
+                </a>
+            </div>
+        </div>
+        
+        <div class="verification-detail-info-grid">
+            <div class="verification-detail-info-card">
+                <h6><i class="fas fa-info-circle"></i> Informasi Verifikasi</h6>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">ID Verifikasi:</span>
+                    <span class="verification-detail-info-value">{{ verification.id }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Jenis:</span>
+                    <span class="verification-detail-badge verification-detail-badge-{{ verification.verification_type }}">
+                        {{ verification.get_verification_type_display }}
+                    </span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Status:</span>
+                    <span class="verification-detail-badge verification-detail-badge-{{ verification.status }}">
+                        {{ verification.get_status_display }}
+                    </span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Prioritas:</span>
+                    <span class="verification-detail-badge verification-detail-badge-{{ verification.priority_level }}">
+                        {{ verification.get_priority_level_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="verification-detail-info-card">
+                <h6><i class="fas fa-user"></i> Verifikator</h6>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Nama:</span>
+                    <span class="verification-detail-info-value">{{ verification.verified_by.get_full_name|default:verification.verified_by.username }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Username:</span>
+                    <span class="verification-detail-info-value">{{ verification.verified_by.username }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Email:</span>
+                    <span class="verification-detail-info-value">{{ verification.verified_by.email|default:"-" }}</span>
+                </div>
+            </div>
+            
+            <div class="verification-detail-info-card">
+                <h6><i class="fas fa-calendar"></i> Waktu</h6>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Dibuat:</span>
+                    <span class="verification-detail-info-value">{{ verification.created_at|date:"d M Y H:i" }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Diperbarui:</span>
+                    <span class="verification-detail-info-value">{{ verification.updated_at|date:"d M Y H:i" }}</span>
+                </div>
+                {% if verification.verified_at %}
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Diverifikasi:</span>
+                    <span class="verification-detail-info-value">{{ verification.verified_at|date:"d M Y H:i" }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="verification-detail-info-card">
+                <h6><i class="fas fa-exclamation-triangle"></i> Pengaduan</h6>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">ID Pengaduan:</span>
+                    <span class="verification-detail-info-value">{{ verification.complaint.complaint_id }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Judul:</span>
+                    <span class="verification-detail-info-value">{{ verification.complaint.title|truncatechars:30 }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Kategori:</span>
+                    <span class="verification-detail-info-value">{{ verification.complaint.category.name|default:"-" }}</span>
+                </div>
+                <div class="verification-detail-info-item">
+                    <span class="verification-detail-info-label">Status:</span>
+                    <span class="verification-detail-badge verification-detail-badge-{{ verification.complaint.status }}">
+                        {{ verification.complaint.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="verification-detail-content">
+            <h6><i class="fas fa-sticky-note"></i> Catatan Verifikasi</h6>
+            <p>{{ verification.verification_notes|linebreaks }}</p>
+        </div>
+        
+        {% if verification.verification_result %}
+        <div class="verification-detail-content">
+            <h6><i class="fas fa-check-circle"></i> Hasil Verifikasi</h6>
+            <p>{{ verification.verification_result|linebreaks }}</p>
+        </div>
+        {% endif %}
+        
+        {% if verification.supporting_evidence %}
+        <div class="verification-detail-content">
+            <h6><i class="fas fa-file-alt"></i> Bukti Pendukung</h6>
+            <p>{{ verification.supporting_evidence|linebreaks }}</p>
+        </div>
+        {% endif %}
+        
+        {% if verification.recommended_action %}
+        <div class="verification-detail-content">
+            <h6><i class="fas fa-lightbulb"></i> Rekomendasi Tindakan</h6>
+            <p>{{ verification.recommended_action|linebreaks }}</p>
+        </div>
+        {% endif %}
+        
+        {% if verification.requires_follow_up %}
+        <div class="verification-detail-follow-up">
+            <h6><i class="fas fa-clock"></i> Tindak Lanjut</h6>
+            <p><strong>Memerlukan Tindak Lanjut:</strong> Ya</p>
+            {% if verification.follow_up_date %}
+            <p><strong>Tanggal Tindak Lanjut:</strong> {{ verification.follow_up_date|date:"d M Y H:i" }}</p>
+            {% endif %}
+            {% if verification.follow_up_notes %}
+            <p><strong>Catatan Tindak Lanjut:</strong> {{ verification.follow_up_notes|linebreaks }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+

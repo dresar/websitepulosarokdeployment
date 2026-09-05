@@ -1,0 +1,1047 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/business-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-components.css' %}">
+<style>
+.category-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.category-header {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    color: #212529;
+    padding: 1rem;
+    border-bottom: none;
+}
+
+.category-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #212529;
+}
+
+.category-body {
+    padding: 1.5rem;
+}
+
+.category-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.category-stats {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.category-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.category-badge-business {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.category-badge-status {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.category-badge-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+.category-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 20;
+}
+
+.category-dropdown-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+}
+
+.category-dropdown-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #374151;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-dropdown-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25);
+}
+
+/* Ensure dropdown button is always visible */
+.category-card .category-actions {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.category-card .category-dropdown-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+/* Force visibility for grid view */
+.grid-view .category-actions {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    z-index: 30 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.grid-view .category-dropdown-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    color: #6b7280 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Make button more visible with contrast */
+.grid-view .category-dropdown-btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    color: #374151 !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Add a subtle background to make button stand out */
+.grid-view .category-card {
+    position: relative;
+}
+
+.grid-view .category-card::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    color: #6c757d;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-description {
+    color: #9ca3af;
+    margin-bottom: 2rem;
+}
+
+/* Modal Styles */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-title {
+    color: #495057;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 12px 12px;
+    padding: 1rem 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    pointer-events: auto !important;
+    cursor: text !important;
+    user-select: text !important;
+}
+
+.form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+/* View Switcher */
+.view-switcher {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.view-switcher-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.view-switcher-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.view-switcher-btn.active {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+/* Table View Styles */
+.table-view {
+    display: none;
+}
+
+.table-view.active {
+    display: block;
+}
+
+.categories-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.categories-table thead {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+}
+
+.categories-table thead th {
+    border: none;
+    color: #212529;
+    font-weight: 600;
+    padding: 1rem;
+    text-align: left;
+}
+
+.categories-table tbody td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.categories-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.category-name-cell {
+    font-weight: 600;
+    color: #495057;
+}
+
+.category-description-cell {
+    color: #6c757d;
+    font-size: 0.9rem;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.category-stats-cell {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.category-actions-cell {
+    text-align: right;
+}
+
+.category-table-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: flex-end;
+}
+
+.category-table-btn {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.category-table-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.category-table-btn.btn-primary {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.category-table-btn.btn-warning {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.category-table-btn.btn-danger {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* List View Styles */
+.list-view {
+    display: block;
+}
+
+.list-view.hidden {
+    display: none;
+}
+
+.categories-list {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.category-list-item {
+    border-bottom: 1px solid #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.category-list-item:last-child {
+    border-bottom: none;
+}
+
+.category-list-item:hover {
+    background: #f8f9fa;
+}
+
+.category-list-content {
+    padding: 1.5rem;
+}
+
+.category-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.category-list-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #495057;
+    margin: 0;
+}
+
+.category-list-actions {
+    position: relative;
+}
+
+.category-list-btn {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+}
+
+.category-list-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #374151;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-list-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25);
+}
+
+.category-list-body {
+    margin-top: 0.5rem;
+}
+
+.category-list-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.category-list-stats {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.category-list-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.category-list-badge-business {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.category-list-badge-status {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.category-list-badge-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+/* Fix dropdown positioning */
+.category-actions {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    z-index: 20 !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.dropdown-menu {
+    z-index: 1050 !important;
+    min-width: 200px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background: #f8f9fa;
+}
+
+.dropdown-item:focus {
+    outline: none;
+    background: #e9ecef;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Ensure dropdown is visible */
+.dropdown.show .dropdown-menu {
+    display: block !important;
+}
+
+/* Force button interactivity */
+.category-list-btn, .category-table-btn, .dropdown-item {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    user-select: none !important;
+}
+
+.category-list-btn:hover, .category-table-btn:hover, .dropdown-item:hover {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Ensure buttons are clickable */
+button, a, .dropdown-item {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    user-select: none !important;
+}
+
+/* Fix any overlay issues */
+.category-card, .category-list-item {
+    position: relative;
+    z-index: 1;
+}
+
+.category-actions, .category-list-actions {
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+/* Fix for Bootstrap dropdown positioning */
+.dropdown-menu-right {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .category-card {
+        margin-bottom: 1rem;
+    }
+    
+    .category-header {
+        padding: 0.75rem;
+    }
+    
+    .category-body {
+        padding: 1rem;
+    }
+    
+    .category-title {
+        font-size: 1rem;
+    }
+    
+    .category-description {
+        font-size: 0.85rem;
+    }
+    
+    .category-stats {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .category-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        padding: 1rem 1.5rem;
+    }
+    
+    .view-switcher {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .categories-table {
+        font-size: 0.9rem;
+    }
+    
+    .categories-table thead th,
+    .categories-table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .category-table-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .category-table-btn {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    /* List View Responsive */
+    .category-list-content {
+        padding: 1rem;
+    }
+    
+    .category-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .category-list-title {
+        font-size: 1.1rem;
+    }
+    
+    .category-list-description {
+        font-size: 0.9rem;
+    }
+    
+    .category-list-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .category-list-badge {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.7rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="business-container">
+    <!-- Page Header -->
+    <div class="business-page-header">
+        <div>
+            <h1 class="business-page-title">
+                <i class="fas fa-tags"></i>Kategori Usaha
+            </h1>
+            <p class="business-page-subtitle">Kelola kategori usaha di Desa Pulosari</p>
+        </div>
+        <div class="business-page-actions">
+            <button type="button" class="business-btn business-btn-primary" data-toggle="modal" data-target="#createCategoryModal">
+                <i class="fas fa-plus"></i>Tambah Kategori
+            </button>
+        </div>
+    </div>
+
+    <!-- View Switcher -->
+    <div class="view-switcher">
+        <button class="view-switcher-btn active" onclick="switchView('list')">
+            <i class="fas fa-list"></i>List View
+        </button>
+        <button class="view-switcher-btn" onclick="switchView('table')">
+            <i class="fas fa-table"></i>Table View
+        </button>
+    </div>
+
+    <!-- List View -->
+    <div class="list-view" id="listView">
+        {% if categories %}
+        <div class="categories-list">
+            {% for category in categories %}
+            <div class="category-list-item">
+                <div class="category-list-content">
+                    <div class="category-list-header">
+                        <h5 class="category-list-title">{{ category.name }}</h5>
+                        <div class="category-list-actions">
+                            <div class="dropdown">
+                                <button class="category-list-btn" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="{% url 'admin_panel:business_category_detail' category.id %}">
+                                        <i class="fas fa-eye mr-2"></i>Detail Kategori
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="{% url 'admin_panel:umkm_list' %}?category={{ category.id }}">
+                                        <i class="fas fa-industry mr-2"></i>Lihat UMKM
+                                    </a>
+                                    <a class="dropdown-item" href="{% url 'admin_panel:layanan_jasa_list' %}?category={{ category.id }}">
+                                        <i class="fas fa-tools mr-2"></i>Lihat Layanan Jasa
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item" onclick="editCategory({{ category.id }}, '{{ category.name }}', '{{ category.description }}', {{ category.is_active|yesno:"true,false" }})">
+                                        <i class="fas fa-edit mr-2"></i>Edit
+                                    </button>
+                                    <a href="{% url 'admin_panel:business_category_delete_confirm' category.id %}" class="dropdown-item text-danger">
+                                        <i class="fas fa-trash mr-2"></i>Hapus
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category-list-body">
+                        <p class="category-list-description">{{ category.description|truncatechars:200 }}</p>
+                        <div class="category-list-stats">
+                            <span class="category-list-badge category-list-badge-business">
+                                <i class="fas fa-store"></i>{{ category.business_count }} Usaha
+                            </span>
+                            <span class="category-list-badge {% if category.is_active %}category-list-badge-status{% else %}category-list-badge-inactive{% endif %}">
+                                <i class="fas fa-{% if category.is_active %}check-circle{% else %}times-circle{% endif %}"></i>
+                                {% if category.is_active %}Aktif{% else %}Non-Aktif{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-tags empty-state-icon"></i>
+            <h5 class="empty-state-title">Belum ada kategori usaha</h5>
+            <p class="empty-state-description">Silakan tambah kategori usaha baru untuk mengorganisir data usaha</p>
+            <button type="button" class="business-btn business-btn-primary" data-toggle="modal" data-target="#createCategoryModal">
+                <i class="fas fa-plus"></i>Tambah Kategori
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Table View -->
+    <div class="table-view" id="tableView">
+        {% if categories %}
+        <div class="categories-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nama Kategori</th>
+                        <th>Deskripsi</th>
+                        <th>Jumlah Usaha</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td class="category-name-cell">{{ category.name }}</td>
+                        <td class="category-description-cell">{{ category.description|truncatechars:100 }}</td>
+                        <td>
+                            <span class="category-badge category-badge-business">
+                                <i class="fas fa-store"></i>{{ category.business_count }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="category-badge {% if category.is_active %}category-badge-status{% else %}category-badge-inactive{% endif %}">
+                                <i class="fas fa-{% if category.is_active %}check-circle{% else %}times-circle{% endif %}"></i>
+                                {% if category.is_active %}Aktif{% else %}Non-Aktif{% endif %}
+                            </span>
+                        </td>
+                        <td class="category-actions-cell">
+                            <div class="category-table-actions">
+                                <a href="{% url 'admin_panel:business_category_detail' category.id %}" class="category-table-btn btn-primary" title="Detail Kategori">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:umkm_list' %}?category={{ category.id }}" class="category-table-btn btn-primary" title="Lihat UMKM">
+                                    <i class="fas fa-industry"></i>
+                                </a>
+                                <a href="{% url 'admin_panel:layanan_jasa_list' %}?category={{ category.id }}" class="category-table-btn btn-primary" title="Lihat Layanan Jasa">
+                                    <i class="fas fa-tools"></i>
+                                </a>
+                                <button class="category-table-btn btn-warning" onclick="editCategory({{ category.id }}, '{{ category.name }}', '{{ category.description }}', {{ category.is_active|yesno:"true,false" }})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <a href="{% url 'admin_panel:business_category_delete_confirm' category.id %}" class="category-table-btn btn-danger" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-tags empty-state-icon"></i>
+            <h5 class="empty-state-title">Belum ada kategori usaha</h5>
+            <p class="empty-state-description">Silakan tambah kategori usaha baru untuk mengorganisir data usaha</p>
+            <button type="button" class="business-btn business-btn-primary" data-toggle="modal" data-target="#createCategoryModal">
+                <i class="fas fa-plus"></i>Tambah Kategori
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Category Modal -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1" role="dialog" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCategoryModalLabel">
+                    <i class="fas fa-plus mr-2"></i>Tambah Kategori Usaha
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="createCategoryForm" method="post" action="{% url 'admin_panel:business_category_create' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="createName" class="form-label">Nama Kategori</label>
+                        <input type="text" class="form-control" id="createName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="createDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="createIsActive" name="is_active" checked>
+                            <label class="form-check-label" for="createIsActive">
+                                Kategori Aktif
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="business-btn business-btn-outline-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="business-btn business-btn-primary">
+                        <i class="fas fa-save"></i>Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">
+                    <i class="fas fa-edit mr-2"></i>Edit Kategori Usaha
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editCategoryForm" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editName" class="form-label">Nama Kategori</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDescription" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editIsActive" name="is_active">
+                            <label class="form-check-label" for="editIsActive">
+                                Kategori Aktif
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="business-btn business-btn-outline-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="business-btn business-btn-warning">
+                        <i class="fas fa-save"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // View Switcher
+    function switchView(viewType) {
+        $('.view-switcher-btn').removeClass('active');
+        if (viewType === 'list') {
+            $('.view-switcher-btn:first').addClass('active');
+            $('#listView').removeClass('hidden');
+            $('#tableView').removeClass('active');
+        } else {
+            $('.view-switcher-btn:last').addClass('active');
+            $('#listView').addClass('hidden');
+            $('#tableView').addClass('active');
+        }
+        localStorage.setItem('categoryView', viewType);
+    }
+    
+    // Load saved view
+    var savedView = localStorage.getItem('categoryView');
+    if (savedView) {
+        switchView(savedView);
+    }
+    
+    // Edit Category Function
+    window.editCategory = function(id, name, description, isActive) {
+        $('#editName').val(name);
+        $('#editDescription').val(description);
+        $('#editIsActive').prop('checked', isActive === true || isActive === 'true');
+        $('#editCategoryForm').attr('action', '{% url "admin_panel:business_category_update" 0 %}'.replace('0', id));
+        $('#editCategoryModal').modal('show');
+    };
+    
+    // Create Form Submit
+    $('#createCategoryForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var formData = {
+            'name': $('#createName').val(),
+            'description': $('#createDescription').val(),
+            'is_active': $('#createIsActive').is(':checked')
+        };
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                $('#createCategoryModal').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                alert('Error: ' + (xhr.responseJSON?.message || 'Server error'));
+            }
+        });
+    });
+    
+    // Edit Form Submit
+    $('#editCategoryForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var formData = {
+            'name': $('#editName').val(),
+            'description': $('#editDescription').val(),
+            'is_active': $('#editIsActive').is(':checked')
+        };
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                $('#editCategoryModal').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                alert('Error: ' + (xhr.responseJSON?.message || 'Server error'));
+            }
+        });
+    });
+    
+    // Reset forms when modals are closed
+    $('#createCategoryModal').on('hidden.bs.modal', function() {
+        $('#createCategoryForm')[0].reset();
+    });
+    
+    $('#editCategoryModal').on('hidden.bs.modal', function() {
+        $('#editCategoryForm')[0].reset();
+    });
+});
+</script>
+{% endblock extra_js %}
+

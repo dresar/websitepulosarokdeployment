@@ -1,0 +1,245 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 overflow-hidden">
+    {% if village_profile.profile_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ village_profile.profile_image.url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-amber-600/80 to-orange-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-amber-600 to-orange-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Detail Sejarah</h1>
+            <p class="text-sm sm:text-base opacity-90">Peristiwa bersejarah Desa Pulosarok</p>
+        </div>
+    </div>
+</section>
+
+<section class="py-2 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav aria-label="breadcrumb">
+            <ol class="flex items-center space-x-2 text-xs sm:text-sm">
+                <li><a href="{% url "village_profile:dashboard" %}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Beranda</a></li>
+                <li class="text-gray-400">/</li>
+                <li><a href="{% url "village_profile:history" %}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Sejarah Desa</a></li>
+                <li class="text-gray-400">/</li>
+                <li class="text-gray-900 dark:text-white font-medium">Detail Sejarah</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- History Detail Content -->
+<section class="py-4 sm:py-6 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {% if history %}
+        <!-- History Detail Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 sm:mb-8 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-amber-600 to-orange-600 text-white p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex-1">
+                        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 flex items-center">
+                            <i class="fas fa-scroll mr-2 text-sm sm:text-base"></i>{{ history.title }}
+                        </h1>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                                {{ history.get_history_type_display }}
+                            </span>
+                            {% if history.year_start %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                                {{ history.year_start }}{% if history.year_end %} - {{ history.year_end }}{% endif %}
+                            </span>
+                            {% endif %}
+                            {% if history.is_featured %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white">
+                                Unggulan
+                            </span>
+                            {% endif %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                                <i class="fas fa-eye mr-1"></i>{{ history.view_count }} views
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{% url "village_profile:history" %}" class="inline-flex items-center px-3 py-2 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200">
+                            <i class="fas fa-arrow-left mr-1"></i>Kembali
+                        </a>
+                        <button onclick="shareHistory()" class="inline-flex items-center px-3 py-2 bg-white/20 hover:bg-white/30 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors duration-200">
+                            <i class="fas fa-share mr-1"></i>Bagikan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="p-4 sm:p-6">
+                <!-- Featured Image -->
+                {% if history.featured_image %}
+                <div class="text-center mb-6">
+                    <img src="{{ history.featured_image.url }}" alt="{{ history.title }}" 
+                         class="w-full h-48 sm:h-64 lg:h-80 object-cover rounded-lg shadow-lg">
+                    {% if history.featured_image_caption %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">{{ history.featured_image_caption }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Summary -->
+                {% if history.summary %}
+                <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+                    <h5 class="text-sm sm:text-base font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>Ringkasan
+                    </h5>
+                    <p class="text-sm sm:text-base text-blue-700 dark:text-blue-300">{{ history.summary }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Content -->
+                <div class="prose prose-sm sm:prose-base max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {{ history.content|linebreaks }}
+                </div>
+
+                <!-- Meta Information -->
+                <hr class="my-6 border-gray-200 dark:border-gray-700">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h6 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-amber-600"></i>Informasi Detail
+                        </h6>
+                        <ul class="space-y-2 text-sm">
+                            {% if history.source %}
+                            <li class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400"><strong>Sumber:</strong></span>
+                                <span class="text-gray-900 dark:text-white">{{ history.source }}</span>
+                            </li>
+                            {% endif %}
+                            {% if history.author %}
+                            <li class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400"><strong>Penulis:</strong></span>
+                                <span class="text-gray-900 dark:text-white">{{ history.author }}</span>
+                            </li>
+                            {% endif %}
+                            <li class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400"><strong>Terakhir Diperbarui:</strong></span>
+                                <span class="text-gray-900 dark:text-white">{{ history.updated_at|date:"d F Y" }}</span>
+                            </li>
+                            <li class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400"><strong>Dibuat:</strong></span>
+                                <span class="text-gray-900 dark:text-white">{{ history.created_at|date:"d F Y" }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center">
+                            <i class="fas fa-share-alt mr-2 text-amber-600"></i>Bagikan Sejarah
+                        </h6>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="shareOnFacebook()" class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors duration-200" title="Share on Facebook">
+                                <i class="fab fa-facebook-f mr-1"></i>Facebook
+                            </button>
+                            <button onclick="shareOnTwitter()" class="inline-flex items-center px-3 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-medium rounded-lg transition-colors duration-200" title="Share on Twitter">
+                                <i class="fab fa-twitter mr-1"></i>Twitter
+                            </button>
+                            <button onclick="shareOnWhatsApp()" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors duration-200" title="Share on WhatsApp">
+                                <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                            </button>
+                            <button onclick="copyLink()" class="inline-flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-lg transition-colors duration-200" title="Copy Link">
+                                <i class="fas fa-copy mr-1"></i>Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Histories -->
+        {% if related_histories %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+                <h5 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-history mr-2 text-amber-600"></i>Sejarah Terkait
+                </h5>
+            </div>
+            <div class="p-4 sm:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% for related in related_histories %}
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
+                        <h6 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">
+                            <a href="{% url "village_profile:history_detail" related.id %}" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors duration-200">
+                                {{ related.title }}
+                            </a>
+                        </h6>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">{{ related.summary|truncatewords:15 }}</p>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
+                            {{ related.get_history_type_display }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-8 sm:py-12">
+            <i class="fas fa-exclamation-triangle text-4xl sm:text-5xl text-gray-400 mb-3"></i>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">Sejarah tidak ditemukan</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Sejarah yang Anda cari tidak tersedia atau telah dihapus</p>
+            <a href="{% url "village_profile:history" %}" class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar Sejarah
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+function shareHistory() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ history.title|escapejs }}',
+            text: '{{ history.summary|default:""|escapejs }}',
+            url: window.location.href
+        });
+    } else {
+        copyLink();
+    }
+}
+
+function shareOnFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('{{ history.title|escapejs }}');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank');
+}
+
+function shareOnTwitter() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('{{ history.title|escapejs }}');
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank');
+}
+
+function shareOnWhatsApp() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('{{ history.title|escapejs }}');
+    window.open(`https://wa.me/?text=${title}%20${url}`, '_blank');
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+        // Show toast notification
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center';
+        toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Link berhasil disalin ke clipboard';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }).catch(function() {
+        alert('Gagal menyalin link');
+    });
+}
+</script>
+{% endblock content %}

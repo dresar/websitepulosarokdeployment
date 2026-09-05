@@ -1,0 +1,713 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Data Ibu Hamil{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ibu-hamil-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .stats-card {
+        background: #fff;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border-left: 5px solid #667eea;
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-card.success {
+        border-left-color: #28a745;
+    }
+    
+    .stats-card.warning {
+        border-left-color: #ffc107;
+    }
+    
+    .stats-card.info {
+        border-left-color: #17a2b8;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+    
+    .stats-card.success .stats-number {
+        color: #28a745;
+    }
+    
+    .stats-card.warning .stats-number {
+        color: #ffc107;
+    }
+    
+    .stats-card.info .stats-number {
+        color: #17a2b8;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box .form-control {
+        padding-left: 45px;
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .search-box .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .search-box .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
+    .table-container {
+        background: #fff;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        overflow-x: auto;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-color: #f1f3f4;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .pregnancy-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .pregnancy-badge.trimester-1 {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .pregnancy-badge.trimester-2 {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .pregnancy-badge.trimester-3 {
+        background: #ffcdd2;
+        color: #d32f2f;
+    }
+    
+    .risk-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .risk-badge.low {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .risk-badge.high {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-badge.inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    
+    .btn-custom {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        border: none;
+    }
+    
+    .modal-header .close {
+        color: white;
+        opacity: 0.8;
+    }
+    
+    .modal-header .close:hover {
+        opacity: 1;
+    }
+    
+    .modal-body {
+        padding: 30px;
+    }
+    
+    .modal-footer {
+        border: none;
+        padding: 20px 30px;
+        background: #f8f9fa;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .pagination .page-link {
+        border-radius: 8px;
+        margin: 0 2px;
+        border: 2px solid #e9ecef;
+        color: #667eea;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="ibu-hamil-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-2">
+                    <i class="fas fa-baby mr-3"></i>
+                    Data Ibu Hamil
+                </h2>
+                <p class="mb-0 opacity-75">Kelola data kehamilan dan kesehatan ibu hamil</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{% url 'admin_panel:posyandu:ibu_hamil_create' %}" class="btn btn-light btn-custom">
+                    <i class="fas fa-plus mr-2"></i>
+                    Tambah Data
+                </a>
+                <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-light btn-custom ml-2">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalIbuHamil">0</div>
+                <div class="stats-label">Total Ibu Hamil</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card success">
+                <div class="stats-number" id="trimester1">0</div>
+                <div class="stats-label">Trimester 1</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card warning">
+                <div class="stats-number" id="trimester2">0</div>
+                <div class="stats-label">Trimester 2</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card info">
+                <div class="stats-number" id="trimester3">0</div>
+                <div class="stats-label">Trimester 3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari nama ibu hamil...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="posyanduFilter">
+                    <option value="">Semua Posyandu</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="trimesterFilter">
+                    <option value="">Semua Trimester</option>
+                    <option value="1">Trimester 1 (0-12 minggu)</option>
+                    <option value="2">Trimester 2 (13-27 minggu)</option>
+                    <option value="3">Trimester 3 (28+ minggu)</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary btn-custom w-100" id="clearFilters">
+                    <i class="fas fa-times mr-1"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Ibu</th>
+                        <th>Usia Kehamilan</th>
+                        <th>Trimester</th>
+                        <th>Risiko</th>
+                        <th>Status</th>
+                        <th>Posyandu</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="ibuHamilTableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-baby"></i>
+            <h4>Tidak ada data ibu hamil</h4>
+            <p>Belum ada data ibu hamil yang tersedia.</p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <nav aria-label="Ibu hamil pagination">
+            <ul class="pagination" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus data ibu hamil ini?</p>
+                <p class="text-muted">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Global variables
+    let currentPage = 1;
+    let currentFilters = {
+        search: '',
+        admin_panel:posyandu: '',
+        trimester: ''
+    };
+    let deleteId = null;
+
+    // Initialize
+    init();
+
+    function init() {
+        loadIbuHamilData();
+        loadPosyanduOptions();
+        bindEvents();
+    }
+
+    function bindEvents() {
+        // Search functionality
+        $('#searchInput').on('input', debounce(function() {
+            currentFilters.search = $(this).val();
+            currentPage = 1;
+            loadIbuHamilData();
+        }, 300));
+
+        // Filter functionality
+        $('#posyanduFilter, #trimesterFilter').on('change', function() {
+            currentFilters.posyandu = $('#posyanduFilter').val();
+            currentFilters.trimester = $('#trimesterFilter').val();
+            currentPage = 1;
+            loadIbuHamilData();
+        });
+
+        // Clear filters
+        $('#clearFilters').on('click', function() {
+            $('#searchInput').val('');
+            $('#posyanduFilter').val('');
+            $('#trimesterFilter').val('');
+            
+            currentFilters = {
+                search: '',
+                admin_panel:posyandu: '',
+                trimester: ''
+            };
+            currentPage = 1;
+            loadIbuHamilData();
+        });
+
+        // Delete confirmation
+        $('#confirmDelete').on('click', function() {
+            if (deleteId) {
+                deleteIbuHamil(deleteId);
+            }
+        });
+    }
+
+    // Load ibu hamil data
+    function loadIbuHamilData() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_ibu_hamil_list" %}',
+            method: 'GET',
+            data: {
+                page: currentPage,
+                search: currentFilters.search,
+                admin_panel:posyandu: currentFilters.posyandu,
+                trimester: currentFilters.trimester
+            },
+            success: function(response) {
+                displayIbuHamilData(response.results || []);
+                updateStatistics(response.statistics || {});
+                updatePagination(response.pagination || {});
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading ibu hamil data:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+
+    // Display ibu hamil data
+    function displayIbuHamilData(data) {
+        const tbody = $('#ibuHamilTableBody');
+        const emptyState = $('#emptyState');
+        
+        if (!data || data.length === 0) {
+            tbody.html('');
+            emptyState.show();
+            return;
+        }
+
+        emptyState.hide();
+        
+        let html = '';
+        data.forEach(function(ibu, index) {
+            const validAge = Math.min(ibu.usia_kehamilan || 0, 42);
+            const trimester = getTrimester(validAge);
+            const trimesterClass = `trimester-${trimester}`;
+            const riskClass = ibu.risiko_kehamilan === 'tinggi' ? 'high' : 'low';
+            const statusClass = ibu.status_aktif ? 'active' : 'inactive';
+            const statusText = ibu.status_aktif ? 'Aktif' : 'Tidak Aktif';
+            
+            html += `
+                <tr>
+                    <td>${(currentPage - 1) * 10 + index + 1}</td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <strong>${ibu.penduduk_name || '-'}</strong>
+                            <small class="text-muted">NIK: ${ibu.penduduk_nik || '-'}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="font-weight-bold">${validAge} minggu</span>
+                            <small class="text-muted">HPHT: ${ibu.tanggal_hpht || '-'}</small>
+                        </div>
+                    </td>
+                    <td><span class="pregnancy-badge ${trimesterClass}">Trimester ${trimester}</span></td>
+                    <td><span class="risk-badge ${riskClass}">${ibu.risiko_kehamilan === 'tinggi' ? 'Tinggi' : 'Rendah'}</span></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${ibu.posyandu_name || '-'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/admin-panel/posyandu/ibu-hamil/${ibu.id}/" class="btn btn-sm btn-outline-primary" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="/admin-panel/posyandu/ibu-hamil/${ibu.id}/update/" class="btn btn-sm btn-outline-warning" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${ibu.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.html(html);
+    }
+
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Semua Posyandu</option>';
+                if (response.results) {
+                    response.results.forEach(function(location) {
+                        options += `<option value="${location.id}">${location.name}</option>`;
+                    });
+                }
+                $('#posyanduFilter').html(options);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading posyandu options:', error);
+            }
+        });
+    }
+
+    // Get trimester
+    function getTrimester(weeks) {
+        if (weeks <= 12) return 1;
+        if (weeks <= 27) return 2;
+        return 3;
+    }
+
+    // Update statistics
+    function updateStatistics(stats) {
+        if (!stats) {
+            $('#totalIbuHamil').text(0);
+            $('#trimester1').text(0);
+            $('#trimester2').text(0);
+            $('#trimester3').text(0);
+            return;
+        }
+        
+        $('#totalIbuHamil').text(stats.total || 0);
+        $('#trimester1').text(stats.trimester1 || 0);
+        $('#trimester2').text(stats.trimester2 || 0);
+        $('#trimester3').text(stats.trimester3 || 0);
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        // Implementation for pagination if needed
+    }
+
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 3000);
+    }
+
+    // Global functions
+    window.confirmDelete = function(id) {
+        deleteId = id;
+        $('#deleteModal').modal('show');
+    };
+
+    // Delete ibu hamil
+    function deleteIbuHamil(id) {
+        $.ajax({
+            url: `{% url "admin_panel:posyandu:api_ibu_hamil_delete" 0 %}`.replace('0', id),
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                showAlert('Data ibu hamil berhasil dihapus', 'success');
+                $('#deleteModal').modal('hide');
+                loadIbuHamilData();
+            },
+            error: function(xhr, status, error) {
+                showAlert('Error deleting ibu hamil data', 'danger');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

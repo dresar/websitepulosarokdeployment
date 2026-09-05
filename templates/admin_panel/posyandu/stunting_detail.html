@@ -1,0 +1,339 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Data Stunting{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .info-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .info-item {
+        margin-bottom: 15px;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .info-value {
+        color: #6c757d;
+        line-height: 1.5;
+    }
+    .stunting-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .status-normal { background: #e8f5e8; color: #2e7d32; }
+    .status-stunting { background: #ffcdd2; color: #d32f2f; }
+    .status-severe-stunting { background: #f8bbd9; color: #c2185b; }
+    .status-risk { background: #fff3e0; color: #f57c00; }
+    .chart-container {
+        height: 300px;
+        margin-top: 20px;
+    }
+    .growth-chart {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .chart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .chart-item:last-child {
+        border-bottom: none;
+    }
+    .chart-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .chart-value {
+        font-weight: bold;
+        color: #007bff;
+    }
+    .intervention-section {
+        background: #fff3cd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        border-left: 4px solid #ffc107;
+    }
+    .intervention-title {
+        font-weight: 600;
+        color: #856404;
+        margin-bottom: 15px;
+    }
+    .intervention-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .intervention-list li {
+        padding: 8px 0;
+        color: #856404;
+    }
+    .intervention-list li:before {
+        content: "✓ ";
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Detail Header -->
+    <div class="detail-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:stunting_data' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        Detail Data Stunting
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Informasi lengkap data stunting anak</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{% url 'admin_panel:posyandu:stunting_data_update' stunting.id %}" class="btn btn-light">
+                    <i class="fas fa-edit mr-2"></i>
+                    Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Child Information -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-child mr-2"></i>
+            Informasi Anak
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Nama Anak</div>
+                    <div class="info-value">{{ stunting.balita.name|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">NIK</div>
+                    <div class="info-value">{{ stunting.balita.nik|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tanggal Lahir</div>
+                    <div class="info-value">{{ stunting.balita.birth_date|date:"d F Y"|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tempat Lahir</div>
+                    <div class="info-value">{{ stunting.balita.birth_place|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Alamat</div>
+                    <div class="info-value">{{ stunting.balita.address|default:"-" }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Usia</div>
+                    <div class="info-value">{{ stunting.balita.age }} tahun</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Jenis Kelamin</div>
+                    <div class="info-value">{{ stunting.balita.get_gender_display|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Agama</div>
+                    <div class="info-value">{{ stunting.balita.religion|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Pendidikan</div>
+                    <div class="info-value">{{ stunting.balita.education|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Posyandu</div>
+                    <div class="info-value">{{ stunting.posyandu.name|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Measurement Data -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-ruler-combined mr-2"></i>
+            Data Pengukuran
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Tanggal Pengukuran</div>
+                    <div class="info-value">{{ stunting.tanggal_ukur|date:"d F Y"|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Berat Badan (kg)</div>
+                    <div class="info-value">{{ stunting.berat_badan|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tinggi Badan (cm)</div>
+                    <div class="info-value">{{ stunting.tinggi_badan|default:"-" }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Usia saat Pengukuran (bulan)</div>
+                    <div class="info-value">{{ stunting.usia_bulan|default:"-" }} bulan</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status Stunting</div>
+                    <div class="info-value">
+                        <span class="stunting-status status-{{ stunting.status_stunting|default:'normal' }}">{{ stunting.get_status_stunting_display|default:"-" }}</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Petugas Kesehatan</div>
+                    <div class="info-value">{{ stunting.recorded_by.get_full_name|default:stunting.recorded_by.username|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Growth Analysis -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-chart-area mr-2"></i>
+            Analisis Pertumbuhan
+        </h5>
+        <div class="growth-chart">
+            <div class="chart-item">
+                <span class="chart-label">Z-Score Tinggi Badan/Umur (TB/U):</span>
+                <span class="chart-value">{{ stunting.z_score_tb_u|default:"-" }}</span>
+            </div>
+            <div class="chart-item">
+                <span class="chart-label">Z-Score Berat Badan/Umur (BB/U):</span>
+                <span class="chart-value">{{ stunting.z_score_bb_u|default:"-" }}</span>
+            </div>
+            <div class="chart-item">
+                <span class="chart-label">Z-Score Berat Badan/Tinggi Badan (BB/TB):</span>
+                <span class="chart-value">{{ stunting.z_score_bb_tb|default:"-" }}</span>
+            </div>
+            <div class="chart-item">
+                <span class="chart-label">BMI (Body Mass Index):</span>
+                <span class="chart-value">
+                    {% if stunting.tinggi_badan and stunting.berat_badan %}
+                        {% widthratio stunting.berat_badan 1 1 as weight_kg %}
+                        {% widthratio stunting.tinggi_badan 100 1 as height_m %}
+                        {% widthratio weight_kg height_m 1 as bmi %}
+                        {% widthratio bmi height_m 1 as bmi_final %}
+                        {{ bmi_final|floatformat:2 }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intervention Plan -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-hands-helping mr-2"></i>
+            Rencana Intervensi
+        </h5>
+        <div class="info-value">{{ stunting.intervensi_diberikan|default:"Belum ada intervensi yang direncanakan" }}</div>
+        
+        {% if stunting.intervensi_diberikan %}
+        <div class="intervention-section">
+            <div class="intervention-title">Intervensi yang Dilakukan:</div>
+            <ul class="intervention-list">
+                <li>{{ stunting.get_intervensi_diberikan_display }}</li>
+                {% if stunting.hasil_intervensi %}
+                <li>Hasil: {{ stunting.hasil_intervensi }}</li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Follow-up Schedule -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-calendar-check mr-2"></i>
+            Jadwal Tindak Lanjut
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Jadwal Pengukuran Berikutnya</div>
+                    <div class="info-value">{{ stunting.follow_up_date|date:"d F Y"|default:"Belum dijadwalkan" }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Riwayat BBLR</div>
+                    <div class="info-value">{{ stunting.riwayat_bblr|yesno:"Ya,Tidak"|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        {% if stunting.riwayat_penyakit %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="info-item">
+                    <div class="info-label">Riwayat Penyakit</div>
+                    <div class="info-value">{{ stunting.riwayat_penyakit }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Notes -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-sticky-note mr-2"></i>
+            Catatan
+        </h5>
+        <div class="info-value">{{ stunting.keterangan|default:"Tidak ada catatan" }}</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add any additional JavaScript functionality here if needed
+    console.log('Stunting detail page loaded');
+});
+</script>
+{% endblock %}
+

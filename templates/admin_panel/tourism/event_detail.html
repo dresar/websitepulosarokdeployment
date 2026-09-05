@@ -1,0 +1,348 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Event Wisata{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Event Information -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center bg-white border-bottom">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'admin_panel:tourism_events_list' %}" class="btn btn-light btn-sm mr-3">
+                        <i class="fas fa-arrow-left mr-1"></i>Kembali
+                    </a>
+                    <h6 class="m-0 font-weight-bold text-primary">Informasi Event</h6>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'admin_panel:tourism_event_edit' event.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit mr-1"></i>Edit
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="showDeleteModal({{ event.id }}, '{{ event.title|escapejs }}')">
+                        <i class="fas fa-trash mr-1"></i>Hapus
+                    </button>
+                </div>
+            </div>
+            <div class="card-body bg-white">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="text-dark">{{ event.title }}</h4>
+                        <p class="text-muted">{{ event.description }}</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Jenis Event:</strong> 
+                                <span class="badge badge-info">{{ event.get_event_type_display }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Lokasi:</strong> 
+                                <a href="{% url 'admin_panel:tourism_location_detail' event.tourism_location.id %}" 
+                                   class="text-decoration-none">
+                                    {{ event.tourism_location.title }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Tanggal Mulai:</strong><br>
+                                {{ event.start_date|date:"d F Y H:i" }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Tanggal Selesai:</strong><br>
+                                {{ event.end_date|date:"d F Y H:i" }}
+                            </div>
+                        </div>
+
+                        {% if event.organizer %}
+                        <div class="mb-3">
+                            <strong>Penyelenggara:</strong><br>
+                            {{ event.organizer }}
+                        </div>
+                        {% endif %}
+
+                        {% if event.contact_info %}
+                        <div class="mb-3">
+                            <strong>Informasi Kontak:</strong><br>
+                            {{ event.contact_info }}
+                        </div>
+                        {% endif %}
+
+                        {% if event.registration_required %}
+                        <div class="mb-3">
+                            <strong>Pendaftaran:</strong><br>
+                            <span class="badge badge-warning">Diperlukan</span>
+                            {% if event.registration_url %}
+                                <br><a href="{{ event.registration_url }}" target="_blank" class="btn btn-sm btn-primary mt-1">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Daftar Sekarang
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" alt="{{ event.title }}" 
+                                 class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
+                        {% endif %}
+                        
+                        {% if event.hero_image %}
+                            <img src="{{ event.hero_image.url }}" alt="{{ event.title }} Hero" 
+                                 class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Status Information -->
+                <div class="mt-4">
+                    <h6 class="text-primary">Status Event</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    {% if event.is_active %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">Status</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    {% if event.is_featured %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-muted"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">Featured</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    {% now "Y-m-d H:i" as current_datetime %}
+                                    {% if event.start_date|date:"Y-m-d H:i" > current_datetime %}
+                                        <i class="fas fa-clock text-info"></i>
+                                    {% elif event.end_date|date:"Y-m-d H:i" < current_datetime %}
+                                        <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-play text-warning"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">
+                                    {% if event.start_date|date:"Y-m-d H:i" > current_datetime %}
+                                        Akan Datang
+                                    {% elif event.end_date|date:"Y-m-d H:i" < current_datetime %}
+                                        Selesai
+                                    {% else %}
+                                        Berlangsung
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="h5 text-primary mb-0">
+                                    {% if event.registration_required %}
+                                        <i class="fas fa-user-plus text-info"></i>
+                                    {% else %}
+                                        <i class="fas fa-user text-muted"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">Registrasi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary">Aksi Cepat</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'admin_panel:tourism_event_edit' event.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit mr-2"></i>Edit Event
+                    </a>
+                    <a href="{% url 'admin_panel:tourism_location_detail' event.tourism_location.id %}" class="btn btn-info">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Lihat Lokasi
+                    </a>
+                    <a href="{% url 'tourism:event_detail_by_slug' event.slug %}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-external-link-alt mr-2"></i>Lihat di Website
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Details -->
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary">Detail Event</h6>
+            </div>
+            <div class="card-body bg-white">
+                <div class="mb-3">
+                    <strong>Dibuat:</strong><br>
+                    {{ event.created_at|date:"d F Y H:i" }}
+                </div>
+                
+                {% if event.updated_at %}
+                <div class="mb-3">
+                    <strong>Diperbarui:</strong><br>
+                    {{ event.updated_at|date:"d F Y H:i" }}
+                </div>
+                {% endif %}
+
+                {% if event.created_by %}
+                <div class="mb-3">
+                    <strong>Dibuat Oleh:</strong><br>
+                    {{ event.created_by.get_full_name|default:event.created_by.username }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Media Files -->
+        {% if event.hero_video or event.hero_youtube %}
+        <div class="card shadow mb-4 bg-white">
+            <div class="card-header py-3 bg-white border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary">Media</h6>
+            </div>
+            <div class="card-body bg-white">
+                {% if event.hero_video %}
+                <div class="mb-3">
+                    <strong>Video Hero:</strong><br>
+                    <video controls class="img-fluid">
+                        <source src="{{ event.hero_video.url }}" type="video/mp4">
+                        Browser Anda tidak mendukung video.
+                    </video>
+                </div>
+                {% endif %}
+
+                {% if event.hero_youtube %}
+                <div class="mb-3">
+                    <strong>YouTube Hero:</strong><br>
+                    <a href="{{ event.hero_youtube }}" target="_blank" class="btn btn-danger btn-sm">
+                        <i class="fab fa-youtube mr-1"></i>Lihat di YouTube
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Penghapusan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                </div>
+                <p class="text-center">Apakah Anda yakin ingin menghapus event <strong id="deleteItemName"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-warning mr-2"></i>
+                    <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/tourism-admin.css' %}">
+{% endblock extra_css %}
+
+{% block extra_js %}
+<script>
+let currentDeleteId = null;
+
+function showDeleteModal(eventId, eventName) {
+    currentDeleteId = eventId;
+    document.getElementById('deleteItemName').textContent = eventName;
+    $('#deleteModal').modal('show');
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+    if (currentDeleteId) {
+        deleteEvent(currentDeleteId);
+    }
+});
+
+function deleteEvent(eventId) {
+    fetch(`{% url 'admin_panel:tourism_event_delete' 0 %}`.replace('0', eventId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        $('#deleteModal').modal('hide');
+        if (data.success) {
+            showAlert('success', 'Event berhasil dihapus!');
+            setTimeout(() => {
+                window.location.href = '{% url "admin_panel:tourism_events_list" %}';
+            }, 1500);
+        } else {
+            showAlert('error', data.error || 'Gagal menghapus event!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        $('#deleteModal').modal('hide');
+        showAlert('error', 'Terjadi kesalahan!');
+    });
+}
+
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.content-wrapper');
+    container.insertAdjacentHTML('afterbegin', alertHtml);
+    
+    setTimeout(() => {
+        const alert = container.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

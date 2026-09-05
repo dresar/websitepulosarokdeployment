@@ -1,0 +1,949 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{% if news %}Edit Berita{% else %}Tambah Berita{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs4.min.css">
+<style>
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .form-section h5 {
+        color: #333;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #007bff;
+    }
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .tag-input {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        min-height: 38px;
+    }
+    .tag-item {
+        display: inline-block;
+        background: #007bff;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        margin: 0.125rem;
+        font-size: 0.875rem;
+    }
+    .tag-item .remove {
+        cursor: pointer;
+        margin-left: 0.5rem;
+    }
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    .status-published { background-color: #28a745; }
+    .status-draft { background-color: #ffc107; }
+    .status-scheduled { background-color: #17a2b8; }
+    .status-archived { background-color: #6c757d; }
+    .preview-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .preview-content {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .required-field::after {
+        content: " *";
+        color: red;
+    }
+    .conditional-field {
+        display: none;
+        transition: all 0.3s ease;
+    }
+    .conditional-field.show {
+        display: block;
+    }
+    .form-floating {
+        position: relative;
+    }
+    .form-floating > .form-control {
+        height: calc(3.5rem + 2px);
+        padding: 1rem 0.75rem;
+    }
+    .form-floating > label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        padding: 1rem 0.75rem;
+        pointer-events: none;
+        border: 1px solid transparent;
+        transform-origin: 0 0;
+        transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+    }
+    
+    /* Summernote Custom Styles */
+    .note-editor {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+    
+    .note-editor .note-toolbar {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.375rem 0.375rem 0 0;
+    }
+    
+    .note-editor .note-editing-area {
+        background: white;
+    }
+    
+    .note-editor .note-editable {
+        padding: 15px;
+        min-height: 300px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    
+    .note-editor .note-editable:focus {
+        outline: none;
+    }
+    
+    .note-editor .note-toolbar .btn-group .btn {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        padding: 8px 12px;
+        margin: 0 2px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+    
+    .note-editor .note-toolbar .btn-group .btn:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    .note-editor .note-toolbar .btn-group .btn.active {
+        background: #007bff;
+        color: white;
+    }
+    
+    .note-editor .note-toolbar .btn-group .btn i {
+        font-size: 14px;
+    }
+    
+    .note-editor .note-editable img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .note-editor .note-editable table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .note-editor .note-editable table td,
+    .note-editor .note-editable table th {
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    
+    .note-editor .note-editable table th {
+        background: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .note-editor .note-editable blockquote {
+        border-left: 4px solid #007bff;
+        margin: 15px 0;
+        padding: 10px 20px;
+        background: #f8f9fa;
+        font-style: italic;
+    }
+    
+    .note-editor .note-editable pre {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        overflow-x: auto;
+    }
+    
+    .note-editor .note-editable h1,
+    .note-editor .note-editable h2,
+    .note-editor .note-editable h3,
+    .note-editor .note-editable h4,
+    .note-editor .note-editable h5,
+    .note-editor .note-editable h6 {
+        margin: 20px 0 10px 0;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .note-editor .note-editable h1 { font-size: 28px; }
+    .note-editor .note-editable h2 { font-size: 24px; }
+    .note-editor .note-editable h3 { font-size: 20px; }
+    .note-editor .note-editable h4 { font-size: 18px; }
+    .note-editor .note-editable h5 { font-size: 16px; }
+    .note-editor .note-editable h6 { font-size: 14px; }
+    
+    .note-editor .note-editable p {
+        margin: 10px 0;
+    }
+    
+    .note-editor .note-editable ul,
+    .note-editor .note-editable ol {
+        margin: 10px 0;
+        padding-left: 30px;
+    }
+    
+    .note-editor .note-editable li {
+        margin: 5px 0;
+    }
+    
+    .note-editor .note-editable a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .note-editor .note-editable a:hover {
+        text-decoration: underline;
+    }
+    
+    .note-editor .note-editable hr {
+        border: none;
+        border-top: 2px solid #dee2e6;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{% if news %}Edit Berita{% else %}Tambah Berita{% endif %}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2">
+                <a href="{% url 'admin_panel:news_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                {% if news %}
+                <a href="{% url 'admin_panel:news_detail' news.pk %}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye"></i> Lihat
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="newsForm" 
+          data-news-id="{% if news %}{{ news.id|escapejs }}{% else %}new{% endif %}"
+          data-has-image="{% if news and news.featured_image %}true{% else %}false{% endif %}"
+          data-available-tags='{% if all_tags %}{{ all_tags|escapejs }}{% else %}[]{% endif %}'
+          data-featured-image-url="{% if news and news.featured_image and news.featured_image.url %}{{ news.featured_image.url|escapejs }}{% endif %}">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h5><i class="fas fa-info-circle"></i> Informasi Dasar</h5>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group mb-3">
+                        <label for="title" class="form-label required-field">Judul Berita</label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               value="{% if news %}{{ news.title }}{% endif %}" required>
+                        <div class="form-text">Judul yang menarik akan meningkatkan engagement pembaca</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="slug" class="form-label">Slug URL</label>
+                        <input type="text" class="form-control" id="slug" name="slug" 
+                               value="{% if news %}{{ news.slug }}{% endif %}">
+                        <div class="form-text">URL-friendly version (auto-generated)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="category" class="form-label required-field">Kategori</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Pilih Kategori</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if news and news.category.id == cat.id %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="priority" class="form-label">Prioritas</label>
+                        <select class="form-control" id="priority" name="priority">
+                            <option value="low" {% if news and news.priority == 'low' %}selected{% endif %}>Rendah</option>
+                            <option value="normal" {% if news and news.priority == 'normal' %}selected{% endif %}>Normal</option>
+                            <option value="high" {% if news and news.priority == 'high' %}selected{% endif %}>Tinggi</option>
+                            <option value="urgent" {% if news and news.priority == 'urgent' %}selected{% endif %}>Mendesak</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="excerpt" class="form-label">Ringkasan</label>
+                <textarea class="form-control" id="excerpt" name="excerpt" rows="3" 
+                          maxlength="300">{% if news %}{{ news.excerpt }}{% endif %}</textarea>
+                <div class="form-text">Ringkasan singkat berita (maksimal 300 karakter)</div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="form-section">
+            <h5><i class="fas fa-edit"></i> Konten Berita</h5>
+            <div class="form-group mb-3">
+                <label for="content" class="form-label required-field">Isi Berita</label>
+                <textarea class="form-control" id="content" name="content" rows="15" required>{% if news %}{{ news.content }}{% endif %}</textarea>
+            </div>
+        </div>
+
+        <!-- Media -->
+        <div class="form-section">
+            <h5><i class="fas fa-images"></i> Media</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="featured_image" class="form-label">Gambar Utama</label>
+                        <input type="file" class="form-control" id="featured_image" name="featured_image" accept="image/*">
+                        <div class="form-text">Format: JPG, PNG, GIF. Maksimal 5MB</div>
+                        {% if news and news.featured_image and news.featured_image.url %}
+                        <div class="mt-2">
+                            <img src="{{ news.featured_image.url }}" alt="Current image" class="image-preview">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="featured_image_alt" class="form-label">Alt Text Gambar</label>
+                        <input type="text" class="form-control" id="featured_image_alt" name="featured_image_alt" 
+                               value="{% if news and news.featured_image_alt %}{{ news.featured_image_alt }}{% endif %}">
+                        <div class="form-text">Deskripsi gambar untuk SEO dan aksesibilitas</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="youtube_url" class="form-label">URL YouTube</label>
+                        <input type="url" class="form-control" id="youtube_url" name="youtube_url" 
+                               value="{% if news %}{{ news.youtube_url }}{% endif %}">
+                        <div class="form-text">URL video YouTube untuk embed</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="video_file" class="form-label">File Video</label>
+                        <input type="file" class="form-control" id="video_file" name="video_file" accept="video/*">
+                        <div class="form-text">File video lokal (MP4, AVI, MOV)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-section">
+            <h5><i class="fas fa-tags"></i> Tags</h5>
+            <div class="form-group mb-3">
+                <label for="tags" class="form-label">Tags</label>
+                <div class="tag-input" id="tagContainer">
+                    <input type="text" id="tagInput" placeholder="Ketik tag dan tekan Enter..." class="border-0 w-100">
+                </div>
+                <div class="form-text">Tekan Enter untuk menambah tag</div>
+                <div id="selectedTags" class="mt-2">
+                    {% if news %}
+                        {% for tag in news.tags.all %}
+                        <span class="tag-item">
+                            {{ tag.name }}
+                            <span class="remove" onclick="removeTag(this)">&times;</span>
+                            <input type="hidden" name="tags" value="{{ tag.id }}">
+                        </span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Status & Settings -->
+        <div class="form-section">
+            <h5><i class="fas fa-cog"></i> Status & Pengaturan</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="status" class="form-label required-field">Status</label>
+                        <select class="form-control" id="status" name="status" required>
+                            <option value="draft" {% if news and news.status == 'draft' %}selected{% endif %}>Draft</option>
+                            <option value="published" {% if news and news.status == 'published' %}selected{% endif %}>Published</option>
+                            <option value="scheduled" {% if news and news.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                            <option value="archived" {% if news and news.status == 'archived' %}selected{% endif %}>Archived</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="published_date" class="form-label">Tanggal Publikasi</label>
+                        <input type="datetime-local" class="form-control" id="published_date" name="published_date" 
+                               value="{% if news and news.published_date %}{{ news.published_date|date:'Y-m-d\TH:i' }}{% endif %}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conditional field for scheduled date -->
+            <div class="row conditional-field" id="scheduled-date-field">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="scheduled_date" class="form-label required-field">Tanggal Terjadwal</label>
+                        <input type="datetime-local" class="form-control" id="scheduled_date" name="scheduled_date" 
+                               value="{% if news and news.scheduled_date %}{{ news.scheduled_date|date:'Y-m-d\TH:i' }}{% endif %}">
+                        <div class="form-text">Pilih tanggal dan waktu untuk publikasi terjadwal</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="is_featured" name="is_featured" 
+                               {% if news and news.is_featured %}checked{% endif %}>
+                        <label class="form-check-label" for="is_featured">
+                            Featured News
+                        </label>
+                        <div class="form-text">Tampilkan sebagai berita utama</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="is_breaking" name="is_breaking" 
+                               {% if news and news.is_breaking %}checked{% endif %}>
+                        <label class="form-check-label" for="is_breaking">
+                            Breaking News
+                        </label>
+                        <div class="form-text">Tampilkan sebagai berita terbaru</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Settings -->
+        <div class="form-section">
+            <h5><i class="fas fa-search"></i> SEO & Meta</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="meta_title" class="form-label">Meta Title</label>
+                        <input type="text" class="form-control" id="meta_title" name="meta_title" 
+                               value="{% if news %}{{ news.meta_title }}{% endif %}" maxlength="60">
+                        <div class="form-text">Judul untuk SEO (maksimal 60 karakter)</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="allow_comments" class="form-label">Izinkan Komentar</label>
+                        <select class="form-control" id="allow_comments" name="allow_comments">
+                            <option value="true" {% if news and news.allow_comments %}selected{% endif %}>Ya</option>
+                            <option value="false" {% if news and not news.allow_comments %}selected{% endif %}>Tidak</option>
+                        </select>
+                        <div class="form-text">Izinkan pembaca untuk berkomentar</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label for="meta_description" class="form-label">Meta Description</label>
+                <textarea class="form-control" id="meta_description" name="meta_description" rows="3" 
+                          maxlength="160">{% if news %}{{ news.meta_description }}{% endif %}</textarea>
+                <div class="form-text">Deskripsi untuk SEO (maksimal 160 karakter)</div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <h5><i class="fas fa-eye"></i> Preview</h5>
+            <div class="preview-content" id="previewContent">
+                <div class="text-muted">Preview akan muncul di sini...</div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button type="button" class="btn btn-outline-secondary" onclick="saveDraft()">
+                        <i class="fas fa-save"></i> Simpan Draft
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="previewNews()">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <small id="auto-save-indicator" class="text-muted ml-3"></small>
+                </div>
+                <div>
+                    <a href="{% url 'admin_panel:news_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> {% if news %}Update Berita{% else %}Publish Berita{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs4.min.js"></script>
+
+<script>
+// Initialize Summernote
+$(document).ready(function() {
+    $('#content').summernote({
+        height: 500,
+        minHeight: 300,
+        maxHeight: 800,
+        focus: true,
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+            ['fontname', ['fontname']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'video', 'hr']],
+            ['view', ['fullscreen', 'codeview', 'help']],
+            ['misc', ['undo', 'redo']]
+        ],
+        fontNames: [
+            'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New',
+            'Helvetica', 'Impact', 'Tahoma', 'Times New Roman',
+            'Verdana', 'Poppins', 'Open Sans', 'Roboto'
+        ],
+        fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '36', '48'],
+        popover: {
+            image: [
+                ['image', ['resizeFull', 'resizeHalf', 'resizeQuarter', 'resizeNone']],
+                ['float', ['floatLeft', 'floatRight', 'floatNone']],
+                ['remove', ['removeMedia']]
+            ],
+            link: [
+                ['link', ['linkDialogShow', 'unlink']]
+            ],
+            table: [
+                ['add', ['addRowDown', 'addRowUp', 'addColLeft', 'addColRight']],
+                ['delete', ['deleteRow', 'deleteCol', 'deleteTable']],
+            ],
+            air: [
+                ['color', ['color']],
+                ['font', ['bold', 'underline', 'clear']]
+            ]
+        },
+        callbacks: {
+            onInit: function() {
+                updatePreview();
+                toggleConditionalFields();
+            },
+            onChange: function(contents) {
+                updatePreview();
+            },
+            onImageUpload: function(files) {
+                for (let i = 0; i < files.length; i++) {
+                    uploadImage(files[i]);
+                }
+            }
+        }
+    });
+
+    // Status change handler for conditional fields
+    $('#status').on('change', function() {
+        toggleConditionalFields();
+    });
+
+    // Initialize conditional fields
+    toggleConditionalFields();
+});
+
+// Toggle conditional fields based on status
+function toggleConditionalFields() {
+    const status = document.getElementById('status').value;
+    const scheduledField = document.getElementById('scheduled-date-field');
+    
+    if (status === 'scheduled') {
+        scheduledField.classList.add('show');
+        document.getElementById('scheduled_date').required = true;
+    } else {
+        scheduledField.classList.remove('show');
+        document.getElementById('scheduled_date').required = false;
+    }
+}
+
+// Image upload function for Summernote
+function uploadImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    fetch('{% url "admin_panel:news_upload_image" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#content').summernote('insertImage', data.url);
+        } else {
+            alert('Error uploading image: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error uploading image');
+    });
+}
+
+// Auto-generate slug from title
+document.getElementById('title').addEventListener('input', function() {
+    const title = this.value;
+    const slug = title.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-');
+    document.getElementById('slug').value = slug;
+});
+
+// Tag management
+const form = document.getElementById('newsForm');
+
+// Get data from form attributes
+const newsId = form.dataset.newsId;
+const hasExistingImage = form.dataset.hasImage === 'true';
+const featuredImageUrl = form.dataset.featuredImageUrl || null;
+
+// Initialize variables
+let availableTags = [];
+let selectedTagIds = [];
+
+// Parse available tags
+try {
+    availableTags = JSON.parse(form.dataset.availableTags || '[]');
+} catch (e) {
+    console.error('Error parsing available tags:', e);
+    availableTags = [];
+}
+
+document.getElementById('tagInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addTag(this.value.trim());
+        this.value = '';
+    }
+});
+
+function addTag(tagName) {
+    if (!tagName) return;
+    
+    // Check if tag already exists
+    const existingTags = document.querySelectorAll('#selectedTags .tag-item');
+    for (let tag of existingTags) {
+        if (tag.textContent.trim().replace('×', '') === tagName) {
+            return;
+        }
+    }
+    
+    // Find or create tag
+    let tagId = null;
+    const existingTag = availableTags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
+    
+    if (existingTag) {
+        tagId = existingTag.id;
+    } else {
+        // Create new tag
+        tagId = 'new_' + Date.now();
+    }
+    
+    // Add tag to UI
+    const tagElement = document.createElement('span');
+    tagElement.className = 'tag-item';
+    tagElement.innerHTML = `${tagName} <span class="remove" onclick="removeTag(this)">&times;</span>`;
+    
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'tags';
+    hiddenInput.value = tagId;
+    tagElement.appendChild(hiddenInput);
+    
+    const selectedTagsContainer = document.getElementById('selectedTags');
+    if (selectedTagsContainer) {
+        selectedTagsContainer.appendChild(tagElement);
+    }
+}
+
+function removeTag(element) {
+    if (element && element.parentElement) {
+        element.parentElement.remove();
+    }
+}
+
+// Update preview
+function updatePreview() {
+    try {
+        const title = document.getElementById('title').value;
+        const excerpt = document.getElementById('excerpt').value;
+        const content = $('#content').summernote('code');
+        const featuredImage = document.getElementById('featured_image').files[0];
+        
+        let previewHtml = '';
+        
+        if (title) {
+            previewHtml += `<h2>${title}</h2>`;
+        }
+        
+        if (excerpt) {
+            previewHtml += `<p class="text-muted">${excerpt}</p>`;
+        }
+        
+        if (featuredImage) {
+            const imageUrl = URL.createObjectURL(featuredImage);
+            previewHtml += `<img src="${imageUrl}" class="img-fluid mb-3" alt="Featured image">`;
+        } else if (hasExistingImage && featuredImageUrl) {
+            previewHtml += `<img src="${featuredImageUrl}" class="img-fluid mb-3" alt="Featured image">`;
+        }
+        
+        if (content) {
+            previewHtml += content;
+        }
+        
+        const previewContent = document.getElementById('previewContent');
+        if (previewContent) {
+            previewContent.innerHTML = previewHtml || '<div class="text-muted">Preview akan muncul di sini...</div>';
+        }
+    } catch (error) {
+        console.error('Error updating preview:', error);
+    }
+}
+
+// Update preview when fields change
+['title', 'excerpt', 'featured_image'].forEach(fieldId => {
+    const element = document.getElementById(fieldId);
+    if (element) {
+        element.addEventListener('input', updatePreview);
+        element.addEventListener('change', updatePreview);
+    }
+});
+
+// Save as draft
+function saveDraft() {
+    const title = document.getElementById('title').value.trim();
+    const content = $('#content').summernote('code').replace(/<[^>]*>/g, '').trim();
+    
+    if (!title) {
+        alert('Judul berita harus diisi untuk menyimpan draft');
+        return;
+    }
+    
+    document.getElementById('status').value = 'draft';
+    
+    // Show loading state
+    const draftBtn = document.querySelector('button[onclick="saveDraft()"]');
+    const originalText = draftBtn.innerHTML;
+    draftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan Draft...';
+    draftBtn.disabled = true;
+    
+    document.getElementById('newsForm').submit();
+}
+
+// Preview news
+function previewNews() {
+    try {
+        const title = document.getElementById('title').value;
+        const excerpt = document.getElementById('excerpt').value;
+        const content = $('#content').summernote('code');
+        const featuredImage = document.getElementById('featured_image').files[0];
+        
+        if (!title && !content) {
+            alert('Judul dan konten harus diisi untuk preview');
+            return;
+        }
+        
+        let previewHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Preview Berita</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                <style>
+                    body { font-family: 'Poppins', sans-serif; }
+                    .preview-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="preview-container">
+        `;
+        
+        if (title) {
+            previewHtml += `<h1 class="mb-3">${title}</h1>`;
+        }
+        
+        if (excerpt) {
+            previewHtml += `<p class="lead text-muted mb-4">${excerpt}</p>`;
+        }
+        
+        if (featuredImage) {
+            const imageUrl = URL.createObjectURL(featuredImage);
+            previewHtml += `<img src="${imageUrl}" class="img-fluid mb-4" alt="Featured image">`;
+        } else if (hasExistingImage && featuredImageUrl) {
+            previewHtml += `<img src="${featuredImageUrl}" class="img-fluid mb-4" alt="Featured image">`;
+        }
+        
+        if (content) {
+            previewHtml += `<div class="content">${content}</div>`;
+        }
+        
+        previewHtml += `
+                </div>
+            </body>
+            </html>
+        `;
+        
+        const previewWindow = window.open('', '_blank', 'width=1000,height=700');
+        if (previewWindow) {
+            previewWindow.document.write(previewHtml);
+            previewWindow.document.close();
+        } else {
+            alert('Tidak dapat membuka jendela preview. Pastikan popup blocker dinonaktifkan.');
+        }
+    } catch (error) {
+        console.error('Error generating preview:', error);
+        alert('Error generating preview: ' + error.message);
+    }
+}
+
+// Form validation
+document.getElementById('newsForm').addEventListener('submit', function(e) {
+    try {
+        const title = document.getElementById('title').value.trim();
+        const content = $('#content').summernote('code').replace(/<[^>]*>/g, '').trim();
+        const status = document.getElementById('status').value;
+        const scheduledDate = document.getElementById('scheduled_date').value;
+        
+        if (!title) {
+            alert('Judul berita harus diisi');
+            e.preventDefault();
+            return;
+        }
+        
+        if (!content) {
+            alert('Konten berita harus diisi');
+            e.preventDefault();
+            return;
+        }
+        
+        if (status === 'scheduled' && !scheduledDate) {
+            alert('Tanggal terjadwal harus diisi untuk status scheduled');
+            e.preventDefault();
+            return;
+        }
+        
+        // Update meta title if empty
+        const metaTitle = document.getElementById('meta_title');
+        if (metaTitle && !metaTitle.value) {
+            metaTitle.value = title;
+        }
+        
+        // Update meta description if empty
+        const metaDescription = document.getElementById('meta_description');
+        const excerpt = document.getElementById('excerpt');
+        if (metaDescription && !metaDescription.value && excerpt && excerpt.value) {
+            metaDescription.value = excerpt.value;
+        }
+        
+        // Show loading state
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after 5 seconds as fallback
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 5000);
+        }
+    } catch (error) {
+        console.error('Error in form validation:', error);
+        alert('Error dalam validasi form: ' + error.message);
+        e.preventDefault();
+    }
+});
+
+// Auto-save draft every 30 seconds
+let autoSaveInterval = setInterval(function() {
+    try {
+        const title = document.getElementById('title').value.trim();
+        const content = $('#content').summernote('code');
+        
+        if (title && content) {
+            // Auto-save logic here
+            console.log('Auto-saving draft...');
+            
+            // You can implement actual auto-save here
+            // For now, just show a subtle indicator
+            const autoSaveIndicator = document.getElementById('auto-save-indicator');
+            if (autoSaveIndicator) {
+                autoSaveIndicator.textContent = 'Terakhir disimpan: ' + new Date().toLocaleTimeString();
+            }
+        }
+    } catch (error) {
+        console.error('Error in auto-save:', error);
+    }
+}, 30000);
+
+// Clear auto-save when form is submitted
+document.getElementById('newsForm').addEventListener('submit', function() {
+    try {
+        clearInterval(autoSaveInterval);
+    } catch (error) {
+        console.error('Error clearing auto-save interval:', error);
+    }
+});
+</script>
+{% endblock %}
+

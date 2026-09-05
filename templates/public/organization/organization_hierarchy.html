@@ -1,0 +1,174 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Page Header -->
+<section class="py-4 sm:py-6 md:py-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900">
+    <div class="container mx-auto px-3 sm:px-4 lg:px-6">
+        <div class="text-center mb-4 sm:mb-6 md:mb-8">
+            <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+                Struktur Organisasi Hierarkis
+            </h1>
+            <p class="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+                Struktur organisasi Desa Pulosarok dalam bentuk hierarki
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Hierarchy Content -->
+<section class="py-4 sm:py-6 md:py-8 bg-white dark:bg-gray-800">
+    <div class="container mx-auto px-3 sm:px-4 lg:px-6">
+        <!-- Mobile Hierarchy View -->
+        <div class="block md:hidden">
+            <div class="space-y-4">
+                <!-- Kepala Desa -->
+                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-blue-200 dark:border-blue-900 rounded-xl p-4 text-center shadow-md">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-crown text-lg"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-1">Kepala Desa</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Pimpinan tertinggi desa</p>
+                    <div class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{ stats.kepala_desa|default:0 }} Orang</div>
+                </div>
+                
+                <!-- Sekretaris Desa -->
+                <div class="bg-gradient-to-br from-green-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-green-200 dark:border-green-900 rounded-xl p-4 text-center shadow-md">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-user-tie text-lg"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-1">Sekretaris Desa</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Pembantu kepala desa</p>
+                    <div class="text-sm font-semibold text-green-600 dark:text-green-400">{{ stats.sekretaris_desa|default:0 }} Orang</div>
+                </div>
+                
+                <!-- Kaur/Kasi -->
+                <div class="bg-gradient-to-br from-purple-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-900 rounded-xl p-4 text-center shadow-md">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-users text-lg"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-1">Kaur/Kasi</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Kepala urusan dan seksi</p>
+                    <div class="text-sm font-semibold text-purple-600 dark:text-purple-400">{{ stats.kaur_kasi|default:0 }} Orang</div>
+                </div>
+                
+                <!-- Kepala Dusun -->
+                <div class="bg-gradient-to-br from-orange-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-orange-200 dark:border-orange-900 rounded-xl p-4 text-center shadow-md">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-home text-lg"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-1">Kepala Dusun</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">Pimpinan tingkat dusun</p>
+                    <div class="text-sm font-semibold text-orange-600 dark:text-orange-400">{{ stats.kepala_dusun|default:0 }} Orang</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Desktop Hierarchy View -->
+        <div class="hidden md:block">
+            <div class="max-w-4xl mx-auto">
+                <!-- Hierarchy Tree -->
+                <div class="space-y-8">
+                    <!-- Level 1: Kepala Desa -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-blue-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-blue-200 dark:border-blue-900 rounded-xl p-6 shadow-lg max-w-sm mx-auto">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                                <i class="fas fa-crown text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Kepala Desa</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Pimpinan tertinggi desa</p>
+                            <div class="text-base font-semibold text-blue-600 dark:text-blue-400">{{ stats.kepala_desa|default:0 }} Orang</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Connector -->
+                    <div class="flex justify-center">
+                        <div class="w-1 h-8 bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
+                    
+                    <!-- Level 2: Sekretaris & Kaur -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Sekretaris Desa -->
+                        <div class="bg-gradient-to-br from-green-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-green-200 dark:border-green-900 rounded-xl p-6 shadow-lg">
+                            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                                <i class="fas fa-user-tie text-lg"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Sekretaris Desa</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Pembantu kepala desa</p>
+                            <div class="text-sm font-semibold text-green-600 dark:text-green-400">{{ stats.sekretaris_desa|default:0 }} Orang</div>
+                        </div>
+                        
+                        <!-- Kaur/Kasi -->
+                        <div class="bg-gradient-to-br from-purple-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-purple-200 dark:border-purple-900 rounded-xl p-6 shadow-lg">
+                            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                                <i class="fas fa-users text-lg"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Kaur/Kasi</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Kepala urusan dan seksi</p>
+                            <div class="text-sm font-semibold text-purple-600 dark:text-purple-400">{{ stats.kaur_kasi|default:0 }} Orang</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Connector -->
+                    <div class="flex justify-center">
+                        <div class="w-1 h-8 bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
+                    
+                    <!-- Level 3: Kepala Dusun -->
+                    <div class="text-center">
+                        <div class="bg-gradient-to-br from-orange-50 to-white dark:from-gray-700 dark:to-gray-800 border-2 border-orange-200 dark:border-orange-900 rounded-xl p-6 shadow-lg max-w-sm mx-auto">
+                            <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                                <i class="fas fa-home text-lg"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2">Kepala Dusun</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Pimpinan tingkat dusun</p>
+                            <div class="text-sm font-semibold text-orange-600 dark:text-orange-400">{{ stats.kepala_dusun|default:0 }} Orang</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Organization Links -->
+        <div class="mt-8 md:mt-12">
+            <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+                Organisasi Lainnya
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <a href="{% url 'organization:lembaga_adat_list' %}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-3 md:p-4 text-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-landmark text-sm"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">Lembaga Adat</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Pelestarian budaya</p>
+                </a>
+                
+                <a href="{% url 'organization:pkk_list' %}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-3 md:p-4 text-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-female text-sm"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">PKK</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Pemberdayaan keluarga</p>
+                </a>
+                
+                <a href="{% url 'organization:kepemudaan_list' %}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-3 md:p-4 text-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-user-friends text-sm"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">Kepemudaan</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Organisasi pemuda</p>
+                </a>
+                
+                <a href="{% url 'organization:karang_taruna_list' %}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-3 md:p-4 text-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
+                        <i class="fas fa-users text-sm"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1">Karang Taruna</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">Organisasi pemuda</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

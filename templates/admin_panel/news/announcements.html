@@ -1,0 +1,830 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Manajemen Pengumuman{% endblock %}
+
+{% block extra_css %}
+<style>
+    .announcement-card {
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 0;
+        margin-bottom: 1.5rem;
+        background: white;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .announcement-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        transform: translateY(-3px);
+    }
+    .announcement-card.urgent {
+        border-left: 5px solid #dc3545;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+    }
+    .announcement-card.pinned {
+        border-left: 5px solid #ffc107;
+        background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
+        position: relative;
+    }
+    .announcement-card.pinned::before {
+        content: "📌";
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.2rem;
+        z-index: 1;
+    }
+    .announcement-card.popup {
+        border-left: 5px solid #17a2b8;
+        background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    }
+    .announcement-card.draft {
+        border-left: 5px solid #6c757d;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        opacity: 0.8;
+    }
+    .announcement-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .announcement-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.3;
+        flex: 1;
+    }
+    .announcement-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .announcement-content {
+        padding: 1.5rem;
+        line-height: 1.7;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    .announcement-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    .announcement-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: #ffffff;
+    }
+    .info-item {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border-left: 3px solid #007bff;
+    }
+    .info-item .label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+    .info-item .value {
+        font-weight: 500;
+        color: #333;
+    }
+    .filter-tabs {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .filter-tab {
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        text-decoration: none;
+        color: #6c757d;
+        margin-right: 0.75rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        display: inline-block;
+    }
+    .filter-tab.active {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+    }
+    .filter-tab:hover {
+        background: #e9ecef;
+        color: #333;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    .filter-tab.active:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        color: white;
+    }
+    .bulk-actions {
+        background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
+        display: none;
+        border: 1px solid #dee2e6;
+    }
+    .bulk-actions.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .search-box {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-top: 4px solid #007bff;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .stat-card .number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 0.5rem;
+    }
+    .stat-card .label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        color: #dee2e6;
+    }
+    .empty-state h5 {
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    .priority-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-weight: 600;
+    }
+    .date-range {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    .date-range i {
+        color: #007bff;
+        font-size: 1rem;
+    }
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .btn-modern.btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+    .btn-modern.btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+    .btn-modern.btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    }
+    .btn-modern.btn-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    .btn-modern.btn-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    .btn-modern.btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    }
+    .form-control-modern {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control-modern:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .page-header-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .page-header-modern h1 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+    .page-header-modern .btn {
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    .announcement-footer {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .announcement-author {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .announcement-author i {
+        color: #007bff;
+    }
+    .pagination-modern {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    .pagination-modern .page-link {
+        border-radius: 10px;
+        margin: 0 0.25rem;
+        border: 2px solid #e9ecef;
+        color: #007bff;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .pagination-modern .page-link:hover {
+        background: #007bff;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .pagination-modern .page-item.active .page-link {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border-color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header-modern">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+            <h1 class="h2">Manajemen Pengumuman</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group mr-2">
+                    <a href="{% url 'admin_panel:announcement_create' %}" class="btn btn-light btn-modern">
+                        <i class="fas fa-plus"></i> Tambah Pengumuman
+                    </a>
+                    <a href="{% url 'admin_panel:news_dashboard' %}" class="btn btn-outline-light btn-modern">
+                        <i class="fas fa-chart-pie"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="number">{{ announcements.paginator.count }}</div>
+            <div class="label">Total Pengumuman</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ published_announcements|default:0 }}</div>
+            <div class="label">Dipublikasi</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ draft_announcements|default:0 }}</div>
+            <div class="label">Draft</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">{{ pinned_announcements|default:0 }}</div>
+            <div class="label">Dipin</div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="{% url 'admin_panel:announcements_list' %}" 
+           class="filter-tab {% if not current_filters.status %}active{% endif %}">
+            <i class="fas fa-list"></i> Semua
+        </a>
+        <a href="{% url 'admin_panel:announcements_list' %}?status=published" 
+           class="filter-tab {% if current_filters.status == 'published' %}active{% endif %}">
+            <i class="fas fa-check-circle"></i> Dipublikasi
+        </a>
+        <a href="{% url 'admin_panel:announcements_list' %}?status=draft" 
+           class="filter-tab {% if current_filters.status == 'draft' %}active{% endif %}">
+            <i class="fas fa-edit"></i> Draft
+        </a>
+        <a href="{% url 'admin_panel:announcements_list' %}?priority=urgent" 
+           class="filter-tab {% if current_filters.priority == 'urgent' %}active{% endif %}">
+            <i class="fas fa-exclamation-triangle"></i> Mendesak
+        </a>
+        <a href="{% url 'admin_panel:announcements_list' %}?pinned=true" 
+           class="filter-tab {% if current_filters.pinned %}active{% endif %}">
+            <i class="fas fa-thumbtack"></i> Dipin
+        </a>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" id="bulkActions">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <span class="text-muted">Selected: <span id="selectedCount">0</span> announcements</span>
+            </div>
+            <div class="col-md-6 text-right">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-success btn-modern" onclick="bulkAction('publish')">
+                        <i class="fas fa-play"></i> Publikasikan
+                    </button>
+                    <button class="btn btn-sm btn-warning btn-modern" onclick="bulkAction('draft')">
+                        <i class="fas fa-edit"></i> Draft
+                    </button>
+                    <button class="btn btn-sm btn-info btn-modern" onclick="bulkAction('pin')">
+                        <i class="fas fa-thumbtack"></i> Pin
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-modern" onclick="bulkAction('delete')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+        <form method="GET" id="searchForm">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">Cari Pengumuman</label>
+                        <input type="text" class="form-control form-control-modern" id="search" name="search" 
+                               value="{{ current_filters.search }}" placeholder="Ketik judul atau isi...">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="announcement_type" class="form-label">Jenis</label>
+                        <select class="form-control form-control-modern" id="announcement_type" name="announcement_type">
+                            <option value="">Semua Jenis</option>
+                            <option value="info" {% if current_filters.announcement_type == 'info' %}selected{% endif %}>Informasi</option>
+                            <option value="warning" {% if current_filters.announcement_type == 'warning' %}selected{% endif %}>Peringatan</option>
+                            <option value="urgent" {% if current_filters.announcement_type == 'urgent' %}selected{% endif %}>Mendesak</option>
+                            <option value="schedule" {% if current_filters.announcement_type == 'schedule' %}selected{% endif %}>Jadwal</option>
+                            <option value="event" {% if current_filters.announcement_type == 'event' %}selected{% endif %}>Acara</option>
+                            <option value="service" {% if current_filters.announcement_type == 'service' %}selected{% endif %}>Layanan</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="priority" class="form-label">Prioritas</label>
+                        <select class="form-control form-control-modern" id="priority" name="priority">
+                            <option value="">Semua Prioritas</option>
+                            <option value="low" {% if current_filters.priority == 'low' %}selected{% endif %}>Rendah</option>
+                            <option value="normal" {% if current_filters.priority == 'normal' %}selected{% endif %}>Normal</option>
+                            <option value="high" {% if current_filters.priority == 'high' %}selected{% endif %}>Tinggi</option>
+                            <option value="urgent" {% if current_filters.priority == 'urgent' %}selected{% endif %}>Mendesak</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="date_from" class="form-label">Tanggal Mulai</label>
+                        <input type="date" class="form-control form-control-modern" id="date_from" name="date_from" 
+                               value="{{ current_filters.date_from }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="date_to" class="form-label">Tanggal Akhir</label>
+                        <input type="date" class="form-control form-control-modern" id="date_to" name="date_to" 
+                               value="{{ current_filters.date_to }}">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-primary btn-modern">
+                        <i class="fas fa-search"></i> Cari Pengumuman
+                    </button>
+                    <a href="{% url 'admin_panel:announcements_list' %}" class="btn btn-outline-secondary btn-modern">
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Announcements List -->
+    <div id="announcementsList">
+        {% for announcement in announcements %}
+        <div class="announcement-card {% if announcement.announcement_type == 'urgent' %}urgent{% elif announcement.is_pinned %}pinned{% elif announcement.is_popup %}popup{% elif announcement.status == 'draft' %}draft{% endif %}">
+            <div class="announcement-header">
+                <h5 class="announcement-title">{{ announcement.title }}</h5>
+                <div class="announcement-meta">
+                    <span class="badge status-badge badge-{% if announcement.status == 'published' %}success{% else %}secondary{% endif %}">
+                        {% if announcement.status == 'published' %}Dipublikasi{% else %}Draft{% endif %}
+                    </span>
+                    <span class="badge priority-badge badge-{% if announcement.priority == 'urgent' %}danger{% elif announcement.priority == 'high' %}warning{% elif announcement.priority == 'normal' %}info{% else %}secondary{% endif %}">
+                        {{ announcement.get_priority_display }}
+                    </span>
+                    <input type="checkbox" class="form-check-input announcement-checkbox" value="{{ announcement.id }}">
+                </div>
+            </div>
+
+            <div class="announcement-content">
+                <div class="announcement-preview">
+                    {{ announcement.content|truncatewords:50|safe }}
+                </div>
+            </div>
+
+            <div class="announcement-info">
+                <div class="info-item">
+                    <div class="label">Jenis</div>
+                    <div class="value">{{ announcement.get_announcement_type_display }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Target Audiens</div>
+                    <div class="value">{{ announcement.target_audience|default:"Semua Warga" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Narahubung</div>
+                    <div class="value">{{ announcement.contact_person|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Lokasi</div>
+                    <div class="value">{{ announcement.location|default:"-" }}</div>
+                </div>
+            </div>
+
+            <div class="date-range">
+                <i class="fas fa-calendar"></i>
+                <span>Mulai: {{ announcement.start_date|date:"d M Y H:i" }}</span>
+                {% if announcement.end_date %}
+                <i class="fas fa-calendar-times"></i>
+                <span>Selesai: {{ announcement.end_date|date:"d M Y H:i" }}</span>
+                {% endif %}
+            </div>
+
+            <div class="announcement-actions">
+                <a href="{% url 'admin_panel:announcement_detail' announcement.pk %}" class="btn btn-sm btn-outline-primary btn-modern">
+                    <i class="fas fa-eye"></i> Lihat
+                </a>
+                <a href="{% url 'admin_panel:announcement_update' announcement.pk %}" class="btn btn-sm btn-outline-warning btn-modern">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                {% if announcement.status == 'published' %}
+                <button class="btn btn-sm btn-warning btn-modern" onclick="toggleStatus({{ announcement.id }}, 'draft')">
+                    <i class="fas fa-edit"></i> Draft
+                </button>
+                {% else %}
+                <button class="btn btn-sm btn-success btn-modern" onclick="toggleStatus({{ announcement.id }}, 'published')">
+                    <i class="fas fa-play"></i> Publikasikan
+                </button>
+                {% endif %}
+                {% if announcement.is_pinned %}
+                <button class="btn btn-sm btn-secondary btn-modern" onclick="togglePin({{ announcement.id }}, false)">
+                    <i class="fas fa-thumbtack"></i> Unpin
+                </button>
+                {% else %}
+                <button class="btn btn-sm btn-info btn-modern" onclick="togglePin({{ announcement.id }}, true)">
+                    <i class="fas fa-thumbtack"></i> Pin
+                </button>
+                {% endif %}
+                <button class="btn btn-sm btn-danger btn-modern" onclick="deleteAnnouncement({{ announcement.id }}, '{{ announcement.title|escapejs }}')">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+
+            <div class="announcement-footer">
+                <div class="announcement-author">
+                    <i class="fas fa-user"></i>
+                    <span>{{ announcement.author.username }}</span>
+                    <span>•</span>
+                    <span>{{ announcement.created_at|date:"d M Y H:i" }}</span>
+                    {% if announcement.is_popup %}
+                    <span>•</span>
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Popup</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <h5>Tidak ada pengumuman ditemukan</h5>
+            <p>Belum ada pengumuman yang sesuai dengan filter yang dipilih.</p>
+            <a href="{% url 'admin_panel:announcement_create' %}" class="btn btn-primary btn-modern">
+                <i class="fas fa-plus"></i> Tambah Pengumuman
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if announcements.has_other_pages %}
+    <nav aria-label="Announcements pagination">
+        <ul class="pagination pagination-modern">
+            {% if announcements.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.announcement_type %}&announcement_type={{ current_filters.announcement_type }}{% endif %}{% if current_filters.priority %}&priority={{ current_filters.priority }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}{% if current_filters.date_to %}&date_to={{ current_filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ announcements.previous_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.announcement_type %}&announcement_type={{ current_filters.announcement_type }}{% endif %}{% if current_filters.priority %}&priority={{ current_filters.priority }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}{% if current_filters.date_to %}&date_to={{ current_filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in announcements.paginator.page_range %}
+                {% if announcements.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > announcements.number|add:'-3' and num < announcements.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.announcement_type %}&announcement_type={{ current_filters.announcement_type }}{% endif %}{% if current_filters.priority %}&priority={{ current_filters.priority }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}{% if current_filters.date_to %}&date_to={{ current_filters.date_to }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if announcements.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ announcements.next_page_number }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.announcement_type %}&announcement_type={{ current_filters.announcement_type }}{% endif %}{% if current_filters.priority %}&priority={{ current_filters.priority }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}{% if current_filters.date_to %}&date_to={{ current_filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ announcements.paginator.num_pages }}{% if current_filters.search %}&search={{ current_filters.search }}{% endif %}{% if current_filters.announcement_type %}&announcement_type={{ current_filters.announcement_type }}{% endif %}{% if current_filters.priority %}&priority={{ current_filters.priority }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.date_from %}&date_from={{ current_filters.date_from }}{% endif %}{% if current_filters.date_to %}&date_to={{ current_filters.date_to }}{% endif %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Hapus</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus pengumuman <strong id="deleteAnnouncementTitle"></strong>?</p>
+                <p class="text-danger">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Bulk actions
+let selectedAnnouncements = [];
+
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('announcement-checkbox')) {
+        updateBulkActions();
+    }
+});
+
+function updateBulkActions() {
+    selectedAnnouncements = Array.from(document.querySelectorAll('.announcement-checkbox:checked')).map(cb => cb.value);
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (selectedAnnouncements.length > 0) {
+        bulkActions.classList.add('show');
+        selectedCount.textContent = selectedAnnouncements.length;
+    } else {
+        bulkActions.classList.remove('show');
+    }
+}
+
+function bulkAction(action) {
+    if (selectedAnnouncements.length === 0) {
+        alert('Pilih pengumuman terlebih dahulu');
+        return;
+    }
+    
+    if (action === 'delete') {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedAnnouncements.length} pengumuman?`)) {
+            return;
+        }
+    }
+    
+    // Send bulk action request
+    fetch('{% url "admin_panel:api_bulk_announcement_action" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            action: action,
+            announcement_ids: selectedAnnouncements
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memproses permintaan');
+    });
+}
+
+// Toggle status
+function toggleStatus(id, action) {
+    fetch(`{% url 'admin_panel:announcement_toggle_status' 0 %}`.replace('0', id), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            action: action
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengubah status');
+    });
+}
+
+// Toggle pin
+function togglePin(id, pin) {
+    fetch(`{% url 'admin_panel:announcement_toggle_pin' 0 %}`.replace('0', id), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            pin: pin
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengubah pin status');
+    });
+}
+
+// Delete announcement
+function deleteAnnouncement(id, title) {
+    document.getElementById('deleteAnnouncementTitle').textContent = title;
+    document.getElementById('confirmDelete').onclick = function() {
+        fetch(`{% url 'admin_panel:announcement_delete' 0 %}`.replace('0', id), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus pengumuman');
+        });
+    };
+    $('#deleteModal').modal('show');
+}
+
+// Auto-submit form on filter change
+document.getElementById('searchForm').addEventListener('change', function() {
+    this.submit();
+});
+
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate cards on load
+    const cards = document.querySelectorAll('.announcement-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

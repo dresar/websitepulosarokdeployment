@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Halaman tidak ditemukan - Website Desa Pulosarok">
+    <title>404 - Halaman Tidak Ditemukan | Desa Pulosarok</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --secondary-color: #10B981;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .bounce-slow {
+            animation: bounce 2s infinite;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-effect {
+            background: rgba(17, 24, 39, 0.1);
+            border: 1px solid rgba(55, 65, 81, 0.2);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background-color: #f3f4f6;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background-color: #1f2937;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 9999px;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #9ca3af;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: #6b7280;
+        }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        secondary: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-3 group">
+                        <img src="/static/images/logo-desa.svg" alt="Desa Pulosarok" class="h-10 w-auto transition-transform duration-300 group-hover:scale-105">
+                        <div class="hidden sm:block">
+                            <h1 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
+                                Desa Pulosarok
+                            </h1>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Back to Home -->
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2">
+                        <i class="fas fa-home"></i>
+                        <span class="hidden sm:inline">Kembali ke Beranda</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="pt-16 min-h-screen flex items-center justify-center">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <!-- 404 Illustration -->
+            <div class="mb-8">
+                <div class="relative inline-block">
+                    <!-- Floating Elements -->
+                    <div class="absolute -top-4 -left-4 w-8 h-8 bg-primary-500 rounded-full opacity-20 floating"></div>
+                    <div class="absolute -top-2 -right-6 w-6 h-6 bg-secondary-500 rounded-full opacity-30 floating" style="animation-delay: 1s;"></div>
+                    <div class="absolute -bottom-4 -left-2 w-4 h-4 bg-primary-400 rounded-full opacity-25 floating" style="animation-delay: 2s;"></div>
+                    
+                    <!-- Main 404 Number -->
+                    <div class="text-9xl sm:text-[12rem] font-black gradient-text leading-none">
+                        404
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="mb-8">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                    Oops! Halaman Tidak Ditemukan
+                </h1>
+                <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+                    Maaf, halaman yang Anda cari tidak dapat ditemukan. Mungkin halaman tersebut telah dipindahkan atau dihapus.
+                </p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+                <a href="/" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 shadow-lg hover:shadow-xl">
+                    <i class="fas fa-home"></i>
+                    Kembali ke Beranda
+                </a>
+                <button onclick="history.back()" class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Halaman Sebelumnya
+                </button>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 sm:p-8">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Mungkin Anda Mencari:</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="/profil/" class="bg-white dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900/20 p-4 rounded-lg transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-info-circle text-primary-600 dark:text-primary-400"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Profil Desa</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Tentang Desa Pulosarok</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="/berita/" class="bg-white dark:bg-gray-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 p-4 rounded-lg transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-newspaper text-orange-600 dark:text-orange-400"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Berita</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Berita terkini</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="/umkm/" class="bg-white dark:bg-gray-700 hover:bg-green-50 dark:hover:bg-green-900/20 p-4 rounded-lg transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-store text-green-600 dark:text-green-400"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white">UMKM</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Usaha Mikro Kecil</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="/wisata/" class="bg-white dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 p-4 rounded-lg transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-mountain text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Wisata</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Destinasi wisata</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="/layanan/" class="bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-4 rounded-lg transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-cogs text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Layanan</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Layanan desa</p>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="/kontak/" class="bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-4 rounded-lg transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-phone text-red-600 dark:text-red-400"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-semibold text-gray-900 dark:text-white">Kontak</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Hubungi kami</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Footer Info -->
+            <div class="mt-12 text-center">
+                <p class="text-gray-500 dark:text-gray-400 text-sm">
+                    Jika Anda yakin ini adalah kesalahan, silakan 
+                    <a href="mailto:admin@pulosarok.my.id" class="text-primary-600 dark:text-primary-400 hover:underline">
+                        hubungi administrator
+                    </a>
+                </p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs mt-2">
+                    Website Desa Pulosarok - Kabupaten Aceh Singkil
+                </p>
+            </div>
+        </div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script>
+        // Theme management
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        // Initialize theme
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+        });
+    </script>
+</body>
+</html>

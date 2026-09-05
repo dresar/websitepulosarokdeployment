@@ -1,0 +1,278 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Galeri Wisata{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center tourism-mb-4">
+        <div>
+            <h1 class="tourism-title">Galeri Wisata</h1>
+            <p class="tourism-text-muted">Kelola semua gambar wisata Desa Pulosarok</p>
+        </div>
+        <div class="tourism-actions">
+            <a href="{% url 'admin_panel:tourism_gallery_create' %}" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                <i class="fas fa-upload"></i>
+                Upload Gambar
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="tourism-stats-grid">
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-primary">
+                <i class="fas fa-images"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_images|default:"0" }}</div>
+                <div class="tourism-stat-label">Total Gambar</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ active_images|default:"0" }}</div>
+                <div class="tourism-stat-label">Gambar Aktif</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-warning">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ featured_images|default:"0" }}</div>
+                <div class="tourism-stat-label">Gambar Unggulan</div>
+            </div>
+        </div>
+
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-info">
+                <i class="fas fa-hdd"></i>
+            </div>
+            <div>
+                <div class="tourism-stat-value">{{ total_size|filesizeformat|default:"0 B" }}</div>
+                <div class="tourism-stat-label">Ukuran Total</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="tourism-filter-section">
+        <h6 class="tourism-subtitle">Filter & Pencarian</h6>
+        <form method="get" class="tourism-filter-row">
+            <div class="tourism-form-group">
+                <label for="search" class="tourism-form-label">Pencarian</label>
+                <input type="text" class="tourism-form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="Cari gambar...">
+            </div>
+            <div class="tourism-form-group">
+                <label for="location" class="tourism-form-label">Lokasi</label>
+                <select class="tourism-form-control" id="location" name="location">
+                    <option value="">Semua Lokasi</option>
+                    {% for location in locations %}
+                        <option value="{{ location.id }}" {% if current_location == location.id|stringformat:"s" %}selected{% endif %}>
+                            {{ location.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tourism-form-group">
+                <label for="status" class="tourism-form-label">Status</label>
+                <select class="tourism-form-control" id="status" name="status">
+                    <option value="">Semua Status</option>
+                    <option value="active" {% if current_status == 'active' %}selected{% endif %}>Aktif</option>
+                    <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Tidak Aktif</option>
+                    <option value="featured" {% if current_status == 'featured' %}selected{% endif %}>Unggulan</option>
+                </select>
+            </div>
+            <div class="tourism-form-group">
+                <label for="sort" class="tourism-form-label">Urutkan</label>
+                <select class="tourism-form-control" id="sort" name="sort">
+                    <option value="-created_at" {% if current_sort == '-created_at' %}selected{% endif %}>Terbaru</option>
+                    <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Terlama</option>
+                    <option value="caption" {% if current_sort == 'caption' %}selected{% endif %}>Keterangan A-Z</option>
+                    <option value="-caption" {% if current_sort == '-caption' %}selected{% endif %}>Keterangan Z-A</option>
+                </select>
+            </div>
+            <div class="tourism-form-group">
+                <button type="submit" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                    <i class="fas fa-search"></i>
+                    Filter
+                </button>
+                <a href="{% url 'admin_panel:tourism_gallery_list' %}" class="tourism-btn tourism-btn-secondary tourism-btn-sm">
+                    <i class="fas fa-times"></i>
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="tourism-grid tourism-grid-5">
+        {% for image in images %}
+        <div class="tourism-card">
+            <div class="position-relative">
+                <img src="{{ image.image.url }}" alt="{{ image.caption|default:image.location.title }}" 
+                     class="tourism-image-preview tourism-rounded-top">
+                <div class="position-absolute top-0 end-0 p-1">
+                    {% if image.is_featured %}
+                        <span class="tourism-badge tourism-badge-warning" style="font-size: 0.6rem;">
+                            <i class="fas fa-star"></i>
+                        </span>
+                    {% endif %}
+                    {% if not image.is_active %}
+                        <span class="tourism-badge tourism-badge-secondary" style="font-size: 0.6rem;">
+                            <i class="fas fa-eye-slash"></i>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="tourism-card-body">
+                <div class="d-flex justify-content-between align-items-start tourism-mb-2">
+                    <h6 class="tourism-subtitle">{{ image.caption|default:"Tanpa Keterangan"|truncatechars:15 }}</h6>
+                    <div class="tourism-actions">
+                        <button class="tourism-action-btn tourism-action-btn-view" 
+                                onclick="viewImage('{{ image.image.url }}', '{{ image.caption|default:"Gambar Wisata"|escapejs }}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <a href="{% url 'admin_panel:tourism_gallery_edit' image.id %}" class="tourism-action-btn tourism-action-btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="tourism-action-btn tourism-action-btn-delete" 
+                                onclick="deleteImage({{ image.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tourism-mb-2">
+                    <p class="tourism-text-muted" style="font-size: 0.65rem;">
+                        <i class="fas fa-map-marker-alt tourism-text-primary"></i>
+                        {{ image.location.title|truncatechars:15 }}
+                    </p>
+                    <p class="tourism-text-muted" style="font-size: 0.65rem;">
+                        <i class="fas fa-calendar tourism-text-primary"></i>
+                        {{ image.created_at|date:"d M Y" }}
+                    </p>
+                </div>
+                
+                <div class="tourism-text-center">
+                    <a href="{{ image.image.url }}" class="tourism-btn tourism-btn-sm tourism-btn-outline" target="_blank">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% empty %}
+    <div class="tourism-card">
+        <div class="tourism-card-body tourism-text-center tourism-p-4">
+            <i class="fas fa-images tourism-text-muted" style="font-size: 2rem;"></i>
+            <h5 class="tourism-text-muted tourism-mt-3">Belum ada gambar</h5>
+            <p class="tourism-text-muted">Upload gambar pertama untuk memulai galeri wisata.</p>
+            <a href="{% url 'admin_panel:tourism_gallery_create' %}" class="tourism-btn tourism-btn-primary tourism-btn-sm">
+                <i class="fas fa-upload"></i>
+                Upload Gambar
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination -->
+    {% if images.has_other_pages %}
+        <div class="tourism-pagination">
+            {% if images.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if current_location %}&location={{ current_location }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">First</a>
+                <a href="?page={{ images.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_location %}&location={{ current_location }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">Previous</a>
+            {% endif %}
+
+            {% for num in images.paginator.page_range %}
+                {% if images.number == num %}
+                    <span class="tourism-pagination-btn active">{{ num }}</span>
+                {% elif num > images.number|add:'-3' and num < images.number|add:'3' %}
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_location %}&location={{ current_location }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if images.has_next %}
+                <a href="?page={{ images.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_location %}&location={{ current_location }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">Next</a>
+                <a href="?page={{ images.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if current_location %}&location={{ current_location }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="tourism-pagination-btn">Last</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Image View Modal -->
+<div class="modal fade" id="imageViewModal" tabindex="-1" role="dialog" aria-labelledby="imageViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageViewModalLabel">Gambar Wisata</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" alt="">
+                <p id="modalCaption" class="mt-3"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="tourism-btn tourism-btn-secondary" data-dismiss="modal">Tutup</button>
+                <a id="modalDownload" href="" class="tourism-btn tourism-btn-primary" target="_blank">
+                    <i class="fas fa-download"></i>
+                    Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function viewImage(imageUrl, caption) {
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('modalCaption').textContent = caption;
+    document.getElementById('modalDownload').href = imageUrl;
+    $('#imageViewModal').modal('show');
+}
+
+function deleteImage(imageId) {
+    if (confirm('Apakah Anda yakin ingin menghapus gambar ini?\n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
+        fetch(`{% url 'admin_panel:tourism_gallery_delete' 0 %}`.replace('0', imageId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Gagal menghapus gambar: ' + (data.error || 'Terjadi kesalahan'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus gambar');
+        });
+    }
+}
+</script>
+{% endblock %}

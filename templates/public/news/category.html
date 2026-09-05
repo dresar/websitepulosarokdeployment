@@ -1,0 +1,506 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Berita Desa - {{ website_settings.site_name|default:'Desa Pulosarok' }}{% endblock %}
+
+{% block meta_description %}Berita dan informasi terkini dalam kategori {{ category.name }} dari Desa Pulosarok. Dapatkan update terbaru tentang {{ category.name|lower }}.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .news-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .news-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .news-image {
+        aspect-ratio: 16/9;
+        object-fit: cover;
+    }
+    
+    .category-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+    }
+    
+    .featured-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 10;
+    }
+    
+    .category-header {
+        background: linear-gradient(135deg, {{ category.color }}, {{ category.color }}CC);
+    }
+    
+    .category-icon {
+        color: {{ category.color }};
+    }
+    
+    .filter-chip {
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+    }
+    
+    .filter-chip.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .filter-chip:hover {
+        transform: translateY(-1px);
+    }
+    
+    .mobile-filter {
+        position: relative;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+    
+    .dark .mobile-filter {
+        background: rgba(17, 24, 39, 0.95);
+    }
+    
+    @media (max-width: 640px) {
+        .news-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .news-card {
+            margin-bottom: 0;
+        }
+        
+        .news-image {
+            aspect-ratio: 4/3;
+            height: 120px;
+        }
+        
+        .news-card .p-4 {
+            padding: 0.75rem;
+        }
+        
+        .news-card h3 {
+            font-size: 0.875rem;
+            line-height: 1.25;
+        }
+        
+        .news-card p {
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+        
+        .news-card .text-xs {
+            font-size: 0.625rem;
+        }
+    }
+    
+    @media (min-width: 641px) and (max-width: 1024px) {
+        .news-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+    }
+    
+    @media (min-width: 1025px) {
+        .news-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Category Header -->
+<section class="category-header text-white py-12 md:py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
+                {% if category.icon %}
+                <i class="{{ category.icon }} text-2xl"></i>
+                {% else %}
+                <i class="fas fa-tag text-2xl"></i>
+                {% endif %}
+            </div>
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 animate-fade-in">
+                {{ category.name }}
+            </h1>
+            <p class="text-lg md:text-xl text-white text-opacity-90 max-w-3xl mx-auto animate-slide-up">
+                {{ category.description|default:"Berita dan informasi terkini dalam kategori "|add:category.name }}
+            </p>
+            <div class="mt-4 flex items-center justify-center space-x-4 text-sm">
+                <span class="flex items-center">
+                    <i class="fas fa-newspaper mr-2"></i>{{ news_list.count }} artikel
+                </span>
+                <span class="flex items-center">
+                    <i class="fas fa-eye mr-2"></i>{{ total_views }} views
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mobile Filter Bar -->
+<div class="mobile-filter border-b border-gray-200 dark:border-gray-700 px-4 py-3 md:hidden">
+    <div class="flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Filter Berita</h3>
+        <button onclick="toggleMobileFilters()" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+            <i class="fas fa-filter text-gray-600 dark:text-gray-400"></i>
+        </button>
+    </div>
+    
+    <!-- Mobile Filter Dropdown -->
+    <div id="mobileFilters" class="hidden mt-3 space-y-2">
+        <div class="flex flex-wrap gap-2">
+            <button onclick="filterNews('all')" class="filter-chip active px-3 py-1.5 text-xs font-medium bg-primary-600 text-white rounded-full">
+                Semua
+            </button>
+            <button onclick="filterNews('featured')" class="filter-chip px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <i class="fas fa-star mr-1"></i>Utama
+            </button>
+            <button onclick="filterNews('breaking')" class="filter-chip px-3 py-1.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <i class="fas fa-bolt mr-1"></i>Breaking
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar - Desktop Only -->
+        <div class="hidden lg:block lg:w-1/4">
+            <!-- Category Info -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-info-circle mr-2 category-icon"></i>
+                    Tentang Kategori
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 rounded-full" style="background-color: {{ category.color }}"></div>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Warna Kategori</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-newspaper text-gray-400"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ news_list.count }} artikel</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-eye text-gray-400"></i>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ total_views }} total views</span>
+                    </div>
+                    {% if category.description %}
+                    <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ category.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Filter Options -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-filter mr-2 text-primary-600"></i>
+                    Filter
+                </h3>
+                <div class="space-y-2">
+                    <button onclick="filterNews('all')" class="filter-chip active w-full text-left px-4 py-2 text-sm font-medium bg-primary-600 text-white rounded-lg">
+                        <i class="fas fa-newspaper mr-2"></i>Semua Berita
+                    </button>
+                    <button onclick="filterNews('featured')" class="filter-chip w-full text-left px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                        <i class="fas fa-star mr-2 text-yellow-500"></i>Berita Utama
+                    </button>
+                    <button onclick="filterNews('breaking')" class="filter-chip w-full text-left px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                        <i class="fas fa-bolt mr-2 text-red-500"></i>Breaking News
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Related Categories -->
+            {% if related_categories %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <i class="fas fa-tags mr-2 text-primary-600"></i>
+                    Kategori Lainnya
+                </h3>
+                <div class="space-y-2">
+                    {% for related in related_categories %}
+                    <a href="{% url 'news:by_category' related.slug %}" class="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 rounded-full" style="background-color: {{ related.color }}"></div>
+                            <span>{{ related.name }}</span>
+                        </div>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ related.news.count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="lg:w-3/4">
+            <!-- Featured News in Category -->
+            {% if featured_news %}
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                    <i class="fas fa-star mr-2 text-yellow-500"></i>
+                    Berita Utama
+                </h2>
+                <div class="news-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for news in featured_news %}
+                    <article class="news-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                        <div class="relative">
+                            {% if news.featured_image %}
+                            <img src="{{ news.featured_image.url }}" alt="{{ news.title }}" class="news-image w-full h-48 object-cover">
+                            {% else %}
+                            <div class="news-image w-full h-48 bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+                                <i class="fas fa-newspaper text-white text-4xl"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="category-badge">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white" style="background-color: {{ news.category.color }}">
+                                    <i class="fas fa-tag mr-1"></i>{{ news.category.name }}
+                                </span>
+                            </div>
+                            
+                            {% if news.is_featured %}
+                            <div class="featured-badge">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white">
+                                    <i class="fas fa-star mr-1"></i>Utama
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">
+                                <a href="{% url 'news:detail' news.slug %}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                                    {{ news.title }}
+                                </a>
+                            </h3>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+                                {{ news.excerpt|default:news.content|truncatewords:20 }}
+                            </p>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center space-x-4">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-user mr-1"></i>{{ news.author.get_full_name|default:news.author.username }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-calendar mr-1"></i>{{ news.published_date|date:"d M Y" }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-eye mr-1"></i>{{ news.views_count }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-comment mr-1"></i>{{ news.comments_count }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- All News in Category -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <i class="fas fa-newspaper mr-2 text-primary-600"></i>
+                        Semua Berita {{ category.name }}
+                    </h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Total: {{ news_list.count }}</span>
+                    </div>
+                </div>
+                
+                <!-- News Grid -->
+                <div class="news-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="newsGrid">
+                    {% for news in news_list %}
+                    <article class="news-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden" data-featured="{{ news.is_featured|yesno:'true,false' }}" data-breaking="{{ news.is_breaking|yesno:'true,false' }}">
+                        <div class="relative">
+                            {% if news.featured_image %}
+                            <img src="{{ news.featured_image.url }}" alt="{{ news.title }}" class="news-image w-full h-48 object-cover">
+                            {% else %}
+                            <div class="news-image w-full h-48 bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+                                <i class="fas fa-newspaper text-white text-4xl"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="category-badge">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white" style="background-color: {{ news.category.color }}">
+                                    <i class="fas fa-tag mr-1"></i>{{ news.category.name }}
+                                </span>
+                            </div>
+                            
+                            {% if news.is_featured %}
+                            <div class="featured-badge">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white">
+                                    <i class="fas fa-star mr-1"></i>Utama
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if news.is_breaking %}
+                            <div class="featured-badge" style="top: 50px;">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                                    <i class="fas fa-bolt mr-1"></i>Breaking
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-4">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                                <a href="{% url 'news:detail' news.slug %}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                                    {{ news.title }}
+                                </a>
+                            </h3>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
+                                {{ news.excerpt|default:news.content|truncatewords:15 }}
+                            </p>
+                            
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center space-x-2">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-user mr-1"></i>{{ news.author.get_full_name|default:news.author.username }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-calendar mr-1"></i>{{ news.published_date|date:"d M" }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-eye mr-1"></i>{{ news.views_count }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-comment mr-1"></i>{{ news.comments_count }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    {% empty %}
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-newspaper text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-500 dark:text-gray-400 mb-2">Belum Ada Berita</h3>
+                        <p class="text-gray-400 dark:text-gray-500">Belum ada berita dalam kategori {{ category.name }}.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center space-x-2">
+                        {% if page_obj.has_previous %}
+                        <a href="?page=1" class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        {% endif %}
+                        
+                        <span class="px-3 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900 rounded-lg">
+                            {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+                        </span>
+                        
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mobile filter toggle
+    function toggleMobileFilters() {
+        const mobileFilters = document.getElementById('mobileFilters');
+        mobileFilters.classList.toggle('hidden');
+    }
+    
+    // Filter news by type
+    function filterNews(type) {
+        const newsCards = document.querySelectorAll('.news-card');
+        const filterChips = document.querySelectorAll('.filter-chip');
+        
+        // Update active filter chip
+        filterChips.forEach(chip => {
+            chip.classList.remove('active');
+            chip.classList.add('bg-gray-100', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
+            chip.classList.remove('bg-primary-600', 'text-white');
+        });
+        
+        event.target.classList.add('active');
+        event.target.classList.add('bg-primary-600', 'text-white');
+        event.target.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
+        
+        // Filter news cards
+        newsCards.forEach(card => {
+            const isFeatured = card.getAttribute('data-featured') === 'true';
+            const isBreaking = card.getAttribute('data-breaking') === 'true';
+            
+            if (type === 'all' || 
+                (type === 'featured' && isFeatured) || 
+                (type === 'breaking' && isBreaking)) {
+                card.style.display = 'block';
+                card.classList.add('animate-fade-in');
+            } else {
+                card.style.display = 'none';
+                card.classList.remove('animate-fade-in');
+            }
+        });
+        
+        // Close mobile filters
+        const mobileFilters = document.getElementById('mobileFilters');
+        if (mobileFilters) {
+            mobileFilters.classList.add('hidden');
+        }
+    }
+    
+    // Initialize filters
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set initial active state for desktop filters
+        const desktopFilters = document.querySelectorAll('.filter-chip');
+        desktopFilters.forEach(chip => {
+            if (chip.textContent.includes('Semua')) {
+                chip.classList.add('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,585 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Pengaturan Profil{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 0.35rem 0.35rem 0 0;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    
+    .profile-card-body {
+        padding: 1.5rem;
+    }
+    
+    .profile-avatar {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .avatar-container {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .avatar-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 4px solid #e3e6f0;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+    
+    .avatar-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+        border: 4px solid #e3e6f0;
+    }
+    
+    .avatar-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .avatar-upload:hover {
+        background: #5a6fd8;
+        transform: scale(1.1);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        border: 1px solid #d1d3e2;
+        border-radius: 0.35rem;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.35rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .btn-change-password {
+        background: #17a2b8;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.35rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .btn-change-password:hover {
+        background: #138496;
+        color: white;
+    }
+    
+    .user-info-card {
+        background: #f8f9fc;
+        border-radius: 0.35rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #5a5c69;
+    }
+    
+    .info-value {
+        color: #6c757d;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-staff {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-superuser {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .alert {
+        border: none;
+        border-radius: 0.35rem;
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+    }
+    
+    .alert-danger {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+    }
+    
+    .section-title {
+        color: #5a5c69;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+    
+    .modal-title {
+        font-weight: 600;
+    }
+    
+    .close {
+        color: white;
+        opacity: 0.8;
+    }
+    
+    .close:hover {
+        color: white;
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="row">
+            <!-- Profile Information -->
+                <div class="col-md-4">
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h4 class="mb-0">
+                                <i class="fas fa-user mr-2"></i>
+                        Informasi Profil
+                    </h4>
+                            <p class="mb-0 mt-1">Data pribadi Anda</p>
+                </div>
+                <div class="profile-card-body">
+                            <div class="profile-avatar">
+                                <div class="avatar-container">
+                                    {% if profile.avatar %}
+                                        <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-image" id="avatarImage">
+                        {% else %}
+                                        <div class="avatar-placeholder" id="avatarPlaceholder">
+                                {{ user.first_name|first|default:user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                                    <button type="button" class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="uploadAvatar(this)">
+                                </div>
+                            </div>
+                            
+                            <div class="user-info-card">
+                                <div class="info-item">
+                                    <span class="info-label">Username</span>
+                                    <span class="info-value">{{ user.username }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value">{{ user.email }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Nama Lengkap</span>
+                                    <span class="info-value">{{ user.get_full_name|default:"-" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Posisi</span>
+                                    <span class="info-value">{{ user.position|default:"-" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Status</span>
+                                    <span class="info-value">
+                            {% if user.is_superuser %}
+                                            <span class="status-badge status-superuser">Superuser</span>
+                            {% elif user.is_staff %}
+                                            <span class="status-badge status-staff">Staff</span>
+                            {% else %}
+                                            <span class="status-badge status-active">User</span>
+                            {% endif %}
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Bergabung</span>
+                                    <span class="info-value">{{ user.date_joined|date:"d M Y" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Login Terakhir</span>
+                                    <span class="info-value">{{ user.last_login|date:"d M Y H:i"|default:"Belum pernah" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                <!-- Profile Settings -->
+                <div class="col-md-8">
+                    <form method="post" enctype="multipart/form-data" id="profileForm">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-edit mr-2"></i>
+                                Informasi Dasar
+                                </h4>
+                                <p class="mb-0 mt-1">Edit informasi pribadi Anda</p>
+                            </div>
+                            <div class="profile-card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                            <label for="first_name" class="form-label">Nama Depan</label>
+                                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                                   value="{{ user.first_name|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                            <label for="last_name" class="form-label">Nama Belakang</label>
+                                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                                   value="{{ user.last_name|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                   value="{{ user.email|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                            <label for="phone_number" class="form-label">Nomor Telepon</label>
+                                            <input type="text" class="form-control" id="phone_number" name="phone_number" 
+                                                   value="{{ user.phone_number|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                                    <div class="form-group">
+                                    <label for="position" class="form-label">Posisi/Jabatan</label>
+                                    <input type="text" class="form-control" id="position" name="position" 
+                                           value="{{ user.position|default:'' }}">
+                            </div>
+                            
+                                    <div class="form-group">
+                                    <label for="address" class="form-label">Alamat</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3">{{ user.address|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Details -->
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Detail Profil
+                                </h4>
+                                <p class="mb-0 mt-1">Informasi tambahan tentang Anda</p>
+                            </div>
+                            <div class="profile-card-body">
+                                <div class="form-group">
+                                    <label for="bio" class="form-label">Bio</label>
+                                    <textarea class="form-control" id="bio" name="bio" rows="4" 
+                                              placeholder="Ceritakan sedikit tentang diri Anda...">{{ profile.bio|default:'' }}</textarea>
+                                    <div class="help-text">Deskripsi singkat tentang diri Anda</div>
+                                </div>
+                                
+                            <div class="form-group">
+                                    <label for="birth_date" class="form-label">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="birth_date" name="birth_date" 
+                                           value="{{ profile.birth_date|date:'Y-m-d'|default:'' }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="profile_address" class="form-label">Alamat Profil</label>
+                                    <textarea class="form-control" id="profile_address" name="profile_address" rows="3" 
+                                              placeholder="Alamat lengkap untuk profil...">{{ profile.address|default:'' }}</textarea>
+                                    <div class="help-text">Alamat yang akan ditampilkan di profil</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="text-right">
+                                    <button type="button" class="btn btn-change-password" onclick="showChangePasswordModal()">
+                                        <i class="fas fa-key mr-1"></i>
+                                        Ubah Password
+                                    </button>
+                                    <button type="submit" class="btn btn-save">
+                                        <i class="fas fa-save mr-1"></i>
+                                Simpan Profil
+                                    </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">
+                    <i class="fas fa-key mr-2"></i>
+                    Ubah Password
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="current_password" class="form-label">Password Saat Ini</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_password" class="form-label">Password Baru</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        <div class="help-text">Minimal 8 karakter</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">Konfirmasi Password Baru</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="savePasswordBtn">
+                        <i class="fas fa-save mr-1"></i>
+                        Ubah Password
+                    </button>
+                </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Save profile
+    $('#profileForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $.ajax({
+            url: '{% url "core:api_update_profile" %}',
+            method: 'POST',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Terjadi kesalahan saat menyimpan profil');
+            }
+        });
+    });
+    
+    // Change password
+    $('#savePasswordBtn').on('click', function() {
+        var formData = $('#changePasswordForm').serialize();
+        
+        // Validate passwords match
+        var newPassword = $('#new_password').val();
+        var confirmPassword = $('#confirm_password').val();
+        
+        if (newPassword !== confirmPassword) {
+            alert('Password baru dan konfirmasi password tidak sama!');
+            return;
+        }
+        
+        if (newPassword.length < 8) {
+            alert('Password baru minimal 8 karakter!');
+            return;
+        }
+        
+        $.ajax({
+            url: '{% url "core:api_change_password" %}',
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    alert('Password berhasil diubah!');
+                    $('#changePasswordModal').modal('hide');
+                    $('#changePasswordForm')[0].reset();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Terjadi kesalahan saat mengubah password');
+            }
+        });
+    });
+});
+
+function uploadAvatar(input) {
+    if (input.files && input.files[0]) {
+        var formData = new FormData();
+        formData.append('avatar', input.files[0]);
+        formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+        
+        $.ajax({
+            url: '{% url "core:api_update_profile" %}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    // Update avatar display
+        var reader = new FileReader();
+        reader.onload = function(e) {
+                        $('#avatarImage').attr('src', e.target.result);
+                        $('#avatarPlaceholder').hide();
+                        $('#avatarImage').show();
+        };
+        reader.readAsDataURL(input.files[0]);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Terjadi kesalahan saat mengupload avatar');
+            }
+        });
+    }
+}
+
+function showChangePasswordModal() {
+    $('#changePasswordForm')[0].reset();
+    $('#changePasswordModal').modal('show');
+}
+</script>
+{% endblock %}

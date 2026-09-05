@@ -1,0 +1,464 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Kategori Wisata{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+<style>
+/* Custom Category Detail Styles */
+.tourism-admin {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+.tourism-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tourism-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.25rem;
+}
+
+.tourism-text-muted {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+/* Header Section */
+.tourism-detail-header {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.tourism-detail-header-content {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: center;
+}
+
+.tourism-category-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tourism-category-info h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    color: #1e293b;
+}
+
+.tourism-category-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tourism-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.tourism-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.tourism-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.tourism-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.tourism-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+}
+
+.tourism-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.tourism-btn-secondary:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.tourism-btn-danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
+}
+
+.tourism-btn-danger:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(220, 38, 38, 0.4);
+}
+
+/* Statistics Cards */
+.tourism-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tourism-stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.tourism-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.tourism-stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.tourism-stat-icon-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.tourism-stat-icon-success {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.tourism-stat-icon-warning {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.tourism-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.tourism-stat-label {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Locations Grid */
+.tourism-locations-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.tourism-locations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.tourism-location-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.tourism-location-card:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.tourism-location-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.tourism-location-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.tourism-status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.tourism-status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.tourism-status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.tourism-status-featured {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Empty State */
+.tourism-empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #64748b;
+}
+
+.tourism-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tourism-detail-header-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .tourism-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .tourism-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .tourism-locations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tourism-admin {
+        padding: 1rem;
+    }
+}
+
+/* Back Button */
+.tourism-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color 0.2s ease;
+}
+
+.tourism-back-btn:hover {
+    color: #3b82f6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Back Button -->
+    <a href="{% url 'admin_panel:tourism_categories_list' %}" class="tourism-back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Kembali ke Daftar Kategori
+    </a>
+
+    <!-- Header Section -->
+    <div class="tourism-detail-header">
+        <div class="tourism-detail-header-content">
+            <div class="tourism-category-icon" style="background: {{ category.color|default:'#3b82f6' }};">
+                {% if category.icon %}
+                    <i class="{{ category.icon }}"></i>
+                {% else %}
+                    <i class="fas fa-tags"></i>
+                {% endif %}
+            </div>
+            
+            <div class="tourism-category-info">
+                <h1>{{ category.name }}</h1>
+                <p class="tourism-text-muted">{{ category.description|default:"Tidak ada deskripsi" }}</p>
+                
+                <div class="tourism-category-meta">
+                    <div class="tourism-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>Dibuat: {{ category.created_at|date:"d M Y" }}</span>
+                    </div>
+                    <div class="tourism-meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Diupdate: {{ category.updated_at|date:"d M Y" }}</span>
+                    </div>
+                    <div class="tourism-meta-item">
+                        <i class="fas fa-{% if category.is_active %}check-circle{% else %}times-circle{% endif %}"></i>
+                        <span>Status: {% if category.is_active %}Aktif{% else %}Tidak Aktif{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tourism-actions">
+                <a href="{% url 'admin_panel:tourism_category_edit' category.id %}" class="tourism-btn tourism-btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </a>
+                <button onclick="deleteCategory({{ category.id }})" class="tourism-btn tourism-btn-danger">
+                    <i class="fas fa-trash"></i>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="tourism-stats-grid">
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-primary">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="tourism-stat-value">{{ total_locations }}</div>
+            <div class="tourism-stat-label">Total Lokasi</div>
+        </div>
+        
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="tourism-stat-value">{{ active_locations }}</div>
+            <div class="tourism-stat-label">Lokasi Aktif</div>
+        </div>
+        
+        <div class="tourism-stat-card">
+            <div class="tourism-stat-icon tourism-stat-icon-warning">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="tourism-stat-value">{{ featured_locations }}</div>
+            <div class="tourism-stat-label">Lokasi Unggulan</div>
+        </div>
+    </div>
+
+    <!-- Locations Section -->
+    <div class="tourism-locations-section">
+        <h3 class="tourism-subtitle">📍 Lokasi dalam Kategori Ini</h3>
+        
+        {% if locations %}
+            <div class="tourism-locations-grid">
+                {% for location in locations %}
+                <div class="tourism-location-card">
+                    <div class="tourism-location-title">{{ location.title }}</div>
+                    <div class="tourism-location-meta">
+                        <span>{{ location.address|truncatechars:30 }}</span>
+                        <div>
+                            {% if location.is_active %}
+                                <span class="tourism-status-badge tourism-status-active">Aktif</span>
+                            {% else %}
+                                <span class="tourism-status-badge tourism-status-inactive">Tidak Aktif</span>
+                            {% endif %}
+                            {% if location.featured %}
+                                <span class="tourism-status-badge tourism-status-featured">Unggulan</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="tourism-empty-state">
+                <i class="fas fa-map-marker-alt"></i>
+                <h5>Belum ada lokasi dalam kategori ini</h5>
+                <p>Lokasi wisata akan muncul di sini setelah ditambahkan ke kategori ini.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteCategory(categoryId) {
+    if (confirm('Apakah Anda yakin ingin menghapus kategori ini?\n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
+        fetch(`{% url 'admin_panel:tourism_category_delete' 0 %}`.replace('0', categoryId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "{% url 'admin_panel:tourism_categories_list' %}";
+            } else {
+                alert('Gagal menghapus kategori: ' + (data.error || 'Terjadi kesalahan'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus kategori');
+        });
+    }
+}
+</script>
+{% endblock %}

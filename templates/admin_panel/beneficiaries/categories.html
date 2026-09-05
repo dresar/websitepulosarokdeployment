@@ -1,0 +1,220 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/beneficiaries.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="beneficiaries-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Kategori Penerima Bantuan</h4>
+                            <p class="text-muted mb-0">Kelola kategori bantuan di Desa Pulosari</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:category_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus mr-1"></i>Tambah Kategori
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories Grid -->
+                <div class="row">
+                    {% for category in categories %}
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="category-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title">{{ category.name }}</h5>
+                                        <p class="card-text">{{ category.description|truncatechars:100 }}</p>
+                                        
+                                        <div class="mt-3">
+                                            <span class="badge badge-primary mr-2">
+                                                <i class="fas fa-users mr-1"></i>{{ category.beneficiary_count }} Penerima
+                                            </span>
+                                            <span class="badge badge-{% if category.is_active %}success{% else %}secondary{% endif %}">
+                                                {% if category.is_active %}Aktif{% else %}Non-Aktif{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                title="Menu Aksi" data-toggle="tooltip">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{% url 'admin_panel:category_detail' category.pk %}">
+                                                <i class="fas fa-eye mr-2"></i>Detail
+                                            </a>
+                                            <a class="dropdown-item" href="{% url 'admin_panel:beneficiaries_list' %}?category={{ category.id }}">
+                                                <i class="fas fa-users mr-2"></i>Lihat Penerima
+                                            </a>
+                                            <a class="dropdown-item" href="{% url 'admin_panel:category_update' category.pk %}">
+                                                <i class="fas fa-edit mr-2"></i>Edit
+                                            </a>
+                                            {% if category.beneficiary_count == 0 %}
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-danger" href="#" 
+                                               onclick="deleteCategory({{ category.id }}, '{{ category.name }}')">
+                                                <i class="fas fa-trash mr-2"></i>Hapus
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if category.criteria %}
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    <strong>Kriteria:</strong> {{ category.criteria|truncatechars:80 }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Belum ada kategori bantuan</h5>
+                            <p class="text-muted">Silakan tambah kategori bantuan baru</p>
+                            <a href="{% url 'admin_panel:category_create' %}" class="btn btn-success mt-3">
+                                <i class="fas fa-plus mr-1"></i>Tambah Kategori
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus kategori:</p>
+                <div class="alert alert-warning">
+                    <strong id="categoryNameToDelete"></strong>
+                </div>
+                <p class="text-muted">Data yang sudah dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+let deleteCategoryId = null;
+
+function deleteCategory(categoryId, categoryName) {
+    deleteCategoryId = categoryId;
+    $('#categoryNameToDelete').text(categoryName);
+    $('#deleteModal').modal('show');
+}
+
+$('#confirmDeleteBtn').click(function() {
+    if (deleteCategoryId) {
+        const submitBtn = $(this);
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+                }
+            }
+        });
+        
+        $.ajax({
+            url: `{% url 'admin_panel:category_delete' 0 %}`.replace('0', deleteCategoryId),
+            type: 'DELETE',
+            success: function(response) {
+                $('#deleteModal').modal('hide');
+                if (response.success) {
+                    showToast('success', 'Kategori berhasil dihapus');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('error', response.message || 'Gagal menghapus kategori');
+                }
+            },
+            error: function() {
+                showToast('error', 'Terjadi kesalahan saat menghapus kategori');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    }
+});
+
+// Reset modals when closed
+$('#deleteModal').on('hidden.bs.modal', function() {
+    deleteCategoryId = null;
+});
+
+// Initialize tooltips for Bootstrap 4
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[title]').tooltip({
+        placement: 'top',
+        trigger: 'hover'
+    });
+});
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% endblock extra_js %}

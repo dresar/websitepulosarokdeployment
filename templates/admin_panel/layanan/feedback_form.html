@@ -1,0 +1,397 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .layanan-wrapper {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .form-card .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        border: none;
+    }
+
+    .form-card .card-title {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .form-card .card-body {
+        padding: 1rem;
+    }
+
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.25rem;
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 0.8rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .form-check-input {
+        border-radius: 5px;
+        border: 2px solid #e9ecef;
+    }
+
+    .form-check-input:checked {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .form-check-label {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .rating-stars .star {
+        transition: all 0.2s ease;
+    }
+
+    .rating-stars .star:hover {
+        transform: scale(1.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .layanan-wrapper {
+            padding: 0.5rem 0;
+        }
+        
+        .page-header {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-card .card-body {
+            padding: 0.75rem;
+        }
+        
+        .form-control {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .form-label {
+            font-size: 0.75rem;
+        }
+        
+        .btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        .rating-stars {
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-header h4 {
+            font-size: 0.9rem;
+        }
+        
+        .page-header p {
+            font-size: 0.75rem;
+        }
+        
+        .form-control {
+            padding: 0.25rem 0.375rem;
+            font-size: 0.7rem;
+        }
+        
+        .form-label {
+            font-size: 0.7rem;
+        }
+        
+        .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+        }
+        
+        .rating-stars {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="layanan-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>{% if feedback %}Edit Feedback{% else %}Tambah Feedback{% endif %}</h4>
+                            <p class="text-muted mb-0">{% if feedback %}Edit feedback dari pengguna{% else %}Tambah feedback dari pengguna{% endif %}</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="fas fa-comments mr-2"></i>Form Feedback
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="feedbackForm">
+                            {% csrf_token %}
+                            {% if feedback %}
+                            <input type="hidden" name="id" value="{{ feedback.id }}">
+                            {% endif %}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nama</label>
+                                    <input type="text" class="form-control" name="name" 
+                                           value="{% if feedback %}{{ feedback.name }}{% endif %}" 
+                                           placeholder="Masukkan nama..." required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" 
+                                           value="{% if feedback %}{{ feedback.email }}{% endif %}" 
+                                           placeholder="Masukkan email..." required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Telepon (Opsional)</label>
+                                    <input type="text" class="form-control" name="phone" 
+                                           value="{% if feedback %}{{ feedback.phone }}{% endif %}" 
+                                           placeholder="Masukkan nomor telepon...">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Kategori</label>
+                                    <select class="form-control" name="category" required>
+                                        <option value="complaint" {% if feedback and feedback.category == 'complaint' %}selected{% endif %}>Keluhan</option>
+                                        <option value="suggestion" {% if feedback and feedback.category == 'suggestion' %}selected{% endif %}>Saran</option>
+                                        <option value="question" {% if feedback and feedback.category == 'question' %}selected{% endif %}>Pertanyaan</option>
+                                        <option value="praise" {% if feedback and feedback.category == 'praise' %}selected{% endif %}>Pujian</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-control" name="status" required>
+                                        <option value="pending" {% if feedback and feedback.status == 'pending' %}selected{% endif %}>Menunggu</option>
+                                        <option value="read" {% if feedback and feedback.status == 'read' %}selected{% endif %}>Sudah Dibaca</option>
+                                        <option value="replied" {% if feedback and feedback.status == 'replied' %}selected{% endif %}>Sudah Dibalas</option>
+                                        <option value="closed" {% if feedback and feedback.status == 'closed' %}selected{% endif %}>Ditutup</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Rating</label>
+                                    <div class="rating-stars" id="ratingStars">
+                                        <span class="star" data-rating="1">★</span>
+                                        <span class="star" data-rating="2">★</span>
+                                        <span class="star" data-rating="3">★</span>
+                                        <span class="star" data-rating="4">★</span>
+                                        <span class="star" data-rating="5">★</span>
+                                    </div>
+                                    <input type="hidden" name="rating" id="ratingInput" value="{% if feedback %}{{ feedback.rating }}{% else %}5{% endif %}">
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Subjek</label>
+                                    <input type="text" class="form-control" name="subject" 
+                                           value="{% if feedback %}{{ feedback.subject }}{% endif %}" 
+                                           placeholder="Masukkan subjek..." required>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Pesan</label>
+                                    <textarea class="form-control" name="message" rows="6" 
+                                              placeholder="Masukkan pesan..." required>{% if feedback %}{{ feedback.message }}{% endif %}</textarea>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Balasan (Opsional)</label>
+                                    <textarea class="form-control" name="reply" rows="4" 
+                                              placeholder="Masukkan balasan...">{% if feedback %}{{ feedback.reply }}{% endif %}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times mr-1"></i>Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i>{% if feedback %}Update{% else %}Simpan{% endif %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Rating stars functionality
+    const stars = $('.rating-stars .star');
+    const ratingInput = $('#ratingInput');
+    
+    // Initialize rating
+    const currentRating = parseInt(ratingInput.val());
+    updateStars(currentRating);
+    
+    stars.on('click', function() {
+        const rating = parseInt($(this).data('rating'));
+        ratingInput.val(rating);
+        updateStars(rating);
+    });
+    
+    stars.on('mouseenter', function() {
+        const rating = parseInt($(this).data('rating'));
+        updateStars(rating);
+    });
+    
+    $('.rating-stars').on('mouseleave', function() {
+        const currentRating = parseInt(ratingInput.val());
+        updateStars(currentRating);
+    });
+    
+    function updateStars(rating) {
+        stars.each(function(index) {
+            if (index < rating) {
+                $(this).addClass('text-warning');
+            } else {
+                $(this).removeClass('text-warning');
+            }
+        });
+    }
+    
+    // Form submission
+    $('#feedbackForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $.ajax({
+            url: '{% url "admin_panel:layanan:feedback_form" %}',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    setTimeout(() => {
+                        window.location.href = '{% url "admin_panel:layanan:feedback_list" %}';
+                    }, 1500);
+                } else {
+                    showAlert('error', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                showAlert('error', 'Terjadi kesalahan saat menyimpan data');
+            }
+        });
+    });
+});
+
+// Alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('body').prepend(alertHtml);
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

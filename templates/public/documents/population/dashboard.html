@@ -1,0 +1,386 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .stats-card h3 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    .stats-card p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+    .action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+    }
+    .action-card:hover {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+        .stats-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .stats-card h3 {
+            font-size: 1.5rem;
+        }
+        .action-card {
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .action-card .icon {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+    }
+    
+    /* Dark theme improvements */
+    .dark .stats-card {
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    }
+    
+    .dark .action-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .dark .action-card:hover {
+        background: #374151;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .action-card .icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        margin-bottom: 15px;
+    }
+    .action-card h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+    }
+    .action-card p {
+        color: #6c757d;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+    .btn-action {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-action:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .recent-activity {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    .activity-item {
+        padding: 15px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: white;
+        margin-right: 15px;
+    }
+    .activity-content h6 {
+        margin: 0 0 5px 0;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .activity-content small {
+        color: #6c757d;
+    }
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    .status-draft { background: #e9ecef; color: #495057; }
+    .status-submitted { background: #fff3cd; color: #856404; }
+    .status-processing { background: #d1ecf1; color: #0c5460; }
+    .status-approved { background: #d4edda; color: #155724; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+    .status-completed { background: #d1ecf1; color: #0c5460; }
+</style>
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">Dokumen Penduduk Desa Pulosarok</h2>
+                    <p class="text-muted mb-0">Kelola surat-surat dan dokumen penduduk</p>
+                </div>
+                <div>
+                    <a href="{% url 'documents:document_list' %}" class="btn btn-primary">
+                        <i class="fas fa-list"></i> Lihat Semua Dokumen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card">
+                <h3>{{ total_documents|default:0 }}</h3>
+                <p><i class="fas fa-file-alt"></i> Total Dokumen</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h3>{{ pending_documents|default:0 }}</h3>
+                <p><i class="fas fa-clock"></i> Menunggu Proses</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h3>{{ processing_documents|default:0 }}</h3>
+                <p><i class="fas fa-cog"></i> Sedang Diproses</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h3>{{ completed_documents|default:0 }}</h3>
+                <p><i class="fas fa-check-circle"></i> Selesai</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="action-card">
+                <div class="icon" style="background: linear-gradient(45deg, #667eea, #764ba2);">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <h5>Buat Dokumen Baru</h5>
+                <p>Buat surat-surat dan dokumen untuk penduduk</p>
+                <a href="{% url 'documents:document_create' %}" class="btn-action">
+                    <i class="fas fa-arrow-right"></i> Buat Dokumen
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="action-card">
+                <div class="icon" style="background: linear-gradient(45deg, #f093fb, #f5576c);">
+                    <i class="fas fa-list"></i>
+                </div>
+                <h5>Daftar Dokumen</h5>
+                <p>Lihat dan kelola semua dokumen penduduk</p>
+                <a href="{% url 'documents:document_list' %}" class="btn-action">
+                    <i class="fas fa-arrow-right"></i> Lihat Dokumen
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="action-card">
+                <div class="icon" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h5>Permintaan Dokumen</h5>
+                <p>Kelola permintaan dokumen dari penduduk</p>
+                <a href="{% url 'documents:request_list' %}" class="btn-action">
+                    <i class="fas fa-arrow-right"></i> Lihat Permintaan
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="action-card">
+                <div class="icon" style="background: linear-gradient(45deg, #43e97b, #38f9d7);">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h5>Template Dokumen</h5>
+                <p>Kelola template surat-surat</p>
+                <a href="#" class="btn-action" onclick="alert('Fitur template akan segera tersedia')">
+                    <i class="fas fa-arrow-right"></i> Kelola Template
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="action-card">
+                <div class="icon" style="background: linear-gradient(45deg, #fa709a, #fee140);">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h5>Laporan Dokumen</h5>
+                <p>Lihat laporan dan statistik dokumen</p>
+                <a href="#" class="btn-action" onclick="alert('Fitur laporan akan segera tersedia')">
+                    <i class="fas fa-arrow-right"></i> Lihat Laporan
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="action-card">
+                <div class="icon" style="background: linear-gradient(45deg, #a8edea, #fed6e3);">
+                    <i class="fas fa-download"></i>
+                </div>
+                <h5>Export Dokumen</h5>
+                <p>Export data dokumen ke Excel atau PDF</p>
+                <a href="#" class="btn-action" onclick="alert('Fitur export akan segera tersedia')">
+                    <i class="fas fa-arrow-right"></i> Export Data
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="recent-activity">
+                <h5 class="mb-3"><i class="fas fa-clock"></i> Dokumen Terbaru</h5>
+                {% for document in recent_documents %}
+                <div class="activity-item">
+                    <div class="d-flex align-items-center">
+                        <div class="activity-icon" style="background: #17a2b8;">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="activity-content flex-grow-1">
+                            <h6>{{ document.title }}</h6>
+                            <small>
+                                <strong>{{ document.applicant.name }}</strong> - 
+                                {{ document.document_type.name }} - 
+                                <span class="status-badge status-{{ document.status }}">
+                                    {{ document.get_status_display }}
+                                </span>
+                            </small>
+                        </div>
+                        <div class="text-muted">
+                            <small>{{ document.created_at|date:"d M Y H:i" }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-3">
+                    <p class="text-muted">Belum ada dokumen</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="recent-activity">
+                <h5 class="mb-3"><i class="fas fa-inbox"></i> Permintaan Terbaru</h5>
+                {% for request in recent_requests %}
+                <div class="activity-item">
+                    <div class="d-flex align-items-center">
+                        <div class="activity-icon" style="background: #ffc107;">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <div class="activity-content flex-grow-1">
+                            <h6>{{ request.purpose }}</h6>
+                            <small>
+                                <strong>{{ request.requester.name }}</strong> - 
+                                {{ request.document_type.name }} - 
+                                <span class="status-badge status-{{ request.status }}">
+                                    {{ request.get_status_display }}
+                                </span>
+                            </small>
+                        </div>
+                        <div class="text-muted">
+                            <small>{{ request.request_date|date:"d M Y H:i" }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-3">
+                    <p class="text-muted">Belum ada permintaan</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="recent-activity">
+                <h5 class="mb-3"><i class="fas fa-bolt"></i> Aksi Cepat</h5>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-primary w-100" onclick="openCreateModal('surat_keterangan')">
+                            <i class="fas fa-file-alt"></i> Surat Keterangan
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-success w-100" onclick="openCreateModal('surat_pengantar')">
+                            <i class="fas fa-file-export"></i> Surat Pengantar
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-info w-100" onclick="openCreateModal('surat_izin')">
+                            <i class="fas fa-file-signature"></i> Surat Izin
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-warning w-100" onclick="openCreateModal('surat_rekomendasi')">
+                            <i class="fas fa-file-check"></i> Surat Rekomendasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function openCreateModal(type) {
+    // Redirect ke halaman create dengan parameter type
+    window.location.href = `{% url "documents:document_create" %}?type=${type}`;
+}
+</script>
+{% endblock %}

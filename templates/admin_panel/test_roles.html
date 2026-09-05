@@ -1,0 +1,641 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Test Multi-Role System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+.role-test-card {
+    border: 2px solid #e3e6f0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.role-test-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+}
+
+.role-test-card.allowed {
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.role-test-card.denied {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.permission-item {
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.permission-item.allowed {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.permission-item.denied {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.user-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 2px;
+}
+
+.role-badge.super-admin { background-color: #dc3545; color: white; }
+.role-badge.admin { background-color: #fd7e14; color: white; }
+.role-badge.data-manager { background-color: #20c997; color: white; }
+.role-badge.beneficiary-manager { background-color: #6f42c1; color: white; }
+.role-badge.business-manager { background-color: #e83e8c; color: white; }
+.role-badge.complaint-manager { background-color: #ffc107; color: #212529; }
+.role-badge.document-manager { background-color: #17a2b8; color: white; }
+.role-badge.tourism-manager { background-color: #28a745; color: white; }
+.role-badge.posyandu-manager { background-color: #6c757d; color: white; }
+.role-badge.news-manager { background-color: #343a40; color: white; }
+.role-badge.village-profile-manager { background-color: #007bff; color: white; }
+.role-badge.reports-viewer { background-color: #6610f2; color: white; }
+.role-badge.data-entry { background-color: #fd7e14; color: white; }
+.role-badge.viewer { background-color: #6c757d; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:dashboard' %}">Dashboard</a>
+                            </li>
+                            <li class="breadcrumb-item active">Test Multi-Role</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-users-cog text-primary mr-2"></i>
+                        Test Multi-Role System
+                    </h1>
+                    <p class="text-muted mb-0">Uji coba sistem multi-role untuk setiap menu penting</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-secondary mr-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current User Info -->
+    <div class="user-info">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-2">
+                    <i class="fas fa-user mr-2"></i>
+                    {{ user.get_full_name|default:user.username }}
+                </h4>
+                <p class="mb-1">{{ user.email }}</p>
+                <div class="mt-2">
+                    {% for role in user.roles.all %}
+                        <span class="role-badge {{ role.name }}">{{ role.display_name }}</span>
+                    {% empty %}
+                        <span class="role-badge viewer">No Role Assigned</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4 text-right">
+                <div class="text-center">
+                    <i class="fas fa-shield-alt fa-3x mb-2"></i>
+                    <h5>Role Test</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Test Cards -->
+    <div class="row">
+        <!-- Dashboard -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'dashboard' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-tachometer-alt mr-2"></i>
+                        Dashboard
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'dashboard' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Dashboard
+                    </div>
+                    <div class="permission-item {% if user|can_export:'dashboard' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Dashboard
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- References -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'references' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-database mr-2"></i>
+                        Data Referensi
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'references' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View References
+                    </div>
+                    <div class="permission-item {% if user|can_add:'references' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add References
+                    </div>
+                    <div class="permission-item {% if user|can_change:'references' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change References
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'references' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete References
+                    </div>
+                    <div class="permission-item {% if user|can_export:'references' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export References
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beneficiaries -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'beneficiaries' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-hand-holding-usd mr-2"></i>
+                        Penerima Bantuan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'beneficiaries' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Beneficiaries
+                    </div>
+                    <div class="permission-item {% if user|can_add:'beneficiaries' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Beneficiaries
+                    </div>
+                    <div class="permission-item {% if user|can_change:'beneficiaries' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Beneficiaries
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'beneficiaries' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Beneficiaries
+                    </div>
+                    <div class="permission-item {% if user|can_export:'beneficiaries' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Beneficiaries
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'business' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-briefcase mr-2"></i>
+                        Usaha
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'business' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Business
+                    </div>
+                    <div class="permission-item {% if user|can_add:'business' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Business
+                    </div>
+                    <div class="permission-item {% if user|can_change:'business' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Business
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'business' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Business
+                    </div>
+                    <div class="permission-item {% if user|can_export:'business' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Business
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complaints -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'complaints' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Keluhan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'complaints' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Complaints
+                    </div>
+                    <div class="permission-item {% if user|can_add:'complaints' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Complaints
+                    </div>
+                    <div class="permission-item {% if user|can_change:'complaints' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Complaints
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'complaints' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Complaints
+                    </div>
+                    <div class="permission-item {% if user|can_export:'complaints' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Complaints
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'documents' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        Dokumen
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'documents' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Documents
+                    </div>
+                    <div class="permission-item {% if user|can_add:'documents' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Documents
+                    </div>
+                    <div class="permission-item {% if user|can_change:'documents' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Documents
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'documents' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Documents
+                    </div>
+                    <div class="permission-item {% if user|can_export:'documents' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Documents
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tourism -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'tourism' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-mountain mr-2"></i>
+                        Wisata
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'tourism' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Tourism
+                    </div>
+                    <div class="permission-item {% if user|can_add:'tourism' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Tourism
+                    </div>
+                    <div class="permission-item {% if user|can_change:'tourism' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Tourism
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'tourism' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Tourism
+                    </div>
+                    <div class="permission-item {% if user|can_export:'tourism' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Tourism
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posyandu -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'posyandu' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-heartbeat mr-2"></i>
+                        Posyandu
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'posyandu' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Posyandu
+                    </div>
+                    <div class="permission-item {% if user|can_add:'posyandu' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Posyandu
+                    </div>
+                    <div class="permission-item {% if user|can_change:'posyandu' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Posyandu
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'posyandu' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Posyandu
+                    </div>
+                    <div class="permission-item {% if user|can_export:'posyandu' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Posyandu
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- News -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'news' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-newspaper mr-2"></i>
+                        Berita
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'news' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View News
+                    </div>
+                    <div class="permission-item {% if user|can_add:'news' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add News
+                    </div>
+                    <div class="permission-item {% if user|can_change:'news' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change News
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'news' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete News
+                    </div>
+                    <div class="permission-item {% if user|can_export:'news' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export News
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Village Profile -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'village_profile' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-building mr-2"></i>
+                        Profil Desa
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'village_profile' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Village Profile
+                    </div>
+                    <div class="permission-item {% if user|can_add:'village_profile' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Village Profile
+                    </div>
+                    <div class="permission-item {% if user|can_change:'village_profile' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Village Profile
+                    </div>
+                    <div class="permission-item {% if user|can_delete:'village_profile' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Village Profile
+                    </div>
+                    <div class="permission-item {% if user|can_export:'village_profile' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Village Profile
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'reports' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Laporan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'reports' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Reports
+                    </div>
+                    <div class="permission-item {% if user|can_export:'reports' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-download mr-2"></i>
+                        Export Reports
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card role-test-card {% if user|can_view:'settings' %}allowed{% else %}denied{% endif %}">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog mr-2"></i>
+                        Pengaturan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="permission-item {% if user|can_view:'settings' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Settings
+                    </div>
+                    <div class="permission-item {% if user|can_change:'settings' %}allowed{% else %}denied{% endif %}">
+                        <i class="fas fa-edit mr-2"></i>
+                        Change Settings
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bug mr-2"></i>
+                        Debug Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>User Information:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Username:</strong> {{ debug_info.user.username }}</li>
+                                <li><strong>Authenticated:</strong> {{ debug_info.is_authenticated }}</li>
+                                <li><strong>Superuser:</strong> {{ debug_info.is_superuser }}</li>
+                                <li><strong>Roles:</strong> 
+                                    {% for role in debug_info.roles %}
+                                        <span class="badge badge-primary">{{ role.display_name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">No roles assigned</span>
+                                    {% endfor %}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Permission Tests:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Dashboard View:</strong> 
+                                    {% if debug_info.has_dashboard_view %}
+                                        <span class="text-success"><i class="fas fa-check"></i> Allowed</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fas fa-times"></i> Denied</span>
+                                    {% endif %}
+                                </li>
+                                <li><strong>References View:</strong> 
+                                    {% if debug_info.has_references_view %}
+                                        <span class="text-success"><i class="fas fa-check"></i> Allowed</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fas fa-times"></i> Denied</span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Instructions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Instruksi Uji Coba Multi-Role
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Test Users yang Tersedia:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>superadmin</strong> - Akses penuh ke semua fitur</li>
+                                <li><strong>admin</strong> - Akses admin ke sebagian besar fitur</li>
+                                <li><strong>datamanager</strong> - Kelola semua data dan laporan</li>
+                                <li><strong>beneficiarymanager</strong> - Kelola penerima bantuan</li>
+                                <li><strong>businessmanager</strong> - Kelola data usaha</li>
+                                <li><strong>complaintmanager</strong> - Kelola keluhan</li>
+                                <li><strong>documentmanager</strong> - Kelola dokumen</li>
+                                <li><strong>tourismmanager</strong> - Kelola wisata</li>
+                                <li><strong>posyandummanager</strong> - Kelola posyandu</li>
+                                <li><strong>newsmanager</strong> - Kelola berita</li>
+                                <li><strong>villageprofilemanager</strong> - Kelola profil desa</li>
+                                <li><strong>reportsviewer</strong> - Hanya lihat laporan</li>
+                                <li><strong>dataentry</strong> - Tambah dan edit data</li>
+                                <li><strong>viewer</strong> - Hanya lihat data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Cara Uji Coba:</h6>
+                            <ol>
+                                <li>Logout dari akun saat ini</li>
+                                <li>Login dengan salah satu test user di atas</li>
+                                <li>Password untuk semua test user: <strong>password123</strong></li>
+                                <li>Kembali ke halaman ini untuk melihat permission yang berbeda</li>
+                                <li>Navigasi ke menu lain untuk melihat akses yang terbatas</li>
+                                <li>Uji coba tombol-tombol yang muncul/hilang berdasarkan role</li>
+                            </ol>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                <strong>Tips:</strong> Setiap role memiliki akses yang berbeda. Coba login dengan role yang berbeda untuk melihat perbedaannya.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add animation to cards
+    $('.role-test-card').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+        $(this).addClass('fade-in');
+    });
+    
+    // Add click effect
+    $('.role-test-card').on('click', function() {
+        $(this).addClass('clicked');
+        setTimeout(() => {
+            $(this).removeClass('clicked');
+        }, 200);
+    });
+});
+</script>
+{% endblock %}

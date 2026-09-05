@@ -1,0 +1,483 @@
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="fas fa-file-import mr-2"></i>
+                    Import Data
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Import Steps -->
+                <div class="import-steps mb-4">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="step-item active" id="step1">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Pilih File</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="step-item" id="step2">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Validasi</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="step-item" id="step3">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Import</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1: File Selection -->
+                <div id="importStep1" class="import-step">
+                    <div class="form-group">
+                        <label for="importFile" class="form-label">
+                            <i class="fas fa-file mr-1"></i>
+                            Pilih File <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="importFile" accept=".xlsx,.xls,.csv,.json">
+                        <small class="form-text text-muted">
+                            Format yang didukung: Excel (.xlsx, .xls), CSV (.csv), JSON (.json)
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-download mr-1"></i>
+                            Download Template
+                        </label>
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-success" onclick="downloadTemplate('excel')">
+                                <i class="fas fa-file-excel mr-1"></i> Excel
+                            </button>
+                            <button type="button" class="btn btn-outline-info" onclick="downloadTemplate('csv')">
+                                <i class="fas fa-file-csv mr-1"></i> CSV
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="downloadTemplate('json')">
+                                <i class="fas fa-file-code mr-1"></i> JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Validation -->
+                <div id="importStep2" class="import-step" style="display: none;">
+                    <div class="validation-results">
+                        <div class="text-center mb-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Memvalidasi...</span>
+                            </div>
+                            <p class="mt-2">Memvalidasi data...</p>
+                        </div>
+                        
+                        <div id="validationResults" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="stat-card">
+                                        <div class="stat-number" id="totalRows">0</div>
+                                        <div class="stat-label">Total Data</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card success">
+                                        <div class="stat-number" id="validRows">0</div>
+                                        <div class="stat-label">Valid</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card danger">
+                                        <div class="stat-number" id="errorRows">0</div>
+                                        <div class="stat-label">Error</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card info">
+                                        <div class="stat-number" id="successRate">0%</div>
+                                        <div class="stat-label">Success Rate</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="errorDetails" class="mt-3" style="display: none;">
+                                <h6 class="text-danger">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Detail Error
+                                </h6>
+                                <div class="error-list" id="errorList">
+                                    <!-- Error details will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Import -->
+                <div id="importStep3" class="import-step" style="display: none;">
+                    <div class="import-progress">
+                        <div class="text-center mb-3">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="sr-only">Mengimport...</span>
+                            </div>
+                            <p class="mt-2">Mengimport data...</p>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%" id="importProgress">
+                            </div>
+                        </div>
+                        
+                        <div id="importResults" style="display: none;">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span id="importSuccessMessage">Import berhasil!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-primary" id="nextStepBtn" onclick="nextImportStep()">
+                    <i class="fas fa-arrow-right mr-1"></i>
+                    Selanjutnya
+                </button>
+                <button type="button" class="btn btn-success" id="importBtn" onclick="startImport()" style="display: none;">
+                    <i class="fas fa-upload mr-1"></i>
+                    Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.import-steps {
+    margin-bottom: 2rem;
+}
+
+.step-item {
+    text-align: center;
+    position: relative;
+}
+
+.step-item::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 1;
+}
+
+.step-item:last-child::after {
+    display: none;
+}
+
+.step-item.active::after {
+    background: #007bff;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+}
+
+.step-item.active .step-number {
+    background: #007bff;
+    color: white;
+}
+
+.step-title {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.step-item.active .step-title {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    border: 2px solid #e9ecef;
+}
+
+.stat-card.success {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.stat-card.danger {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+
+.stat-card.info {
+    border-color: #17a2b8;
+    background: #d1ecf1;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.stat-card.success .stat-number {
+    color: #28a745;
+}
+
+.stat-card.danger .stat-number {
+    color: #dc3545;
+}
+
+.stat-card.info .stat-number {
+    color: #17a2b8;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.error-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+.error-item {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.error-item:last-child {
+    margin-bottom: 0;
+}
+</style>
+
+<script>
+let currentImportStep = 1;
+let importFile = null;
+let validationResults = null;
+
+function nextImportStep() {
+    if (currentImportStep === 1) {
+        // Validate file selection
+        const fileInput = document.getElementById('importFile');
+        if (!fileInput.files[0]) {
+            alert('Pilih file terlebih dahulu!');
+            return;
+        }
+        
+        importFile = fileInput.files[0];
+        validateImportFile();
+    } else if (currentImportStep === 2) {
+        // Move to import step
+        showImportStep(3);
+        startImport();
+    }
+}
+
+function showImportStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.import-step').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
+    
+    // Show current step
+    document.getElementById(`importStep${step}`).style.display = 'block';
+    document.getElementById(`step${step}`).classList.add('active');
+    
+    currentImportStep = step;
+    
+    // Update buttons
+    const nextBtn = document.getElementById('nextStepBtn');
+    const importBtn = document.getElementById('importBtn');
+    
+    if (step === 1) {
+        nextBtn.style.display = 'inline-block';
+        importBtn.style.display = 'none';
+        nextBtn.innerHTML = '<i class="fas fa-arrow-right mr-1"></i> Selanjutnya';
+    } else if (step === 2) {
+        nextBtn.style.display = 'inline-block';
+        importBtn.style.display = 'none';
+        nextBtn.innerHTML = '<i class="fas fa-arrow-right mr-1"></i> Lanjutkan';
+    } else if (step === 3) {
+        nextBtn.style.display = 'none';
+        importBtn.style.display = 'inline-block';
+    }
+}
+
+function validateImportFile() {
+    showImportStep(2);
+    
+    const formData = new FormData();
+    formData.append('file', importFile);
+    formData.append('model_name', getCurrentModelName());
+    
+    fetch('{% url "admin_panel:references_validate_import_file" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.querySelector('#importStep2 .spinner-border').style.display = 'none';
+        document.querySelector('#importStep2 p').style.display = 'none';
+        
+        validationResults = data;
+        displayValidationResults(data);
+    })
+    .catch(error => {
+        console.error('Validation error:', error);
+        alert('Error saat memvalidasi file: ' + error.message);
+    });
+}
+
+function displayValidationResults(data) {
+    document.getElementById('validationResults').style.display = 'block';
+    
+    document.getElementById('totalRows').textContent = data.total_rows || 0;
+    document.getElementById('validRows').textContent = data.valid_rows || 0;
+    document.getElementById('errorRows').textContent = data.error_count || 0;
+    
+    const successRate = data.total_rows > 0 ? Math.round((data.valid_rows / data.total_rows) * 100) : 0;
+    document.getElementById('successRate').textContent = successRate + '%';
+    
+    if (data.error_count > 0) {
+        document.getElementById('errorDetails').style.display = 'block';
+        displayErrors(data.errors);
+    }
+}
+
+function displayErrors(errors) {
+    const errorList = document.getElementById('errorList');
+    errorList.innerHTML = '';
+    
+    errors.forEach(error => {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-item';
+        errorDiv.innerHTML = `
+            <strong>Baris ${error.row}:</strong> ${error.error}
+        `;
+        errorList.appendChild(errorDiv);
+    });
+}
+
+function startImport() {
+    const formData = new FormData();
+    formData.append('file', importFile);
+    
+    fetch(`{% url "admin_panel:references_quick_import" "penduduk" %}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.querySelector('#importStep3 .spinner-border').style.display = 'none';
+        document.querySelector('#importStep3 p').style.display = 'none';
+        document.querySelector('#importStep3 .progress').style.display = 'none';
+        
+        document.getElementById('importResults').style.display = 'block';
+        document.getElementById('importSuccessMessage').textContent = data.message;
+        
+        // Update button
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-check mr-1"></i> Selesai';
+        document.getElementById('importBtn').onclick = () => {
+            $('#importModal').modal('hide');
+            location.reload();
+        };
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+        alert('Error saat mengimport: ' + error.message);
+    });
+}
+
+function downloadTemplate(format) {
+    const modelName = getCurrentModelName();
+    window.open(`{% url "admin_panel:references_get_template" "penduduk" %}?format=${format}`, '_blank');
+}
+
+function getCurrentModelName() {
+    // This should be set by the parent page
+    return window.currentModelName || 'penduduk';
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Reset modal when closed
+$('#importModal').on('hidden.bs.modal', function () {
+    currentImportStep = 1;
+    importFile = null;
+    validationResults = null;
+    
+    // Reset form
+    document.getElementById('importFile').value = '';
+    showImportStep(1);
+    
+    // Hide all results
+    document.getElementById('validationResults').style.display = 'none';
+    document.getElementById('errorDetails').style.display = 'none';
+    document.getElementById('importResults').style.display = 'none';
+    
+    // Show loading elements
+    document.querySelector('#importStep2 .spinner-border').style.display = 'block';
+    document.querySelector('#importStep2 p').style.display = 'block';
+    document.querySelector('#importStep3 .spinner-border').style.display = 'block';
+    document.querySelector('#importStep3 p').style.display = 'block';
+    document.querySelector('#importStep3 .progress').style.display = 'block';
+});
+</script>

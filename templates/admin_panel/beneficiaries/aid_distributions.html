@@ -1,0 +1,945 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/beneficiaries.css' %}">
+<style>
+/* Light Theme Improvements - Consistent with list.html */
+.beneficiaries-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.filter-card {
+    background: #ffffff;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.filter-card .card-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.beneficiaries-table {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.beneficiaries-table .card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border: none;
+}
+
+.beneficiaries-table .card-title {
+    color: white;
+    font-weight: 600;
+    margin: 0;
+}
+
+.beneficiaries-table .table {
+    margin: 0;
+    background: white;
+}
+
+.beneficiaries-table .table thead th {
+    background: #f8f9fa;
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.beneficiaries-table .table tbody td {
+    padding: 1rem;
+    border: none;
+    border-bottom: 1px solid #f8f9fa;
+    vertical-align: middle;
+}
+
+.beneficiaries-table .table tbody tr:hover {
+    background: #f8f9fa;
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
+
+/* Action Buttons - Horizontal Layout */
+.btn-group {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-group .btn {
+    border-radius: 8px !important;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    margin: 0.125rem;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-group .btn-outline-primary:hover {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.btn-group .btn-outline-success:hover {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-group .btn-outline-warning:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-group .btn-outline-danger:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* Badge Improvements */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: #212529;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.badge-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+    color: white;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    color: white;
+}
+
+/* Form Improvements */
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background: white;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Button Improvements */
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: white;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    border: 2px dashed #dee2e6;
+    margin: 2rem 0;
+}
+
+.empty-state i {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+/* Pagination */
+.pagination {
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 0.25rem;
+    border: 2px solid #e9ecef;
+    color: #007bff;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+}
+
+.modal-title {
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-body {
+    padding: 2rem;
+    background: #fff;
+}
+
+.modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 15px 15px;
+    padding: 1.5rem;
+}
+
+.modal .btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.modal .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.modal .btn-secondary {
+    background: #6c757d;
+    border-color: #6c757d;
+}
+
+.modal .btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border-color: #dc3545;
+}
+
+/* Bulk Actions Styling */
+.bulk-actions {
+    transition: all 0.3s ease;
+}
+
+.bulk-actions .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.bulk-actions .btn:last-child {
+    margin-right: 0;
+}
+
+/* Checkbox Styling */
+.form-check-input {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* ID Badge Styling */
+.badge-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .beneficiaries-wrapper {
+        padding: 1rem 0;
+    }
+    
+    .page-header {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn-group {
+        flex-direction: column !important;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+    
+    .bulk-actions {
+        flex-direction: column !important;
+        width: 100%;
+    }
+    
+    .bulk-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Hide some columns on mobile */
+    .d-none.d-md-table-cell {
+        display: none !important;
+    }
+    
+    .d-none.d-lg-table-cell {
+        display: none !important;
+    }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.beneficiaries-table .table tbody tr {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Card Hover Effects */
+.beneficiaries-table:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="beneficiaries-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Distribusi Bantuan</h4>
+                            <p class="text-muted mb-0">Kelola distribusi bantuan di Desa Pulosari</p>
+                        </div>
+                        <div>
+                            <a class="btn btn-primary" href="{% url 'admin_panel:aid_distribution_create' %}">
+                                <i class="fas fa-plus mr-1"></i>Tambah Distribusi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter -->
+                <div class="filter-card">
+                    <div class="card-body">
+                        <form method="get" id="filterForm" class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Program Bantuan</label>
+                                <select class="form-control" id="aid" name="aid">
+                                    <option value="">Semua Program</option>
+                                    {% for aid in aids %}
+                                    <option value="{{ aid.id }}" {% if selected_aid == aid.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ aid.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">Status</option>
+                                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Menunggu</option>
+                                    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Disetujui</option>
+                                    <option value="distributed" {% if selected_status == 'distributed' %}selected{% endif %}>Sudah Disalurkan</option>
+                                    <option value="rejected" {% if selected_status == 'rejected' %}selected{% endif %}>Ditolak</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Dari Tanggal</label>
+                                <input type="date" class="form-control" name="date_from" value="{{ date_from }}">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Sampai Tanggal</label>
+                                <input type="date" class="form-control" name="date_to" value="{{ date_to }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="d-flex align-items-end h-100">
+                                    <button type="submit" class="btn btn-primary mr-2">
+                                        <i class="fas fa-search mr-1"></i>Filter
+                                    </button>
+                                    <a href="{% url 'admin_panel:aid_distributions_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times mr-1"></i>Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="beneficiaries-table">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="fas fa-gift mr-2"></i>Daftar Distribusi Bantuan
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <div class="bulk-actions d-none" id="bulkActionsDistributions">
+                                <button class="btn btn-sm btn-outline-danger" id="bulkDeleteDistributionsBtn" disabled>
+                                    <i class="fas fa-trash mr-1"></i>Hapus Terpilih
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" id="bulkEditDistributionsBtn" disabled>
+                                    <i class="fas fa-edit mr-1"></i>Edit Terpilih
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" id="bulkExportDistributionsBtn" disabled>
+                                    <i class="fas fa-file-csv mr-1"></i>Export Terpilih
+                                </button>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" id="exportAllDistributionsBtn">
+                                <i class="fas fa-file-csv mr-1"></i>Export Semua
+                            </button>
+                        </div>
+                    </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th width="3%" class="text-center">
+                                    <input type="checkbox" id="selectAllDistributions" class="form-check-input">
+                                </th>
+                                <th width="5%" class="d-none d-md-table-cell">ID</th>
+                                <th width="20%">Penerima</th>
+                                <th width="20%" class="d-none d-md-table-cell">Program Bantuan</th>
+                                <th width="15%" class="d-none d-lg-table-cell">Jumlah</th>
+                                <th width="10%" class="d-none d-sm-table-cell">Status</th>
+                                <th width="15%" class="d-none d-lg-table-cell">Tanggal Distribusi</th>
+                                <th width="15%" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for distribution in distributions %}
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input distribution-checkbox" value="{{ distribution.id }}">
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="badge badge-primary">#{{ distribution.id }}</span>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>{{ distribution.beneficiary.person.name }}</strong>
+                                        <div class="d-md-none">
+                                            <small class="text-muted">{{ distribution.aid.name|truncatechars:20 }}</small>
+                                            <br>
+                                            <span class="badge badge-{% if distribution.status == 'distributed' %}success{% elif distribution.status == 'approved' %}info{% elif distribution.status == 'pending' %}warning{% else %}danger{% endif %} badge-sm">
+                                                {{ distribution.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <span class="text-muted">{{ distribution.aid.name }}</span>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    <span class="text-muted">{{ distribution.amount_received|rupiah }}</span>
+                                </td>
+                                <td class="d-none d-sm-table-cell">
+                                    <span class="badge badge-{% if distribution.status == 'distributed' %}success{% elif distribution.status == 'approved' %}info{% elif distribution.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                        {{ distribution.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="d-none d-lg-table-cell">
+                                    {{ distribution.distribution_date|date:"d/m/Y"|default:"-" }}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a class="btn btn-outline-primary btn-sm" title="Detail" 
+                                           href="{% url 'admin_panel:aid_distribution_detail' distribution.id %}" 
+                                           data-toggle="tooltip">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if distribution.status != 'distributed' %}
+                                        <a class="btn btn-outline-success btn-sm" title="Lihat & Acc"
+                                           href="{% url 'admin_panel:aid_distribution_detail' distribution.id %}" 
+                                           data-toggle="tooltip">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if distribution.status == 'pending' %}
+                                        <a class="btn btn-outline-warning btn-sm" title="Edit" 
+                                           href="{% url 'admin_panel:aid_distribution_create' %}?edit={{ distribution.id }}" 
+                                           data-toggle="tooltip">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-outline-danger btn-sm" title="Hapus"
+                                                data-toggle="modal" data-target="#deleteModal" 
+                                                data-distribution-id="{{ distribution.id }}" 
+                                                data-distribution-recipient="{{ distribution.beneficiary.person.name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <div class="text-center">
+                                        <i class="fas fa-gift fa-4x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Belum ada distribusi bantuan</h5>
+                                        <p class="text-muted">Silakan tambah distribusi bantuan baru</p>
+                                        <a class="btn btn-primary mt-3" href="{% url 'admin_panel:aid_distribution_create' %}">
+                                            <i class="fas fa-plus mr-1"></i>Tambah Distribusi
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if distributions.has_other_pages %}
+            <div class="pagination">
+                <ul class="pagination">
+                    {% if distributions.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if selected_aid %}&aid={{ selected_aid }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ distributions.previous_page_number }}{% if selected_aid %}&aid={{ selected_aid }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">{{ distributions.number }} of {{ distributions.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if distributions.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ distributions.next_page_number }}{% if selected_aid %}&aid={{ selected_aid }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ distributions.paginator.num_pages }}{% if selected_aid %}&aid={{ selected_aid }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning mr-2"></i>Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus distribusi bantuan untuk:</p>
+                <div class="alert alert-warning">
+                    <strong id="distributionRecipient"></strong>
+                </div>
+                <p class="text-muted">Data yang sudah dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>Hapus Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+let editingDistributionId = null;
+let deleteDistributionId = null;
+let statusDistributionId = null;
+let selectedDistributions = [];
+
+$(document).ready(function() {
+    // Auto-submit filter form on change
+    $('#filterForm select, #filterForm input').on('change', function() {
+        $('#filterForm').submit();
+    });
+    
+    // Load beneficiaries when aid is selected
+    $('#aidSelect').on('change', function() {
+        const aidId = $(this).val();
+        const amount = $(this).find(':selected').data('amount');
+        
+        if (amount) {
+            $('#amountReceived').val(amount);
+        }
+        
+        loadBeneficiaries();
+    });
+    
+    // Set default date to today
+    $('#distributionDate').val(new Date().toISOString().split('T')[0]);
+
+    // Handle delete modal open
+    $('#deleteModal').on('show.bs.modal', function(event) {
+        const button = $(event.relatedTarget);
+        deleteDistributionId = button.data('distribution-id');
+        $('#distributionRecipient').text(button.data('distribution-recipient'));
+    });
+
+    // Handle delete modal close
+    $('#deleteModal').on('hidden.bs.modal', function() {
+        deleteDistributionId = null;
+    });
+    
+    // Initialize tooltips for Bootstrap 4
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Bulk actions for distributions
+    $('#selectAllDistributions').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        $('.distribution-checkbox').prop('checked', isChecked);
+        updateBulkActionsDistributions();
+    });
+
+    $('.distribution-checkbox').on('change', function() {
+        updateBulkActionsDistributions();
+        updateSelectAllDistributions();
+    });
+});
+
+function updateBulkActionsDistributions() {
+    const checkedBoxes = $('.distribution-checkbox:checked');
+    const count = checkedBoxes.length;
+    
+    if (count > 0) {
+        $('#bulkActionsDistributions').removeClass('d-none');
+        $('#bulkDeleteDistributionsBtn, #bulkEditDistributionsBtn, #bulkExportDistributionsBtn').prop('disabled', false);
+        $('#bulkDeleteDistributionsBtn').html(`<i class="fas fa-trash mr-1"></i>Hapus ${count} Item`);
+    } else {
+        $('#bulkActionsDistributions').addClass('d-none');
+        $('#bulkDeleteDistributionsBtn, #bulkEditDistributionsBtn, #bulkExportDistributionsBtn').prop('disabled', true);
+    }
+}
+
+function updateSelectAllDistributions() {
+    const totalBoxes = $('.distribution-checkbox').length;
+    const checkedBoxes = $('.distribution-checkbox:checked').length;
+    
+    if (checkedBoxes === 0) {
+        $('#selectAllDistributions').prop('indeterminate', false).prop('checked', false);
+    } else if (checkedBoxes === totalBoxes) {
+        $('#selectAllDistributions').prop('indeterminate', false).prop('checked', true);
+    } else {
+        $('#selectAllDistributions').prop('indeterminate', true);
+    }
+}
+
+// Bulk delete distributions
+$('#bulkDeleteDistributionsBtn').on('click', function() {
+    const selectedIds = $('.distribution-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showToast('warning', 'Pilih item yang akan dihapus');
+        return;
+    }
+    
+    if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} distribusi?`)) {
+        bulkDeleteDistributions(selectedIds);
+    }
+});
+
+// Bulk edit distributions
+$('#bulkEditDistributionsBtn').on('click', function() {
+    const selectedIds = $('.distribution-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showToast('warning', 'Pilih item yang akan diedit');
+        return;
+    }
+    
+    showToast('info', 'Fitur edit massal sedang dalam pengembangan');
+});
+
+// Bulk export distributions
+$('#bulkExportDistributionsBtn').on('click', function() {
+    const selectedIds = $('.distribution-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    if (selectedIds.length === 0) {
+        showToast('warning', 'Pilih item yang akan diekspor');
+        return;
+    }
+    
+    showToast('info', 'Fitur ekspor massal sedang dalam pengembangan');
+});
+
+// Export all distributions
+$('#exportAllDistributionsBtn').on('click', function() {
+    showToast('info', 'Fitur ekspor semua data sedang dalam pengembangan');
+});
+
+function bulkDeleteDistributions(ids) {
+    const btn = $('#bulkDeleteDistributionsBtn');
+    const originalText = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+    
+    // Prepare data for Django's getlist() method
+    const formData = new FormData();
+    formData.append('action', 'bulk_delete');
+    formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+    ids.forEach(id => {
+        formData.append('ids', id);
+    });
+    
+    $.ajax({
+        url: '{% url "admin_panel:aid_distributions_list" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast('success', response.message);
+                // Clear selections
+                $('.distribution-checkbox:checked').prop('checked', false);
+                $('#selectAllDistributions').prop('checked', false);
+                updateBulkActionsDistributions();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', response.message || 'Gagal menghapus distribusi');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Bulk delete error:', xhr.responseText);
+            let errorMessage = 'Terjadi kesalahan saat menghapus data';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.message) {
+                    errorMessage = response.message;
+                }
+            } catch (e) {
+                // Use default error message
+            }
+            showToast('error', errorMessage);
+        },
+        complete: function() {
+            btn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function deleteDistribution(distributionId, recipientName) {
+    deleteDistributionId = distributionId;
+    $('#distributionRecipient').text(recipientName);
+    $('#deleteModal').modal('show');
+}
+
+$('#confirmDeleteBtn').click(function() {
+    if (deleteDistributionId) {
+        const submitBtn = $(this);
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+        
+        $.ajax({
+            url: `{% url 'admin_panel:aid_distribution_delete' 0 %}`.replace('0', deleteDistributionId),
+            type: 'DELETE',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-CSRFToken", $('[name=csrfmiddlewaretoken]').val());
+            },
+            success: function(response) {
+                $('#deleteModal').modal('hide');
+                if (response.success) {
+                    showToast('success', response.message || 'Distribusi berhasil dihapus');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('error', response.message || 'Gagal menghapus distribusi');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete error:', xhr.responseText);
+                let errorMessage = 'Terjadi kesalahan saat menghapus distribusi';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.message) {
+                        errorMessage = response.message;
+                    }
+                } catch (e) {
+                    // Use default error message
+                }
+                showToast('error', errorMessage);
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    }
+});
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% endblock extra_js %}

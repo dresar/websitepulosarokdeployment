@@ -1,0 +1,683 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/beneficiaries.css' %}">
+<style>
+/* Light Theme Form Improvements */
+.admin-forms {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.form-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.form-card .card-body {
+    padding: 3rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.form-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+}
+
+.form-section-title i {
+    margin-right: 0.75rem;
+    color: #007bff;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-height: 50px;
+    width: 100%;
+    background-color: #fff;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    background-color: #fff;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 1;
+    font-style: italic;
+    font-size: 1rem;
+}
+
+.form-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.75rem;
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: white;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 0;
+    border-top: 2px solid #e9ecef;
+    margin-top: 3rem;
+    gap: 1rem;
+}
+
+.action-buttons .btn {
+    padding: 1rem 2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    min-height: 50px;
+    min-width: 150px;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Input group improvements */
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.input-group .form-control {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    margin-bottom: 0;
+    min-height: 50px;
+    font-size: 1.1rem;
+    padding: 1rem 1.25rem;
+}
+
+.input-group-append {
+    display: flex;
+}
+
+.input-group-append .btn {
+    position: relative;
+    z-index: 2;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0;
+    min-height: 50px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+.input-group .form-control:focus {
+    z-index: 3;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Selected beneficiary card */
+#selectedBeneficiary {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 2px solid #e1f5fe;
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+#selectedBeneficiary .card-body {
+    padding: 1.5rem;
+    background: transparent;
+}
+
+#selectedBeneficiary .card-title {
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+#selectedBeneficiary h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#selectedBeneficiary p {
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-forms {
+        padding: 1rem 0;
+    }
+    
+    .page-header {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .form-control {
+        font-size: 1rem;
+        padding: 0.875rem 1rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .input-group-append {
+        margin-top: 0.5rem;
+    }
+    
+    .input-group-append .btn {
+        border-radius: 10px;
+        border-left: 2px solid #007bff;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-card .card-body {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .form-control {
+        font-size: 0.95rem;
+        padding: 0.75rem 0.875rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="admin-forms">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10 col-lg-11">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Tambah Distribusi Bantuan</h4>
+                            <p class="text-muted mb-0">Tambah distribusi bantuan baru</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:aid_distributions_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="card-body">
+                        <form id="distributionCreateForm">
+                            {% csrf_token %}
+                            <div class="form-section">
+                                <h6 class="form-section-title">
+                                    <i class="fas fa-hand-holding-heart mr-2"></i>Data Program & Penerima
+                                </h6>
+                                <div class="form-group">
+                                    <label for="aidSelect" class="form-label">Program Bantuan</label>
+                                    <select class="form-control" id="aidSelect" required>
+                                        <option value="">Pilih Program Bantuan</option>
+                                        {% for aid in aids %}
+                                        <option value="{{ aid.id }}" data-amount="{{ aid.value_per_beneficiary }}">{{ aid.name }} - Rp {{ aid.value_per_beneficiary|floatformat:0 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="beneficiarySelect" class="form-label">Penerima</label>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="beneficiarySearch" placeholder="Cari berdasarkan nama atau NIK...">
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-primary" id="searchBeneficiaryBtn">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small class="form-text"><span id="beneficiarySearchStatus"></span></small>
+                                    <select class="form-control mt-2" id="beneficiarySelect" required>
+                                        <option value="">Pilih Penerima</option>
+                                        {% for b in beneficiaries %}
+                                        <option value="{{ b.id }}">{{ b.person.name }} - {{ b.person.nik }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="card mt-2" id="selectedBeneficiary" style="display: none;">
+                                        <div class="card-body">
+                                            <h6 class="card-title"><i class="fas fa-check-circle text-success"></i> Penerima Terpilih</h6>
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <h6 class="mb-1" id="beneficiaryName"></h6>
+                                                    <p class="text-muted mb-1">NIK: <span id="beneficiaryNik"></span></p>
+                                                    <p class="text-muted mb-0">Alamat: <span id="beneficiaryAddress"></span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h6 class="form-section-title">
+                                    <i class="fas fa-receipt mr-2"></i>Detail Distribusi
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="amountReceived" class="form-label">Jumlah Diterima (Rp)</label>
+                                            <input type="text" class="form-control" id="amountReceived" required inputmode="numeric" placeholder="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="distributionDate" class="form-label">Tanggal Distribusi</label>
+                                            <input type="date" class="form-control" id="distributionDate">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="distributionStatus" class="form-label">Status</label>
+                                            <select class="form-control" id="distributionStatus">
+                                                <option value="pending">Menunggu</option>
+                                                <option value="approved">Disetujui</option>
+                                                <option value="distributed">Sudah Disalurkan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="receiptNumber" class="form-label">No. Kwitansi</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="receiptNumber" placeholder="Otomatis / isi manual">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-primary" type="button" id="generateReceipt">
+                                                        <i class="fas fa-magic"></i> Generate
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text">Klik Generate untuk mengisi nomor otomatis</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="distributionNotes" class="form-label">Catatan</label>
+                                    <textarea class="form-control" id="distributionNotes" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <a href="{% url 'admin_panel:aid_distributions_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left mr-1"></i>Kembali
+                                </a>
+                                <button type="button" class="btn btn-primary" id="saveBtn">
+                                    <i class="fas fa-save mr-1"></i>Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+(function(){
+  const amountInput=document.getElementById('amountReceived');
+  const aidSelect=document.getElementById('aidSelect');
+  const dateInput=document.getElementById('distributionDate');
+  const beneficiarySelect=document.getElementById('beneficiarySelect');
+  const beneficiarySearch=document.getElementById('beneficiarySearch');
+  const searchBtn=document.getElementById('searchBeneficiaryBtn');
+  const searchStatus=document.getElementById('beneficiarySearchStatus');
+  const urlParams=new URLSearchParams(window.location.search);
+  const editId=urlParams.get('edit');
+  dateInput.value=new Date().toISOString().split('T')[0];
+  function parseNum(x){ 
+    const cleaned = String(x||'').replace(/\./g,'').replace(/[^0-9]/g,'');
+    // Batasi maksimal 10 digit (sesuai dengan max_digits=12, decimal_places=2)
+    const maxValue = 999999999.99;
+    const numValue = parseFloat(cleaned) || 0;
+    return Math.min(numValue, maxValue);
+  }
+  function formatRupiah(x){ if(!x) return ''; let s=parseNum(x); if(!s) return ''; return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+  aidSelect.addEventListener('change',function(){
+    const opt=this.options[this.selectedIndex];
+    const amt=opt && opt.getAttribute('data-amount');
+    if(amt){ amountInput.value=formatRupiah(amt); }
+  });
+  amountInput.addEventListener('input',function(){ this.value = formatRupiah(this.value); });
+
+  let searchTimeout;
+  function loadBeneficiaries(q){
+    searchStatus.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memuat penerima bantuan yang sudah terdaftar...';
+    beneficiarySelect.disabled=true;
+    // PENTING: Ambil HANYA beneficiaries yang sudah terdaftar, BUKAN data penduduk umum
+    fetch('{% url "admin_panel:api_beneficiaries_search" %}?q='+(encodeURIComponent(q||'')))
+      .then(r=>r.json()).then(function(data){
+        const list=data.results||data;
+        beneficiarySelect.innerHTML='';
+        const ph=document.createElement('option'); ph.value=''; ph.textContent='Pilih Penerima Bantuan (yang sudah terdaftar)'; beneficiarySelect.appendChild(ph);
+        if(list && list.length){
+          list.forEach(function(p){ 
+            const opt=document.createElement('option'); 
+            opt.value=p.id; 
+            opt.textContent=p.name+' - '+p.nik; 
+            opt.dataset.name=p.name;
+            opt.dataset.nik=p.nik;
+            opt.dataset.address=p.address||'';
+            beneficiarySelect.appendChild(opt); 
+          });
+          searchStatus.innerHTML='<span class="text-success">Ditemukan '+list.length+' penerima bantuan yang sudah terdaftar</span>';
+        } else {
+          const opt=document.createElement('option'); opt.value=''; opt.textContent='Belum ada penerima bantuan yang terdaftar'; beneficiarySelect.appendChild(opt);
+          searchStatus.innerHTML='<span class="text-warning">0 penerima terdaftar - daftarkan dulu di form beneficiaries</span>';
+        }
+      }).catch(function(err){ 
+        console.error('Search error:', err);
+        searchStatus.innerHTML='<span class="text-danger">Gagal memuat data penerima</span>'; 
+      })
+      .finally(function(){ beneficiarySelect.disabled=false; });
+  }
+  
+  // Enhanced search with filtering for beneficiaries
+  function filterBeneficiaryDropdown(searchTerm) {
+    const options = beneficiarySelect.options;
+    let visibleCount = 0;
+    
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
+      const text = option.textContent.toLowerCase();
+      const search = searchTerm.toLowerCase();
+      
+      if (option.value === '' || text.includes(search)) {
+        option.style.display = 'block';
+        if (option.value !== '') visibleCount++;
+      } else {
+        option.style.display = 'none';
+      }
+    }
+    
+    searchStatus.innerHTML = `<span class="text-info">${visibleCount} penerima tersedia</span>`;
+  }
+  if(beneficiarySearch){
+    beneficiarySearch.addEventListener('input',function(){
+      clearTimeout(searchTimeout);
+      const q=beneficiarySearch.value;
+      if(q.length>=1){ 
+        searchTimeout=setTimeout(function(){ loadBeneficiaries(q); },300); 
+      } else { 
+        loadBeneficiaries(''); 
+      }
+      // Also filter existing dropdown options
+      filterBeneficiaryDropdown(q);
+    });
+  }
+  if(searchBtn){ searchBtn.addEventListener('click',function(){ loadBeneficiaries(beneficiarySearch.value||''); }); }
+  
+  // Handle beneficiary selection
+  beneficiarySelect.addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const selectedBeneficiary = document.getElementById('selectedBeneficiary');
+    
+    if (selectedOption && selectedOption.value) {
+      // Show selected beneficiary card
+      document.getElementById('beneficiaryName').textContent = selectedOption.dataset.name || selectedOption.textContent.split(' - ')[0];
+      document.getElementById('beneficiaryNik').textContent = selectedOption.dataset.nik || selectedOption.textContent.split(' - ')[1] || '';
+      document.getElementById('beneficiaryAddress').textContent = selectedOption.dataset.address || '-';
+      selectedBeneficiary.style.display = 'block';
+    } else {
+      selectedBeneficiary.style.display = 'none';
+    }
+  });
+  
+  // Load all beneficiaries on page load
+  loadBeneficiaries('');
+  function prefillForm(data){
+    if(!data||!data.success){return;}
+    const d=data.data||{};
+    aidSelect.value=d.aid_id; const evt=new Event('change'); aidSelect.dispatchEvent(evt);
+    // set beneficiary simply with a single option
+    beneficiarySelect.innerHTML='';
+    const opt=document.createElement('option');
+    opt.value=d.beneficiary_id;
+    opt.textContent=((d.beneficiary_name||'')+(d.beneficiary_nik?' - '+d.beneficiary_nik:''))||('ID '+d.beneficiary_id);
+    beneficiarySelect.appendChild(opt);
+    beneficiarySelect.value=d.beneficiary_id;
+    amountInput.value=d.amount_received||'';
+    dateInput.value=d.distribution_date||'';
+    document.getElementById('distributionStatus').value=d.status||'pending';
+    document.getElementById('receiptNumber').value=d.receipt_number||'';
+    document.getElementById('distributionNotes').value=d.notes||'';
+  }
+  if(editId){
+    fetch('{% url "admin_panel:aid_distribution_update" 0 %}'.replace('0', editId))
+      .then(r=>r.json()).then(prefillForm).catch(function(){});
+  }
+
+  function validateDuplicate(){
+    const aidId=aidSelect.value; const benId=beneficiarySelect.value; if(!aidId||!benId){ return; }
+    const q='?aid_id='+encodeURIComponent(aidId)+'&beneficiary_id='+encodeURIComponent(benId)+(editId?'&exclude_id='+encodeURIComponent(editId):'');
+    fetch('{% url "admin_panel:aid_distribution_check" %}'+q)
+      .then(r=>r.json()).then(function(res){ if(res && res.exists){ alert('Penerima ini sudah menerima bantuan pada program tersebut.'); } });
+  }
+  aidSelect.addEventListener('change',validateDuplicate);
+  beneficiarySelect.addEventListener('change',validateDuplicate);
+  document.getElementById('saveBtn').addEventListener('click',function(){
+    const btn=this; const original=btn.innerHTML; btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...';
+    const aidIdValue = document.getElementById('aidSelect').value;
+    const beneficiaryIdValue = document.getElementById('beneficiarySelect').value;
+    
+    console.log('Aid ID value:', aidIdValue);
+    console.log('Beneficiary ID value:', beneficiaryIdValue);
+    
+    if(!aidIdValue || aidIdValue === ''){
+      alert('Silakan pilih program bantuan terlebih dahulu');
+      btn.disabled=false; btn.innerHTML=original;
+      return;
+    }
+    
+    if(!beneficiaryIdValue || beneficiaryIdValue === ''){
+      alert('Silakan pilih penerima bantuan terlebih dahulu');
+      btn.disabled=false; btn.innerHTML=original;
+      return;
+    }
+    
+    // Validate amount_received
+    const amountValue = parseNum(document.getElementById('amountReceived').value);
+    if(amountValue > 999999999.99){
+      alert('Jumlah bantuan terlalu besar. Maksimal Rp 999.999.999,99');
+      btn.disabled=false; btn.innerHTML=original;
+      return;
+    }
+    if(amountValue < 0){
+      alert('Jumlah bantuan tidak boleh negatif');
+      btn.disabled=false; btn.innerHTML=original;
+      return;
+    }
+    
+    const payload={
+      aid_id: aidIdValue,
+      beneficiary_id: beneficiaryIdValue,
+      amount_received: parseNum(document.getElementById('amountReceived').value),
+      distribution_date: document.getElementById('distributionDate').value,
+      status: document.getElementById('distributionStatus').value,
+      receipt_number: document.getElementById('receiptNumber').value,
+      notes: document.getElementById('distributionNotes').value
+    };
+    
+    console.log('Payload being sent:', payload);
+    const q='?receipt_number='+encodeURIComponent(payload.receipt_number)+(editId?'&exclude_id='+encodeURIComponent(editId):'');
+    if(payload.receipt_number){
+      fetch('{% url "admin_panel:aid_distribution_check" %}'+q)
+        .then(r=>r.json()).then(function(res){
+          if(res && res.exists){ alert('Nomor kwitansi sudah digunakan. Silakan generate lagi.'); btn.disabled=false; btn.innerHTML=original; }
+          else { submitNow(); }
+        }).catch(function(){ submitNow(); });
+    } else { submitNow(); }
+
+    function submitNow(){
+      const submitUrl = editId ? '{% url "admin_panel:aid_distribution_update" 0 %}'.replace('0', editId) : '{% url "admin_panel:aid_distribution_create" %}';
+      fetch(submitUrl,{ method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]').value}, body: JSON.stringify(payload) })
+        .then(r=>r.json()).then(function(res){ if(res && res.success){ window.location.href='{% url "admin_panel:aid_distributions_list" %}'; } else { alert(res.message||'Gagal menyimpan'); } })
+        .catch(function(){ alert('Terjadi kesalahan'); })
+        .finally(function(){ btn.disabled=false; btn.innerHTML=original; });
+    }
+  });
+
+  // Inline receipt generator (no modal)
+  const genBtn=document.getElementById('generateReceipt');
+  function genReceipt(){
+    const d=new Date();
+    const pad=(n)=> String(n).padStart(2,'0');
+    const y=d.getFullYear();
+    const ym=String(y)+pad(d.getMonth()+1)+pad(d.getDate());
+    const hms=pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());
+    const rnd=Math.random().toString(36).substring(2,5).toUpperCase();
+    return 'KW-'+ym+'-'+hms+'-'+rnd;
+  }
+  if(genBtn){ genBtn.addEventListener('click',function(){ document.getElementById('receiptNumber').value=genReceipt(); }); }
+  // auto-generate on focus if empty
+  const receiptInput=document.getElementById('receiptNumber');
+  receiptInput.addEventListener('focus',function(){ if(!this.value){ this.value=genReceipt(); } });
+  // live check duplicate when leaving field
+  receiptInput.addEventListener('blur',function(){ const val=this.value.trim(); if(!val){ return; } const q='?receipt_number='+encodeURIComponent(val)+(editId?'&exclude_id='+encodeURIComponent(editId):''); fetch('{% url "admin_panel:aid_distribution_check" %}'+q).then(r=>r.json()).then(function(res){ if(res && res.exists){ alert('Nomor kwitansi sudah digunakan. Silakan generate lagi.'); } }); });
+
+  // Initialize tooltips for Bootstrap 4
+  $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[title]').tooltip({
+        placement: 'top',
+        trigger: 'hover'
+    });
+  });
+})();
+</script>
+{% endblock extra_js %}
+

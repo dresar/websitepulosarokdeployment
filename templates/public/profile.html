@@ -1,0 +1,859 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/android-fixes.css' %}">
+<link rel="stylesheet" href="{% static 'css/tourism-mobile.css' %}">
+<link rel="stylesheet" href="{% static 'css/mobile-optimization.css' %}">
+
+<style>
+    /* Profile Page - Minimal Responsive Design */
+    .village-hero {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        position: relative;
+        overflow: hidden;
+        min-height: 40vh;
+    }
+    
+    .dark .village-hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+        color: white;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .dark .info-card {
+        background: #1f2937;
+        border-color: #374151;
+        color: white;
+    }
+    
+    .village-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+    
+    .map-container {
+        height: 200px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .dark .map-container {
+        background: #374151;
+    }
+    
+    .map-container::before {
+        content: '🗺️';
+        font-size: 3rem;
+        opacity: 0.3;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .village-hero {
+            min-height: 30vh;
+            padding: 2rem 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .info-card {
+            padding: 1rem;
+        }
+        
+        .village-image {
+            height: 150px;
+        }
+        
+        .map-container {
+            height: 150px;
+        }
+    }
+    
+    /* Dark mode improvements */
+    .dark .village-hero::before {
+        background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .dark .stat-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .dark .info-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Better contrast for dark mode */
+    .dark .text-gray-600 {
+        color: #9ca3af;
+    }
+    
+    .dark .text-gray-400 {
+        color: #6b7280;
+    }
+    
+    @media (max-width: 640px) {
+        .village-hero {
+            min-height: 25vh;
+            padding: 1.5rem 0;
+        }
+        
+        .stats-grid {
+            gap: 0.5rem;
+        }
+        
+        .stat-card {
+            padding: 0.75rem;
+        }
+        
+        .info-card {
+            padding: 0.75rem;
+        }
+        
+        .village-image {
+            height: 120px;
+        }
+        
+        .map-container {
+            height: 120px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .village-hero {
+            min-height: 20vh;
+            padding: 1rem 0;
+        }
+        
+        .stat-card {
+            padding: 0.5rem;
+        }
+        
+        .info-card {
+            padding: 0.5rem;
+        }
+        
+        .village-image {
+            height: 100px;
+        }
+        
+        .map-container {
+            height: 100px;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="village-hero relative flex items-center" id="village-hero-section"
+         {% if hero_image_url %}style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(29, 78, 216, 0.8) 100%), url('{{ hero_image_url }}') center/cover; background-attachment: fixed;"{% endif %}>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2" id="village-name">Memuat...</h1>
+            <p class="text-sm sm:text-base md:text-lg opacity-90 max-w-3xl mx-auto" id="village-description">Memuat data desa...</p>
+        </div>
+    </div>
+</section>
+
+<!-- Village Statistics -->
+<section class="py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2" id="total-population">-</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Total Penduduk</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400 mb-2" id="total-families">-</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Jumlah Keluarga</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2" id="total-dusun">-</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Jumlah Dusun</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-2xl sm:text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2" id="total-area">-</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Luas Wilayah (km²)</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Village Content -->
+<div class="py-8 sm:py-12 bg-white dark:bg-gray-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <!-- Village Image -->
+            <div class="order-2 lg:order-1">
+                <img id="village-image" 
+                     src="/static/images/village-photo.svg" 
+                     alt="Desa Pulosarok" 
+                     class="village-image">
+            </div>
+            
+            <!-- Village Information -->
+            <div class="space-y-6 order-1 lg:order-2">
+                <div class="info-card">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-3 text-blue-600"></i>Informasi Umum
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-600 dark:text-gray-400">Kecamatan:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="kecamatan">Memuat...</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-600 dark:text-gray-400">Kabupaten:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="kabupaten">Memuat...</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-600 dark:text-gray-400">Provinsi:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="provinsi">Memuat...</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600 dark:text-gray-400">Kode Pos:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="kode-pos">Memuat...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <i class="fas fa-map-marker-alt mr-3 text-green-600"></i>Geografi
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-600 dark:text-gray-400">Luas Wilayah:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="luas-wilayah">Memuat...</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-gray-600 dark:text-gray-400">Ketinggian:</span>
+                            <span class="font-medium text-gray-900 dark:text-white" id="ketinggian">Memuat...</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-gray-600 dark:text-gray-400">Koordinat:</span>
+                            <span class="font-medium text-gray-900 dark:text-white text-sm break-all" id="koordinat">Memuat...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vision & Mission -->
+<div class="py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <!-- Vision -->
+            <div class="info-card">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-eye mr-3 text-blue-600"></i>Visi Desa
+                </h3>
+                <div id="village-vision" class="prose max-w-none dark:prose-invert">
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                        Memuat visi desa...
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Mission -->
+            <div class="info-card">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-bullseye mr-3 text-green-600"></i>Misi Desa
+                </h3>
+                <div id="village-mission" class="prose max-w-none dark:prose-invert">
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Memuat misi desa...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Village Officials -->
+<div class="py-8 sm:py-12 bg-white dark:bg-gray-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="info-card">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-users mr-3 text-blue-600"></i>Perangkat Desa
+            </h3>
+            <div id="village-officials" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Officials will be loaded here -->
+                <div class="text-center py-8 col-span-full">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-400">Memuat data perangkat desa...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Village Facilities -->
+<div class="py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="info-card">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-building mr-3 text-green-600"></i>Fasilitas Desa
+            </h3>
+            <div id="village-facilities" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Facilities will be loaded here -->
+                <div class="text-center py-8 col-span-full">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 dark:border-green-400 mx-auto mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-400">Memuat data fasilitas desa...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Village Gallery -->
+<div class="py-8 sm:py-12 bg-white dark:bg-gray-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="info-card">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-images mr-3 text-purple-600"></i>Galeri Desa
+            </h3>
+            <div id="village-gallery" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Gallery will be loaded here -->
+                <div class="text-center py-8 col-span-full">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 dark:border-purple-400 mx-auto mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-400">Memuat galeri desa...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+class VillageProfileManager {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.loadVillageStats();
+        this.loadVillageInfo();
+        this.loadVillageOfficials();
+        this.loadVillageFacilities();
+        this.loadVillageGallery();
+        this.loadVillageGeography();
+        this.loadVillageHistory();
+    }
+
+    async loadVillageStats() {
+        try {
+            const response = await fetch('{% url "village_profile:ajax_demography_data" %}');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateNumber('total-population', data.data.total_population || 0);
+                this.updateNumber('total-families', data.data.total_families || 0);
+                this.updateNumber('total-dusun', data.data.total_dusun || 0);
+                this.updateDemographyData(data.data);
+            }
+        } catch (error) {
+            console.error('Error loading village stats:', error);
+            this.updateNumber('total-population', 0);
+            this.updateNumber('total-families', 0);
+            this.updateNumber('total-dusun', 0);
+        }
+    }
+
+    async loadVillageInfo() {
+        try {
+            const response = await fetch('{% url "village_profile:ajax_profile_data" %}');
+            const data = await response.json();
+            
+            console.log('Village info data:', data); // Debug log
+            
+            if (data.success) {
+                this.updateVillageInfo(data.data);
+                this.updateVillageHero(data.data);
+            }
+        } catch (error) {
+            console.error('Error loading village info:', error);
+            this.setDefaultVillageInfo();
+        }
+    }
+
+    async loadVillageOfficials() {
+        try {
+            const response = await fetch('{% url "village_profile:ajax_officials_data" %}');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.renderVillageOfficials(data.data);
+            }
+        } catch (error) {
+            console.error('Error loading village officials:', error);
+            this.showError('village-officials', 'Gagal memuat data perangkat desa');
+        }
+    }
+
+    async loadVillageFacilities() {
+        try {
+            const response = await fetch('{% url "village_profile:ajax_facilities_data" %}');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.renderVillageFacilities(data.data);
+            }
+        } catch (error) {
+            console.error('Error loading village facilities:', error);
+            this.showError('village-facilities', 'Gagal memuat data fasilitas desa');
+        }
+    }
+
+    async loadVillageGallery() {
+        try {
+            console.log('Loading village gallery...');
+            const response = await fetch('{% url "village_profile:ajax_gallery_data" %}');
+            const data = await response.json();
+            
+            console.log('Gallery data:', data); // Debug log
+            
+            if (data.success) {
+                console.log('Gallery data loaded successfully, rendering...');
+                this.renderVillageGallery(data.data);
+                this.updateVillageImageFromGallery(data.data);
+            } else {
+                console.log('Gallery data failed to load:', data);
+            }
+        } catch (error) {
+            console.error('Error loading village gallery:', error);
+            this.showError('village-gallery', 'Gagal memuat galeri desa');
+        }
+    }
+
+    async loadVillageGeography() {
+        try {
+            const response = await fetch('{% url "village_profile:ajax_geography_data" %}');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateVillageGeography(data.data);
+            }
+        } catch (error) {
+            console.error('Error loading village geography:', error);
+        }
+    }
+
+    async loadVillageHistory() {
+        try {
+            const response = await fetch('{% url "village_profile:ajax_history_data" %}');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.updateVillageHistory(data.data);
+            }
+        } catch (error) {
+            console.error('Error loading village history:', error);
+        }
+    }
+
+    updateVillageInfo(data) {
+        // Update basic information
+        document.getElementById('kecamatan').textContent = data.district || 'Data kosong';
+        document.getElementById('kabupaten').textContent = data.regency || 'Data kosong';
+        document.getElementById('provinsi').textContent = data.province || 'Data kosong';
+        document.getElementById('kode-pos').textContent = data.postal_code || 'Data kosong';
+        
+        // Update area information
+        if (data.area) {
+            document.getElementById('luas-wilayah').textContent = data.area + ' km²';
+            this.updateNumber('total-area', data.area);
+        } else {
+            document.getElementById('luas-wilayah').textContent = 'Data kosong';
+            document.getElementById('total-area').textContent = '0';
+        }
+    }
+
+    updateVillageGeography(data) {
+        // Update altitude
+        document.getElementById('ketinggian').textContent = data.altitude ? `${data.altitude} mdpl` : 'Data kosong';
+        
+        // Update coordinates
+        if (data.latitude && data.longitude) {
+            document.getElementById('koordinat').textContent = `${data.latitude}, ${data.longitude}`;
+        } else {
+            document.getElementById('koordinat').textContent = 'Data kosong';
+        }
+    }
+
+    updateDemographyData(data) {
+        // Update population statistics
+        this.updateNumber('total-population', data.total_population || 0);
+        this.updateNumber('total-families', data.total_families || 0);
+        this.updateNumber('total-dusun', data.total_dusun || 0);
+    }
+
+    updateVillageHistory(histories) {
+        const historyElement = document.getElementById('village-history');
+        if (!historyElement || !histories || histories.length === 0) return;
+
+        const featuredHistory = histories.find(h => h.is_featured) || histories[0];
+        
+        if (featuredHistory) {
+            historyElement.innerHTML = `
+                <div class="prose max-w-none dark:prose-invert">
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">${featuredHistory.title}</h4>
+                    ${featuredHistory.summary ? `<p class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm mb-4">${featuredHistory.summary}</p>` : ''}
+                    <p class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">
+                        ${featuredHistory.content}
+                    </p>
+                    ${featuredHistory.period_display ? `<p class="text-sm text-gray-500 dark:text-gray-400 mt-3"><i class="fas fa-calendar mr-1"></i>${featuredHistory.period_display}</p>` : ''}
+                </div>
+            `;
+        }
+    }
+
+    updateVillageHero(data) {
+        if (data.name) {
+            document.getElementById('village-name').textContent = `Profil ${data.name}`;
+        }
+        
+        if (data.profile_description) {
+            document.getElementById('village-description').textContent = data.profile_description;
+        } else if (data.description) {
+            document.getElementById('village-description').textContent = data.description;
+        } else {
+            document.getElementById('village-description').textContent = 'Mengenal lebih dekat desa kami, sejarah, geografi, dan potensi yang dimiliki';
+        }
+        
+        // Update hero background image
+        if (data.header_image) {
+            const heroSection = document.getElementById('village-hero-section');
+            if (heroSection) {
+                // Create a new image to test if it loads
+                const img = new Image();
+                img.onload = function() {
+                    heroSection.style.backgroundImage = `url(${data.header_image})`;
+                    heroSection.style.backgroundSize = 'cover';
+                    heroSection.style.backgroundPosition = 'center';
+                    heroSection.style.backgroundRepeat = 'no-repeat';
+                    heroSection.style.backgroundAttachment = 'fixed';
+                };
+                img.onerror = function() {
+                    console.warn('Header image failed to load:', data.header_image);
+                    // Keep default gradient background
+                };
+                img.src = data.header_image;
+            }
+        }
+        
+        this.updateVisionMission(data);
+    }
+
+    updateVisionMission(data) {
+        // Update vision
+        if (data.vision) {
+            const visionElement = document.getElementById('village-vision');
+            if (visionElement) {
+                visionElement.innerHTML = `<p class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm italic">"${data.vision}"</p>`;
+            }
+        } else {
+            const visionElement = document.getElementById('village-vision');
+            if (visionElement) {
+                visionElement.innerHTML = `<p class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm italic">Data kosong</p>`;
+            }
+        }
+        
+        // Update mission
+        if (data.mission) {
+            const missionElement = document.getElementById('village-mission');
+            if (missionElement) {
+                // Handle mission as string (split by newlines) or array
+                let missionList = [];
+                if (Array.isArray(data.mission)) {
+                    missionList = data.mission;
+                } else if (typeof data.mission === 'string') {
+                    missionList = data.mission.split('\n').filter(m => m.trim());
+                }
+                
+                if (missionList.length > 0) {
+                    const missionHTML = missionList.map(mission => 
+                        `<li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1 flex-shrink-0 text-xs"></i>
+                            <span>${mission.trim()}</span>
+                        </li>`
+                    ).join('');
+                    
+                    missionElement.innerHTML = `<ul class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm space-y-1">${missionHTML}</ul>`;
+                } else {
+                    missionElement.innerHTML = `<p class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">Data kosong</p>`;
+                }
+            }
+        } else {
+            const missionElement = document.getElementById('village-mission');
+            if (missionElement) {
+                missionElement.innerHTML = `<p class="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">Data kosong</p>`;
+            }
+        }
+    }
+
+    updateVillageImageFromGallery(photos) {
+        console.log('updateVillageImageFromGallery called with:', photos);
+        
+        if (!photos || photos.length === 0) {
+            console.log('No photos available, using default image');
+            // Set default image if no photos available
+            const villageImage = document.getElementById('village-image');
+            if (villageImage) {
+                villageImage.src = '/static/images/village-photo.svg';
+                villageImage.alt = 'Desa Pulosarok';
+            }
+            return;
+        }
+        
+        const featuredPhoto = photos.find(p => p.is_featured) || photos[0];
+        console.log('Selected photo:', featuredPhoto);
+        
+        if (featuredPhoto && featuredPhoto.image) {
+            const villageImage = document.getElementById('village-image');
+            if (villageImage) {
+                console.log('Setting image src to:', featuredPhoto.image);
+                villageImage.src = featuredPhoto.image;
+                villageImage.alt = featuredPhoto.title || 'Desa Pulosarok';
+            }
+        } else {
+            console.log('No image found in photo:', featuredPhoto);
+        }
+    }
+
+    updateNumber(elementId, target) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        element.textContent = target.toLocaleString();
+    }
+
+    renderVillageOfficials(officials) {
+        const container = document.getElementById('village-officials');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!officials || officials.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-4">
+                    <i class="fas fa-users text-2xl text-gray-400 mb-2"></i>
+                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Tidak Ada Data</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Belum ada data perangkat desa yang tersedia.</p>
+                </div>
+            `;
+            return;
+        }
+
+        officials.forEach((official, index) => {
+            const card = this.createOfficialCard(official);
+            container.appendChild(card);
+        });
+    }
+
+    createOfficialCard(official) {
+        const card = document.createElement('div');
+        card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 text-center transition-colors duration-300';
+        
+        card.innerHTML = `
+            <div class="w-12 h-12 mx-auto mb-2 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-lg text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-1 text-sm">${official.name}</h4>
+            <p class="text-xs text-blue-600 dark:text-blue-400 mb-1">${official.position_display || official.position}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${official.nik || 'NIK: -'}</p>
+        `;
+        
+        return card;
+    }
+
+    renderVillageFacilities(facilities) {
+        const container = document.getElementById('village-facilities');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!facilities || facilities.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-4">
+                    <i class="fas fa-building text-2xl text-gray-400 mb-2"></i>
+                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Tidak Ada Data</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Belum ada data fasilitas desa yang tersedia.</p>
+                </div>
+            `;
+            return;
+        }
+
+        facilities.forEach((facility, index) => {
+            const card = this.createFacilityCard(facility);
+            container.appendChild(card);
+        });
+    }
+
+    createFacilityCard(facility) {
+        const card = document.createElement('div');
+        card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 transition-colors duration-300';
+        
+        const conditionColor = {
+            'BAIK': 'text-green-600',
+            'CUKUP': 'text-yellow-600',
+            'RUSAK': 'text-red-600',
+            'RENOVASI': 'text-orange-600'
+        }[facility.condition] || 'text-gray-600';
+        
+        card.innerHTML = `
+            <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-building text-gray-500 dark:text-gray-400 text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1 text-sm truncate">${facility.name}</h4>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">${facility.location || 'Lokasi tidak diketahui'}</p>
+                    <p class="text-xs ${conditionColor} font-medium">Kondisi: ${facility.condition_display || facility.condition}</p>
+                    ${facility.description ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">${facility.description}</p>` : ''}
+                </div>
+            </div>
+        `;
+        
+        return card;
+    }
+
+    renderVillageGallery(photos) {
+        const container = document.getElementById('village-gallery');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!photos || photos.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-4">
+                    <i class="fas fa-images text-2xl text-gray-400 mb-2"></i>
+                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Tidak Ada Foto</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Belum ada foto galeri desa yang tersedia.</p>
+                </div>
+            `;
+            return;
+        }
+
+        photos.forEach((photo, index) => {
+            const card = this.createGalleryCard(photo);
+            container.appendChild(card);
+        });
+    }
+
+    createGalleryCard(photo) {
+        const card = document.createElement('div');
+        card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-colors duration-300';
+        
+        card.innerHTML = `
+            <div class="aspect-w-16 aspect-h-12 bg-gray-200 dark:bg-gray-700">
+                <div class="w-full h-24 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <i class="fas fa-image text-xl text-gray-400 dark:text-gray-500"></i>
+                </div>
+            </div>
+            <div class="p-2">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-1 text-xs line-clamp-2">${photo.title}</h4>
+                ${photo.description ? `<p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${photo.description}</p>` : ''}
+                ${photo.location ? `<p class="text-xs text-gray-400 mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${photo.location}</p>` : ''}
+            </div>
+        `;
+        
+        return card;
+    }
+
+    showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="col-span-full text-center py-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-500 mb-2"></i>
+                <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Terjadi Kesalahan</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">${message}</p>
+            </div>
+        `;
+    }
+
+    setDefaultVillageInfo() {
+        // Set default values for village information
+        document.getElementById('kecamatan').textContent = 'Data kosong';
+        document.getElementById('kabupaten').textContent = 'Data kosong';
+        document.getElementById('provinsi').textContent = 'Data kosong';
+        document.getElementById('kode-pos').textContent = 'Data kosong';
+        document.getElementById('luas-wilayah').textContent = 'Data kosong';
+        document.getElementById('ketinggian').textContent = 'Data kosong';
+        document.getElementById('koordinat').textContent = 'Data kosong';
+        
+        // Set default values for statistics
+        document.getElementById('total-population').textContent = '0';
+        document.getElementById('total-families').textContent = '0';
+        document.getElementById('total-dusun').textContent = '0';
+        document.getElementById('total-area').textContent = '0';
+        
+        // Set default values for hero section
+        document.getElementById('village-name').textContent = 'Profil Desa';
+        document.getElementById('village-description').textContent = 'Mengenal lebih dekat desa kami, sejarah, geografi, dan potensi yang dimiliki';
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    new VillageProfileManager();
+});
+</script>
+{% endblock extra_js %}

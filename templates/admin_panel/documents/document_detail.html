@@ -1,0 +1,526 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Dokumen{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-file-alt text-primary mr-2"></i>
+            Detail Dokumen
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'admin_panel:documents_list' %}" class="btn btn-outline-secondary mr-2">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
+            <a href="{% url 'admin_panel:document_edit' document.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Document Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Informasi Dokumen
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4 class="mb-2">{{ document.title }}</h4>
+                            {% if document.document_number %}
+                                <p class="text-muted mb-3">
+                                    <i class="fas fa-hashtag mr-1"></i>
+                                    {{ document.document_number }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge badge-{{ document.get_category_display_color }} fs-6">
+                                {{ document.get_category_display }}
+                            </span>
+                            <br>
+                            <span class="badge badge-{{ document.get_status_display_color }} fs-6 mt-1">
+                                {{ document.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <label class="info-label">Prioritas</label>
+                                <div class="info-value">
+                                    <span class="badge badge-{{ document.get_priority_display_color }}">
+                                        {{ document.get_priority_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <label class="info-label">Tanggal Dokumen</label>
+                                <div class="info-value">{{ document.document_date|date:"d M Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if document.summary %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Ringkasan</label>
+                        <div class="info-value">{{ document.summary }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if document.tags %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Tags</label>
+                        <div class="info-value">
+                            {% for tag in document.get_tags_list %}
+                                <span class="badge badge-secondary me-1">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if document.notes %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Catatan</label>
+                        <div class="info-value">{{ document.notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- People Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users mr-2"></i>
+                        Orang Terkait
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if document.applicant %}
+                        <div class="col-md-4">
+                            <div class="info-item mb-3">
+                                <label class="info-label">Pemohon</label>
+                                <div class="info-value">
+                                    <strong>{{ document.applicant.name }}</strong><br>
+                                    <small class="text-muted">{{ document.applicant.nik }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if document.recipient %}
+                        <div class="col-md-4">
+                            <div class="info-item mb-3">
+                                <label class="info-label">Penerima</label>
+                                <div class="info-value">{{ document.recipient }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if document.sender %}
+                        <div class="col-md-4">
+                            <div class="info-item mb-3">
+                                <label class="info-label">Pengirim</label>
+                                <div class="info-value">{{ document.sender }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-comments mr-2"></i>
+                        Komentar ({{ comments.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Add Comment Form -->
+                    <form method="post" action="{% url 'admin_panel:document_comment_add' document.pk %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="comment" class="form-label">Tambah Komentar</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="3" 
+                                      placeholder="Tulis komentar..." required></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" name="is_internal" id="is_internal" class="form-check-input">
+                            <label for="is_internal" class="form-check-label">
+                                Komentar Internal (tidak terlihat oleh pemohon)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-comment mr-1"></i> Tambah Komentar
+                        </button>
+                    </form>
+
+                    <!-- Comments List -->
+                    {% if comments %}
+                        {% for comment in comments %}
+                        <div class="comment-item border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                                        {% if comment.is_internal %}
+                                            <span class="badge badge-warning ms-2">Internal</span>
+                                        {% endif %}
+                                        <small class="text-muted ms-2">{{ comment.created_at|date:"d M Y H:i" }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ comment.comment }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">Belum ada komentar</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Document Status -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info mr-2"></i> Status Dokumen
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item mb-3">
+                        <label class="info-label">Status Saat Ini</label>
+                        <div class="info-value">
+                            <span class="badge badge-{{ document.get_status_display_color }} fs-6">
+                                {{ document.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="info-item mb-3">
+                        <label class="info-label">Prioritas</label>
+                        <div class="info-value">
+                            <span class="badge badge-{{ document.get_priority_display_color }}">
+                                {{ document.get_priority_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="info-item mb-3">
+                        <label class="info-label">Dibuat Oleh</label>
+                        <div class="info-value">
+                            {{ document.created_by.get_full_name|default:document.created_by.username }}
+                        </div>
+                    </div>
+
+                    <div class="info-item mb-3">
+                        <label class="info-label">Dibuat Pada</label>
+                        <div class="info-value">
+                            {{ document.created_at|date:"d M Y H:i" }}
+                        </div>
+                    </div>
+
+                    {% if document.updated_at != document.created_at %}
+                    <div class="info-item mb-3">
+                        <label class="info-label">Diupdate Pada</label>
+                        <div class="info-value">
+                            {{ document.updated_at|date:"d M Y H:i" }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- File Attachments -->
+            {% if document.file_attachment %}
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-paperclip mr-2"></i> Lampiran
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-file fa-2x text-primary mr-3"></i>
+                        <div class="flex-grow-1">
+                            <div class="font-weight-bold">{{ document.file_attachment.name|slice:"12:" }}</div>
+                            <small class="text-muted">Lampiran dokumen</small>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'admin_panel:document_preview' document.pk %}" class="btn btn-outline-info btn-sm" title="Preview">
+                                <i class="fas fa-eye mr-1"></i> Preview
+                            </a>
+                            <a href="{{ document.file_attachment.url }}" class="btn btn-outline-primary btn-sm" target="_blank" title="Download">
+                                <i class="fas fa-download mr-1"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Additional Attachments -->
+            {% if attachments %}
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-paperclip mr-2"></i> Lampiran Tambahan
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for attachment in attachments %}
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-file fa-lg text-secondary mr-2"></i>
+                        <div class="flex-grow-1">
+                            <div class="text-sm">{{ attachment.filename }}</div>
+                            <small class="text-muted">
+                                {{ attachment.uploaded_by.username }} - {{ attachment.uploaded_at|date:"d M Y" }}
+                            </small>
+                        </div>
+                        <a href="{{ attachment.file.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs mr-2"></i> Aksi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'admin_panel:document_edit' document.pk %}" class="btn btn-primary">
+                            <i class="fas fa-edit mr-2"></i> Edit Dokumen
+                        </a>
+                        <a href="{% url 'admin_panel:documents_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list mr-2"></i> Kembali ke Daftar
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" onclick="deleteDocument({{ document.pk }})">
+                            <i class="fas fa-trash mr-2"></i> Hapus Dokumen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus dokumen ini?</p>
+                <p class="text-danger"><strong>Perhatian:</strong> Tindakan ini tidak dapat dibatalkan!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fix white text issues in document detail */
+.info-item {
+    margin-bottom: 1rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6c757d !important;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.info-value {
+    color: #212529 !important;
+    font-size: 1rem;
+}
+
+.comment-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Ensure all text in cards is dark */
+.card-body {
+    color: #212529 !important;
+}
+
+.card-body * {
+    color: inherit !important;
+}
+
+.card-body h4, .card-body h5, .card-body h6 {
+    color: #212529 !important;
+}
+
+.card-body p {
+    color: #495057 !important;
+}
+
+.card-body small {
+    color: #6c757d !important;
+}
+
+.card-body strong {
+    color: #212529 !important;
+}
+
+/* Fix badge colors */
+.badge {
+    color: white !important;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.badge-primary {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.badge-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+.badge-dark {
+    background-color: #343a40 !important;
+    color: white !important;
+}
+
+/* Fix comment section */
+.comment-item {
+    color: #212529 !important;
+}
+
+.comment-item p {
+    color: #495057 !important;
+}
+
+.comment-item strong {
+    color: #212529 !important;
+}
+
+.comment-item small {
+    color: #6c757d !important;
+}
+
+/* Fix form elements */
+.form-control {
+    color: #212529 !important;
+}
+
+.form-label {
+    color: #495057 !important;
+}
+
+/* Fix button text */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Override any inherited white text */
+.card * {
+    color: inherit !important;
+}
+
+/* Ensure all text elements are dark */
+.card-body div {
+    color: #212529 !important;
+}
+
+.card-body span {
+    color: #212529 !important;
+}
+
+/* Fix any white text from parent styles */
+.card-body {
+    color: #212529 !important;
+}
+
+/* Ensure font weight is normal for readability */
+.card-body {
+    font-weight: normal !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteDocument(documentId) {
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = '{% url "admin_panel:document_delete" 0 %}'.replace('0', documentId);
+    
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %}

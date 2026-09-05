@@ -1,0 +1,1243 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Dashboard Referensi{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* General Dashboard Styling */
+    :root {
+        --primary-color: #4A90E2;
+        --success-color: #28a745;
+        --info-color: #17a2b8;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --light-gray: #f8f9fa;
+        --medium-gray: #e9ecef;
+        --dark-gray: #6c757d;
+        --text-color: #343a40;
+        --card-bg: #ffffff;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --border-radius: 12px;
+    }
+
+    .admin-dashboard {
+        padding: 2rem 1rem;
+        background-color: var(--light-gray);
+    }
+
+    /* Professional Header */
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), #3c7dd8);
+        color: white;
+        padding: 2.5rem 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    .dashboard-header .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .dashboard-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .dashboard-title .fas {
+        margin-right: 1rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+
+    .header-meta .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .header-meta .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Cart Containers */
+    .stats-cart-container,
+    .analytics-cart-container,
+    .system-info-cart-container {
+        margin-bottom: 2.5rem;
+    }
+
+    .cart-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .cart-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .cart-subtitle {
+        color: var(--dark-gray);
+    }
+
+    /* Statistics Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-cart {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        box-shadow: var(--shadow);
+        border-left: 5px solid;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-cart:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Stat Cart Colors */
+    .stat-cart-primary { border-color: var(--primary-color); }
+    .stat-cart-success { border-color: var(--success-color); }
+    .stat-cart-info { border-color: var(--info-color); }
+    .stat-cart-warning { border-color: var(--warning-color); }
+    .stat-cart-danger { border-color: var(--danger-color); }
+    .stat-cart-secondary { border-color: #6c757d; }
+    .stat-cart-dark { border-color: #343a40; }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-right: 1.5rem;
+        opacity: 0.7;
+    }
+
+    .stat-cart-primary .stat-icon { color: var(--primary-color); }
+    .stat-cart-success .stat-icon { color: var(--success-color); }
+    .stat-cart-info .stat-icon { color: var(--info-color); }
+    .stat-cart-warning .stat-icon { color: var(--warning-color); }
+    .stat-cart-danger .stat-icon { color: var(--danger-color); }
+    .stat-cart-secondary .stat-icon { color: #6c757d; }
+    .stat-cart-dark .stat-icon { color: #343a40; }
+
+    .stat-content {
+        flex-grow: 1;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-description {
+        font-size: 0.875rem;
+        color: var(--dark-gray);
+    }
+
+    .stat-trend {
+        color: var(--success-color);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .stat-trend .fas {
+        margin-right: 0.25rem;
+    }
+
+    /* Floating Action Button (FAB) */
+    .floating-fab-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1050;
+    }
+
+    .fab-main {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    .fab-main.active {
+        transform: rotate(45deg);
+        background-color: var(--danger-color);
+    }
+
+    .fab-menu {
+        position: absolute;
+        bottom: 70px;
+        right: 5px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .fab-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .fab-item {
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    .fab-item a {
+        width: 50px;
+        height: 50px;
+        background-color: var(--card-bg);
+        color: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+    }
+
+    .fab-item a:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    /* Tooltip for FAB */
+    .fab-item::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        right: 65px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: var(--text-color);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    .fab-item:hover::before {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Analytics Section */
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .chart-cart {
+        background-color: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+
+    .chart-header {
+        margin-bottom: 1rem;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .chart-subtitle {
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+    }
+
+    /* System Info Section */
+    .system-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .system-info-cart {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        box-shadow: var(--shadow);
+    }
+
+    .info-icon {
+        font-size: 2rem;
+        margin-right: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .info-label {
+        font-weight: 600;
+    }
+    
+    .info-value {
+        font-size: 1.1rem;
+        color: var(--dark-gray);
+    }
+
+    .info-description {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    .info-status {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .status-indicator.online {
+        background-color: var(--success-color);
+    }
+    .status-indicator.updated {
+        background-color: var(--info-color);
+    }
+    .status-indicator.secure {
+        background-color: var(--warning-color);
+    }
+
+    /* New Components Styling */
+    .data-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+
+    .summary-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--light-gray);
+        border-radius: 8px;
+        border: 1px solid var(--medium-gray);
+    }
+
+    .summary-label {
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .summary-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .status-online {
+        color: var(--success-color) !important;
+    }
+
+    .gender-distribution {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
+    .gender-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--light-gray);
+        border-radius: 8px;
+        border: 1px solid var(--medium-gray);
+        min-width: 150px;
+    }
+
+    .gender-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .gender-icon.male {
+        background: rgba(74, 144, 226, 0.1);
+        color: var(--primary-color);
+    }
+
+    .gender-icon.female {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--danger-color);
+    }
+
+    .gender-info {
+        text-align: center;
+    }
+
+    .gender-label {
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+        margin-bottom: 0.25rem;
+    }
+
+    .gender-count {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .age-distribution, .education-distribution {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+
+    .age-item, .education-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--light-gray);
+        border-radius: 8px;
+        border: 1px solid var(--medium-gray);
+    }
+
+    .age-label, .education-label {
+        font-size: 0.9rem;
+        color: var(--dark-gray);
+        font-weight: 600;
+    }
+
+    .age-count, .education-count {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    /* Loading and Error States */
+    .stat-cart.loading .stat-number {
+        opacity: 0.5;
+    }
+
+    .stat-cart.error .stat-number {
+        color: var(--danger-color);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .analytics-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .admin-dashboard {
+            padding: 1rem 0.5rem;
+        }
+
+        .dashboard-header .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .header-meta {
+            margin-top: 1rem;
+        }
+        
+        .stats-grid, .system-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="admin-dashboard">
+<!-- Professional Header -->
+<div class="dashboard-header">
+    <div class="header-content">
+        <div class="header-info">
+            <h1 class="dashboard-title">
+                <i class="fas fa-database"></i>
+                Dashboard Referensi Desa
+                    </h1>
+            <p class="dashboard-subtitle">Kelola data referensi desa secara terpusat</p>
+                </div>
+        <div class="header-meta">
+                <div class="d-flex">
+                    {% if user|can_add:"references" %}
+                <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-light mr-2">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Data
+                    </a>
+                    {% endif %}
+                    {% if user|can_export:"references" %}
+                <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-light mr-2">
+                        <i class="fas fa-file-import mr-1"></i>
+                        Import Data
+                    </a>
+                <a href="{% url 'admin_panel:references_dusun_list' %}" class="btn btn-light">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Laporan
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Professional Statistics Cart -->
+<div class="stats-cart-container">
+    <div class="cart-header">
+        <h3 class="cart-title">
+            <i class="fas fa-chart-bar"></i>
+            Statistik Referensi Desa
+        </h3>
+        <div class="cart-subtitle">Data Real-time Penduduk dan Referensi Desa</div>
+                            </div>
+    
+    <div class="stats-grid">
+        <!-- Data Penduduk -->
+        <div class="stat-cart stat-cart-primary">
+            <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalPenduduk">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                <div class="stat-label">Total Penduduk</div>
+                <div class="stat-description">Warga terdaftar di desa</div>
+                </div>
+            <div class="stat-trend">
+                <i class="fas fa-users"></i>
+                <span id="pendudukTrend">0</span>
+            </div>
+        </div>
+
+        <!-- Data Keluarga -->
+        <div class="stat-cart stat-cart-success">
+            <div class="stat-icon">
+                <i class="fas fa-home"></i>
+                            </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalKeluarga">
+                    <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                <div class="stat-label">Total Keluarga</div>
+                <div class="stat-description">Kepala keluarga terdaftar</div>
+                        </div>
+            <div class="stat-trend">
+                <i class="fas fa-home"></i>
+                <span id="keluargaTrend">0</span>
+                        </div>
+                    </div>
+
+        <!-- Data Dusun -->
+        <div class="stat-cart stat-cart-info">
+            <div class="stat-icon">
+                <i class="fas fa-map-marker-alt"></i>
+                </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalDusun">
+                    <i class="fas fa-spinner fa-spin"></i>
+            </div>
+                <div class="stat-label">Total Dusun</div>
+                <div class="stat-description">Wilayah dusun desa</div>
+        </div>
+            <div class="stat-trend">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="dusunTrend">0</span>
+                            </div>
+                            </div>
+
+        <!-- Data Lorong -->
+        <div class="stat-cart stat-cart-warning">
+            <div class="stat-icon">
+                <i class="fas fa-road"></i>
+                        </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalLorong">
+                    <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                <div class="stat-label">Total Lorong</div>
+                <div class="stat-description">Jalan-jalan di desa</div>
+                    </div>
+            <div class="stat-trend">
+                <i class="fas fa-road"></i>
+                <span id="lorongTrend">0</span>
+                </div>
+        </div>
+
+        <!-- Data RW -->
+        <div class="stat-cart stat-cart-secondary">
+            <div class="stat-icon">
+                <i class="fas fa-users-cog"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalRW">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Total RW</div>
+                <div class="stat-description">Rukun Warga</div>
+            </div>
+            <div class="stat-trend">
+                <i class="fas fa-users-cog"></i>
+                <span id="rwTrend">0</span>
+            </div>
+        </div>
+
+        <!-- Data RT -->
+        <div class="stat-cart stat-cart-dark">
+            <div class="stat-icon">
+                <i class="fas fa-home"></i>
+                            </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalRT">
+                    <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                <div class="stat-label">Total RT</div>
+                <div class="stat-description">Rukun Tetangga</div>
+                        </div>
+            <div class="stat-trend">
+                <i class="fas fa-home"></i>
+                <span id="rtTrend">0</span>
+                        </div>
+                    </div>
+
+        <!-- Data Pelajar -->
+        <div class="stat-cart stat-cart-primary">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalPelajar">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Total Pelajar</div>
+                <div class="stat-description">Siswa dan mahasiswa</div>
+            </div>
+            <div class="stat-trend">
+                <i class="fas fa-graduation-cap"></i>
+                <span id="pelajarTrend">0</span>
+            </div>
+        </div>
+
+        <!-- Data Disabilitas -->
+        <div class="stat-cart stat-cart-danger">
+            <div class="stat-icon">
+                <i class="fas fa-wheelchair"></i>
+                </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalDisabilitas">
+                    <i class="fas fa-spinner fa-spin"></i>
+            </div>
+                <div class="stat-label">Data Disabilitas</div>
+                <div class="stat-description">Warga berkebutuhan khusus</div>
+            </div>
+            <div class="stat-trend">
+                <i class="fas fa-wheelchair"></i>
+                <span id="disabilitasTrend">0</span>
+            </div>
+        </div>
+
+        <!-- Data Keluarga (Keluarga Model) -->
+        <div class="stat-cart stat-cart-success">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number" id="totalKeluargaModel">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="stat-label">Keluarga Model</div>
+                <div class="stat-description">Data keluarga terpisah</div>
+            </div>
+            <div class="stat-trend">
+                <i class="fas fa-users"></i>
+                <span id="keluargaModelTrend">0</span>
+            </div>
+        </div>
+    </div>
+
+<!-- Floating Action Button untuk Akses Cepat Referensi -->
+<div class="floating-fab-container">
+    <div class="fab-main" id="fabMain">
+        <i class="fas fa-plus"></i>
+                </div>
+    
+    <div class="fab-menu" id="fabMenu">
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data Penduduk">
+                            <a href="{% url 'admin_panel:references_penduduk_list' %}">
+                <i class="fas fa-users"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data Keluarga">
+                            <a href="{% url 'admin_panel:references_keluarga_list' %}">
+                <i class="fas fa-home"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data Dusun">
+                            <a href="{% url 'admin_panel:references_dusun_list' %}">
+                <i class="fas fa-map-marker-alt"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data Pelajar">
+                            <a href="{% url 'admin_panel:references_pelajar_list' %}">
+                <i class="fas fa-graduation-cap"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data Lorong">
+                            <a href="{% url 'admin_panel:references_lorong_list' %}">
+                <i class="fas fa-road"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data RW">
+                            <a href="{% url 'admin_panel:references_rw_list' %}">
+                <i class="fas fa-users-cog"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data RT">
+                            <a href="{% url 'admin_panel:references_rt_list' %}">
+                <i class="fas fa-home"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if user|can_view:"references" %}
+        <div class="fab-item" data-tooltip="Data Disabilitas">
+                            <a href="{% url 'admin_panel:references_disabilitas_list' %}">
+                <i class="fas fa-wheelchair"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+<!-- Data Real-time Summary -->
+<div class="analytics-cart-container">
+    <div class="cart-header">
+        <h3 class="cart-title">
+            <i class="fas fa-info-circle"></i>
+            Ringkasan Data Real-time
+        </h3>
+        <div class="cart-subtitle">Informasi Lengkap Data Referensi Desa</div>
+            </div>
+
+    <div class="analytics-grid">
+        <!-- Data Summary Card -->
+        <div class="chart-cart">
+            <div class="chart-header">
+                <h4 class="chart-title">
+                    <i class="fas fa-database"></i>
+                    Total Data Referensi
+                </h4>
+                <div class="chart-subtitle">Semua Data yang Tersimpan</div>
+            </div>
+            <div class="chart-body">
+                <div class="data-summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Total Data Aktif</div>
+                        <div class="summary-value" id="totalActiveData">0</div>
+                </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Data Terbaru</div>
+                        <div class="summary-value" id="latestData">-</div>
+            </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Integritas Data</div>
+                        <div class="summary-value" id="dataIntegrity">100%</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Status Sistem</div>
+                        <div class="summary-value status-online">Online</div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+        <!-- Gender Distribution -->
+        <div class="chart-cart">
+            <div class="chart-header">
+                <h4 class="chart-title">
+                    <i class="fas fa-users"></i>
+                    Distribusi Gender
+                </h4>
+                <div class="chart-subtitle">Jumlah Penduduk Berdasarkan Gender</div>
+                    </div>
+            <div class="chart-body">
+                <div class="gender-distribution">
+                    <div class="gender-item">
+                        <div class="gender-icon male">
+                            <i class="fas fa-male"></i>
+                </div>
+                        <div class="gender-info">
+                            <div class="gender-label">Laki-laki</div>
+                            <div class="gender-count" id="totalLakiLaki">0</div>
+                        </div>
+                    </div>
+                    <div class="gender-item">
+                        <div class="gender-icon female">
+                            <i class="fas fa-female"></i>
+                        </div>
+                        <div class="gender-info">
+                            <div class="gender-label">Perempuan</div>
+                            <div class="gender-count" id="totalPerempuan">0</div>
+                        </div>
+                    </div>
+                    </div>
+                            </div>
+                        </div>
+
+        <!-- Age Distribution -->
+        <div class="chart-cart">
+            <div class="chart-header">
+                <h4 class="chart-title">
+                    <i class="fas fa-birthday-cake"></i>
+                    Distribusi Usia
+                </h4>
+                <div class="chart-subtitle">Kategori Usia Penduduk</div>
+                            </div>
+            <div class="chart-body">
+                <div class="age-distribution">
+                    <div class="age-item">
+                        <div class="age-label">Balita (0-5 tahun)</div>
+                        <div class="age-count" id="ageBalita">0</div>
+                        </div>
+                    <div class="age-item">
+                        <div class="age-label">Anak (6-17 tahun)</div>
+                        <div class="age-count" id="ageAnak">0</div>
+                </div>
+                    <div class="age-item">
+                        <div class="age-label">Dewasa (18-59 tahun)</div>
+                        <div class="age-count" id="ageDewasa">0</div>
+                    </div>
+                    <div class="age-item">
+                        <div class="age-label">Lansia (60+ tahun)</div>
+                        <div class="age-count" id="ageLansia">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education Distribution -->
+        <div class="chart-cart">
+            <div class="chart-header">
+                <h4 class="chart-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Tingkat Pendidikan
+                </h4>
+                <div class="chart-subtitle">Distribusi Pendidikan Warga</div>
+            </div>
+            <div class="chart-body">
+                <div class="education-distribution" id="educationStats">
+                    <div class="education-item">
+                        <div class="education-label">Tidak/Belum Sekolah</div>
+                        <div class="education-count">0</div>
+                    </div>
+                    <div class="education-item">
+                        <div class="education-label">SD/Sederajat</div>
+                        <div class="education-count">0</div>
+                </div>
+                    <div class="education-item">
+                        <div class="education-label">SMP/Sederajat</div>
+                        <div class="education-count">0</div>
+                    </div>
+                    <div class="education-item">
+                        <div class="education-label">SMA/Sederajat</div>
+                        <div class="education-count">0</div>
+                    </div>
+                    <div class="education-item">
+                        <div class="education-label">Diploma/S1</div>
+                        <div class="education-count">0</div>
+                    </div>
+                    <div class="education-item">
+                        <div class="education-label">S2/S3</div>
+                        <div class="education-count">0</div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- System Info Cart -->
+        <div class="system-info-cart-container">
+            <div class="cart-header">
+                <h3 class="cart-title">
+                    <i class="fas fa-info-circle"></i>
+                        Informasi Sistem
+                </h3>
+                <div class="cart-subtitle">Status dan Informasi Teknis Sistem</div>
+                </div>
+            
+            <div class="system-info-grid">
+                <div class="system-info-cart">
+                    <div class="info-icon">
+                        <i class="fas fa-database"></i>
+                            </div>
+                    <div class="info-content">
+                        <div class="info-label">Sistem Referensi</div>
+                        <div class="info-value">Active</div>
+                        <div class="info-description">Sistem manajemen data referensi</div>
+                            </div>
+                    <div class="info-status">
+                        <span class="status-indicator online"></span>
+                        <span>Aktif</span>
+                        </div>
+                    </div>
+
+                <div class="system-info-cart">
+                    <div class="info-icon">
+                        <i class="fas fa-sync-alt"></i>
+                </div>
+                    <div class="info-content">
+                        <div class="info-label">Update Terakhir</div>
+                        <div class="info-value" id="lastUpdate">-</div>
+                        <div class="info-description">Data terbaru</div>
+            </div>
+                    <div class="info-status">
+                        <span class="status-indicator updated"></span>
+                        <span>Updated</span>
+        </div>
+    </div>
+                
+                <div class="system-info-cart">
+                    <div class="info-icon">
+                        <i class="fas fa-shield-alt"></i>
+</div>
+                    <div class="info-content">
+                        <div class="info-label">Integritas Data</div>
+                        <div class="info-value" id="dataIntegrity">100%</div>
+                        <div class="info-description">Data terlindungi</div>
+                </div>
+                    <div class="info-status">
+                        <span class="status-indicator secure"></span>
+                        <span>Aman</span>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+
+</div> <!-- End admin-dashboard -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Initialize Floating Action Button
+    initializeFAB();
+    
+    // Load dashboard data immediately
+    loadDashboardData();
+    
+    // Auto refresh data every 30 seconds
+    setInterval(loadDashboardData, 30000);
+});
+
+function initializeFAB() {
+    const fabMain = document.getElementById('fabMain');
+    const fabMenu = document.getElementById('fabMenu');
+    
+    if (fabMain && fabMenu) {
+        fabMain.addEventListener('click', function() {
+            fabMain.classList.toggle('active');
+            fabMenu.classList.toggle('active');
+        });
+        
+        // Close FAB when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!fabMain.contains(e.target) && !fabMenu.contains(e.target)) {
+                fabMain.classList.remove('active');
+                fabMenu.classList.remove('active');
+            }
+        });
+        
+        // Close FAB when scrolling
+        window.addEventListener('scroll', function() {
+            fabMain.classList.remove('active');
+            fabMenu.classList.remove('active');
+        });
+    }
+}
+
+// Removed all chart functions as requested
+
+function loadDashboardData() {
+    // Show loading state
+    showLoadingState();
+    
+    // Try to fetch real-time data from API, fallback to sample data
+    fetch('{% url "admin_panel:api_references_dashboard_data" %}', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('API request failed');
+        }
+    })
+    .then(dashboardData => {
+        console.log('Dashboard data loaded:', dashboardData);
+        updateDashboardCards(dashboardData);
+        updateSystemInfo(dashboardData);
+        updateDetailedStats(dashboardData);
+    })
+    .catch(error => {
+        console.error('Error loading dashboard data:', error);
+        showErrorState();
+        useSampleData();
+    });
+}
+
+function useSampleData() {
+    // Use sample data for dashboard cards
+    updateDashboardCards({
+        success: true,
+        total_penduduk: 0,
+        total_keluarga: 0,
+        total_dusun: 0,
+        total_pelajar: 0,
+        total_lorong: 0,
+        total_disabilitas: 0,
+        total_rw: 0,
+        total_rt: 0,
+        total_families: 0,
+        total_laki_laki: 0,
+        total_perempuan: 0,
+        age_groups: {
+            balita: 0,
+            anak: 0,
+            dewasa: 0,
+            lansia: 0
+        },
+        education_stats: [],
+        last_update: new Date().toISOString(),
+        data_integrity: 100
+    });
+}
+
+function showLoadingState() {
+    // Add loading class to cards
+    $('.stat-cart').addClass('loading');
+    
+    // Show spinner in numbers
+    $('#totalPenduduk, #totalKeluarga, #totalDusun, #totalPelajar, #totalLorong, #totalDisabilitas, #totalRW, #totalRT, #totalKeluargaModel').html('<i class="fas fa-spinner fa-spin"></i>');
+    
+    console.log('Loading state activated');
+}
+
+function showErrorState() {
+    // Remove loading class and add error class
+    $('.stat-cart').removeClass('loading').addClass('error');
+    
+    // Show error icon in numbers
+    $('#totalPenduduk, #totalKeluarga, #totalDusun, #totalPelajar, #totalLorong, #totalDisabilitas, #totalRW, #totalRT, #totalKeluargaModel').html('<i class="fas fa-exclamation-triangle text-danger"></i>');
+    
+    console.log('Error state activated');
+}
+
+function updateDashboardCards(data) {
+    if (data && data.success) {
+        console.log('Updating dashboard cards with data:', data);
+        
+        // Remove loading and error classes
+        $('.stat-cart').removeClass('loading error');
+        
+        // Update main statistics cards
+        $('#totalPenduduk').text(formatNumber(data.total_penduduk || 0));
+        $('#totalKeluarga').text(formatNumber(data.total_keluarga || 0));
+        $('#totalDusun').text(formatNumber(data.total_dusun || 0));
+        $('#totalPelajar').text(formatNumber(data.total_pelajar || 0));
+        $('#totalLorong').text(formatNumber(data.total_lorong || 0));
+        $('#totalDisabilitas').text(formatNumber(data.total_disabilitas || 0));
+        $('#totalRW').text(formatNumber(data.total_rw || 0));
+        $('#totalRT').text(formatNumber(data.total_rt || 0));
+        $('#totalKeluargaModel').text(formatNumber(data.total_families || 0));
+        
+        // Update trend indicators
+        $('#pendudukTrend').text(formatNumber(data.total_penduduk || 0));
+        $('#keluargaTrend').text(formatNumber(data.total_keluarga || 0));
+        $('#dusunTrend').text(formatNumber(data.total_dusun || 0));
+        $('#lorongTrend').text(formatNumber(data.total_lorong || 0));
+        $('#rwTrend').text(formatNumber(data.total_rw || 0));
+        $('#rtTrend').text(formatNumber(data.total_rt || 0));
+        $('#pelajarTrend').text(formatNumber(data.total_pelajar || 0));
+        $('#disabilitasTrend').text(formatNumber(data.total_disabilitas || 0));
+        $('#keluargaModelTrend').text(formatNumber(data.total_families || 0));
+        
+        // Add animation to cards
+        $('.stat-cart').addClass('animate__animated animate__fadeInUp');
+        
+        console.log('Dashboard cards updated successfully');
+    } else {
+        console.error('Invalid data received:', data);
+        showErrorState();
+    }
+}
+
+function updateDetailedStats(data) {
+    if (data && data.success) {
+        // Update gender distribution
+        $('#totalLakiLaki').text(formatNumber(data.total_laki_laki || 0));
+        $('#totalPerempuan').text(formatNumber(data.total_perempuan || 0));
+        
+        // Update age groups
+        $('#ageBalita').text(formatNumber(data.age_groups?.balita || 0));
+        $('#ageAnak').text(formatNumber(data.age_groups?.anak || 0));
+        $('#ageDewasa').text(formatNumber(data.age_groups?.dewasa || 0));
+        $('#ageLansia').text(formatNumber(data.age_groups?.lansia || 0));
+        
+        // Update education stats
+        if (data.education_stats && data.education_stats.length > 0) {
+            data.education_stats.forEach(stat => {
+                const educationItem = $(`.education-item:contains("${stat.education}")`);
+                if (educationItem.length > 0) {
+                    educationItem.find('.education-count').text(formatNumber(stat.count));
+                }
+            });
+        }
+        
+        // Update total active data
+        const totalActive = (data.total_penduduk || 0) + (data.total_keluarga || 0) + 
+                           (data.total_dusun || 0) + (data.total_lorong || 0) + 
+                           (data.total_rw || 0) + (data.total_rt || 0) + 
+                           (data.total_pelajar || 0) + (data.total_disabilitas || 0) + 
+                           (data.total_families || 0);
+        $('#totalActiveData').text(formatNumber(totalActive));
+        
+        // Update latest data
+        if (data.last_update) {
+            $('#latestData').text(formatDateTime(data.last_update));
+        }
+        
+        console.log('Detailed stats updated successfully');
+    }
+}
+
+function updateSystemInfo(data) {
+    if (data && data.last_update) {
+        $('#lastUpdate').text(formatDateTime(data.last_update));
+    }
+    
+    if (data && data.data_integrity !== undefined) {
+        $('#dataIntegrity').text(data.data_integrity + '%');
+    }
+}
+
+function formatNumber(num) {
+    return new Intl.NumberFormat('id-ID').format(num);
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 1) return 'Baru saja';
+    if (diffMins < 60) return `${diffMins} menit lalu`;
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    if (diffDays < 7) return `${diffDays} hari lalu`;
+    
+    return date.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Chart functions removed as requested - no charts in dashboard
+</script>
+{% endblock %}

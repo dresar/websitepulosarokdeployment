@@ -1,0 +1,578 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Contact Specific Styles */
+    .contact-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .contact-card {
+        border-color: #374151;
+    }
+    
+    .contact-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .contact-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .contact-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+    }
+    
+    .contact-icon-phone {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+    }
+    
+    .contact-icon-email {
+        background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        color: white;
+    }
+    
+    .contact-icon-address {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+    }
+    
+    .contact-icon-whatsapp {
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+    }
+    
+    .contact-icon-hours {
+        background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        color: white;
+    }
+    
+    .contact-icon-social {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 640px) {
+        .contact-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-card .p-6 {
+            padding: 0.75rem;
+        }
+        
+        .contact-card h3 {
+            font-size: 0.875rem;
+            line-height: 1rem;
+        }
+        
+        .contact-card p {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .form-input {
+            font-size: 0.875rem;
+            padding: 0.5rem;
+        }
+        
+        .map-container {
+            height: 250px;
+        }
+    }
+    
+    /* Form Styles */
+    .form-input {
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .dark .form-input:focus {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Map Container */
+    .map-container {
+        height: 400px;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark .map-container {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Social Media Links */
+    .social-link {
+        transition: all 0.3s ease;
+    }
+    
+    .social-link:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Loading States */
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Success/Error Messages */
+    .message-success {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+    }
+    
+    .message-error {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/80 to-purple-600/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
+                Hubungi Kami
+            </h1>
+            <p class="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl mx-auto">
+                Ada pertanyaan tentang wisata Desa Pulosarok? Jangan ragu untuk menghubungi kami
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Information -->
+<div class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Phone Contact -->
+            <div class="contact-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="contact-icon contact-icon-phone">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Telepon</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Hubungi kami untuk informasi wisata
+                </p>
+                <a href="tel:+6281234567890" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                    +62 812-3456-7890
+                </a>
+            </div>
+            
+            <!-- Email Contact -->
+            <div class="contact-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="contact-icon contact-icon-email">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Email</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Kirim email untuk pertanyaan detail
+                </p>
+                <a href="mailto:wisata@pulosarok.desa.id" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                    wisata@pulosarok.desa.id
+                </a>
+            </div>
+            
+            <!-- WhatsApp Contact -->
+            <div class="contact-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="contact-icon contact-icon-whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">WhatsApp</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Chat langsung dengan kami
+                </p>
+                <a href="https://wa.me/6281234567890" target="_blank" class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+                    +62 812-3456-7890
+                </a>
+            </div>
+            
+            <!-- Address -->
+            <div class="contact-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="contact-icon contact-icon-address">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Alamat</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Kantor Desa Pulosarok
+                </p>
+                <p class="text-gray-700 dark:text-gray-300 text-sm">
+                    Jl. Raya Pulosarok No. 1<br>
+                    Desa Pulosarok, Kecamatan Pulosarok<br>
+                    Kabupaten Pulosarok, Jawa Timur
+                </p>
+            </div>
+            
+            <!-- Office Hours -->
+            <div class="contact-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="contact-icon contact-icon-hours">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Jam Operasional</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Waktu pelayanan wisata
+                </p>
+                <div class="text-gray-700 dark:text-gray-300 text-sm space-y-1">
+                    <p>Senin - Jumat: 08:00 - 17:00</p>
+                    <p>Sabtu: 08:00 - 15:00</p>
+                    <p>Minggu: Tutup</p>
+                </div>
+            </div>
+            
+            <!-- Social Media -->
+            <div class="contact-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="contact-icon contact-icon-social">
+                    <i class="fas fa-share-alt"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Media Sosial</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Ikuti kami di media sosial
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#" class="social-link text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                        <i class="fab fa-facebook text-xl"></i>
+                    </a>
+                    <a href="#" class="social-link text-pink-600 dark:text-pink-400 hover:text-pink-700 dark:hover:text-pink-300">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="social-link text-blue-400 dark:text-blue-300 hover:text-blue-500 dark:hover:text-blue-200">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="social-link text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                        <i class="fab fa-youtube text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Form and Map -->
+<div class="bg-gray-50 dark:bg-gray-800 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Contact Form -->
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Kirim Pesan</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">
+                    Ada pertanyaan atau saran? Kirim pesan kepada kami dan kami akan merespons secepatnya.
+                </p>
+                
+                <form id="contactForm" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Nama Lengkap
+                            </label>
+                            <input type="text" 
+                                   id="name" 
+                                   name="name" 
+                                   required
+                                   class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Email
+                            </label>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   required
+                                   class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Nomor Telepon
+                        </label>
+                        <input type="tel" 
+                               id="phone" 
+                               name="phone"
+                               class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                    </div>
+                    
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Subjek
+                        </label>
+                        <select id="subject" 
+                                name="subject" 
+                                required
+                                class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            <option value="">Pilih subjek</option>
+                            <option value="info">Informasi Wisata</option>
+                            <option value="booking">Pemesanan Paket</option>
+                            <option value="complaint">Keluhan</option>
+                            <option value="suggestion">Saran</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Pesan
+                        </label>
+                        <textarea id="message" 
+                                  name="message" 
+                                  rows="5" 
+                                  required
+                                  class="form-input w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"></textarea>
+                    </div>
+                    
+                    <button type="submit" 
+                            id="submitButton"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <span id="submitText">Kirim Pesan</span>
+                        <div id="submitLoading" class="loading-spinner hidden ml-2"></div>
+                    </button>
+                </form>
+                
+                <!-- Success/Error Messages -->
+                <div id="messageContainer" class="mt-6 hidden">
+                    <div id="successMessage" class="message-success p-4 rounded-lg hidden">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Pesan berhasil dikirim! Kami akan merespons secepatnya.</span>
+                    </div>
+                    <div id="errorMessage" class="message-error p-4 rounded-lg hidden">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span>Terjadi kesalahan. Silakan coba lagi.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map -->
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Lokasi Kami</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                    Temukan lokasi Kantor Desa Pulosarok di peta berikut.
+                </p>
+                
+                <div class="map-container">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3951.123456789!2d112.123456789!3d-7.123456789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zN8KwMDcnMjQuNCJTIDExMsKwMDcnMjQuNCJF!5e0!3m2!1sen!2sid!4v1234567890123!5m2!1sen!2sid" 
+                            width="100%" 
+                            height="100%" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                
+                <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Petunjuk Arah</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
+                        Dari terminal bus utama, naik angkutan umum ke arah Desa Pulosarok. 
+                        Kantor desa terletak di Jl. Raya Pulosarok No. 1, sekitar 15 menit perjalanan.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Pertanyaan yang Sering Diajukan</h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Temukan jawaban untuk pertanyaan yang sering diajukan tentang wisata Desa Pulosarok
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Bagaimana cara memesan paket wisata?
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Anda dapat memesan paket wisata melalui WhatsApp, email, atau langsung datang ke kantor desa. 
+                        Tim kami akan membantu Anda memilih paket yang sesuai.
+                    </p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Apakah ada biaya masuk untuk destinasi wisata?
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Beberapa destinasi wisata ada yang berbayar dan ada yang gratis. 
+                        Informasi lengkap dapat dilihat di halaman detail masing-masing destinasi.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Kapan waktu terbaik untuk berkunjung?
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Desa Pulosarok dapat dikunjungi sepanjang tahun. Namun, waktu terbaik adalah 
+                        pada musim kemarau (April-Oktober) untuk aktivitas outdoor.
+                    </p>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Apakah tersedia akomodasi di desa?
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Ya, tersedia beberapa pilihan akomodasi mulai dari homestay hingga hotel. 
+                        Tim kami dapat membantu Anda memesan akomodasi yang sesuai.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class ContactForm {
+    constructor() {
+        this.form = document.getElementById('contactForm');
+        this.submitButton = document.getElementById('submitButton');
+        this.submitText = document.getElementById('submitText');
+        this.submitLoading = document.getElementById('submitLoading');
+        this.messageContainer = document.getElementById('messageContainer');
+        this.successMessage = document.getElementById('successMessage');
+        this.errorMessage = document.getElementById('errorMessage');
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        this.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSubmit();
+        });
+    }
+    
+    async handleSubmit() {
+        const formData = new FormData(this.form);
+        
+        // Show loading state
+        this.setLoadingState(true);
+        this.hideMessages();
+        
+        try {
+            const response = await fetch('{% url "tourism:contact" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            
+            if (response.ok) {
+                this.showSuccessMessage();
+                this.form.reset();
+            } else {
+                this.showErrorMessage();
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            this.showErrorMessage();
+        } finally {
+            this.setLoadingState(false);
+        }
+    }
+    
+    setLoadingState(loading) {
+        if (loading) {
+            this.submitButton.disabled = true;
+            this.submitText.classList.add('hidden');
+            this.submitLoading.classList.remove('hidden');
+        } else {
+            this.submitButton.disabled = false;
+            this.submitText.classList.remove('hidden');
+            this.submitLoading.classList.add('hidden');
+        }
+    }
+    
+    showSuccessMessage() {
+        this.messageContainer.classList.remove('hidden');
+        this.successMessage.classList.remove('hidden');
+        this.errorMessage.classList.add('hidden');
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            this.hideMessages();
+        }, 5000);
+    }
+    
+    showErrorMessage() {
+        this.messageContainer.classList.remove('hidden');
+        this.errorMessage.classList.remove('hidden');
+        this.successMessage.classList.add('hidden');
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            this.hideMessages();
+        }, 5000);
+    }
+    
+    hideMessages() {
+        this.messageContainer.classList.add('hidden');
+        this.successMessage.classList.add('hidden');
+        this.errorMessage.classList.add('hidden');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    new ContactForm();
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,589 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<style>
+/* Enhanced Koperasi Detail Cards */
+.business-detail-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.business-detail-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #1e40af 50%, #3b82f6 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.business-detail-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    border-color: #3b82f6;
+}
+
+.business-section-title {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.business-section-title i {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.business-detail-section {
+    padding: 1.5rem;
+}
+
+.business-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.business-detail-item:last-child {
+    border-bottom: none;
+}
+
+.business-detail-item:hover {
+    background: rgba(59, 130, 246, 0.02);
+    margin: 0 -1.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.business-detail-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.95rem;
+    min-width: 140px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.business-detail-value {
+    color: #1f2937;
+    font-weight: 500;
+    font-size: 1rem;
+    text-align: right;
+    flex: 1;
+    margin-left: 1rem;
+}
+
+.business-text-success {
+    color: #059669 !important;
+    font-weight: 700 !important;
+}
+
+/* Enhanced Badges */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.badge-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+}
+
+/* Enhanced Buttons */
+.business-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.business-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.business-btn:hover::before {
+    left: 100%;
+}
+
+.business-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.business-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+}
+
+.business-btn-primary:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color: white;
+}
+
+.business-btn-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.business-btn-warning:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: white;
+}
+
+.business-btn-outline-secondary {
+    border-color: #6b7280;
+    color: #6b7280;
+    background: transparent;
+}
+
+.business-btn-outline-secondary:hover {
+    background: #6b7280;
+    border-color: #6b7280;
+    color: white;
+}
+
+.business-btn-outline-primary {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: transparent;
+}
+
+.business-btn-outline-primary:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+/* Enhanced Page Header */
+.business-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.business-page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.business-page-title i {
+    color: #3b82f6;
+    font-size: 2.2rem;
+}
+
+.business-page-subtitle {
+    color: #6b7280;
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0 0;
+    font-weight: 500;
+}
+
+.business-page-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Enhanced Grid Layout */
+.d-grid {
+    display: grid;
+}
+
+.gap-2 {
+    gap: 1rem;
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .business-detail-card {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-color: #374151;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .business-detail-card:hover {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    border-color: #3b82f6;
+}
+
+[data-theme="dark"] .business-detail-label {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .business-detail-value {
+    color: #f9fafb;
+}
+
+[data-theme="dark"] .business-detail-item:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+[data-theme="dark"] .business-page-header {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-color: #374151;
+}
+
+[data-theme="dark"] .business-page-title {
+    color: #f9fafb;
+}
+
+[data-theme="dark"] .business-page-subtitle {
+    color: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .business-page-header {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .business-page-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .business-detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .business-detail-label {
+        min-width: auto;
+    }
+    
+    .business-detail-value {
+        text-align: left;
+        margin-left: 0;
+    }
+    
+    .business-detail-section {
+        padding: 1rem;
+    }
+    
+    .business-section-title {
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .business-page-title {
+        font-size: 1.5rem;
+    }
+    
+    .business-page-title i {
+        font-size: 1.7rem;
+    }
+    
+    .business-detail-section {
+        padding: 0.75rem;
+    }
+    
+    .business-section-title {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="business-container">
+    <div class="business-page-header">
+        <div>
+            <h1 class="business-page-title">
+                <i class="fas fa-handshake"></i>Detail Koperasi
+            </h1>
+            <p class="business-page-subtitle">{{ koperasi.nama }} - {{ koperasi.ketua }}</p>
+        </div>
+        <div class="business-page-actions">
+            <a href="{% url 'admin_panel:koperasi_edit' koperasi.id %}" class="business-btn business-btn-primary">
+                <i class="fas fa-edit"></i>Edit
+            </a>
+            <a href="{% url 'admin_panel:koperasi_list' %}" class="business-btn business-btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>Kembali
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informasi Dasar -->
+        <div class="col-lg-8">
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Informasi Dasar Koperasi
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Nama Koperasi</div>
+                        <div class="business-detail-value">{{ koperasi.nama }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Nomor Badan Hukum</div>
+                        <div class="business-detail-value">{{ koperasi.nomor_badan_hukum }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Tanggal Berdiri</div>
+                        <div class="business-detail-value">{{ koperasi.tanggal_berdiri|date:"d F Y" }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Jenis Koperasi</div>
+                        <div class="business-detail-value">
+                            {% if koperasi.jenis_koperasi %}
+                                {{ koperasi.jenis_koperasi }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Alamat</div>
+                        <div class="business-detail-value">{{ koperasi.alamat }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengurus Koperasi -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-users"></i>
+                    Pengurus Koperasi
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Ketua</div>
+                        <div class="business-detail-value">{{ koperasi.ketua }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Sekretaris</div>
+                        <div class="business-detail-value">{{ koperasi.sekretaris }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Bendahara</div>
+                        <div class="business-detail-value">{{ koperasi.bendahara }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Keuangan -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Data Keuangan
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Jumlah Anggota</div>
+                        <div class="business-detail-value business-text-success">{{ koperasi.jumlah_anggota }} orang</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Modal Awal</div>
+                        <div class="business-detail-value business-text-success">{{ koperasi.modal_awal|currency_idr }}</div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Modal Sekarang</div>
+                        <div class="business-detail-value business-text-success">{{ koperasi.modal_sekarang|currency_idr }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jenis Usaha -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-briefcase"></i>
+                    Jenis Usaha
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-value">{{ koperasi.jenis_usaha }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kontak -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-phone"></i>
+                    Informasi Kontak
+                </h5>
+                <div class="business-detail-section">
+                    {% if koperasi.telepon %}
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Nomor Telepon</div>
+                        <div class="business-detail-value">
+                            <i class="fas fa-phone mr-2"></i>{{ koperasi.telepon }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if koperasi.email %}
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Email</div>
+                        <div class="business-detail-value">
+                            <i class="fas fa-envelope mr-2"></i>{{ koperasi.email }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if koperasi.keterangan %}
+            <!-- Keterangan -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Keterangan
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-value">{{ koperasi.keterangan }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <!-- Status Card -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-cog"></i>
+                    Status
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Status Koperasi</div>
+                        <div class="business-detail-value">
+                            <span class="badge badge-{% if koperasi.status == 'aktif' %}success{% elif koperasi.status == 'tidak_aktif' %}danger{% else %}warning{% endif %}">
+                                {{ koperasi.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informasi Tambahan -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-calendar"></i>
+                    Informasi Tambahan
+                </h5>
+                <div class="business-detail-section">
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Dibuat</div>
+                        <div class="business-detail-value">
+                            <i class="fas fa-calendar mr-2"></i>{{ koperasi.created_at|date:"d F Y H:i" }}
+                        </div>
+                    </div>
+                    <div class="business-detail-item">
+                        <div class="business-detail-label">Diperbarui</div>
+                        <div class="business-detail-value">
+                            <i class="fas fa-calendar mr-2"></i>{{ koperasi.updated_at|date:"d F Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="business-detail-card">
+                <h5 class="business-section-title">
+                    <i class="fas fa-tools"></i>
+                    Aksi
+                </h5>
+                <div class="business-detail-section">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'admin_panel:koperasi_edit' koperasi.id %}" class="business-btn business-btn-warning">
+                            <i class="fas fa-edit"></i>Edit Koperasi
+                        </a>
+                        <a href="{% url 'admin_panel:koperasi_list' %}" class="business-btn business-btn-outline-secondary">
+                            <i class="fas fa-list"></i>Daftar Koperasi
+                        </a>
+                        <a href="{% url 'admin_panel:business_dashboard' %}" class="business-btn business-btn-outline-primary">
+                            <i class="fas fa-chart-pie"></i>Dashboard Usaha
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

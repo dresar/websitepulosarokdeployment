@@ -1,0 +1,37 @@
+# Data Dummy Wisata Pulosarok Aceh Singkil
+# File ini berisi data dummy untuk 15 destinasi wisata di Pulosarok, Aceh Singkil
+
+# Untuk menjalankan data dummy, gunakan file tourism_test_data.py
+# python tourism_test_data.py
+
+# Data wisata yang dibuat:
+# 1. Pantai Pulo Sarok
+# 2. Hutan Mangrove Pulo Sarok  
+# 3. Pulau Bengkaru
+# 4. Pulau Pandan
+# 5. Pulau Sikandang
+# 6. Budidaya dan Penetasan Penyu Pulo Bangkaru
+# 7. Pulau Panjang
+# 8. Pulau Tailana
+# 9. Pulau Palambak
+# 10. Pulau Asok
+# 11. Pulau Lambudung
+# 12. Pulau Biawak
+# 13. Pulau Matahari
+# 14. Pulau Silailik
+# 15. Pulau Rangit Besar
+
+# Kategori wisata:
+# - Wisata Pantai
+# - Wisata Pulau
+# - Wisata Alam
+# - Wisata Edukasi
+# - Wisata Petualangan
+
+# Fitur yang dibuat:
+# - 15 lokasi wisata dengan detail lengkap
+# - Kategori wisata
+# - Galeri foto untuk setiap lokasi
+# - Paket wisata
+# - Event wisata
+# - FAQ untuk setiap lokasi

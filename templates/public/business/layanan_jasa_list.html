@@ -1,0 +1,306 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load business_filters %}
+{% load hero_tags %}
+
+{% block title %}Layanan Jasa Desa Pulosarok - {{ website_settings.site_name|default:'Desa Pulosarok' }}{% endblock %}
+{% block meta_description %}Daftar layanan jasa di Desa Pulosarok. Temukan berbagai jasa terbaik yang melayani kebutuhan masyarakat desa.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .layanan-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .layanan-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .dark .layanan-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    }
+    .filter-chip {
+        transition: all 0.2s ease-in-out;
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    .filter-chip:hover {
+        transform: scale(1.05);
+    }
+    .search-input {
+        font-size: 0.875rem;
+    }
+    /* FORCE MOBILE 2 GRID - OVERRIDE ALL CSS */
+    .grid {
+        display: grid !important;
+    }
+    
+    /* FORCE 2 COLUMNS ON MOBILE */
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+    }
+    
+    /* FORCE 2 COLUMNS ON SMALL MOBILE */
+    @media (max-width: 480px) {
+        .grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.25rem !important;
+        }
+    }
+    
+    /* OVERRIDE business-mobile.css */
+    .business-grid-mobile {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    /* OVERRIDE business-grid.css */
+    .business-col-sm-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+    
+    /* FORCE CARD SIZE */
+    .layanan-card {
+        width: 100% !important;
+        max-width: none !important;
+        flex: 0 0 50% !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section - Minimalis -->
+<section class="relative overflow-hidden min-h-[40vh] sm:min-h-[50vh] flex items-center">
+    {% get_hero_image 'layanan_jasa' as hero_image %}
+    {% if hero_image %}
+        <div class="absolute inset-0">
+            <img src="{{ hero_image.image.url }}" alt="{{ hero_image.name }}" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-600/80 via-primary-700/80 to-secondary-600/80"></div>
+        </div>
+    {% else %}
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600"></div>
+    {% endif %}
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
+        <div class="text-center">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-white">
+                Layanan Jasa Desa Pulosarok
+            </h1>
+            <p class="text-sm sm:text-base text-primary-100 mb-6 max-w-2xl mx-auto">
+                Temukan berbagai jasa terbaik yang melayani kebutuhan masyarakat desa
+            </p>
+            
+            <!-- Search Bar - Minimalis -->
+            <div class="max-w-lg mx-auto mb-4">
+                <form method="GET" class="relative">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ search_query|default:'' }}" 
+                               placeholder="Cari layanan jasa..." 
+                               class="w-full px-3 py-2 pl-10 pr-3 text-gray-900 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <button type="submit" class="absolute right-1 top-1/2 transform -translate-y-1/2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded text-sm">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section - Minimalis -->
+<section class="bg-gray-50 dark:bg-gray-800 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+            <a href="{% url 'business:layanan_jasa_list' %}" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-tools mr-1"></i>Semua
+            </a>
+            <a href="{% url 'business:layanan_jasa_list' %}?kategori=teknologi" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-laptop mr-1"></i>Teknologi
+            </a>
+            <a href="{% url 'business:layanan_jasa_list' %}?kategori=kesehatan" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-heartbeat mr-1"></i>Kesehatan
+            </a>
+            <a href="{% url 'business:layanan_jasa_list' %}?kategori=pendidikan" 
+               class="filter-chip px-3 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200">
+                <i class="fas fa-graduation-cap mr-1"></i>Pendidikan
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Layanan Jasa List -->
+<section class="py-6 lg:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if layanan_list %}
+        <!-- Results Count -->
+        <div class="mb-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+                Menampilkan {{ layanan_list.start_index }}-{{ layanan_list.end_index }} dari {{ layanan_list.paginator.count }} layanan jasa
+                {% if search_query %}
+                untuk "<span class="font-semibold text-primary-600">{{ search_query }}</span>"
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Layanan Grid - Mobile 2 Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {% for layanan in layanan_list %}
+            <div class="layanan-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <!-- Layanan Image Placeholder -->
+                <div class="h-24 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 flex items-center justify-center">
+                    <i class="fas fa-tools text-lg text-primary-600 dark:text-primary-400"></i>
+                </div>
+                
+                <!-- Layanan Info -->
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-2">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight flex-1">
+                            {{ layanan.nama }}
+                        </h3>
+                        <span class="ml-2 px-2 py-1 {% if layanan.status == 'aktif' %}bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300{% else %}bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300{% endif %} text-xs font-medium rounded-full flex-shrink-0">
+                            {{ layanan.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Layanan Details - Compact -->
+                    <div class="space-y-1 mb-3">
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-user w-3 h-3 mr-2"></i>
+                            <span class="truncate">{{ layanan.penyedia }}</span>
+                        </div>
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-tag w-3 h-3 mr-2"></i>
+                            <span class="truncate">{{ layanan.kategori }}</span>
+                        </div>
+                        {% if layanan.harga_min > 0 %}
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-coins w-3 h-3 mr-2"></i>
+                            <span class="truncate">{{ layanan.harga_min|rupiah_short }}</span>
+                        </div>
+                        {% endif %}
+                        {% if layanan.rating > 0 %}
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-star w-3 h-3 mr-2"></i>
+                            <span class="truncate">{{ layanan.rating|rating_stars }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Button - Touch Friendly -->
+                    <a href="{% url 'business:layanan_jasa_detail' layanan.id %}" 
+                       class="w-full bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 flex items-center justify-center text-sm min-h-[36px] touch-manipulation">
+                        <i class="fas fa-eye mr-2"></i>
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if layanan_list.has_other_pages %}
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if layanan_list.has_previous %}
+                <a href="?page={{ layanan_list.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-sm">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in layanan_list.paginator.page_range %}
+                {% if layanan_list.number == num %}
+                <span class="px-3 py-2 bg-primary-600 text-white rounded-lg font-medium text-sm">{{ num }}</span>
+                {% elif num > layanan_list.number|add:'-3' and num < layanan_list.number|add:'3' %}
+                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-sm">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if layanan_list.has_next %}
+                <a href="?page={{ layanan_list.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                   class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 text-sm">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="max-w-md mx-auto">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-tools text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Belum Ada Layanan Jasa
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+                    {% if search_query %}
+                    Tidak ditemukan layanan jasa untuk pencarian "<span class="font-semibold">{{ search_query }}</span>"
+                    {% else %}
+                    Belum ada layanan jasa yang terdaftar di Desa Pulosarok.
+                    {% endif %}
+                </p>
+                {% if search_query %}
+                <a href="{% url 'business:layanan_jasa_list' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Lihat Semua Layanan
+                </a>
+                {% else %}
+                <a href="{% url 'business:business_register' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 text-sm">
+                    <i class="fas fa-plus mr-2"></i>
+                    Daftarkan Layanan
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-primary-600 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-xl sm:text-2xl font-bold mb-3">
+            Punya Layanan Jasa?
+        </h2>
+        <p class="text-sm text-primary-100 mb-6 max-w-xl mx-auto">
+            Daftarkan layanan jasa Anda untuk melayani kebutuhan masyarakat desa.
+        </p>
+        <a href="{% url 'business:business_register' %}" 
+           class="inline-flex items-center px-4 py-2 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm">
+            <i class="fas fa-plus mr-2"></i>
+            Daftarkan Layanan Sekarang
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add smooth scrolling for anchor links
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animation to layanan cards
+    const layananCards = document.querySelectorAll('.layanan-card');
+    layananCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+    });
+});
+</script>
+{% endblock %}

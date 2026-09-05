@@ -1,0 +1,670 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}
+    {% if form.instance.pk %}Edit Lokasi Wisata{% else %}Tambah Lokasi Wisata{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tourism-admin.css' %}">
+<style>
+/* Compact Form Styles */
+.tourism-admin {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    min-height: 100vh;
+    padding: 1rem !important;
+    margin: 0 !important;
+}
+
+.tourism-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 0.5rem !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.2 !important;
+}
+
+.tourism-text-muted {
+    color: #64748b !important;
+    font-size: 0.8rem !important;
+    margin: 0 !important;
+}
+
+/* Compact Form Container */
+.tourism-form-container {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    max-width: 700px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+}
+
+.tourism-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+    border-radius: 12px 12px 0 0;
+}
+
+/* Compact Form Groups */
+.tourism-form-group {
+    margin-bottom: 1.25rem !important;
+    position: relative;
+}
+
+.tourism-form-label {
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem !important;
+    display: block !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Compact Form Controls */
+.tourism-form-container input[type="text"],
+.tourism-form-container input[type="email"],
+.tourism-form-container input[type="tel"],
+.tourism-form-container input[type="number"],
+.tourism-form-container input[type="url"],
+.tourism-form-container textarea,
+.tourism-form-container select {
+    width: 100% !important;
+    padding: 0.75rem !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    transition: all 0.3s ease !important;
+    background: #fafbfc !important;
+    font-family: inherit !important;
+    line-height: 1.4 !important;
+}
+
+.tourism-form-container input[type="text"]:focus,
+.tourism-form-container input[type="email"]:focus,
+.tourism-form-container input[type="tel"]:focus,
+.tourism-form-container input[type="number"]:focus,
+.tourism-form-container input[type="url"]:focus,
+.tourism-form-container textarea:focus,
+.tourism-form-container select:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    background: white !important;
+    transform: translateY(-1px);
+}
+
+.tourism-form-container textarea {
+    resize: vertical !important;
+    min-height: 80px !important;
+}
+
+/* Compact Form Row Layout */
+.tourism-form-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem !important;
+    margin-bottom: 0 !important;
+}
+
+/* Compact Buttons */
+.tourism-btn {
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.tourism-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 8px -2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.tourism-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4) !important;
+}
+
+.tourism-btn-secondary {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    color: #475569 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.tourism-btn-secondary:hover {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%) !important;
+    color: #334155 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Compact Form Actions */
+.tourism-form-actions {
+    display: flex !important;
+    gap: 1rem !important;
+    justify-content: flex-end !important;
+    margin-top: 2rem !important;
+    padding-top: 1.5rem !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+/* Compact Help Text */
+.tourism-help-text {
+    font-size: 0.7rem !important;
+    color: #64748b !important;
+    margin-top: 0.25rem !important;
+    font-style: italic !important;
+    background: #f8fafc !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    border-left: 2px solid #3b82f6 !important;
+}
+
+/* Required Field Indicator */
+.tourism-required {
+    color: #dc2626 !important;
+    font-weight: 900 !important;
+}
+
+/* Compact Form Header */
+.tourism-form-header {
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+    padding-bottom: 1rem !important;
+    border-bottom: 2px solid #f1f5f9 !important;
+    position: relative !important;
+}
+
+.tourism-form-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: 1px;
+}
+
+/* Compact Checkbox */
+.tourism-form-container input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 0.5rem !important;
+    accent-color: #3b82f6 !important;
+}
+
+/* Compact File Input */
+.tourism-form-container input[type="file"] {
+    padding: 0.5rem !important;
+    border: 2px dashed #cbd5e1 !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.8rem !important;
+}
+
+.tourism-form-container input[type="file"]:hover {
+    border-color: #3b82f6 !important;
+    background: #f0f9ff !important;
+}
+
+/* Compact Image Preview */
+.tourism-image-preview {
+    max-width: 150px !important;
+    max-height: 100px !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-top: 0.5rem !important;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Compact Alert Messages */
+.alert {
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 1rem !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.8rem !important;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+    color: #166534 !important;
+    border-left: 3px solid #22c55e !important;
+}
+
+.alert-error {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    color: #991b1b !important;
+    border-left: 3px solid #ef4444 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tourism-form-row {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    .tourism-form-actions {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    
+    .tourism-admin {
+        padding: 0.75rem !important;
+    }
+    
+    .tourism-form-container {
+        padding: 1rem !important;
+        margin: 0 0.5rem !important;
+    }
+    
+    .tourism-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* Compact Status Display */
+.tourism-status-display {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tourism-status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Compact Location Info */
+.tourism-location-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tourism-location-info h6 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.tourism-location-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tourism-admin">
+    <!-- Form Header -->
+    <div class="tourism-form-header">
+        <h1 class="tourism-title">
+            {% if form.instance.pk %}
+                ✏️ Edit Lokasi Wisata
+            {% else %}
+                ➕ Tambah Lokasi Wisata
+            {% endif %}
+        </h1>
+        <p class="tourism-text-muted">
+            {% if form.instance.pk %}
+                Perbarui informasi lokasi wisata
+            {% else %}
+                Tambahkan lokasi wisata baru untuk Desa Pulosarok
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                    <button type="button" class="close" onclick="this.parentElement.style.display='none'" style="background: none; border: none; font-size: 1rem; color: inherit; opacity: 0.5; float: right; cursor: pointer;">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Form Container -->
+    <div class="tourism-form-container">
+        <form method="post" enctype="multipart/form-data" id="locationForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="tourism-form-group">
+                <label for="{{ form.title.id_for_label }}" class="tourism-form-label">
+                    Nama Lokasi <span class="tourism-required">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.title.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Masukkan nama lokasi wisata yang menarik</div>
+            </div>
+
+            <div class="tourism-form-group">
+                <label for="{{ form.short_description.id_for_label }}" class="tourism-form-label">
+                    Deskripsi Singkat
+                </label>
+                {{ form.short_description }}
+                {% if form.short_description.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.short_description.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Deskripsi singkat untuk preview (opsional)</div>
+            </div>
+
+            <div class="tourism-form-group">
+                <label for="{{ form.full_description.id_for_label }}" class="tourism-form-label">
+                    Deskripsi Lengkap
+                </label>
+                {{ form.full_description }}
+                {% if form.full_description.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.full_description.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Jelaskan secara detail tentang lokasi wisata ini</div>
+            </div>
+
+            <!-- Location Details -->
+            <div class="tourism-form-row">
+                <div class="tourism-form-group">
+                    <label for="{{ form.address.id_for_label }}" class="tourism-form-label">
+                        Alamat
+                    </label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.address.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="tourism-form-group">
+                    <label for="{{ form.contact_phone.id_for_label }}" class="tourism-form-label">
+                        Telepon
+                    </label>
+                    {{ form.contact_phone }}
+                    {% if form.contact_phone.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.contact_phone.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Category and Type -->
+            <div class="tourism-form-row">
+                <div class="tourism-form-group">
+                    <label for="{{ form.category.id_for_label }}" class="tourism-form-label">
+                        Kategori
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.category.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="tourism-form-group">
+                    <label for="{{ form.location_type.id_for_label }}" class="tourism-form-label">
+                        Jenis Wisata
+                    </label>
+                    {{ form.location_type }}
+                    {% if form.location_type.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.location_type.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="tourism-form-group">
+                <label for="{{ form.entry_fee.id_for_label }}" class="tourism-form-label">
+                    Harga Tiket (Rp)
+                </label>
+                {{ form.entry_fee }}
+                {% if form.entry_fee.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.entry_fee.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Image -->
+            <div class="tourism-form-group">
+                <label for="{{ form.main_image.id_for_label }}" class="tourism-form-label">
+                    Gambar Utama
+                </label>
+                {{ form.main_image }}
+                {% if form.main_image.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.main_image.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Upload gambar utama lokasi wisata</div>
+                {% if form.instance.main_image %}
+                <img src="{{ form.instance.main_image.url }}" alt="Current image" class="tourism-image-preview">
+                {% endif %}
+            </div>
+
+            <!-- Status Options -->
+            <div class="tourism-form-group">
+                <label for="{{ form.status.id_for_label }}" class="tourism-form-label">
+                    Status Publikasi
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.status.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <div class="tourism-help-text">Pilih status publikasi lokasi wisata</div>
+            </div>
+
+            <!-- Additional Status Options -->
+            <div class="tourism-form-group">
+                <label class="tourism-form-label">Opsi Tambahan</label>
+                <div class="tourism-status-display">
+                    <div class="tourism-status-item">
+                        {{ form.is_active }}
+                        <span>Aktif</span>
+                    </div>
+                    <div class="tourism-status-item">
+                        {{ form.featured }}
+                        <span>Unggulan</span>
+                    </div>
+                </div>
+                <div class="tourism-help-text">Lokasi aktif akan ditampilkan di halaman publik</div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="tourism-form-actions">
+                <a href="{% url 'admin_panel:tourism_locations_list' %}" class="tourism-btn tourism-btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Kembali
+                </a>
+                <button type="submit" class="tourism-btn tourism-btn-primary">
+                    <i class="fas fa-save"></i>
+                    {% if form.instance.pk %}Update Lokasi{% else %}Simpan Lokasi{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Alert dismissal
+    const alertCloseButtons = document.querySelectorAll('.close');
+    alertCloseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.parentElement.style.display = 'none';
+        });
+    });
+
+    // Form validation and AJAX submission
+    const form = document.getElementById('locationForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+            const locationTypeInput = document.getElementById('{{ form.location_type.id_for_label }}');
+            const statusInput = document.getElementById('{{ form.status.id_for_label }}');
+            
+            // Client-side validation
+            if (!titleInput.value.trim()) {
+                alert('Nama lokasi harus diisi!');
+                titleInput.focus();
+                return false;
+            }
+            
+            if (!locationTypeInput.value) {
+                alert('Jenis wisata harus dipilih!');
+                locationTypeInput.focus();
+                return false;
+            }
+            
+            if (!statusInput.value) {
+                alert('Status publikasi harus dipilih!');
+                statusInput.focus();
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            submitBtn.disabled = true;
+            
+            // Prepare form data
+            const formData = new FormData(form);
+            
+            // Submit form via AJAX
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success';
+                    successAlert.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        ${data.message || 'Data berhasil disimpan!'}
+                        <button type="button" class="close" onclick="this.parentElement.style.display='none'">&times;</button>
+                    `;
+                    form.insertBefore(successAlert, form.firstChild);
+                    
+                    // Redirect after short delay
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 1500);
+                } else {
+                    // Show error messages
+                    if (data.errors) {
+                        let errorHtml = '<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Terjadi kesalahan:<ul>';
+                        for (const field in data.errors) {
+                            errorHtml += `<li>${data.errors[field].join(', ')}</li>`;
+                        }
+                        errorHtml += '</ul></div>';
+                        
+                        const errorAlert = document.createElement('div');
+                        errorAlert.innerHTML = errorHtml;
+                        form.insertBefore(errorAlert, form.firstChild);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+
+    // Auto-format phone number
+    const phoneInput = document.getElementById('{{ form.contact_phone.id_for_label }}');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.startsWith('0')) {
+                    value = value.substring(1);
+                }
+                if (value.length > 0) {
+                    value = '0' + value;
+                }
+            }
+            this.value = value;
+        });
+    }
+
+    // Auto-format entry fee
+    const feeInput = document.getElementById('{{ form.entry_fee.id_for_label }}');
+    if (feeInput) {
+        feeInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            this.value = value;
+        });
+    }
+});
+</script>
+{% endblock %}

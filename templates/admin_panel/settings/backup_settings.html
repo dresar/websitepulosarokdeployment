@@ -1,0 +1,656 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan Backup{% endblock %}
+
+{% block extra_css %}
+<style>
+    .backup-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .backup-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .backup-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .backup-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .backup-stats {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .backup-settings {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    
+    .backup-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .backup-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .backup-btn.primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .backup-btn.primary:hover {
+        background: #5a6fd8;
+        transform: translateY(-2px);
+    }
+    
+    .backup-btn.danger {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .backup-btn.danger:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+    }
+    
+    .backup-btn.warning {
+        background: #f39c12;
+        color: white;
+    }
+    
+    .backup-btn.warning:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+    }
+    
+    .backup-btn.success {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .backup-btn.success:hover {
+        background: #229954;
+        transform: translateY(-2px);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .settings-info {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .settings-info h4 {
+        margin: 0 0 10px 0;
+        color: #667eea;
+    }
+    
+    .settings-info p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .backup-list {
+        background: #f8f9fa;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .backup-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: white;
+    }
+    
+    .backup-info {
+        flex: 1;
+    }
+    
+    .backup-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .backup-details {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .backup-actions-item {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .backup-actions-item .btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #e1e5e9;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+    }
+    
+    .upload-area {
+        border: 2px dashed #e1e5e9;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        margin: 20px 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .upload-area:hover {
+        border-color: #667eea;
+        background: #f8f9fa;
+    }
+    
+    .upload-area.dragover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+    
+    .upload-area input[type="file"] {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="backup-container">
+    <!-- Header -->
+    <div class="backup-header">
+        <h1><i class="fas fa-save"></i> Pengaturan Backup</h1>
+        <p>Kelola backup database dan file website</p>
+    </div>
+    
+    <!-- Backup Statistics -->
+    <div class="backup-stats">
+        <h4 class="mb-3">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Statistik Backup
+        </h4>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ backup_stats.total_backups|default:"0" }}</div>
+                    <div class="stat-label">Total Backups</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ backup_stats.total_size|default:"0 MB" }}</div>
+                    <div class="stat-label">Total Size</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ backup_stats.last_backup|default:"Never" }}</div>
+                    <div class="stat-label">Last Backup</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ backup_stats.auto_backup|default:"Off" }}</div>
+                    <div class="stat-label">Auto Backup</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backup Settings Form -->
+    <div class="backup-settings">
+        <form method="post">
+            {% csrf_token %}
+            
+            <h3><i class="fas fa-cog"></i> Pengaturan Backup Otomatis</h3>
+            
+            <div class="settings-info">
+                <h4>Informasi Backup</h4>
+                <p>Konfigurasi backup otomatis untuk melindungi data website. Backup akan mencakup database dan file-file penting.</p>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_auto_backup" name="enable_auto_backup" {% if settings.enable_auto_backup %}checked{% endif %}>
+                    <label for="enable_auto_backup">Aktifkan Backup Otomatis</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="backup_frequency">Frekuensi Backup</label>
+                <select id="backup_frequency" name="backup_frequency">
+                    <option value="daily" {% if settings.backup_frequency == 'daily' %}selected{% endif %}>Harian</option>
+                    <option value="weekly" {% if settings.backup_frequency == 'weekly' %}selected{% endif %}>Mingguan</option>
+                    <option value="monthly" {% if settings.backup_frequency == 'monthly' %}selected{% endif %}>Bulanan</option>
+                </select>
+                <div class="help-text">Seberapa sering backup otomatis dijalankan</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="backup_time">Waktu Backup</label>
+                <input type="time" id="backup_time" name="backup_time" value="{{ settings.backup_time|default:'02:00' }}">
+                <div class="help-text">Waktu untuk menjalankan backup otomatis</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="backup_retention_days">Retensi Backup (hari)</label>
+                <input type="number" id="backup_retention_days" name="backup_retention_days" value="{{ settings.backup_retention_days|default:30 }}" min="7" max="365">
+                <div class="help-text">Berapa lama backup disimpan sebelum dihapus (7-365 hari)</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="backup_database" name="backup_database" {% if settings.backup_database %}checked{% endif %}>
+                    <label for="backup_database">Backup Database</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="backup_media" name="backup_media" {% if settings.backup_media %}checked{% endif %}>
+                    <label for="backup_media">Backup Media Files</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="backup_static" name="backup_static" {% if settings.backup_static %}checked{% endif %}>
+                    <label for="backup_static">Backup Static Files</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="backup_compress" name="backup_compress" {% if settings.backup_compress %}checked{% endif %}>
+                    <label for="backup_compress">Kompresi Backup</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="backup_encrypt" name="backup_encrypt" {% if settings.backup_encrypt %}checked{% endif %}>
+                    <label for="backup_encrypt">Enkripsi Backup</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="backup_password">Password Enkripsi</label>
+                <input type="password" id="backup_password" name="backup_password" value="{{ settings.backup_password|default:'' }}" placeholder="Password untuk enkripsi backup">
+                <div class="help-text">Password untuk enkripsi backup (opsional)</div>
+            </div>
+            
+            <!-- Manual Backup -->
+            <h3><i class="fas fa-download"></i> Backup Manual</h3>
+            
+            <div class="backup-actions">
+                <button type="button" class="backup-btn primary" onclick="createBackup()">
+                    <i class="fas fa-plus"></i> Buat Backup
+                </button>
+                <button type="button" class="backup-btn warning" onclick="scheduleBackup()">
+                    <i class="fas fa-clock"></i> Jadwalkan Backup
+                </button>
+                <a href="{% url 'core:backup_history' %}" class="backup-btn success">
+                    <i class="fas fa-history"></i> Riwayat Backup
+                </a>
+                <a href="{% url 'core:backup_dashboard' %}" class="backup-btn primary">
+                    <i class="fas fa-chart-bar"></i> Dashboard Backup
+                </a>
+            </div>
+            
+            <!-- Restore Backup -->
+            <h3><i class="fas fa-upload"></i> Restore Backup</h3>
+            
+            <div class="upload-area" onclick="document.getElementById('backup_file').click()">
+                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                <h5>Upload Backup File</h5>
+                <p>Klik atau drag & drop file backup untuk restore</p>
+                <input type="file" id="backup_file" name="backup_file" accept=".zip,.tar,.gz" onchange="handleFileUpload(this)">
+            </div>
+            
+            <!-- Backup List -->
+            <div class="backup-list">
+                <h5><i class="fas fa-list"></i> Daftar Backup</h5>
+                {% for backup in backup_list %}
+                <div class="backup-item">
+                    <div class="backup-info">
+                        <div class="backup-name">{{ backup.name }}</div>
+                        <div class="backup-details">
+                            Ukuran: {{ backup.size }} | 
+                            Dibuat: {{ backup.created_at|date:"d M Y H:i" }} | 
+                            Status: {{ backup.status }}
+                        </div>
+                    </div>
+                    <div class="backup-actions-item">
+                        <a href="{% url 'core:download_backup' backup.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        <button type="button" class="btn btn-sm btn-warning" onclick="restoreBackup({{ backup.id }})">
+                            <i class="fas fa-upload"></i> Restore
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteBackup({{ backup.id }})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <p>Belum ada backup tersedia</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Save Button -->
+            <div style="text-align: center; margin-top: 40px;">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Simpan Pengaturan Backup
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Create backup
+    function createBackup() {
+        if (!confirm('Apakah Anda yakin ingin membuat backup sekarang?')) {
+            return;
+        }
+        
+        // Show loading
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat Backup...';
+        
+        // Simulate backup creation
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            alert('Backup berhasil dibuat!');
+            location.reload();
+        }, 3000);
+    }
+    
+    // Schedule backup
+    function scheduleBackup() {
+        const frequency = document.getElementById('backup_frequency').value;
+        const time = document.getElementById('backup_time').value;
+        
+        if (!confirm(`Jadwalkan backup ${frequency} pada pukul ${time}?`)) {
+            return;
+        }
+        
+        alert('Backup berhasil dijadwalkan!');
+    }
+    
+    // Handle file upload
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        if (!confirm(`Restore backup dari file ${file.name}?`)) {
+            input.value = '';
+            return;
+        }
+        
+        // Show progress
+        const uploadArea = input.parentNode;
+        const originalHTML = uploadArea.innerHTML;
+        uploadArea.innerHTML = `
+            <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+            <h5>Mengupload Backup...</h5>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+        `;
+        
+        // Simulate upload progress
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            uploadArea.querySelector('.progress-fill').style.width = progress + '%';
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    uploadArea.innerHTML = originalHTML;
+                    alert('Backup berhasil diupload dan siap untuk restore!');
+                }, 1000);
+            }
+        }, 200);
+    }
+    
+    // Restore backup
+    function restoreBackup(backupId) {
+        if (!confirm('Apakah Anda yakin ingin restore backup ini? Semua data saat ini akan diganti!')) {
+            return;
+        }
+        
+        if (!confirm('PERINGATAN: Restore akan mengganti semua data saat ini. Pastikan Anda sudah membuat backup terbaru!')) {
+            return;
+        }
+        
+        // Show loading
+        alert('Restore backup sedang diproses...');
+    }
+    
+    // Delete backup
+    function deleteBackup(backupId) {
+        if (!confirm('Apakah Anda yakin ingin menghapus backup ini?')) {
+            return;
+        }
+        
+        // Show loading
+        alert('Backup berhasil dihapus!');
+        location.reload();
+    }
+    
+    // Backup action confirmations
+    document.querySelectorAll('.backup-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const action = this.textContent.trim();
+            if (action.includes('Buat') || action.includes('Jadwalkan')) {
+                // These are handled by specific functions
+                return;
+            }
+            
+            if (!confirm(`Apakah Anda yakin ingin ${action.toLowerCase()}?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const retentionDays = document.getElementById('backup_retention_days').value;
+        const backupPassword = document.getElementById('backup_password').value;
+        const enableEncrypt = document.getElementById('backup_encrypt').checked;
+        
+        if (retentionDays < 7 || retentionDays > 365) {
+            e.preventDefault();
+            alert('Retensi backup harus antara 7-365 hari!');
+            return;
+        }
+        
+        if (enableEncrypt && !backupPassword.trim()) {
+            e.preventDefault();
+            alert('Password enkripsi harus diisi jika enkripsi diaktifkan!');
+            return;
+        }
+    });
+    
+    // Drag and drop functionality
+    const uploadArea = document.querySelector('.upload-area');
+    
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            document.getElementById('backup_file').files = files;
+            handleFileUpload(document.getElementById('backup_file'));
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,628 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Pengaturan Keamanan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .security-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .security-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .security-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .security-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .security-stats {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 0.5rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .security-settings {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    
+    .security-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .security-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .security-btn.primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .security-btn.primary:hover {
+        background: #5a6fd8;
+        transform: translateY(-2px);
+    }
+    
+    .security-btn.danger {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .security-btn.danger:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+    }
+    
+    .security-btn.warning {
+        background: #f39c12;
+        color: white;
+    }
+    
+    .security-btn.warning:hover {
+        background: #e67e22;
+        transform: translateY(-2px);
+    }
+    
+    .security-btn.success {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .security-btn.success:hover {
+        background: #229954;
+        transform: translateY(-2px);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .settings-info {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .settings-info h4 {
+        margin: 0 0 10px 0;
+        color: #667eea;
+    }
+    
+    .settings-info p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .maintenance-toggle {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .maintenance-toggle.enabled {
+        background: #d4edda;
+        border-color: #c3e6cb;
+    }
+    
+    .maintenance-toggle.disabled {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        width: 60px;
+        height: 30px;
+        background: #ccc;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .toggle-switch.active {
+        background: #667eea;
+    }
+    
+    .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .toggle-switch.active::after {
+        left: 33px;
+    }
+    
+    .security-level {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .security-level input[type="radio"] {
+        display: none;
+    }
+    
+    .security-level label {
+        padding: 10px 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        flex: 1;
+    }
+    
+    .security-level input[type="radio"]:checked + label {
+        border-color: #667eea;
+        background: #667eea;
+        color: white;
+    }
+    
+    .password-strength {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .password-strength.weak {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .password-strength.medium {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .password-strength.strong {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="security-container">
+    <!-- Header -->
+    <div class="security-header">
+        <h1><i class="fas fa-shield-alt"></i> Pengaturan Keamanan</h1>
+        <p>Kelola keamanan website dan akses pengguna</p>
+    </div>
+    
+    <!-- Security Statistics -->
+    <div class="security-stats">
+        <h4 class="mb-3">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Statistik Keamanan
+        </h4>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ security_stats.active_users|default:"0" }}</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ security_stats.failed_logins|default:"0" }}</div>
+                    <div class="stat-label">Failed Logins</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ security_stats.blocked_ips|default:"0" }}</div>
+                    <div class="stat-label">Blocked IPs</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number">{{ security_stats.security_score|default:"85" }}%</div>
+                    <div class="stat-label">Security Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Security Settings Form -->
+    <div class="security-settings">
+        <form method="post">
+            {% csrf_token %}
+            
+            <h3><i class="fas fa-cog"></i> Pengaturan Keamanan</h3>
+            
+            <div class="settings-info">
+                <h4>Informasi Keamanan</h4>
+                <p>Konfigurasi pengaturan keamanan untuk melindungi website dari serangan dan akses yang tidak sah.</p>
+            </div>
+            
+            <!-- Maintenance Mode -->
+            <div class="maintenance-toggle {% if settings.enable_maintenance_mode %}enabled{% else %}disabled{% endif %}">
+                <div class="toggle-switch {% if settings.enable_maintenance_mode %}active{% endif %}" onclick="toggleMaintenance()"></div>
+                <div>
+                    <h4>Mode Maintenance</h4>
+                    <p>{% if settings.enable_maintenance_mode %}Website dalam mode maintenance{% else %}Website berjalan normal{% endif %}</p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="maintenance_message">Pesan Maintenance</label>
+                <textarea id="maintenance_message" name="maintenance_message" placeholder="Masukkan pesan yang akan ditampilkan kepada pengunjung...">{{ settings.maintenance_message|default:'' }}</textarea>
+            </div>
+            
+            <!-- Hidden input for maintenance mode -->
+            <input type="hidden" id="enable_maintenance_mode" name="enable_maintenance_mode" value="{% if settings.enable_maintenance_mode %}on{% endif %}">
+            
+            <!-- SSL Settings -->
+            <h4><i class="fas fa-lock"></i> Pengaturan SSL</h4>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_ssl_redirect" name="enable_ssl_redirect" {% if settings.enable_ssl_redirect %}checked{% endif %}>
+                    <label for="enable_ssl_redirect">Redirect ke HTTPS</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_hsts" name="enable_hsts" {% if settings.enable_hsts %}checked{% endif %}>
+                    <label for="enable_hsts">HTTP Strict Transport Security (HSTS)</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="hsts_max_age">HSTS Max Age (detik)</label>
+                <input type="number" id="hsts_max_age" name="hsts_max_age" value="{{ settings.hsts_max_age|default:31536000 }}" min="0" max="31536000">
+                <div class="help-text">Durasi HSTS dalam detik (0-31536000)</div>
+            </div>
+            
+            <!-- Login Security -->
+            <h4><i class="fas fa-sign-in-alt"></i> Keamanan Login</h4>
+            
+            <div class="form-group">
+                <label for="max_login_attempts">Maksimal Percobaan Login</label>
+                <input type="number" id="max_login_attempts" name="max_login_attempts" value="{{ settings.max_login_attempts|default:5 }}" min="3" max="10">
+                <div class="help-text">Jumlah percobaan login yang diizinkan sebelum akun diblokir</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="login_timeout">Timeout Login (menit)</label>
+                <input type="number" id="login_timeout" name="login_timeout" value="{{ settings.login_timeout|default:15 }}" min="5" max="60">
+                <div class="help-text">Durasi blokir setelah melebihi percobaan login</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_2fa" name="enable_2fa" {% if settings.enable_2fa %}checked{% endif %}>
+                    <label for="enable_2fa">Two-Factor Authentication (2FA)</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enable_captcha" name="enable_captcha" {% if settings.enable_captcha %}checked{% endif %}>
+                    <label for="enable_captcha">CAPTCHA pada Login</label>
+                </div>
+            </div>
+            
+            <!-- Password Policy -->
+            <h4><i class="fas fa-key"></i> Kebijakan Password</h4>
+            
+            <div class="form-group">
+                <label for="min_password_length">Panjang Password Minimum</label>
+                <input type="number" id="min_password_length" name="min_password_length" value="{{ settings.min_password_length|default:8 }}" min="6" max="20">
+                <div class="help-text">Panjang minimum karakter password (6-20)</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="require_uppercase" name="require_uppercase" {% if settings.require_uppercase %}checked{% endif %}>
+                    <label for="require_uppercase">Wajib Huruf Besar</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="require_lowercase" name="require_lowercase" {% if settings.require_lowercase %}checked{% endif %}>
+                    <label for="require_lowercase">Wajib Huruf Kecil</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="require_numbers" name="require_numbers" {% if settings.require_numbers %}checked{% endif %}>
+                    <label for="require_numbers">Wajib Angka</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="require_symbols" name="require_symbols" {% if settings.require_symbols %}checked{% endif %}>
+                    <label for="require_symbols">Wajib Simbol</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password_expiry">Kadaluarsa Password (hari)</label>
+                <input type="number" id="password_expiry" name="password_expiry" value="{{ settings.password_expiry|default:90 }}" min="30" max="365">
+                <div class="help-text">Password akan kadaluarsa setelah hari yang ditentukan (30-365)</div>
+            </div>
+            
+            <!-- Security Level -->
+            <h4><i class="fas fa-shield-alt"></i> Level Keamanan</h4>
+            
+            <div class="security-level">
+                <input type="radio" id="security_low" name="security_level" value="low" {% if settings.security_level == 'low' %}checked{% endif %}>
+                <label for="security_low">
+                    <strong>Rendah</strong><br>
+                    <small>Keamanan dasar</small>
+                </label>
+                
+                <input type="radio" id="security_medium" name="security_level" value="medium" {% if settings.security_level == 'medium' or not settings.security_level %}checked{% endif %}>
+                <label for="security_medium">
+                    <strong>Sedang</strong><br>
+                    <small>Keamanan standar</small>
+                </label>
+                
+                <input type="radio" id="security_high" name="security_level" value="high" {% if settings.security_level == 'high' %}checked{% endif %}>
+                <label for="security_high">
+                    <strong>Tinggi</strong><br>
+                    <small>Keamanan maksimal</small>
+                </label>
+            </div>
+            
+            <!-- Security Actions -->
+            <div class="security-actions">
+                <a href="{% url 'core:security_audit' %}" class="security-btn primary">
+                    <i class="fas fa-search"></i> Security Audit
+                </a>
+                <a href="{% url 'core:blocked_ips' %}" class="security-btn warning">
+                    <i class="fas fa-ban"></i> Blocked IPs
+                </a>
+                <a href="{% url 'core:login_logs' %}" class="security-btn success">
+                    <i class="fas fa-list"></i> Login Logs
+                </a>
+                <a href="{% url 'core:security_dashboard' %}" class="security-btn primary">
+                    <i class="fas fa-chart-bar"></i> Security Dashboard
+                </a>
+            </div>
+            
+            <!-- Save Button -->
+            <div style="text-align: center; margin-top: 40px;">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Simpan Pengaturan Keamanan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Maintenance mode toggle
+    function toggleMaintenance() {
+        const toggle = document.querySelector('.toggle-switch');
+        const maintenanceToggle = document.querySelector('.maintenance-toggle');
+        const hiddenInput = document.getElementById('enable_maintenance_mode');
+        
+        toggle.classList.toggle('active');
+        maintenanceToggle.classList.toggle('enabled');
+        maintenanceToggle.classList.toggle('disabled');
+        
+        if (toggle.classList.contains('active')) {
+            hiddenInput.value = 'on';
+            maintenanceToggle.querySelector('h4').textContent = 'Mode Maintenance';
+            maintenanceToggle.querySelector('p').textContent = 'Website dalam mode maintenance';
+        } else {
+            hiddenInput.value = '';
+            maintenanceToggle.querySelector('h4').textContent = 'Mode Normal';
+            maintenanceToggle.querySelector('p').textContent = 'Website berjalan normal';
+        }
+    }
+    
+    // Security action confirmations
+    document.querySelectorAll('.security-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const action = this.textContent.trim();
+            if (!confirm(`Apakah Anda yakin ingin ${action.toLowerCase()}?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const maxLoginAttempts = document.getElementById('max_login_attempts').value;
+        const loginTimeout = document.getElementById('login_timeout').value;
+        const minPasswordLength = document.getElementById('min_password_length').value;
+        const passwordExpiry = document.getElementById('password_expiry').value;
+        
+        if (maxLoginAttempts < 3 || maxLoginAttempts > 10) {
+            e.preventDefault();
+            alert('Maksimal percobaan login harus antara 3-10!');
+            return;
+        }
+        
+        if (loginTimeout < 5 || loginTimeout > 60) {
+            e.preventDefault();
+            alert('Timeout login harus antara 5-60 menit!');
+            return;
+        }
+        
+        if (minPasswordLength < 6 || minPasswordLength > 20) {
+            e.preventDefault();
+            alert('Panjang password minimum harus antara 6-20 karakter!');
+            return;
+        }
+        
+        if (passwordExpiry < 30 || passwordExpiry > 365) {
+            e.preventDefault();
+            alert('Kadaluarsa password harus antara 30-365 hari!');
+            return;
+        }
+    });
+    
+    // Password strength indicator
+    document.getElementById('min_password_length').addEventListener('input', function() {
+        const length = parseInt(this.value);
+        const strengthDiv = document.getElementById('password-strength') || document.createElement('div');
+        strengthDiv.id = 'password-strength';
+        strengthDiv.className = 'password-strength';
+        
+        if (length < 8) {
+            strengthDiv.className = 'password-strength weak';
+            strengthDiv.textContent = 'Password lemah - disarankan minimal 8 karakter';
+        } else if (length < 12) {
+            strengthDiv.className = 'password-strength medium';
+            strengthDiv.textContent = 'Password sedang - disarankan minimal 12 karakter';
+        } else {
+            strengthDiv.className = 'password-strength strong';
+            strengthDiv.textContent = 'Password kuat';
+        }
+        
+        if (!document.getElementById('password-strength')) {
+            this.parentNode.appendChild(strengthDiv);
+        }
+    });
+</script>
+{% endblock %}

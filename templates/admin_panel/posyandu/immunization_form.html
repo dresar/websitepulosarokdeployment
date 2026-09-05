@@ -1,0 +1,592 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Form Imunisasi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .form-container {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box .form-control {
+        padding-left: 45px;
+    }
+    
+    .search-box .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
+    .child-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        display: none;
+    }
+    
+    .child-option {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f1f3f4;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .child-option:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .child-option:last-child {
+        border-bottom: none;
+    }
+    
+    .child-name {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 4px;
+    }
+    
+    .child-details {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .vaccine-type {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .vaccine-type.bcg { background: #e3f2fd; color: #1976d2; }
+    .vaccine-type.dpt { background: #f3e5f5; color: #7b1fa2; }
+    .vaccine-type.polio { background: #e8f5e8; color: #388e3c; }
+    .vaccine-type.hepatitis { background: #fff3e0; color: #f57c00; }
+    .vaccine-type.campak { background: #fce4ec; color: #c2185b; }
+    .vaccine-type.other { background: #f5f5f5; color: #616161; }
+    
+    .btn-custom {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Form Header -->
+    <div class="form-header">
+        <h2 class="mb-2">
+            <i class="fas fa-syringe mr-2"></i>
+            {{ page_title|default:"Tambah Data Imunisasi" }}
+        </h2>
+        <p class="mb-0">{{ page_subtitle|default:"Form untuk menambah data imunisasi baru" }}</p>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <form id="immunizationForm">
+            {% csrf_token %}
+            <input type="hidden" id="immunizationId" name="immunization_id" value="{{ immunization.id|default:'' }}">
+            
+            <!-- Child Selection -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-child text-primary mr-2"></i>
+                        Pilih Anak
+                    </h5>
+                </div>
+                <div class="col-md-8">
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="form-control" id="childSearch" placeholder="Cari nama anak atau NIK..." autocomplete="off">
+                        <div class="child-search-results" id="childSearchResults"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-outline-primary btn-custom w-100" id="clearChildSelection">
+                        <i class="fas fa-times mr-1"></i>
+                        Hapus Pilihan
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Selected Child Info -->
+            <div class="row mb-4" id="selectedChildInfo" style="display: none;">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <h6 class="mb-2">
+                            <i class="fas fa-check-circle text-success mr-2"></i>
+                            Anak Terpilih
+                        </h6>
+                        <div id="childInfoContent"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Immunization Details -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-syringe text-primary mr-2"></i>
+                        Detail Imunisasi
+                    </h5>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="vaccineType" class="form-label">Jenis Vaksin <span class="required">*</span></label>
+                    <select class="form-control" id="vaccineType" name="vaccine_type" required>
+                        <option value="">Pilih Jenis Vaksin</option>
+                        <option value="bcg">BCG</option>
+                        <option value="dpt">DPT</option>
+                        <option value="polio">Polio</option>
+                        <option value="hepatitis">Hepatitis B</option>
+                        <option value="campak">Campak</option>
+                        <option value="other">Lainnya</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="immunizationDate" class="form-label">Tanggal Imunisasi <span class="required">*</span></label>
+                    <input type="date" class="form-control" id="immunizationDate" name="immunization_date" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="posyanduSelect" class="form-label">Posyandu <span class="required">*</span></label>
+                    <select class="form-control" id="posyanduSelect" name="posyandu_id" required>
+                        <option value="">Pilih Posyandu</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="healthWorker" class="form-label">Petugas Kesehatan</label>
+                    <input type="text" class="form-control" id="healthWorker" name="health_worker" placeholder="Nama petugas kesehatan">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="batchNumber" class="form-label">No. Batch Vaksin</label>
+                    <input type="text" class="form-control" id="batchNumber" name="batch_number" placeholder="Nomor batch vaksin">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="nextSchedule" class="form-label">Jadwal Berikutnya</label>
+                    <input type="date" class="form-control" id="nextSchedule" name="next_schedule">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <label for="notes" class="form-label">Catatan</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Catatan tambahan tentang imunisasi..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'admin_panel:posyandu:immunizations' %}" class="btn btn-outline-secondary btn-custom">
+                            <i class="fas fa-arrow-left mr-1"></i>
+                            Kembali
+                        </a>
+                        <div>
+                            <button type="button" class="btn btn-outline-warning btn-custom mr-2" id="resetForm">
+                                <i class="fas fa-undo mr-1"></i>
+                                Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-custom" id="submitBtn">
+                                <i class="fas fa-save mr-1"></i>
+                                <span id="submitText">Simpan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let selectedChild = null;
+    let isEditMode = $('#immunizationId').val() !== '';
+    
+    // Set page title based on mode
+    if (isEditMode) {
+        $('#submitText').text('Update');
+        loadImmunizationData();
+    }
+    
+    // Load initial data
+    loadPosyanduOptions();
+    
+    // Child search functionality
+    let searchTimeout;
+    $('#childSearch').on('input', function() {
+        const query = $(this).val();
+        
+        clearTimeout(searchTimeout);
+        if (query.length < 2) {
+            $('#childSearchResults').hide();
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            searchChildren(query);
+        }, 300);
+    });
+    
+    // Hide search results when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-box').length) {
+            $('#childSearchResults').hide();
+        }
+    });
+    
+    // Clear child selection
+    $('#clearChildSelection').on('click', function() {
+        selectedChild = null;
+        $('#childSearch').val('');
+        $('#selectedChildInfo').hide();
+        $('#childSearchResults').hide();
+    });
+    
+    // Form submission
+    $('#immunizationForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        if (!selectedChild) {
+            showAlert('Pilih anak terlebih dahulu', 'warning');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        formData.append('child_id', selectedChild.id);
+        
+        const submitBtn = $('#submitBtn');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+        
+        const url = isEditMode ? 
+            `{% url 'posyandu:api_immunization_update' 0 %}`.replace('0', $('#immunizationId').val()) :
+            '{% url "posyandu:api_immunization_create" %}';
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                showAlert(response.message || 'Data imunisasi berhasil disimpan', 'success');
+                setTimeout(function() {
+                    window.location.href = '{% url "admin_panel:posyandu:immunizations" %}';
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.error || 'Terjadi kesalahan saat menyimpan data';
+                showAlert(errorMsg, 'danger');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+    
+    // Reset form
+    $('#resetForm').on('click', function() {
+        if (confirm('Apakah Anda yakin ingin mereset form?')) {
+            $('#immunizationForm')[0].reset();
+            selectedChild = null;
+            $('#selectedChildInfo').hide();
+            $('#childSearch').val('');
+        }
+    });
+    
+    // Search children function
+    function searchChildren(query) {
+        $.ajax({
+            url: '{% url "posyandu:api_penduduk_search" %}',
+            method: 'GET',
+            data: { 
+                search: query,
+                age_group: 'balita'
+            },
+            success: function(response) {
+                displayChildSearchResults(response.results);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error searching children:', error);
+            }
+        });
+    }
+    
+    // Display child search results
+    function displayChildSearchResults(children) {
+        const container = $('#childSearchResults');
+        
+        if (children.length === 0) {
+            container.html('<div class="child-option text-center text-muted">Tidak ada anak ditemukan</div>');
+        } else {
+            let html = '';
+            children.forEach(function(child, index) {
+                const age = calculateAge(child.birth_date);
+                // Store child data as a data attribute with proper escaping
+                const childData = JSON.stringify(child);
+                html += `
+                    <div class="child-option" data-child='${childData.replace(/'/g, "&#39;")}' data-child-index="${index}">
+                        <div class="child-name">${child.name || 'N/A'}</div>
+                        <div class="child-details">
+                            NIK: ${child.nik || 'N/A'} | Usia: ${age} bulan | ${child.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                        </div>
+                    </div>
+                `;
+            });
+            container.html(html);
+        }
+        
+        container.show();
+    }
+    
+    // Child selection
+    $(document).on('click', '.child-option', function() {
+        try {
+            const childData = $(this).data('child');
+            console.log('Child data:', childData); // Debug log
+            
+            // Check if childData is already an object or needs parsing
+            if (typeof childData === 'string') {
+                selectedChild = JSON.parse(childData);
+            } else if (typeof childData === 'object') {
+                selectedChild = childData;
+            } else {
+                console.error('Invalid child data type:', typeof childData);
+                showAlert('Error: Data anak tidak valid', 'danger');
+                return;
+            }
+            
+            $('#childSearch').val(selectedChild.name);
+            $('#selectedChildInfo').show();
+            $('#childInfoContent').html(`
+                <div class="row">
+                    <div class="col-md-8">
+                        <strong>${selectedChild.name}</strong><br>
+                        <small class="text-muted">
+                            NIK: ${selectedChild.nik} | 
+                            Usia: ${calculateAge(selectedChild.birth_date)} bulan | 
+                            ${selectedChild.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeChildSelection">
+                            <i class="fas fa-times"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            `);
+            $('#childSearchResults').hide();
+        } catch (error) {
+            console.error('Error parsing child data:', error);
+            showAlert('Error: Gagal memproses data anak', 'danger');
+        }
+    });
+    
+    // Remove child selection
+    $(document).on('click', '#removeChildSelection', function() {
+        selectedChild = null;
+        $('#childSearch').val('');
+        $('#selectedChildInfo').hide();
+    });
+    
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Pilih Posyandu</option>';
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+                $('#posyanduSelect').html(options);
+            }
+        });
+    }
+    
+    // Load immunization data for edit
+    function loadImmunizationData() {
+        $.ajax({
+            url: `{% url 'posyandu:api_immunization_update' 0 %}`.replace('0', $('#immunizationId').val()),
+            method: 'GET',
+            success: function(response) {
+                // Populate form fields
+                $('#vaccineType').val(response.vaccine_type);
+                $('#immunizationDate').val(response.immunization_date);
+                $('#posyanduSelect').val(response.posyandu_id);
+                $('#healthWorker').val(response.health_worker);
+                $('#batchNumber').val(response.batch_number);
+                $('#nextSchedule').val(response.next_schedule);
+                $('#notes').val(response.notes);
+                
+                // Set selected child
+                if (response.child_id) {
+                    selectedChild = {
+                        id: response.child_id,
+                        name: response.child_name || 'N/A',
+                        nik: response.child_nik || 'N/A',
+                        birth_date: response.child_birth_date || null,
+                        gender: response.child_gender || ''
+                    };
+                    $('#childSearch').val(selectedChild.name);
+                    $('#selectedChildInfo').show();
+                    $('#childInfoContent').html(`
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>${selectedChild.name}</strong><br>
+                                <small class="text-muted">
+                                    NIK: ${selectedChild.nik} | 
+                                    Usia: ${calculateAge(selectedChild.birth_date)} bulan | 
+                                    ${selectedChild.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="removeChildSelection">
+                                    <i class="fas fa-times"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading immunization data:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+    
+    // Calculate age in months
+    function calculateAge(birthDate) {
+        if (!birthDate) return 0;
+        const birth = new Date(birthDate);
+        const today = new Date();
+        const ageInMonths = (today.getFullYear() - birth.getFullYear()) * 12 + (today.getMonth() - birth.getMonth());
+        return Math.max(0, ageInMonths);
+    }
+    
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

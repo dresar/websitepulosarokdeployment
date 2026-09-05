@@ -1,0 +1,214 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .warning-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-left: 5px solid #dc3545;
+    }
+    .patient-type-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .age-range {
+        background: #e3f2fd;
+        color: #1565c0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+    .warning-icon {
+        font-size: 3rem;
+        color: #dc3545;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2 class="mb-2">
+                    <i class="fas fa-exclamation-triangle mr-3"></i>
+                    {{ page_title }}
+                </h2>
+                <p class="mb-0 opacity-75">{{ page_subtitle }}</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{% url 'admin_panel:posyandu:patient_types' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="warning-card">
+                <div class="text-center">
+                    <div class="warning-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 class="text-danger mb-3">Konfirmasi Penghapusan</h4>
+                    <p class="lead">Anda akan menghapus jenis pasien berikut:</p>
+                </div>
+
+                <!-- Patient Type Information -->
+                <div class="patient-type-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="font-weight-bold text-muted">Nama:</label>
+                                <p class="mb-0 font-weight-bold">{{ patient_type.name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="font-weight-bold text-muted">Kode:</label>
+                                <p class="mb-0"><code>{{ patient_type.code }}</code></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="font-weight-bold text-muted">Status:</label>
+                                <div>
+                                    <span class="status-badge {% if patient_type.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                        {% if patient_type.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="font-weight-bold text-muted">Rentang Usia:</label>
+                                <div>
+                                    {% if patient_type.age_min or patient_type.age_max %}
+                                        <span class="age-range">
+                                            {% if patient_type.age_min and patient_type.age_max %}
+                                                {{ patient_type.age_min }} - {{ patient_type.age_max }} tahun
+                                            {% elif patient_type.age_min %}
+                                                {{ patient_type.age_min }}+ tahun
+                                            {% elif patient_type.age_max %}
+                                                ≤ {{ patient_type.age_max }} tahun
+                                            {% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Tidak ada batasan usia</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if patient_type.description %}
+                        <div class="mb-3">
+                            <label class="font-weight-bold text-muted">Deskripsi:</label>
+                            <p class="mb-0">{{ patient_type.description }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-0">
+                                <label class="font-weight-bold text-muted">Dibuat:</label>
+                                <p class="mb-0">{{ patient_type.created_at|date:"d F Y, H:i" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-0">
+                                <label class="font-weight-bold text-muted">Diperbarui:</label>
+                                <p class="mb-0">{{ patient_type.updated_at|date:"d F Y, H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning Messages -->
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Peringatan!
+                    </h6>
+                    <ul class="mb-0">
+                        <li>Penghapusan ini <strong>tidak dapat dibatalkan</strong></li>
+                        <li>Jika jenis pasien ini masih digunakan dalam rekam kesehatan, penghapusan akan <strong>ditolak</strong></li>
+                        <li>Pastikan tidak ada data yang bergantung pada jenis pasien ini</li>
+                    </ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center">
+                    <form method="post" id="deleteForm">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-secondary mr-3" onclick="history.back()">
+                            <i class="fas fa-times mr-2"></i>
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-danger" id="confirmDelete">
+                            <i class="fas fa-trash mr-2"></i>
+                            Ya, Hapus Jenis Pasien
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add confirmation for delete button
+    $('#confirmDelete').on('click', function(e) {
+        if (!confirm('Apakah Anda benar-benar yakin ingin menghapus jenis pasien "{{ patient_type.name }}"?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Prevent double submission
+    $('#deleteForm').on('submit', function() {
+        $('#confirmDelete').prop('disabled', true);
+        $('#confirmDelete').html('<i class="fas fa-spinner fa-spin mr-2"></i>Menghapus...');
+    });
+});
+</script>
+{% endblock %}
+

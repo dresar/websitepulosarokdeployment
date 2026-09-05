@@ -1,0 +1,1593 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Data Lorong{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Bulk Actions Improvements */
+.bulk-actions-container {
+    position: relative;
+}
+
+.bulk-actions-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.bulk-actions-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24 !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .form-control {
+        font-size: 16px; /* Prevent zoom on mobile */
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .bulk-actions-container .btn {
+        font-size: 12px;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-md-2, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+    
+    .d-flex {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .d-flex .btn {
+        margin-bottom: 0.5rem;
+        margin-right: 0 !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item active">Lorong</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-road text-primary mr-2"></i>
+                        Data Lorong
+                    </h1>
+                    <p class="text-muted mb-0">Kelola data lorong di desa</p>
+                </div>
+                <div class="d-flex flex-wrap">
+                    <a href="{% url 'admin_panel:references_dashboard' %}" class="btn btn-outline-secondary mr-2 mb-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                    <a href="{% url 'admin_panel:references_lorong_add' %}" class="btn btn-primary mr-2 mb-2">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Lorong
+                    </a>
+                    
+                    <!-- Export Dropdown -->
+                    <!-- Export Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i>
+                            Export Data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdownBtn">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-file mr-1"></i>
+                                Pilih Format Export
+                            </h6>
+                            <div class="dropdown-divider"></div>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_lorong_export_excel' %}">
+                                <i class="fas fa-file-excel text-success mr-2"></i>
+                                <span>Excel (.xlsx)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_lorong_export_csv' %}">
+                                <i class="fas fa-file-csv text-info mr-2"></i>
+                                <span>CSV (.csv)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_lorong_export_json' %}">
+                                <i class="fas fa-file-code text-warning mr-2"></i>
+                                <span>JSON (.json)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_lorong_export_pdf' %}">
+                                <i class="fas fa-file-pdf text-danger mr-2"></i>
+                                <span>PDF (.pdf)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Lorong
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalLorong">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-road fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Lorong Aktif
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeLorong">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total RT
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalRT">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-home fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Penduduk
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalPenduduk">-</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-2"></i>
+                Filter dan Pencarian
+            </h6>
+        </div>
+        <div class="card-body">
+            <form id="filterForm" class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="search" class="form-label">Pencarian</label>
+                    <input type="text" class="form-control" id="search" placeholder="Cari nama atau kode lorong...">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="dusun_filter" class="form-label">Dusun</label>
+                    <select class="form-control" id="dusun_filter">
+                        <option value="">Semua Dusun</option>
+                        {% for dusun in dusun_list %}
+                        <option value="{{ dusun.id }}">{{ dusun.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="status_filter" class="form-label">Status</label>
+                    <select class="form-control" id="status_filter">
+                        <option value="">Semua Status</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="tidak_aktif">Tidak Aktif</option>
+                    </select>
+                </div>
+                <div class="col-md-1 mb-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex">
+                        <button type="button" class="btn btn-primary mr-2" id="filterBtn">
+                            <i class="fas fa-search mr-1"></i>
+                            Filter
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                            <i class="fas fa-undo mr-1"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-2"></i>
+                Daftar Lorong
+            </h6>
+            <div class="d-flex flex-wrap mt-2 mt-md-0">
+                <button class="btn btn-outline-success btn-sm mr-2 mb-2" id="exportBtn">
+                    <i class="fas fa-file-excel mr-1"></i>
+                    Export Excel
+                </button>
+                <div class="dropdown mb-2">
+                    <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="actionDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-cog mr-1"></i>
+                        Aksi
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="actionDropdown">
+                        <a class="dropdown-item" href="#" id="bulkActivateBtn">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Aktifkan Terpilih
+                        </a>
+                        <a class="dropdown-item" href="#" id="bulkDeactivateBtn">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            Nonaktifkan Terpilih
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" id="bulkDeleteBtn">
+                            <i class="fas fa-trash mr-2"></i>
+                            Hapus Terpilih
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="lorongTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th width="50">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="selectAll">
+                                    <label class="custom-control-label" for="selectAll"></label>
+                                </div>
+                            </th>
+                            <th>No</th>
+                            <th>Nama Lorong</th>
+                            <th>Kode</th>
+                            <th>Dusun</th>
+                            <th>RT/RW</th>
+                            <th>KK</th>
+                            <th>Penduduk</th>
+                            <th>Status</th>
+                            <th width="150">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lorongTableBody">
+                        <!-- Data akan dimuat dari backend -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Bulk Actions - Always Visible -->
+        <div class="card-footer">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <div class="bulk-actions-container" id="bulkActionsContainer">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="bulkActionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-tasks mr-1"></i>
+                            <span id="bulkActionsText">Aksi Massal</span>
+                            <span class="badge badge-light ml-2" id="bulkActionsCount">0</span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="bulkActionsDropdown">
+                            <a class="dropdown-item" href="#" onclick="executeBulkAction('activate')">
+                                <i class="fas fa-check text-success mr-2"></i>Aktifkan
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="executeBulkAction('deactivate')">
+                                <i class="fas fa-pause text-warning mr-2"></i>Nonaktifkan
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="#" onclick="executeBulkAction('delete')">
+                                <i class="fas fa-trash mr-2"></i>Hapus Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-muted mb-2 mb-md-0" id="paginationInfo">
+                    Menampilkan 0-0 dari 0 data
+                </div>
+                <nav aria-label="Page navigation" id="paginationNav">
+                    <!-- Pagination akan dimuat dari backend -->
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Hapus Data Lorong
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Peringatan!</strong> Tindakan ini tidak dapat dibatalkan. Data yang dihapus akan hilang permanen.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px; margin: 0 auto;">
+                                <i class="fas fa-road fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h6 class="font-weight-bold mb-3">Detail Data yang Akan Dihapus:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td class="font-weight-bold">Nama Lorong:</td>
+                                    <td id="deleteNamaLorong">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Kode Lorong:</td>
+                                    <td id="deleteKode">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Dusun:</td>
+                                    <td id="deleteDusun">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">RT:</td>
+                                    <td id="deleteRt">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Jumlah Rumah:</td>
+                                    <td id="deleteJumlahRumah">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Jumlah Penduduk:</td>
+                                    <td id="deleteJumlahPenduduk">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Status:</td>
+                                    <td id="deleteStatus">-</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="lorong_id" id="deleteLorongId">
+                    
+                    <div class="form-group">
+                        <label for="deleteReason" class="font-weight-bold">
+                            Alasan Penghapusan <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="deleteReason" name="reason" rows="3" 
+                                  placeholder="Masukkan alasan penghapusan data..." required></textarea>
+                        <div class="invalid-feedback">
+                            Alasan penghapusan harus diisi.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="deleteConfirm" required>
+                            <label class="custom-control-label" for="deleteConfirm">
+                                Saya yakin ingin menghapus data lorong ini
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Load data from backend
+    loadLorongData();
+    
+    // Select all functionality
+    $('#selectAll').change(function() {
+        $('.lorong-checkbox').prop('checked', this.checked);
+        updateBulkActions();
+    });
+    
+    // Bind checkbox change events
+    $(document).on('change', '.lorong-checkbox', function() {
+        updateBulkActions();
+    });
+    
+    // Filter functionality
+    $('#filterBtn').click(function() {
+        loadLorongData();
+    });
+    
+    // Reset functionality
+    $('#resetBtn').click(function() {
+        $('#filterForm')[0].reset();
+        loadLorongData();
+    });
+    
+    // Export functionality
+    $('#exportBtn').click(function() {
+        exportToExcel();
+    });
+
+    // Bulk actions
+    $('#bulkActivateBtn').click(function() {
+        bulkAction('activate');
+    });
+    
+    $('#bulkDeactivateBtn').click(function() {
+        bulkAction('deactivate');
+    });
+    
+    $('#bulkDeleteBtn').click(function() {
+        bulkAction('delete');
+    });
+    
+    // Delete modal validation
+    $('#deleteReason, #deleteConfirm').on('input change', function() {
+        validateDeleteForm();
+    });
+    
+    // Confirm delete button
+    $('#confirmDeleteBtn').on('click', function() {
+        if (validateDeleteForm()) {
+            submitDeleteForm();
+        }
+    });
+});
+
+function loadLorongData(page = 1) {
+    const search = $('#search').val();
+    const dusun = $('#dusun_filter').val();
+    const status = $('#status_filter').val();
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (dusun) params.append('dusun', dusun);
+    if (status) params.append('status', status);
+    params.append('page', page);
+    
+    // Load data from backend
+    fetch(`/admin-panel/api/references/lorong/?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data && Array.isArray(data.data)) {
+                renderLorongTable(data.data);
+                updateStatistics(data.statistics);
+                updatePagination(data.pagination);
+            } else {
+                console.error('API returned error or invalid data structure:', data);
+                showErrorState();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading lorong data:', error);
+            showErrorState();
+        });
+}
+
+function renderLorongTable(lorongData) {
+    const tbody = $('#lorongTableBody');
+    tbody.empty();
+    
+    if (lorongData.length === 0) {
+        tbody.append(`
+            <tr>
+                <td colspan="10" class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Tidak ada data lorong</p>
+                </td>
+            </tr>
+        `);
+        return;
+    }
+    
+    lorongData.forEach((lorong, index) => {
+        const row = `
+            <tr>
+                <td>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input lorong-checkbox" id="lorong_${lorong.id}" value="${lorong.id}">
+                        <label class="custom-control-label" for="lorong_${lorong.id}"></label>
+                    </div>
+                </td>
+                <td>${index + 1}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="beneficiary-photo-small mr-3">
+                            <div class="beneficiary-photo-placeholder-small">
+                                <i class="fas fa-road"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-weight-bold">${lorong.nama_lorong}</div>
+                            <small class="text-muted">${lorong.description || '-'}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge badge-primary">${lorong.kode}</span>
+                </td>
+                <td>
+                    <span class="badge badge-info">${lorong.dusun_name}</span>
+                </td>
+                <td>
+                    <span class="badge badge-secondary">${lorong.rt || '-'}</span>
+                </td>
+                <td>${lorong.house_count || 0}</td>
+                <td>${lorong.population_count || 0}</td>
+                <td>
+                    <span class="badge ${lorong.is_active ? 'badge-success' : 'badge-warning'}">
+                        ${lorong.is_active ? 'Aktif' : 'Tidak Aktif'}
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'admin_panel:references_lorong_detail' 0 %}".replace('0', lorong.id) class="btn btn-sm btn-outline-info" title="Detail">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'admin_panel:references_lorong_edit' 0 %}".replace('0', lorong.id) class="btn btn-sm btn-outline-primary" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger" title="Hapus" onclick="showDeleteModal(${lorong.id}, '${lorong.nama_lorong}', '${lorong.kode}', '${lorong.dusun_name}', '${lorong.rt || '-'}', '${lorong.house_count || 0}', '${lorong.population_count || 0}', '${lorong.is_active}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+}
+
+function updateStatistics(stats) {
+    $('#totalLorong').text(stats.total_lorong || 0);
+    $('#activeLorong').text(stats.active_lorong || 0);
+    $('#totalRT').text(stats.total_rt || 0);
+    $('#totalPenduduk').text(stats.total_penduduk || 0);
+}
+
+function updatePagination(pagination) {
+    const paginationNav = $('#paginationNav');
+    const paginationInfo = $('#paginationInfo');
+    
+    // Update pagination info
+    const startItem = (pagination.current_page - 1) * pagination.per_page + 1;
+    const endItem = Math.min(pagination.current_page * pagination.per_page, pagination.total_items);
+    paginationInfo.text(`Menampilkan ${startItem}-${endItem} dari ${pagination.total_items} data`);
+    
+    // Generate pagination buttons
+    let paginationHtml = '<ul class="pagination pagination-sm">';
+    
+    // Previous button
+    if (pagination.has_previous) {
+        paginationHtml += `<li class="page-item">
+            <a class="page-link" href="#" onclick="loadLorongData(${pagination.previous_page}); return false;">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>`;
+    } else {
+        paginationHtml += `<li class="page-item disabled">
+            <span class="page-link">
+                <i class="fas fa-chevron-left"></i>
+            </span>
+        </li>`;
+    }
+    
+    // Page numbers
+    const startPage = Math.max(1, pagination.current_page - 2);
+    const endPage = Math.min(pagination.total_pages, pagination.current_page + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === pagination.current_page) {
+            paginationHtml += `<li class="page-item active">
+                <span class="page-link">${i}</span>
+            </li>`;
+        } else {
+            paginationHtml += `<li class="page-item">
+                <a class="page-link" href="#" onclick="loadLorongData(${i}); return false;">${i}</a>
+            </li>`;
+        }
+    }
+    
+    // Next button
+    if (pagination.has_next) {
+        paginationHtml += `<li class="page-item">
+            <a class="page-link" href="#" onclick="loadLorongData(${pagination.next_page}); return false;">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>`;
+    } else {
+        paginationHtml += `<li class="page-item disabled">
+            <span class="page-link">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+        </li>`;
+    }
+    
+    paginationHtml += '</ul>';
+    paginationNav.html(paginationHtml);
+}
+
+function showErrorState() {
+    const tbody = $('#lorongTableBody');
+    tbody.empty();
+    tbody.append(`
+        <tr>
+            <td colspan="10" class="text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <p class="text-muted">Gagal memuat data lorong</p>
+                <button class="btn btn-outline-primary" onclick="loadLorongData()">
+                    <i class="fas fa-refresh mr-1"></i>
+                    Coba Lagi
+                </button>
+            </td>
+        </tr>
+    `);
+}
+
+function showDeleteModal(id, namaLorong, kode, dusun, rt, jumlahRumah, jumlahPenduduk, isActive) {
+    // Set form action
+    $('#deleteForm').attr('action', '{% url "admin_panel:references_lorong_delete" 0 %}'.replace('0', id));
+    $('#deleteLorongId').val(id);
+    
+    // Set data details
+    $('#deleteNamaLorong').text(namaLorong);
+    $('#deleteKode').text(kode);
+    $('#deleteDusun').text(dusun);
+    $('#deleteRt').text(rt);
+    $('#deleteJumlahRumah').text(jumlahRumah + ' Rumah');
+    $('#deleteJumlahPenduduk').text(jumlahPenduduk + ' Jiwa');
+    $('#deleteStatus').text(isActive ? 'Aktif' : 'Tidak Aktif');
+    
+    // Reset form
+    $('#deleteReason').val('');
+    $('#deleteConfirm').prop('checked', false);
+    $('#confirmDeleteBtn').prop('disabled', true);
+    
+    // Show modal
+    $('#deleteModal').modal('show');
+}
+
+function validateDeleteForm() {
+    const reason = $('#deleteReason').val().trim();
+    const confirmed = $('#deleteConfirm').is(':checked');
+    
+    if (reason && confirmed) {
+        $('#confirmDeleteBtn').prop('disabled', false);
+        return true;
+    } else {
+        $('#confirmDeleteBtn').prop('disabled', true);
+        return false;
+    }
+}
+
+function submitDeleteForm() {
+    if (!validateDeleteForm()) {
+        return;
+    }
+    
+    const form = $('#deleteForm');
+    const formData = new FormData(form[0]);
+    const btn = $('#confirmDeleteBtn');
+    const originalText = btn.html();
+    
+    // Show loading
+    btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+    btn.prop('disabled', true);
+    
+    $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                // Close modal
+                $('#deleteModal').modal('hide');
+                
+                // Reload page to update list (notifikasi akan muncul dari Django messages)
+                setTimeout(function() {
+                    location.reload();
+                }, 500);
+            } else {
+                showAlert(response.message || 'Terjadi kesalahan saat menghapus data', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            let message = 'Terjadi kesalahan saat menghapus data';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            showAlert(message, 'error');
+        },
+        complete: function() {
+            // Reset button state
+            btn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function showAlert(message, type) {
+    // Use global notification toast instead of banner
+    if (typeof showGlobalNotificationToast === 'function') {
+        showGlobalNotificationToast(message, type);
+    } else {
+        // Fallback to simple alert
+        alert(message);
+    }
+}
+
+// Export functions
+function exportData() {
+    showLoading('Mengekspor data...');
+    const exportUrl = '{% url "admin_panel:references_lorong_export_csv" %}';
+
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'data_lorong_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('Data CSV berhasil diekspor');
+    }, 1000);
+}
+
+function exportExcel() {
+    showLoading('Mengekspor ke Excel...');
+    const exportUrl = '{% url "admin_panel:references_lorong_export_excel" %}';
+
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'data_lorong_' + new Date().toISOString().split('T')[0] + '.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('File Excel berhasil dibuat');
+    }, 1000);
+}
+
+function exportPDF() {
+    showLoading('Mengekspor ke PDF...');
+    const exportUrl = '{% url "admin_panel:references_lorong_export_pdf" %}';
+
+    window.open(exportUrl, '_blank');
+
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('File PDF berhasil dibuat');
+    }, 1000);
+}
+
+function importData() {
+    showInfo('Fitur import data akan segera tersedia');
+}
+
+function downloadTemplate() {
+    showInfo('Template import akan segera tersedia');
+}
+
+// Utility functions
+function showLoading(message) {
+    // Create loading overlay if it doesn't exist
+    if (!document.getElementById('loadingOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+        overlay.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">${message}</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function showSuccess(message) {
+    // Create success notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    notification.innerHTML = `
+        <i class="fas fa-check-circle mr-2"></i>${message}
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showInfo(message) {
+    // Create info notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #17a2b8;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    notification.innerHTML = `
+        <i class="fas fa-info-circle mr-2"></i>${message}
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function bulkAction(action) {
+    const selected = $('input[type="checkbox"]:checked').not('#selectAll');
+    
+    // Filter only valid checkboxes with numeric values
+    const validSelected = selected.filter(function() {
+        const value = $(this).val();
+        return value && !isNaN(value) && value !== 'on';
+    });
+    
+    if (validSelected.length === 0) {
+        showAlert('Pilih data yang akan di' + action, 'warning');
+        return;
+    }
+    
+    if (action === 'delete') {
+        bulkDelete(validSelected);
+    } else if (action === 'activate') {
+        bulkActivate(validSelected);
+    } else if (action === 'deactivate') {
+        bulkDeactivate(validSelected);
+    }
+}
+
+function bulkDelete(selected) {
+    if (confirm(`Apakah Anda yakin ingin menghapus ${selected.length} data lorong terpilih?`)) {
+        const lorongIds = [];
+        selected.each(function() {
+            const value = $(this).val();
+            // Only add numeric IDs, skip 'on' or other non-numeric values
+            if (value && !isNaN(value) && value !== 'on') {
+                lorongIds.push(value);
+            }
+        });
+        
+        if (lorongIds.length === 0) {
+            showAlert('Tidak ada data lorong yang valid untuk dihapus', 'warning');
+            return;
+        }
+        
+        // Show loading
+        showLoading('Menghapus data lorong...');
+        
+        // Send bulk delete request
+        $.ajax({
+            url: '{% url "admin_panel:references_lorong_bulk_delete" %}',
+            type: 'POST',
+            data: {
+                'lorong_ids[]': lorongIds,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+            },
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    showAlert(`Berhasil menghapus ${response.deleted_count} data lorong`, 'success');
+                    // Reload page to update list
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(response.message || 'Gagal menghapus data lorong', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                console.error('Bulk delete error:', xhr.responseText);
+                console.error('Status:', xhr.status);
+                console.error('Error:', error);
+                showAlert('Terjadi kesalahan saat menghapus data lorong: ' + xhr.responseText, 'error');
+            }
+        });
+    }
+}
+
+function bulkActivate(selected) {
+    if (confirm(`Apakah Anda yakin ingin mengaktifkan ${selected.length} data lorong terpilih?`)) {
+        const lorongIds = [];
+        selected.each(function() {
+            const value = $(this).val();
+            // Only add numeric IDs, skip 'on' or other non-numeric values
+            if (value && !isNaN(value) && value !== 'on') {
+                lorongIds.push(value);
+            }
+        });
+        
+        if (lorongIds.length === 0) {
+            showAlert('Tidak ada data lorong yang valid untuk diaktifkan', 'warning');
+            return;
+        }
+        
+        // Show loading
+        showLoading('Mengaktifkan data lorong...');
+        
+        // Send bulk activate request
+        $.ajax({
+            url: '{% url "admin_panel:references_lorong_bulk_activate" %}',
+            type: 'POST',
+            data: {
+                'lorong_ids[]': lorongIds,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+            },
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    showAlert(`Berhasil mengaktifkan ${response.activated_count} data lorong`, 'success');
+                    // Reload page to update list
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(response.message || 'Gagal mengaktifkan data lorong', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                showAlert('Terjadi kesalahan saat mengaktifkan data lorong', 'error');
+            }
+        });
+    }
+}
+
+function bulkDeactivate(selected) {
+    if (confirm(`Apakah Anda yakin ingin menonaktifkan ${selected.length} data lorong terpilih?`)) {
+        const lorongIds = [];
+        selected.each(function() {
+            const value = $(this).val();
+            // Only add numeric IDs, skip 'on' or other non-numeric values
+            if (value && !isNaN(value) && value !== 'on') {
+                lorongIds.push(value);
+            }
+        });
+        
+        if (lorongIds.length === 0) {
+            showAlert('Tidak ada data lorong yang valid untuk dinonaktifkan', 'warning');
+            return;
+        }
+        
+        // Show loading
+        showLoading('Menonaktifkan data lorong...');
+        
+        // Send bulk deactivate request
+        $.ajax({
+            url: '{% url "admin_panel:references_lorong_bulk_deactivate" %}',
+            type: 'POST',
+            data: {
+                'lorong_ids[]': lorongIds,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+            },
+            success: function(response) {
+                hideLoading();
+                if (response.success) {
+                    showAlert(`Berhasil menonaktifkan ${response.deactivated_count} data lorong`, 'success');
+                    // Reload page to update list
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(response.message || 'Gagal menonaktifkan data lorong', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoading();
+                showAlert('Terjadi kesalahan saat menonaktifkan data lorong', 'error');
+            }
+        });
+    }
+}
+
+// Bulk Actions Functions
+function updateBulkActions() {
+    const selected = $('.lorong-checkbox:checked').length;
+    const container = $('#bulkActionsContainer');
+    const count = $('#bulkActionsCount');
+    const dropdown = $('#bulkActionsDropdown');
+    
+    // Always show container, but change style based on selection
+    count.text(selected);
+    
+    if (selected > 0) {
+        dropdown.removeClass('btn-outline-primary').addClass('btn-primary');
+        dropdown.find('i').removeClass('fa-tasks').addClass('fa-check');
+    } else {
+        dropdown.removeClass('btn-primary').addClass('btn-outline-primary');
+        dropdown.find('i').removeClass('fa-check').addClass('fa-tasks');
+    }
+    
+    // Update select all checkbox
+    const totalCheckboxes = $('.lorong-checkbox').length;
+    const selectAll = $('#selectAll');
+    
+    if (selected === 0) {
+        selectAll.prop('indeterminate', false).prop('checked', false);
+    } else if (selected === totalCheckboxes) {
+        selectAll.prop('indeterminate', false).prop('checked', true);
+    } else {
+        selectAll.prop('indeterminate', true);
+    }
+}
+
+function executeBulkAction(action) {
+    const selected = $('.lorong-checkbox:checked');
+    
+    if (selected.length === 0) {
+        showError('Pilih minimal satu data');
+        return;
+    }
+    
+    // Get selected IDs
+    const selectedIds = [];
+    selected.each(function() {
+        const value = $(this).val();
+        // Only add numeric IDs, skip 'on' or other non-numeric values
+        if (value && !isNaN(value) && value !== 'on') {
+            selectedIds.push(value);
+        }
+    });
+    
+    if (selectedIds.length === 0) {
+        showError('Tidak ada data lorong yang valid untuk diproses');
+        return;
+    }
+    
+    // Confirm for delete action
+    if (action === 'delete') {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} data lorong?`)) {
+            return;
+        }
+    }
+    
+    showLoading(`Menjalankan aksi ${action} pada ${selectedIds.length} data...`);
+    
+    // Execute the actual bulk action
+    if (action === 'delete') {
+        bulkDeleteLorong(selectedIds);
+    } else if (action === 'activate') {
+        bulkActivateLorong(selectedIds);
+    } else if (action === 'deactivate') {
+        bulkDeactivateLorong(selectedIds);
+    }
+}
+
+function bulkDeleteLorong(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_lorong_bulk_delete" %}',
+        type: 'POST',
+        data: {
+            'lorong_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menghapus ${response.deleted_count} data lorong`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                let errorMessage = response.message || 'Gagal menghapus data lorong';
+                if (response.errors && response.errors.length > 0) {
+                    errorMessage += '\n\nDetail error:\n' + response.errors.join('\n');
+                }
+                showAlert(errorMessage, 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk delete error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menghapus data lorong: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkActivateLorong(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_lorong_bulk_activate" %}',
+        type: 'POST',
+        data: {
+            'lorong_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil mengaktifkan ${response.activated_count} data lorong`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal mengaktifkan data lorong', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk activate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat mengaktifkan data lorong: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkDeactivateLorong(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_lorong_bulk_deactivate" %}',
+        type: 'POST',
+        data: {
+            'lorong_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menonaktifkan ${response.deactivated_count} data lorong`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal menonaktifkan data lorong', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk deactivate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menonaktifkan data lorong: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function showError(message) {
+    showAlert(message, 'error');
+}
+</script>
+
+<!-- Import Modal -->
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="fas fa-file-import mr-2"></i>
+                    Import Data Lorong
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Petunjuk Import:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Download template Excel terlebih dahulu</li>
+                        <li>Isi template dengan data yang akan diimport</li>
+                        <li>Upload file Excel yang sudah diisi</li>
+                        <li>Data duplikat akan dilewati</li>
+                    </ul>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" action="{% url 'admin_panel:references_quick_import' 'lorong' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="importFile" class="form-label">
+                            <i class="fas fa-file mr-1"></i>
+                            Pilih File <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="importFile" name="file" accept=".xlsx,.xls" required>
+                        <small class="form-text text-muted">
+                            Format yang didukung: Excel (.xlsx, .xls) - Maksimal 10MB
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-download mr-1"></i>
+                            Download Template
+                        </label>
+                        <div class="text-center">
+                            <a href="{% url 'admin_panel:references_get_template' 'lorong' %}?format=excel" class="btn btn-outline-success">
+                                <i class="fas fa-download mr-1"></i>
+                                Download Template Excel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitImport()">
+                    <i class="fas fa-upload mr-1"></i>
+                    Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulkActionModal" tabindex="-1" role="dialog" aria-labelledby="bulkActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkActionModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Aksi Bulk
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-warning mr-2"></i>
+                    <strong>Peringatan:</strong> Aksi ini akan diterapkan pada <span id="bulkActionCount">0</span> item yang dipilih.
+                </div>
+                <p id="bulkActionMessage">Apakah Anda yakin ingin melanjutkan?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="confirmBulkAction">
+                    <i class="fas fa-check mr-1"></i>
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set current model name for import/export
+window.currentModelName = 'lorong';
+
+// Import functionality
+function submitImport() {
+    const form = document.querySelector('#importModal form');
+    const formData = new FormData(form);
+    
+    fetch('{% url "admin_panel:references_quick_import" "lorong" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Import berhasil! ' + data.message);
+            $('#importModal').modal('hide');
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+        alert('Error saat mengimport data');
+    });
+}
+
+// Bulk actions functionality
+let selectedItems = [];
+let currentBulkAction = '';
+
+// Select all checkbox functionality
+$('#selectAll').change(function() {
+    const isChecked = $(this).is(':checked');
+    $('.item-checkbox').prop('checked', isChecked);
+    updateBulkActions();
+});
+
+// Individual checkbox functionality
+$(document).on('change', '.item-checkbox', function() {
+    updateBulkActions();
+});
+
+// Update bulk actions bar
+function updateBulkActions() {
+    selectedItems = $('.item-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    const count = selectedItems.length;
+    $('#selectedCount').text(count);
+    $('#bulkActionCount').text(count);
+    
+    if (count > 0) {
+        $('#bulkActionsBar').show();
+        $('#bulkDeleteBtn, #bulkDeactivateBtn, #bulkActivateBtn').prop('disabled', false);
+    } else {
+        $('#bulkActionsBar').hide();
+        $('#bulkDeleteBtn, #bulkDeactivateBtn, #bulkActivateBtn').prop('disabled', true);
+    }
+    
+    // Update select all checkbox
+    const totalItems = $('.item-checkbox').length;
+    const checkedItems = $('.item-checkbox:checked').length;
+    
+    if (checkedItems === 0) {
+        $('#selectAll').prop('indeterminate', false).prop('checked', false);
+    } else if (checkedItems === totalItems) {
+        $('#selectAll').prop('indeterminate', false).prop('checked', true);
+    } else {
+        $('#selectAll').prop('indeterminate', true);
+    }
+}
+
+// Bulk delete
+$('#bulkDeleteBtn').click(function() {
+    currentBulkAction = 'delete';
+    $('#bulkActionModalLabel').html('<i class="fas fa-trash mr-2"></i>Konfirmasi Hapus Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin menghapus item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Bulk deactivate
+$('#bulkDeactivateBtn').click(function() {
+    currentBulkAction = 'deactivate';
+    $('#bulkActionModalLabel').html('<i class="fas fa-eye-slash mr-2"></i>Konfirmasi Nonaktifkan Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin menonaktifkan item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Bulk activate
+$('#bulkActivateBtn').click(function() {
+    currentBulkAction = 'activate';
+    $('#bulkActionModalLabel').html('<i class="fas fa-eye mr-2"></i>Konfirmasi Aktifkan Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin mengaktifkan item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Clear selection
+$('#clearSelectionBtn').click(function() {
+    $('.item-checkbox').prop('checked', false);
+    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+    updateBulkActions();
+});
+
+// Confirm bulk action
+$('#confirmBulkAction').click(function() {
+    if (selectedItems.length === 0) {
+        alert('Tidak ada item yang dipilih.');
+        return;
+    }
+    
+    $.ajax({
+        url: '{% url "admin_panel:references_bulk_action" %}',
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val(),
+            'model': 'lorong',
+            'action': currentBulkAction,
+            'items': selectedItems.join(',')
+        },
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                $('#bulkActionModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function() {
+            alert('Terjadi kesalahan saat memproses aksi bulk.');
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+{% endblock %}

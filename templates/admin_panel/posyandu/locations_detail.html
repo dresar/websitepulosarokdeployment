@@ -1,0 +1,701 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Lokasi Posyandu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .location-info-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .location-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .info-item {
+        margin-bottom: 15px;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .info-value {
+        color: #6c757d;
+        line-height: 1.5;
+    }
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+    .action-buttons {
+        position: sticky;
+        top: 20px;
+        z-index: 1000;
+    }
+    .amenities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .amenity-item {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        border-left: 4px solid #1976d2;
+    }
+    .amenity-icon {
+        font-size: 2rem;
+        color: #1976d2;
+        margin-bottom: 10px;
+    }
+    .amenity-name {
+        font-weight: 600;
+        color: #1976d2;
+    }
+    .map-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .map-placeholder {
+        width: 100%;
+        height: 300px;
+        background: #e9ecef;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    .contact-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .contact-item i {
+        width: 20px;
+        color: #6c757d;
+        margin-right: 10px;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .stat-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    .schedule-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .schedule-timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    .schedule-item {
+        position: relative;
+        margin-bottom: 20px;
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .schedule-item::before {
+        content: '';
+        position: absolute;
+        left: -22px;
+        top: 15px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 3px #dee2e6;
+    }
+    .schedule-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    .schedule-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .schedule-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #dee2e6;
+    }
+    @media print {
+        .action-buttons {
+            display: none !important;
+        }
+        .detail-header {
+            background: #f8f9fa !important;
+            color: #000 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Detail Header -->
+    <div class="detail-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:locations' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-map-marker-alt mr-3"></i>
+                        Detail Lokasi Posyandu
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Informasi lengkap lokasi posyandu</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <span class="badge status-badge bg-light text-dark" id="statusBadge">
+                    <!-- Status will be loaded here -->
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Location Image -->
+            <div class="location-info-card">
+                <img src="" alt="Location Image" class="location-image" id="locationImage">
+            </div>
+
+            <!-- Location Information -->
+            <div class="location-info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Informasi Lokasi
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nama Lokasi</div>
+                            <div class="info-value" id="locationName">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Kode Lokasi</div>
+                            <div class="info-value" id="locationCode">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Kapasitas</div>
+                            <div class="info-value" id="locationCapacity">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value" id="locationStatus">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Tanggal Dibuat</div>
+                            <div class="info-value" id="locationCreated">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Terakhir Diupdate</div>
+                            <div class="info-value" id="locationUpdated">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Alamat</div>
+                    <div class="info-value" id="locationAddress">-</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Deskripsi</div>
+                    <div class="info-value" id="locationDescription">-</div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="location-info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-phone mr-2"></i>
+                    Informasi Kontak
+                </h5>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span id="locationPhone">-</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span id="locationEmail">-</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span id="locationFullAddress">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="location-info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-list mr-2"></i>
+                    Fasilitas
+                </h5>
+                <div class="amenities-grid" id="amenitiesGrid">
+                    <!-- Amenities will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="location-info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-map mr-2"></i>
+                    Peta Lokasi
+                </h5>
+                <div class="map-container">
+                    <div class="map-placeholder" id="mapPlaceholder">
+                        <div>
+                            <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+                            <p>Peta akan ditampilkan di sini</p>
+                            <small>Koordinat: <span id="coordinates">-</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Statistics -->
+            <div class="location-info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    Statistik Lokasi
+                </h5>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalSchedules">0</div>
+                        <div class="stat-label">Jadwal Aktif</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalKaders">0</div>
+                        <div class="stat-label">Kader</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalVisits">0</div>
+                        <div class="stat-label">Kunjungan</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalPatients">0</div>
+                        <div class="stat-label">Pasien</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Schedules -->
+            <div class="location-info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-calendar mr-2"></i>
+                    Jadwal Terbaru
+                </h5>
+                <div class="schedule-timeline" id="recentSchedules">
+                    <!-- Schedules will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="action-buttons">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tools mr-2"></i>
+                            Aksi
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'admin_panel:posyandu:location_update' 0 %}" class="btn btn-primary" id="editLocationBtn">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit Lokasi
+                            </a>
+                            <button class="btn btn-info" onclick="showMap()">
+                                <i class="fas fa-map mr-2"></i>
+                                Lihat Peta
+                            </button>
+                            <a href="{% url 'admin_panel:posyandu:schedule_create' %}" class="btn btn-warning">
+                                <i class="fas fa-plus mr-2"></i>
+                                Tambah Jadwal
+                            </a>
+                            <hr>
+                            <a href="{% url 'admin_panel:posyandu:location_delete' 0 %}" class="btn btn-outline-danger" id="deleteLocationBtn">
+                                <i class="fas fa-trash mr-2"></i>
+                                Hapus Lokasi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-pie mr-2"></i>
+                            Statistik Cepat
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h4 text-primary mb-1" id="quickSchedules">0</div>
+                                <small class="text-muted">Jadwal Minggu Ini</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="h4 text-success mb-1" id="quickVisits">0</div>
+                                <small class="text-muted">Kunjungan Hari Ini</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Locations -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-link mr-2"></i>
+                            Lokasi Terkait
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                                <span>Posyandu Terdekat</span>
+                                <span class="badge badge-primary float-right">2</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-calendar mr-2 text-success"></i>
+                                <span>Jadwal Bersama</span>
+                                <span class="badge badge-success float-right">5</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-users mr-2 text-info"></i>
+                                <span>Kader Bersama</span>
+                                <span class="badge badge-info float-right">3</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Get location ID from URL path
+    const pathParts = window.location.pathname.split('/');
+    const locationId = pathParts[pathParts.length - 2]; // Get second to last part of URL
+    
+    if (locationId) {
+        loadLocationDetail(locationId);
+        loadLocationStats(locationId);
+        loadRecentSchedules(locationId);
+    } else {
+        showAlert('ID lokasi tidak ditemukan', 'danger');
+    }
+
+    // Load location detail
+    function loadLocationDetail(id) {
+        $.ajax({
+            url: `{% url "admin_panel:posyandu:api_location_update" 0 %}`.replace('0', id),
+            method: 'GET',
+            success: function(response) {
+                displayLocationDetail(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading location detail:', error);
+                showAlert('Error loading location detail', 'danger');
+            }
+        });
+    }
+
+    // Display location detail
+    function displayLocationDetail(location) {
+        // Basic information
+        $('#locationName').text(location.name || '-');
+        $('#locationCode').text(location.code || '-');
+        $('#locationCapacity').text(location.capacity ? location.capacity + ' orang' : '-');
+        $('#locationStatus').text(getStatusLabel(location.status));
+        $('#locationCreated').text(location.created_at || '-');
+        $('#locationUpdated').text(location.updated_at || '-');
+        $('#locationAddress').text(location.address || '-');
+        $('#locationDescription').text(location.description || '-');
+
+        // Image
+        if (location.image) {
+            $('#locationImage').attr('src', location.image);
+        } else {
+            $('#locationImage').attr('src', '/static/images/defaults/placeholder.svg');
+        }
+
+        // Status badge
+        $('#statusBadge').text(getStatusLabel(location.status));
+        $('#statusBadge').removeClass().addClass('badge status-badge ' + getStatusClass(location.status));
+
+        // Contact information
+        $('#locationPhone').text(location.phone || '-');
+        $('#locationEmail').text(location.email || '-');
+        $('#locationFullAddress').text(location.address || '-');
+
+        // Coordinates
+        if (location.latitude && location.longitude) {
+            $('#coordinates').text(`${location.latitude}, ${location.longitude}`);
+        } else {
+            $('#coordinates').text('Koordinat tidak tersedia');
+        }
+
+        // Amenities
+        displayAmenities(location.amenities);
+
+        // Populate edit form
+        $('#editLocationId').val(location.id);
+        $('#editLocationName').val(location.name);
+        $('#editLocationCode').val(location.code);
+        $('#editLocationAddress').val(location.address);
+        $('#editLocationDescription').val(location.description);
+        $('#editLocationCapacity').val(location.capacity);
+        $('#editLocationStatus').val(location.status);
+        $('#editLocationPhone').val(location.phone);
+        $('#editLocationEmail').val(location.email);
+        $('#editLocationLatitude').val(location.latitude);
+        $('#editLocationLongitude').val(location.longitude);
+        $('#editLocationAmenities').val(location.amenities);
+        $('#editLocationNotes').val(location.notes);
+    }
+
+    // Display amenities
+    function displayAmenities(amenities) {
+        const container = $('#amenitiesGrid');
+        
+        if (!amenities) {
+            container.html('<div class="col-12"><div class="empty-state"><i class="fas fa-list"></i><p>Tidak ada fasilitas</p></div></div>');
+            return;
+        }
+
+        const amenitiesList = amenities.split(',').map(a => a.trim());
+        let html = '';
+        
+        amenitiesList.forEach(function(amenity) {
+            html += `
+                <div class="amenity-item">
+                    <div class="amenity-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="amenity-name">${amenity}</div>
+                </div>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Load location stats
+    function loadLocationStats(id) {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_statistics" %}',
+            method: 'GET',
+            data: { location_id: id },
+            success: function(response) {
+                $('#totalSchedules').text(response.schedules || 0);
+                $('#totalKaders').text(response.kaders || 0);
+                $('#totalVisits').text(response.visits || 0);
+                $('#totalPatients').text(response.patients || 0);
+                $('#quickSchedules').text(response.weekly_schedules || 0);
+                $('#quickVisits').text(response.daily_visits || 0);
+            }
+        });
+    }
+
+    // Load recent schedules
+    function loadRecentSchedules(id) {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_schedule_list" %}',
+            method: 'GET',
+            data: { location_id: id, limit: 5 },
+            success: function(response) {
+                displayRecentSchedules(response.results);
+            }
+        });
+    }
+
+    // Display recent schedules
+    function displayRecentSchedules(schedules) {
+        const container = $('#recentSchedules');
+        
+        if (schedules.length === 0) {
+            container.html(`
+                <div class="empty-state">
+                    <i class="fas fa-calendar"></i>
+                    <p>Tidak ada jadwal</p>
+                </div>
+            `);
+            return;
+        }
+
+        let html = '';
+        schedules.forEach(function(schedule) {
+            html += `
+                <div class="schedule-item">
+                    <div class="schedule-time">${schedule.schedule_date} - ${schedule.start_time}</div>
+                    <div class="schedule-title">${schedule.title}</div>
+                    <div class="schedule-description">${schedule.description || '-'}</div>
+                </div>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Update button URLs with location ID
+    $('#editLocationBtn').attr('href', `{% url "admin_panel:posyandu:location_update" 0 %}`.replace('0', locationId));
+    $('#deleteLocationBtn').attr('href', `{% url "admin_panel:posyandu:location_delete" 0 %}`.replace('0', locationId));
+
+    // Show map
+    window.showMap = function() {
+        const lat = $('#coordinates').text().split(',')[0]?.trim();
+        const lng = $('#coordinates').text().split(',')[1]?.trim();
+        
+        if (lat && lng && lat !== 'Koordinat tidak tersedia' && lng !== 'Koordinat tidak tersedia') {
+            const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+            window.open(mapsUrl, '_blank');
+        } else {
+            showAlert('Koordinat tidak tersedia untuk menampilkan peta', 'warning');
+        }
+    };
+
+    // Helper functions
+    function getStatusLabel(status) {
+        const labels = {
+            'active': 'Aktif',
+            'inactive': 'Tidak Aktif',
+            'maintenance': 'Maintenance'
+        };
+        return labels[status] || status;
+    }
+
+    function getStatusClass(status) {
+        const classes = {
+            'active': 'bg-success',
+            'inactive': 'bg-danger',
+            'maintenance': 'bg-warning'
+        };
+        return classes[status] || 'bg-secondary';
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 2 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

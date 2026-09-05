@@ -1,0 +1,556 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{% if document %}Edit Dokumen{% else %}Tambah Dokumen{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fix white text issues in document form */
+.form-control {
+    color: #212529 !important;
+    background-color: #fff !important;
+}
+
+.form-label {
+    color: #495057 !important;
+    font-weight: 600;
+}
+
+.form-text {
+    color: #6c757d !important;
+}
+
+.card-body {
+    color: #212529 !important;
+}
+
+.card-body * {
+    color: inherit !important;
+}
+
+.card-body h4, .card-body h5, .card-body h6 {
+    color: #212529 !important;
+}
+
+.card-body p {
+    color: #495057 !important;
+}
+
+.card-body small {
+    color: #6c757d !important;
+}
+
+.card-body strong {
+    color: #212529 !important;
+}
+
+/* Fix badge colors */
+.badge {
+    color: white !important;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #17a2b8 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.badge-primary {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+.badge-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+/* Fix button text */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Override any inherited white text */
+.card * {
+    color: inherit !important;
+}
+
+/* Ensure all text elements are dark */
+.card-body div {
+    color: #212529 !important;
+}
+
+.card-body span {
+    color: #212529 !important;
+}
+
+/* Fix any white text from parent styles */
+.card-body {
+    color: #212529 !important;
+}
+
+/* Ensure font weight is normal for readability */
+.card-body {
+    font-weight: normal !important;
+}
+
+/* Fix search suggestions */
+.list-group-item {
+    color: #212529 !important;
+}
+
+.list-group-item h6 {
+    color: #212529 !important;
+}
+
+.list-group-item p {
+    color: #6c757d !important;
+}
+
+.list-group-item small {
+    color: #6c757d !important;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="fas fa-edit text-primary mr-2"></i>
+            {% if document %}Edit Dokumen{% else %}Tambah Dokumen Baru{% endif %}
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'admin_panel:documents_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="documentForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Basic Information -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Informasi Dasar
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                                        Judul Dokumen <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger small">{{ form.title.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.document_number.id_for_label }}" class="form-label">
+                                        Nomor Dokumen
+                                    </label>
+                                    {{ form.document_number }}
+                                    {% if form.document_number.errors %}
+                                        <div class="text-danger small">{{ form.document_number.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.category.id_for_label }}" class="form-label">
+                                        Kategori <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.category }}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger small">{{ form.category.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.document_category.id_for_label }}" class="form-label">
+                                        Kategori Dokumen
+                                    </label>
+                                    {{ form.document_category }}
+                                    {% if form.document_category.errors %}
+                                        <div class="text-danger small">{{ form.document_category.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label">
+                                        Status
+                                    </label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <div class="text-danger small">{{ form.status.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                                        Prioritas
+                                    </label>
+                                    {{ form.priority }}
+                                    {% if form.priority.errors %}
+                                        <div class="text-danger small">{{ form.priority.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-text mr-2"></i>
+                            Ringkasan Dokumen
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label for="{{ form.summary.id_for_label }}" class="form-label">
+                                Ringkasan
+                            </label>
+                            {{ form.summary }}
+                            {% if form.summary.errors %}
+                                <div class="text-danger small">{{ form.summary.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- People Involved -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users mr-2"></i>
+                            Orang Terkait
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="applicant_search" class="form-label">
+                                        Pemohon (Opsional)
+                                    </label>
+                                    <input type="text" class="form-control" id="applicant_search" 
+                                           placeholder="Cari penduduk..." autocomplete="off">
+                                    <div id="applicant_suggestions" class="list-group" style="display: none; position: absolute; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto;"></div>
+                                    {{ form.applicant }}
+                                    {{ form.applicant_id }}
+                                    {% if form.applicant.errors %}
+                                        <div class="text-danger small">{{ form.applicant.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Ketik nama atau NIK untuk mencari penduduk</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.recipient.id_for_label }}" class="form-label">
+                                        Penerima
+                                    </label>
+                                    {{ form.recipient }}
+                                    {% if form.recipient.errors %}
+                                        <div class="text-danger small">{{ form.recipient.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="{{ form.sender.id_for_label }}" class="form-label">
+                                Pengirim
+                            </label>
+                            {{ form.sender }}
+                            {% if form.sender.errors %}
+                                <div class="text-danger small">{{ form.sender.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info mr-2"></i>
+                            Informasi Tambahan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.document_date.id_for_label }}" class="form-label">
+                                        Tanggal Dokumen
+                                    </label>
+                                    {{ form.document_date }}
+                                    {% if form.document_date.errors %}
+                                        <div class="text-danger small">{{ form.document_date.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.file_attachment.id_for_label }}" class="form-label">
+                                        Lampiran
+                                    </label>
+                                    {{ form.file_attachment }}
+                                    {% if form.file_attachment.errors %}
+                                        <div class="text-danger small">{{ form.file_attachment.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="{{ form.tags.id_for_label }}" class="form-label">
+                                Tags
+                            </label>
+                            {{ form.tags }}
+                            {% if form.tags.errors %}
+                                <div class="text-danger small">{{ form.tags.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                Catatan
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="text-danger small">{{ form.notes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Actions -->
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cogs mr-2"></i> Aksi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>
+                                {% if document %}Update Dokumen{% else %}Simpan Dokumen{% endif %}
+                            </button>
+                            <a href="{% url 'admin_panel:documents_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times mr-2"></i> Batal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help -->
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-question-circle mr-2"></i> Bantuan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Kategori Dokumen:</h6>
+                        <ul class="list-unstyled small">
+                            <li><span class="badge badge-info">Surat Warga</span> - Surat dari warga</li>
+                            <li><span class="badge badge-success">Surat Masuk</span> - Surat masuk</li>
+                            <li><span class="badge badge-primary">Surat Keluar</span> - Surat keluar</li>
+                            <li><span class="badge badge-warning">Surat Internal</span> - Surat internal</li>
+                        </ul>
+                        
+                        <h6>Status Dokumen:</h6>
+                        <ul class="list-unstyled small">
+                            <li><span class="badge badge-secondary">Draft</span> - Belum selesai</li>
+                            <li><span class="badge badge-warning">Diajukan</span> - Menunggu persetujuan</li>
+                            <li><span class="badge badge-success">Disetujui</span> - Sudah disetujui</li>
+                            <li><span class="badge badge-danger">Ditolak</span> - Ditolak</li>
+                            <li><span class="badge badge-primary">Selesai</span> - Selesai</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('documentForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const titleField = document.getElementById('{{ form.title.id_for_label }}');
+            
+            if (titleField && !titleField.value.trim()) {
+                e.preventDefault();
+                alert('Judul dokumen harus diisi!');
+                titleField.focus();
+                return false;
+            }
+        });
+    }
+
+    // Auto-generate document number based on category
+    const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+    const documentNumberField = document.getElementById('{{ form.document_number.id_for_label }}');
+    
+    if (categorySelect && documentNumberField) {
+        categorySelect.addEventListener('change', function() {
+            if (!documentNumberField.value) {
+                const category = this.value;
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                
+                let prefix = '';
+                switch(category) {
+                    case 'surat_warga':
+                        prefix = 'SW';
+                        break;
+                    case 'surat_masuk':
+                        prefix = 'SM';
+                        break;
+                    case 'surat_keluar':
+                        prefix = 'SK';
+                        break;
+                    case 'surat_internal':
+                        prefix = 'SI';
+                        break;
+                }
+                
+                if (prefix) {
+                    documentNumberField.value = `${prefix}/${year}${month}${day}/001`;
+                }
+            }
+        });
+    }
+
+    // Applicant search functionality
+    const applicantSearch = document.getElementById('applicant_search');
+    const applicantSuggestions = document.getElementById('applicant_suggestions');
+    const applicantIdField = document.getElementById('applicant_id');
+    let searchTimeout;
+
+    // Populate search field if editing existing document
+    {% if document and document.applicant %}
+    if (applicantSearch && applicantIdField) {
+        applicantSearch.value = '{{ document.applicant.name }}';
+        applicantIdField.value = '{{ document.applicant.id }}';
+    }
+    {% endif %}
+
+    if (applicantSearch && applicantSuggestions) {
+        applicantSearch.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                applicantSuggestions.style.display = 'none';
+                return;
+            }
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetch(`{% url "admin_panel:api_penduduk_search" %}?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.penduduk.length > 0) {
+                            applicantSuggestions.innerHTML = '';
+                            data.penduduk.forEach(penduduk => {
+                                const item = document.createElement('div');
+                                item.className = 'list-group-item list-group-item-action';
+                                item.innerHTML = `
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">${penduduk.name}</h6>
+                                        <small>${penduduk.nik}</small>
+                                    </div>
+                                    <p class="mb-1">${penduduk.alamat || ''}</p>
+                                `;
+                                item.addEventListener('click', function() {
+                                    applicantSearch.value = penduduk.name;
+                                    applicantIdField.value = penduduk.id;
+                                    applicantSuggestions.style.display = 'none';
+                                });
+                                applicantSuggestions.appendChild(item);
+                            });
+                            applicantSuggestions.style.display = 'block';
+                        } else {
+                            applicantSuggestions.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error searching penduduk:', error);
+                        applicantSuggestions.style.display = 'none';
+                    });
+            }, 300);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!applicantSearch.contains(e.target) && !applicantSuggestions.contains(e.target)) {
+                applicantSuggestions.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

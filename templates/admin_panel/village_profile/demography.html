@@ -1,0 +1,608 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Demography Form Styles - Bootstrap 4 Compatible */
+.demography-form-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.demography-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #6f42c1;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.demography-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-color: #6f42c1;
+}
+
+.demography-form-card .card-header {
+    background: #6f42c1;
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.demography-form-card .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.demography-form-card .card-body {
+    padding: 1.5rem;
+    background: transparent;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    position: relative;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #6f42c1;
+    border-radius: 0 2px 2px 0;
+}
+
+.form-section h6 {
+    color: #6f42c1;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    position: relative;
+}
+
+.form-section h6::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: #6f42c1;
+    border-radius: 1px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+.form-control {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    color: #495057;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-control:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+    background: #ffffff;
+    color: #495057;
+    outline: none;
+}
+
+.form-control:hover {
+    border-color: #adb5bd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+}
+
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .demography-form-card {
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+    }
+    
+    .demography-form-card .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .demography-form-card .card-body {
+        padding: 1rem;
+    }
+    
+    .form-section {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-section h6 {
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+    
+    .form-control {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .demography-form-card .card-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .demography-form-card .card-body {
+        padding: 0.75rem;
+    }
+    
+    .form-section {
+        padding: 0.5rem;
+    }
+    
+    .form-section h6 {
+        font-size: 0.8rem;
+    }
+    
+    .form-control {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Enhanced Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <div class="mb-3 mb-md-0">
+        <h4 class="text-primary mb-2" style="font-weight: 600; font-size: 1.5rem;">
+            <i class="fas fa-chart-pie mr-2"></i>Data Demografi Desa
+        </h4>
+        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+            Kelola informasi demografi dan statistik penduduk desa
+        </p>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <button class="btn btn-outline-primary btn-sm mb-2 mb-sm-0" onclick="previewDemography()">
+            <i class="fas fa-eye mr-1"></i>Preview
+        </button>
+        <button class="btn btn-success btn-sm" onclick="saveDemographyData()">
+            <i class="fas fa-save mr-1"></i>Simpan Data
+        </button>
+    </div>
+</div>
+
+<!-- Demography Information Form -->
+<div class="demography-form-card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-chart-pie mr-2"></i>Data Demografi Desa
+        </h5>
+    </div>
+    <div class="card-body">
+        <form id="demographyForm">
+            <input type="hidden" id="demographyVillageId" value="{{ village_profile.id|default:'' }}">
+            
+            <!-- Basic Population Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-users mr-2"></i>Data Populasi Dasar</h6>
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="totalPopulation" class="form-label">Total Penduduk <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="totalPopulation" 
+                                   value="{{ demography.total_population|default:'5000' }}" required>
+                            <small class="form-text text-muted">Jumlah total penduduk</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="malePopulation" class="form-label">Laki-laki <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="malePopulation" 
+                                   value="{{ demography.male_population|default:'2500' }}" required>
+                            <small class="form-text text-muted">Jumlah penduduk laki-laki</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="femalePopulation" class="form-label">Perempuan <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="femalePopulation" 
+                                   value="{{ demography.female_population|default:'2500' }}" required>
+                            <small class="form-text text-muted">Jumlah penduduk perempuan</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="totalFamilies" class="form-label">Jumlah KK</label>
+                            <input type="number" class="form-control" id="totalFamilies" 
+                                   value="{{ demography.total_families|default:'1250' }}">
+                            <small class="form-text text-muted">Jumlah kepala keluarga</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Density & Growth Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-chart-line mr-2"></i>Kepadatan & Pertumbuhan</h6>
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="populationDensity" class="form-label">Kepadatan (jiwa/km²)</label>
+                            <input type="number" class="form-control" id="populationDensity" step="0.01" 
+                                   value="{{ demography.population_density|default:'476.19' }}">
+                            <small class="form-text text-muted">Kepadatan penduduk per km²</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="growthRate" class="form-label">Tingkat Pertumbuhan (%)</label>
+                            <input type="number" class="form-control" id="growthRate" step="0.01" 
+                                   value="{{ demography.growth_rate|default:'1.5' }}">
+                            <small class="form-text text-muted">Tingkat pertumbuhan penduduk tahunan</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-12">
+                        <div class="form-group">
+                            <label for="year" class="form-label">Tahun Data <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="year" 
+                                   value="{{ demography.year|default:'2024' }}" required>
+                            <small class="form-text text-muted">Tahun data demografi</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Age Groups Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-child mr-2"></i>Kelompok Usia</h6>
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="age014" class="form-label">Usia 0-14 tahun</label>
+                            <input type="number" class="form-control" id="age014" 
+                                   value="{{ demography.age_0_14|default:'1500' }}">
+                            <small class="form-text text-muted">Anak-anak dan remaja</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="form-group">
+                            <label for="age1564" class="form-label">Usia 15-64 tahun</label>
+                            <input type="number" class="form-control" id="age1564" 
+                                   value="{{ demography.age_15_64|default:'3000' }}">
+                            <small class="form-text text-muted">Usia produktif</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-12">
+                        <div class="form-group">
+                            <label for="age65plus" class="form-label">Usia 65+ tahun</label>
+                            <input type="number" class="form-control" id="age65plus" 
+                                   value="{{ demography.age_65_plus|default:'500' }}">
+                            <small class="form-text text-muted">Lansia</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Education Levels Section -->
+            <div class="form-section">
+                <h6><i class="fas fa-graduation-cap mr-2"></i>Tingkat Pendidikan</h6>
+                <div class="row">
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="form-group">
+                            <label for="educationNone" class="form-label">Tidak Sekolah</label>
+                            <input type="number" class="form-control" id="educationNone" 
+                                   value="{{ demography.education_none|default:'200' }}">
+                            <small class="form-text text-muted">Belum sekolah</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="form-group">
+                            <label for="educationElementary" class="form-label">SD</label>
+                            <input type="number" class="form-control" id="educationElementary" 
+                                   value="{{ demography.education_elementary|default:'2000' }}">
+                            <small class="form-text text-muted">Sekolah Dasar</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="form-group">
+                            <label for="educationJunior" class="form-label">SMP</label>
+                            <input type="number" class="form-control" id="educationJunior" 
+                                   value="{{ demography.education_junior|default:'1500' }}">
+                            <small class="form-text text-muted">Sekolah Menengah Pertama</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <div class="form-group">
+                            <label for="educationSenior" class="form-label">SMA</label>
+                            <input type="number" class="form-control" id="educationSenior" 
+                                   value="{{ demography.education_senior|default:'1000' }}">
+                            <small class="form-text text-muted">Sekolah Menengah Atas</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6">
+                        <div class="form-group">
+                            <label for="educationHigher" class="form-label">Perguruan Tinggi</label>
+                            <input type="number" class="form-control" id="educationHigher" 
+                                   value="{{ demography.education_higher|default:'300' }}">
+                            <small class="form-text text-muted">Universitas/Akademi</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6">
+                        <div class="form-group">
+                            <label for="employed" class="form-label">Bekerja</label>
+                            <input type="number" class="form-control" id="employed" 
+                                   value="{{ demography.employed|default:'2800' }}">
+                            <small class="form-text text-muted">Status bekerja</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <a href="{% url "village_profile:admin_dashboard" %}" class="btn btn-secondary btn-sm mb-3 mb-md-0">
+                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Dashboard
+            </a>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="resetDemographyForm()">
+                    <i class="fas fa-undo mr-1"></i>Reset Form
+                </button>
+                <button type="button" class="btn btn-success btn-sm" onclick="saveDemographyData()">
+                    <i class="fas fa-save mr-1"></i>Simpan Data Demografi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-calculate population density
+    $('#totalPopulation, #area').on('input', function() {
+        calculatePopulationDensity();
+    });
+    
+    // Auto-calculate total population
+    $('#malePopulation, #femalePopulation').on('input', function() {
+        calculateTotalPopulation();
+    });
+});
+
+function calculatePopulationDensity() {
+    const population = parseInt($('#totalPopulation').val()) || 0;
+    const area = parseFloat($('#area').val()) || 1;
+    const density = population / area;
+    $('#populationDensity').val(density.toFixed(2));
+}
+
+function calculateTotalPopulation() {
+    const male = parseInt($('#malePopulation').val()) || 0;
+    const female = parseInt($('#femalePopulation').val()) || 0;
+    const total = male + female;
+    $('#totalPopulation').val(total);
+    calculatePopulationDensity();
+}
+
+function validateDemographyData() {
+    const male = parseInt($('#malePopulation').val()) || 0;
+    const female = parseInt($('#femalePopulation').val()) || 0;
+    const total = parseInt($('#totalPopulation').val()) || 0;
+    
+    if (male + female !== total) {
+        showToast('error', 'Jumlah laki-laki + perempuan harus sama dengan total populasi');
+        return false;
+    }
+    
+    const year = parseInt($('#year').val());
+    if (year < 1900 || year > 2100) {
+        showToast('error', 'Tahun harus antara 1900 dan 2100');
+        return false;
+    }
+    
+    return true;
+}
+
+function saveDemographyData() {
+    if (!validateDemographyData()) {
+        return;
+    }
+    
+    const submitBtn = $('button[onclick="saveDemographyData()"]');
+    const originalText = submitBtn.html();
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+    
+    const formData = new FormData();
+    formData.append('village_id', $('#demographyVillageId').val());
+    formData.append('total_population', $('#totalPopulation').val());
+    formData.append('male_population', $('#malePopulation').val());
+    formData.append('female_population', $('#femalePopulation').val());
+    formData.append('total_families', $('#totalFamilies').val());
+    formData.append('population_density', $('#populationDensity').val());
+    formData.append('growth_rate', $('#growthRate').val());
+    formData.append('age_0_14', $('#age014').val());
+    formData.append('age_15_64', $('#age1564').val());
+    formData.append('age_65_plus', $('#age65plus').val());
+    formData.append('education_none', $('#educationNone').val());
+    formData.append('education_elementary', $('#educationElementary').val());
+    formData.append('education_junior', $('#educationJunior').val());
+    formData.append('education_senior', $('#educationSenior').val());
+    formData.append('education_higher', $('#educationHigher').val());
+    formData.append('employed', $('#employed').val());
+    formData.append('year', $('#year').val());
+    formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+    
+    $.ajax({
+        url: '{% url "village_profile:admin_save_demography" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                showToast('success', 'Data demografi berhasil disimpan');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', 'Gagal menyimpan data: ' + response.message);
+            }
+        },
+        error: function() {
+            showToast('error', 'Gagal menyimpan data demografi');
+        },
+        finally: function() {
+            submitBtn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function resetDemographyForm() {
+    if (confirm('Apakah Anda yakin ingin mereset form?')) {
+        location.reload();
+    }
+}
+
+function previewDemography() {
+    window.open('{% url "village_profile:demography" %}', '_blank');
+}
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% csrf_token %}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock extra_js %}

@@ -1,0 +1,523 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Edit Jadwal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .form-section {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-weight: 600;
+    }
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 30px;
+        font-weight: 600;
+    }
+    .preview-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .preview-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .preview-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    .preview-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .preview-item {
+        text-align: left;
+    }
+    .preview-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    .preview-value {
+        font-weight: 600;
+        color: #495057;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .status-upcoming { background: #e3f2fd; color: #1976d2; }
+    .status-ongoing { background: #e8f5e8; color: #2e7d32; }
+    .status-completed { background: #f3e5f5; color: #7b1fa2; }
+    .status-cancelled { background: #ffcdd2; color: #d32f2f; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="form-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-calendar-plus mr-2"></i>
+                    <span id="pageTitle">Jadwal Kegiatan</span>
+                </h2>
+                <p class="mb-0" id="pageSubtitle">Kelola jadwal kegiatan posyandu</p>
+            </div>
+            <div>
+                <a href="{% url 'admin_panel:posyandu:schedules' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Form Section -->
+        <div class="col-lg-8">
+            <div class="form-section">
+                <h5 class="mb-4">
+                    <i class="fas fa-edit mr-2"></i>
+                    Informasi Jadwal
+                </h5>
+                
+                <form id="scheduleForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="scheduleTitle" class="form-label">Judul Kegiatan *</label>
+                                <input type="text" class="form-control" id="scheduleTitle" 
+                                       placeholder="Masukkan judul kegiatan" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="scheduleType" class="form-label">Jenis Kegiatan *</label>
+                                <select class="form-control" id="scheduleType" required>
+                                    <option value="">Pilih Jenis</option>
+                                    <option value="posyandu">Posyandu</option>
+                                    <option value="imunisasi">Imunisasi</option>
+                                    <option value="pemeriksaan">Pemeriksaan</option>
+                                    <option value="konseling">Konseling</option>
+                                    <option value="pelatihan">Pelatihan</option>
+                                    <option value="lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date and Time -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="scheduleDate" class="form-label">Tanggal *</label>
+                                <input type="date" class="form-control" id="scheduleDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="startTime" class="form-label">Waktu Mulai *</label>
+                                <input type="time" class="form-control" id="startTime" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="endTime" class="form-label">Waktu Selesai</label>
+                                <input type="time" class="form-control" id="endTime">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location and Participants -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="scheduleLocation" class="form-label">Lokasi *</label>
+                                <select class="form-control" id="scheduleLocation" required>
+                                    <option value="">Pilih Lokasi</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="maxParticipants" class="form-label">Maksimal Peserta</label>
+                                <input type="number" class="form-control" id="maxParticipants" min="0" 
+                                       value="{% if schedule_data.is_edit %}{{ schedule_data.max_participants|default:"" }}{% endif %}" 
+                                       placeholder="Jumlah maksimal peserta">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organizer and Description -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="scheduleOrganizer" class="form-label">Penanggung Jawab</label>
+                                <input type="text" class="form-control" id="scheduleOrganizer" 
+                                       value="{% if schedule_data.is_edit %}{{ schedule_data.organizer|default:""|escapejs }}{% endif %}" 
+                                       placeholder="Nama penanggung jawab">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="scheduleStatus" class="form-label">Status</label>
+                                <select class="form-control" id="scheduleStatus">
+                                    <option value="upcoming" {% if schedule_data.is_edit and schedule_data.status == "upcoming" %}selected{% endif %}>Mendatang</option>
+                                    <option value="ongoing" {% if schedule_data.is_edit and schedule_data.status == "ongoing" %}selected{% endif %}>Sedang Berlangsung</option>
+                                    <option value="completed" {% if schedule_data.is_edit and schedule_data.status == "completed" %}selected{% endif %}>Selesai</option>
+                                    <option value="cancelled" {% if schedule_data.is_edit and schedule_data.status == "cancelled" %}selected{% endif %}>Dibatalkan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="scheduleDescription" class="form-label">Deskripsi Kegiatan</label>
+                        <textarea class="form-control" id="scheduleDescription" rows="4" 
+                                  placeholder="Deskripsi lengkap tentang kegiatan...">{% if schedule_data.is_edit %}{{ schedule_data.description|default:""|escapejs }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-group">
+                        <label for="scheduleNotes" class="form-label">Catatan</label>
+                        <textarea class="form-control" id="scheduleNotes" rows="3" 
+                                  placeholder="Catatan khusus tentang jadwal...">{% if schedule_data.is_edit %}{{ schedule_data.notes|default:""|escapejs }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-group text-right">
+                        <button type="button" class="btn btn-secondary mr-2" onclick="window.history.back()">
+                            <i class="fas fa-times mr-1"></i>
+                            Batal
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="saveSchedule()">
+                            <i class="fas fa-save mr-1"></i>
+                            <span id="saveButtonText">Simpan Jadwal</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="col-lg-4">
+            <div class="preview-section">
+                <h6 class="mb-3">
+                    <i class="fas fa-eye mr-2"></i>
+                    Preview Data
+                </h6>
+                <div class="preview-card">
+                    <div class="preview-title" id="previewTitle">-</div>
+                    <div class="preview-details">
+                        <div class="preview-item">
+                            <div class="preview-label">Jenis:</div>
+                            <div class="preview-value" id="previewType">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Tanggal:</div>
+                            <div class="preview-value" id="previewDate">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Waktu:</div>
+                            <div class="preview-value" id="previewTime">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Lokasi:</div>
+                            <div class="preview-value" id="previewLocation">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Peserta:</div>
+                            <div class="preview-value" id="previewParticipants">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">Status:</div>
+                            <div class="preview-value" id="previewStatus">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('Schedule form loaded');
+    
+    // Load location options
+    loadLocationOptions();
+    
+    // Load existing data if editing
+    try {
+        const scheduleData = JSON.parse('{{ schedule_data|safe }}');
+        console.log('Schedule data:', scheduleData);
+        if (scheduleData.is_edit) {
+            loadExistingData();
+        }
+        
+        // Update UI based on mode
+        updateUIMode(scheduleData.is_edit);
+    } catch (error) {
+        console.error('Error parsing schedule data:', error);
+        // Set default values
+        updateUIMode(false);
+    }
+    
+    // Real-time preview on input change
+    $('#scheduleTitle, #scheduleType, #scheduleDate, #startTime, #endTime, #scheduleLocation, #maxParticipants, #scheduleOrganizer, #scheduleStatus, #scheduleDescription, #scheduleNotes').on('input change', function() {
+        updatePreview();
+    });
+    
+    // Initialize preview
+    updatePreview();
+});
+
+// Load location options
+function loadLocationOptions() {
+    $.ajax({
+        url: '{% url "admin_panel:posyandu:api_locations" %}',
+        method: 'GET',
+        success: function(response) {
+            console.log('Locations API response:', response);
+            let options = '<option value="">Pilih Lokasi</option>';
+            if (response.results && response.results.length > 0) {
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+            } else {
+                options += '<option value="" disabled>Belum ada lokasi posyandu</option>';
+            }
+            $('#scheduleLocation').html(options);
+            
+            // Set selected location if editing
+            if (typeof scheduleData !== 'undefined' && scheduleData.is_edit) {
+                $('#scheduleLocation').val(scheduleData.location_id || '');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading locations:', error);
+            console.error('Response:', xhr.responseText);
+            $('#scheduleLocation').html('<option value="" disabled>Error loading locations</option>');
+        }
+    });
+}
+
+// Load existing data for editing
+function loadExistingData() {
+    if (typeof scheduleData === 'undefined') {
+        console.error('scheduleData is not defined');
+        return;
+    }
+    
+    // Fill form fields
+    $('#scheduleTitle').val(scheduleData.title || '');
+    $('#scheduleType').val(scheduleData.activity_type || '');
+    $('#scheduleDate').val(scheduleData.schedule_date || '');
+    $('#startTime').val(scheduleData.start_time || '');
+    $('#endTime').val(scheduleData.end_time || '');
+    $('#maxParticipants').val(scheduleData.max_participants || '');
+    $('#scheduleOrganizer').val(scheduleData.organizer || '');
+    $('#scheduleStatus').val(scheduleData.status || 'upcoming');
+    $('#scheduleDescription').val(scheduleData.description || '');
+    $('#scheduleNotes').val(scheduleData.notes || '');
+    
+    // Update preview
+    updatePreview();
+}
+
+// Update UI based on edit mode
+function updateUIMode(isEdit) {
+    if (isEdit) {
+        $('#pageTitle').text('Edit Jadwal Kegiatan');
+        $('#pageSubtitle').text('Perbarui informasi jadwal kegiatan');
+        $('#saveButtonText').text('Update Jadwal');
+    } else {
+        $('#pageTitle').text('Tambah Jadwal Kegiatan');
+        $('#pageSubtitle').text('Buat jadwal kegiatan posyandu baru');
+        $('#saveButtonText').text('Simpan Jadwal');
+    }
+}
+
+// Update preview
+function updatePreview() {
+    const title = $('#scheduleTitle').val() || '-';
+    const type = $('#scheduleType option:selected').text() || '-';
+    const date = $('#scheduleDate').val() || '-';
+    const startTime = $('#startTime').val() || '-';
+    const endTime = $('#endTime').val() || '-';
+    const location = $('#scheduleLocation option:selected').text() || '-';
+    const participants = $('#maxParticipants').val() || '-';
+    const status = $('#scheduleStatus option:selected').text() || '-';
+    
+    $('#previewTitle').text(title);
+    $('#previewType').text(type);
+    $('#previewDate').text(date);
+    $('#previewTime').text(startTime + (endTime !== '-' ? ' - ' + endTime : ''));
+    $('#previewLocation').text(location);
+    $('#previewParticipants').text(participants + ' orang');
+    $('#previewStatus').text(status);
+}
+
+// Save schedule
+function saveSchedule() {
+    if (!validateForm()) {
+        return;
+    }
+    
+    const formData = {
+        title: $('#scheduleTitle').val(),
+        activity_type: $('#scheduleType').val(),
+        schedule_date: $('#scheduleDate').val(),
+        start_time: $('#startTime').val(),
+        end_time: $('#endTime').val(),
+        location_id: $('#scheduleLocation').val(),
+        target_participants: $('#maxParticipants').val(),
+        organizer: $('#scheduleOrganizer').val(),
+        status: $('#scheduleStatus').val(),
+        description: $('#scheduleDescription').val(),
+        notes: $('#scheduleNotes').val()
+    };
+    
+    const isEdit = typeof scheduleData !== 'undefined' && scheduleData.is_edit;
+    const url = isEdit ? 
+        '{% url "posyandu:api_schedule_update" 0 %}'.replace('0', scheduleData.id || 0) :
+        '{% url "posyandu:api_schedule_create" %}';
+    
+    $.ajax({
+        url: url,
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(formData),
+        success: function(response) {
+            showAlert('Jadwal berhasil disimpan', 'success');
+            setTimeout(function() {
+                window.location.href = '{% url "admin_panel:posyandu:schedules" %}';
+            }, 1500);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error saving schedule:', error);
+            showAlert('Error saving schedule: ' + (xhr.responseJSON?.error || error), 'danger');
+        }
+    });
+}
+
+// Validate form
+function validateForm() {
+    let isValid = true;
+    
+    // Required fields
+    const requiredFields = ['scheduleTitle', 'scheduleType', 'scheduleDate', 'startTime', 'scheduleLocation'];
+    requiredFields.forEach(function(fieldId) {
+        const field = $('#' + fieldId);
+        if (!field.val()) {
+            field.addClass('is-invalid');
+            isValid = false;
+        } else {
+            field.removeClass('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        showAlert('Mohon lengkapi semua field yang wajib diisi', 'warning');
+    }
+    
+    return isValid;
+}
+
+// Show alert with spam prevention
+let alertCount = 0;
+const maxAlerts = 3;
+const alertMessages = new Set();
+
+function showAlert(message, type) {
+    if (alertMessages.has(message)) {
+        return;
+    }
+    
+    if (alertCount >= maxAlerts) {
+        return;
+    }
+    
+    alertMessages.add(message);
+    alertCount++;
+    
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    $('.container-fluid').prepend(alertHtml);
+    
+    setTimeout(function() {
+        $('.alert').first().fadeOut(function() {
+            $(this).remove();
+            alertCount--;
+            alertMessages.delete(message);
+        });
+    }, 3000);
+}
+</script>
+{% endblock %}

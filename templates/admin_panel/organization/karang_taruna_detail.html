@@ -1,0 +1,537 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Detail Anggota Karang Taruna{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        margin-bottom: 1rem;
+    }
+    
+    .profile-photo-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-title {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .info-card {
+        background: white;
+        border: 1px solid #e3e6f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .info-card-header {
+        border-bottom: 1px solid #e3e6f0;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #5a5c69;
+        margin: 0;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fc;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #5a5c69;
+        min-width: 120px;
+    }
+    
+    .info-value {
+        color: #6c757d;
+        text-align: right;
+        flex: 1;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 6px;
+    }
+    
+    .jabatan-badge {
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        font-weight: 600;
+    }
+    
+    .pengurus-inti-badge {
+        background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%);
+        color: white;
+    }
+    
+    .experience-badge {
+        background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+        color: white;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .contact-info {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .contact-icon {
+        width: 20px;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .skills-section {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .skill-tag {
+        display: inline-block;
+        background: #4e73df;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin: 0.25rem 0.25rem 0.25rem 0;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e3e6f0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.75rem;
+        top: 0.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #4e73df;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #e3e6f0;
+    }
+    
+    .timeline-content {
+        background: white;
+        border: 1px solid #e3e6f0;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .timeline-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .timeline-title {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.25rem;
+    }
+    
+    .timeline-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 1.5rem;
+        }
+        
+        .profile-photo,
+        .profile-photo-placeholder {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .profile-name {
+            font-size: 1.25rem;
+        }
+        
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .info-label {
+            min-width: auto;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            text-align: left;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                {% if member.foto_profil %}
+                    <img src="{{ member.foto_profil.url }}" alt="{{ member.penduduk.nama }}" class="profile-photo">
+                {% else %}
+                    <div class="profile-photo-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col">
+                <div class="profile-name">{{ member.penduduk.nama }}</div>
+                <div class="profile-title">{{ member.get_jabatan_display }}</div>
+                <div class="profile-badges">
+                    <span class="badge status-badge {% if member.status == 'aktif' %}bg-success{% elif member.status == 'non_aktif' %}bg-secondary{% else %}bg-warning{% endif %}">
+                        {{ member.get_status_display }}
+                    </span>
+                    {% if member.is_pengurus_inti %}
+                        <span class="badge pengurus-inti-badge">Pengurus Inti</span>
+                    {% endif %}
+                    {% if member.tanggal_bergabung %}
+                        <span class="badge experience-badge">
+                            {{ member.tanggal_bergabung|timesince }} di organisasi
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="action-buttons">
+                    <a href="{% url 'admin_panel:organization:admin_karang_taruna_edit' member.id %}" class="action-btn btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'admin_panel:organization:admin_karang_taruna_list' %}" class="action-btn btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Personal Information -->
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Informasi Personal</h5>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nama Lengkap</span>
+                    <span class="info-value">{{ member.penduduk.nama }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">NIK</span>
+                    <span class="info-value">{{ member.penduduk.nik }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">No. Anggota</span>
+                    <span class="info-value">{{ member.nomor_anggota }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Jabatan</span>
+                    <span class="info-value">
+                        <span class="badge jabatan-badge bg-primary">{{ member.get_jabatan_display }}</span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span class="info-value">
+                        <span class="badge status-badge {% if member.status == 'aktif' %}bg-success{% elif member.status == 'non_aktif' %}bg-secondary{% else %}bg-warning{% endif %}">
+                            {{ member.get_status_display }}
+                        </span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tanggal Bergabung</span>
+                    <span class="info-value">{{ member.tanggal_bergabung|date:"d F Y" }}</span>
+                </div>
+                {% if member.tanggal_keluar %}
+                <div class="info-item">
+                    <span class="info-label">Tanggal Keluar</span>
+                    <span class="info-value">{{ member.tanggal_keluar|date:"d F Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Contact Information -->
+            {% if member.kontak_whatsapp or member.email_pribadi or member.alamat_lengkap %}
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Informasi Kontak</h5>
+                </div>
+                <div class="contact-info">
+                    {% if member.kontak_whatsapp %}
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp contact-icon"></i>
+                        <a href="https://wa.me/{{ member.kontak_whatsapp }}" target="_blank" class="text-decoration-none">
+                            {{ member.kontak_whatsapp }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if member.email_pribadi %}
+                    <div class="contact-item">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <a href="mailto:{{ member.email_pribadi }}" class="text-decoration-none">
+                            {{ member.email_pribadi }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if member.alamat_lengkap %}
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <span>{{ member.alamat_lengkap }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Organization Information -->
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Informasi Organisasi</h5>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Pengurus Inti</span>
+                    <span class="info-value">
+                        {% if member.is_pengurus_inti %}
+                            <span class="badge bg-success">Ya</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Tidak</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Lama Bergabung</span>
+                    <span class="info-value">
+                        {% if member.tanggal_bergabung %}
+                            {{ member.tanggal_bergabung|timesince }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+                {% if member.pendidikan_terakhir %}
+                <div class="info-item">
+                    <span class="info-label">Pendidikan Terakhir</span>
+                    <span class="info-value">{{ member.pendidikan_terakhir }}</span>
+                </div>
+                {% endif %}
+                {% if member.pekerjaan %}
+                <div class="info-item">
+                    <span class="info-label">Pekerjaan</span>
+                    <span class="info-value">{{ member.pekerjaan }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Skills and Experience -->
+            {% if member.bidang_keahlian or member.pengalaman_organisasi %}
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Keahlian & Pengalaman</h5>
+                </div>
+                {% if member.bidang_keahlian %}
+                <div class="skills-section">
+                    <h6 class="mb-2">Bidang Keahlian</h6>
+                    <div>
+                        {% for skill in member.bidang_keahlian.split:',' %}
+                            <span class="skill-tag">{{ skill.strip }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if member.pengalaman_organisasi %}
+                <div class="mt-3">
+                    <h6 class="mb-2">Pengalaman Organisasi</h6>
+                    <p class="text-muted">{{ member.pengalaman_organisasi }}</p>
+                </div>
+                {% endif %}
+                {% if member.prestasi_individu %}
+                <div class="mt-3">
+                    <h6 class="mb-2">Prestasi Individu</h6>
+                    <p class="text-muted">{{ member.prestasi_individu }}</p>
+                </div>
+                {% endif %}
+                {% if member.kontribusi %}
+                <div class="mt-3">
+                    <h6 class="mb-2">Kontribusi</h6>
+                    <p class="text-muted">{{ member.kontribusi }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="row">
+        <div class="col-12">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Riwayat Aktivitas</h5>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ member.created_at|date:"d F Y, H:i" }}</div>
+                            <div class="timeline-title">Data Anggota Dibuat</div>
+                            <div class="timeline-description">Data anggota Karang Taruna berhasil ditambahkan ke sistem</div>
+                        </div>
+                    </div>
+                    {% if member.tanggal_bergabung %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ member.tanggal_bergabung|date:"d F Y" }}</div>
+                            <div class="timeline-title">Bergabung dengan Karang Taruna</div>
+                            <div class="timeline-description">Menjadi anggota Karang Taruna dengan jabatan {{ member.get_jabatan_display }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if member.updated_at and member.updated_at != member.created_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ member.updated_at|date:"d F Y, H:i" }}</div>
+                            <div class="timeline-title">Data Diperbarui</div>
+                            <div class="timeline-description">Informasi anggota terakhir diperbarui</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/organization.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize any interactive elements
+    console.log('Karang Taruna detail page loaded');
+});
+</script>
+{% endblock %}
+

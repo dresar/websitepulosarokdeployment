@@ -1,0 +1,48 @@
+{% load static %}
+
+<!-- Hero Section Template -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br {{ gradient_classes|default:'from-blue-600/80 to-blue-700/80' }}"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br {{ gradient_classes|default:'from-blue-600 to-blue-700' }}"></div>
+    {% endif %}
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            {% if hero_icon %}
+            <div class="mb-4 sm:mb-6">
+                <i class="{{ hero_icon }} text-4xl sm:text-5xl lg:text-6xl opacity-90"></i>
+            </div>
+            {% endif %}
+            
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-3">
+                {{ hero_title|default:"Selamat Datang" }}
+            </h1>
+            
+            {% if hero_subtitle %}
+            <p class="text-sm sm:text-base md:text-lg mb-4 md:mb-6 max-w-3xl mx-auto opacity-95 leading-relaxed">
+                {{ hero_subtitle }}
+            </p>
+            {% endif %}
+            
+            {% if hero_description %}
+            <p class="text-xs sm:text-sm md:text-base max-w-2xl mx-auto opacity-90 leading-relaxed">
+                {{ hero_description }}
+            </p>
+            {% endif %}
+            
+            {% if hero_buttons %}
+            <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                {% for button in hero_buttons %}
+                <a href="{{ button.url }}" class="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-white/20 hover:bg-white/30 text-white font-medium rounded-lg transition-all duration-300 backdrop-blur-sm border border-white/30 hover:border-white/50">
+                    {% if button.icon %}<i class="{{ button.icon }} mr-2"></i>{% endif %}
+                    {{ button.text }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>

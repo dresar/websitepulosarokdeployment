@@ -1,0 +1,1578 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block title %}Daftar Pelajar - Admin Panel{% endblock %}
+
+{% block page_title %}Daftar Pelajar{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Modern List Styling */
+.filter-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+}
+
+.data-table .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.data-table .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+}
+
+.data-table .card-header h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: #f8f9fa;
+    border: none;
+    color: #495057;
+    font-weight: 600;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
+
+.student-photo {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.student-photo:hover {
+    border-color: #667eea;
+    transform: scale(1.1);
+}
+
+.student-photo-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.badge-custom {
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.btn-action {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.125rem;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.btn-outline-warning:hover {
+    background: #f39c12;
+    border-color: #f39c12;
+}
+
+.btn-outline-danger:hover {
+    background: #e74c3c;
+    border-color: #e74c3c;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+}
+
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    border: none;
+    color: #667eea;
+    padding: 0.75rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    color: #2d3436;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+    color: white;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+    color: white;
+}
+
+/* Modal Styling */
+.modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+    border: none;
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border: none;
+    padding: 1.5rem 2rem;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Export Buttons */
+.export-buttons .btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.export-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Bulk Actions Improvements */
+.bulk-actions-container {
+    position: relative;
+}
+
+.bulk-actions-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.bulk-actions-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24 !important;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .form-control {
+        font-size: 16px; /* Prevent zoom on mobile */
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .bulk-actions-container .btn {
+        font-size: 12px;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Messages akan ditampilkan via modal -->
+    
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item active">Pelajar</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-graduation-cap text-primary mr-2"></i>
+                        Data Pelajar
+                    </h1>
+                    <p class="text-muted mb-0">Kelola data pelajar desa</p>
+                </div>
+                <div class="d-flex">
+                    {% if user|can_add:"references" %}
+                    <a href="{% url 'admin_panel:references_pelajar_add' %}" class="btn btn-primary mr-2">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Pelajar
+                    </a>
+                    {% endif %}
+
+                    <!-- Export Dropdown -->
+                    <!-- Export Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i>
+                            Export Data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdownBtn">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-file mr-1"></i>
+                                Pilih Format Export
+                            </h6>
+                            <div class="dropdown-divider"></div>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_pelajar_export_excel' %}">
+                                <i class="fas fa-file-excel text-success mr-2"></i>
+                                <span>Excel (.xlsx)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_pelajar_export_csv' %}">
+                                <i class="fas fa-file-csv text-info mr-2"></i>
+                                <span>CSV (.csv)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_pelajar_export_json' %}">
+                                <i class="fas fa-file-code text-warning mr-2"></i>
+                                <span>JSON (.json)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_pelajar_export_pdf' %}">
+                                <i class="fas fa-file-pdf text-danger mr-2"></i>
+                                <span>PDF (.pdf)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Minimal Filter -->
+
+<div class="filter-card mb-3">
+    <div class="card-body py-2">
+        <form method="get" id="filterForm" class="d-flex align-items-center">
+            <input type="text" class="form-control form-control-sm mr-2" id="search" name="search" 
+                   value="{{ search_query }}" placeholder="Cari pelajar..." style="max-width: 250px;">
+            <select class="form-control form-control-sm mr-2" id="tingkat" name="tingkat" style="max-width: 120px;">
+                <option value="">Tingkat</option>
+                <option value="SD" {% if tingkat_filter == 'SD' %}selected{% endif %}>SD</option>
+                <option value="SMP" {% if tingkat_filter == 'SMP' %}selected{% endif %}>SMP</option>
+                <option value="SMA" {% if tingkat_filter == 'SMA' %}selected{% endif %}>SMA</option>
+                <option value="PT" {% if tingkat_filter == 'PT' %}selected{% endif %}>PT</option>
+            </select>
+            <button class="btn btn-info btn-sm" onclick="exportData()">
+                <i class="fas fa-download"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Data Table -->
+<div class="data-table">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-graduation-cap mr-2"></i>Daftar Pelajar
+        </h5>
+        <div class="export-buttons">
+            <button class="btn btn-sm btn-outline-primary" onclick="exportData()">
+                <i class="fas fa-file-excel mr-1"></i>Excel
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="pelajarTable">
+                <thead>
+                    <tr>
+                        <th width="50">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="selectAll">
+                                <label class="custom-control-label" for="selectAll"></label>
+                            </div>
+                        </th>
+                        <th width="5%" class="d-none d-md-table-cell">No</th>
+                        <th width="25%">Nama Pelajar</th>
+                        <th width="12%" class="d-none d-sm-table-cell">NIK</th>
+                        <th width="10%" class="d-none d-md-table-cell">Usia</th>
+                        <th width="12%" class="d-none d-md-table-cell">Tingkat</th>
+                        <th width="18%" class="d-none d-lg-table-cell">Sekolah</th>
+                        <th width="10%" class="d-none d-lg-table-cell">Status</th>
+                        <th width="15%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pelajar in page_obj %}
+                    <tr>
+                        <td>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input pelajar-checkbox" 
+                                       id="pelajar_{{ pelajar.id }}" value="{{ pelajar.id }}">
+                                <label class="custom-control-label" for="pelajar_{{ pelajar.id }}"></label>
+                            </div>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <span class="badge badge-light">{{ forloop.counter0|add:page_obj.start_index }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 mr-2">
+                                    {% if pelajar.penduduk.photo and pelajar.penduduk.photo.url %}
+                                        <img src="{{ pelajar.penduduk.photo.url }}" alt="{{ pelajar.penduduk.name }}" 
+                                             class="student-photo" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+                                    {% else %}
+                                        <div class="student-photo-placeholder" style="width: 40px; height: 40px; border-radius: 50%; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-user" style="font-size: 16px; color: #6c757d;"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>{{ pelajar.penduduk.name }}</strong>
+                                    <div class="d-sm-none text-muted small">
+                                        <i class="fas fa-id-card mr-1"></i>{{ pelajar.penduduk.nik }}
+                                        <br><i class="fas fa-birthday-cake mr-1"></i>{{ pelajar.penduduk.age }} tahun
+                                        <br><i class="fas fa-map-marker-alt mr-1"></i>{{ pelajar.penduduk.dusun.name|default:"-" }}
+                                    </div>
+                                    <div class="d-md-none text-muted small">
+                                        <i class="fas fa-graduation-cap mr-1"></i>{{ pelajar.jenjang|default:"-" }}
+                                        <br><i class="fas fa-school mr-1"></i>{{ pelajar.sekolah|default:"-" }}
+                                    </div>
+                                    <div class="d-lg-none text-muted small">
+                                        <i class="fas fa-school mr-1"></i>{{ pelajar.sekolah|default:"-" }}
+                                        <br><i class="fas fa-user-check mr-1"></i>{{ pelajar.status|default:"-" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="d-none d-sm-table-cell">{{ pelajar.penduduk.nik }}</td>
+                        <td class="d-none d-md-table-cell">
+                            <span class="badge badge-secondary badge-custom">{{ pelajar.penduduk.age }} tahun</span>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <span class="badge badge-info badge-custom">{{ pelajar.jenjang|default:"-" }}</span>
+                        </td>
+                        <td class="d-none d-lg-table-cell">{{ pelajar.sekolah|default:"-" }}</td>
+                        <td class="d-none d-lg-table-cell">
+                            {% if pelajar.status %}
+                                <span class="badge badge-{% if pelajar.status == 'aktif' %}success{% else %}secondary{% endif %} badge-custom">{{ pelajar.status|title }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group-vertical btn-group-sm d-md-none" role="group">
+                                <!-- Mobile Layout -->
+                                <div class="btn-group mb-1" role="group">
+                                    <a href="{% url 'admin_panel:references_pelajar_detail' pelajar.id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="btn-group d-none d-md-flex" role="group">
+                                <!-- Desktop Layout -->
+                                <a href="{% url 'admin_panel:references_pelajar_detail' pelajar.id %}" 
+                                   class="btn btn-sm btn-outline-primary btn-action" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user|can_change:"references" %}
+                                <a href="{% url 'admin_panel:references_pelajar_edit' pelajar.id %}" 
+                                   class="btn btn-sm btn-outline-warning btn-action" title="Edit Data">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                                {% if user|can_delete:"references" %}
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-action" 
+                                        title="Hapus Data" 
+                                        onclick="showDeleteModal('{{ pelajar.id }}', '{{ pelajar.penduduk.name }}', '{{ pelajar.penduduk.nik }}', '{{ pelajar.jenjang|default:"-" }}', '{{ pelajar.sekolah|default:"-" }}', '{{ pelajar.status|default:"-" }}', '{% if pelajar.penduduk.photo and pelajar.penduduk.photo.url %}{{ pelajar.penduduk.photo.url }}{% else %}{% endif %}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-graduation-cap"></i>
+                            <p>Tidak ada data pelajar ditemukan</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+        
+<!-- Bulk Actions - Always Visible -->
+<div class="mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="bulk-actions-container" id="bulkActionsContainer">
+            <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="bulkActionsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-tasks mr-1"></i>
+                    <span id="bulkActionsText">Aksi Massal</span>
+                    <span class="badge badge-light ml-2" id="bulkActionsCount">0</span>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="bulkActionsDropdown">
+                    <a class="dropdown-item" href="#" onclick="executeBulkAction('activate')">
+                        <i class="fas fa-check text-success mr-2"></i>Aktifkan
+                    </a>
+                    <a class="dropdown-item" href="#" onclick="executeBulkAction('deactivate')">
+                        <i class="fas fa-pause text-warning mr-2"></i>Nonaktifkan
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="#" onclick="executeBulkAction('delete')">
+                        <i class="fas fa-trash mr-2"></i>Hapus Data
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="text-muted">
+            Menampilkan {{ page_obj.start_index|default:0 }} - {{ page_obj.end_index|default:0 }} dari {{ page_obj.paginator.count|default:0 }} data
+        </div>
+    </div>
+</div>
+
+<!-- Minimal Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="mt-3">
+    <nav>
+        <ul class="pagination pagination-sm justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tingkat_filter %}&tingkat={{ tingkat_filter }}{% endif %}">‹</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tingkat_filter %}&tingkat={{ tingkat_filter }}{% endif %}">›</a>
+            </li>
+        {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endif %}
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Hapus Data Pelajar
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Peringatan!</strong> Tindakan ini tidak dapat dibatalkan. Data yang dihapus akan hilang permanen.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <div id="deletePhotoContainer">
+                                <img id="deletePhoto" src="" alt="Foto Pelajar" class="img-fluid rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                                <div id="deletePhotoPlaceholder" class="d-none">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px; margin: 0 auto;">
+                                        <i class="fas fa-graduation-cap fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h6 class="font-weight-bold mb-3">Detail Data yang Akan Dihapus:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td class="font-weight-bold">Nama Pelajar:</td>
+                                    <td id="deleteNama">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">NIK:</td>
+                                    <td id="deleteNik">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Jenjang:</td>
+                                    <td id="deleteJenjang">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Sekolah:</td>
+                                    <td id="deleteSekolah">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Status:</td>
+                                    <td id="deleteStatus">-</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="pelajar_id" id="deletePelajarId">
+                    
+                    <div class="form-group">
+                        <label for="deleteReason" class="font-weight-bold">
+                            Alasan Penghapusan <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="deleteReason" name="reason" rows="3" 
+                                  placeholder="Masukkan alasan penghapusan data..." required></textarea>
+                        <div class="invalid-feedback">
+                            Alasan penghapusan harus diisi.
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="deleteConfirm" required>
+                            <label class="custom-control-label" for="deleteConfirm">
+                                Saya yakin ingin menghapus data pelajar ini
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+$(document).ready(function() {
+    // Auto-submit form on search/filter change
+    $('#search').on('input', function() {
+        clearTimeout(window.searchTimeout);
+        window.searchTimeout = setTimeout(function() {
+            $('#filterForm').submit();
+        }, 500);
+    });
+    
+    $('#tingkat').change(function() {
+        $('#filterForm').submit();
+    });
+    
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('.pelajar-checkbox').prop('checked', this.checked);
+        updateBulkActions();
+    });
+    
+    // Bind checkbox change events
+    $(document).on('change', '.pelajar-checkbox', function() {
+        updateBulkActions();
+    });
+    
+    // Delete modal validation
+    $('#deleteReason, #deleteConfirm').on('input change', function() {
+        validateDeleteForm();
+    });
+    
+    // Confirm delete button
+    $('#confirmDeleteBtn').on('click', function() {
+        if (validateDeleteForm()) {
+            submitDeleteForm();
+        }
+    });
+});
+
+// Delete modal functions
+function showDeleteModal(id, nama, nik, jenjang, sekolah, status, photoUrl) {
+    // Set form action
+    $('#deleteForm').attr('action', '{% url "admin_panel:references_pelajar_delete" 0 %}'.replace('0', id));
+    $('#deletePelajarId').val(id);
+    
+    // Set data details
+    $('#deleteNama').text(nama);
+    $('#deleteNik').text(nik);
+    $('#deleteJenjang').text(jenjang);
+    $('#deleteSekolah').text(sekolah);
+    $('#deleteStatus').text(status);
+    
+    // Set photo
+    if (photoUrl && photoUrl !== '') {
+        $('#deletePhoto').attr('src', photoUrl).removeClass('d-none');
+        $('#deletePhotoPlaceholder').addClass('d-none');
+    } else {
+        $('#deletePhoto').addClass('d-none');
+        $('#deletePhotoPlaceholder').removeClass('d-none');
+    }
+    
+    // Reset form
+    $('#deleteReason').val('');
+    $('#deleteConfirm').prop('checked', false);
+    $('#confirmDeleteBtn').prop('disabled', true);
+    
+    // Show modal
+    $('#deleteModal').modal('show');
+}
+
+function validateDeleteForm() {
+    const reason = $('#deleteReason').val().trim();
+    const confirmed = $('#deleteConfirm').is(':checked');
+    
+    if (reason && confirmed) {
+        $('#confirmDeleteBtn').prop('disabled', false);
+        return true;
+    } else {
+        $('#confirmDeleteBtn').prop('disabled', true);
+        return false;
+    }
+}
+
+function submitDeleteForm() {
+    if (!validateDeleteForm()) {
+        return;
+    }
+    
+    const form = $('#deleteForm');
+    const formData = new FormData(form[0]);
+    const btn = $('#confirmDeleteBtn');
+    const originalText = btn.html();
+    
+    // Show loading
+    btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+    btn.prop('disabled', true);
+    
+    $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                // Show success message
+                showAlert(response.message, 'success');
+                
+                // Close modal
+                $('#deleteModal').modal('hide');
+                
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Terjadi kesalahan saat menghapus data', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            let message = 'Terjadi kesalahan saat menghapus data';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            showAlert(message, 'error');
+        },
+        complete: function() {
+            // Reset button state
+            btn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function showAlert(message, type) {
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            <i class="fas ${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Insert alert at the top of the main content
+    $('.container-fluid').prepend(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+
+// Export functions
+function exportData() {
+    showLoading('Mengekspor data...');
+    const exportUrl = '{% url "admin_panel:references_pelajar_export_csv" %}';
+
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'data_pelajar_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('Data CSV berhasil diekspor');
+    }, 1000);
+}
+
+function exportExcel() {
+    showLoading('Mengekspor ke Excel...');
+    const exportUrl = '{% url "admin_panel:references_pelajar_export_excel" %}';
+
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'data_pelajar_' + new Date().toISOString().split('T')[0] + '.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('File Excel berhasil dibuat');
+    }, 1000);
+}
+
+function exportPDF() {
+    showLoading('Mengekspor ke PDF...');
+    const exportUrl = '{% url "admin_panel:references_pelajar_export_pdf" %}';
+
+    window.open(exportUrl, '_blank');
+
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('File PDF berhasil dibuat');
+    }, 1000);
+}
+
+function importData() {
+    showInfo('Fitur import data akan segera tersedia');
+}
+
+function downloadTemplate() {
+    showInfo('Template import akan segera tersedia');
+}
+
+// Utility functions
+function showLoading(message) {
+    // Create loading overlay if it doesn't exist
+    if (!document.getElementById('loadingOverlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+        overlay.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">${message}</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function showSuccess(message) {
+    // Create success notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    notification.innerHTML = `
+        <i class="fas fa-check-circle mr-2"></i>${message}
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function showInfo(message) {
+    // Create info notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #17a2b8;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 10000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    notification.innerHTML = `
+        <i class="fas fa-info-circle mr-2"></i>${message}
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Utility function to show toast notifications
+function showAlert(message, type) {
+    showNotificationToast(message, type);
+}
+
+// Function to show notification toast (samping kanan)
+function showNotificationToast(message, type) {
+    // Remove existing notifications
+    $('.notification-toast').remove();
+    
+    // Set colors and icons
+    let bgColor, icon, title;
+    if (type === 'success') {
+        bgColor = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+        icon = 'fa-check-circle';
+        title = 'Berhasil';
+    } else if (type === 'error') {
+        bgColor = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+        icon = 'fa-times-circle';
+        title = 'Error';
+    } else if (type === 'warning') {
+        bgColor = 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)';
+        icon = 'fa-exclamation-triangle';
+        title = 'Peringatan';
+    } else {
+        bgColor = 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)';
+        icon = 'fa-info-circle';
+        title = 'Informasi';
+    }
+    
+    // Create notification toast
+    const toast = $(`
+        <div class="notification-toast" style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${bgColor};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        ">
+            <div class="d-flex align-items-center">
+                <i class="fas ${icon} fa-lg mr-3"></i>
+                <div class="flex-grow-1">
+                    <div class="font-weight-bold mb-1">${title}</div>
+                    <div class="small">${message}</div>
+                </div>
+                <button type="button" class="btn-close text-white ml-2" style="
+                    background: none;
+                    border: none;
+                    font-size: 1.2rem;
+                    opacity: 0.8;
+                    cursor: pointer;
+                ">&times;</button>
+            </div>
+        </div>
+    `);
+    
+    // Add to body
+    $('body').append(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.css('transform', 'translateX(0)');
+    }, 100);
+    
+    // Auto-hide after 2 seconds
+    setTimeout(() => {
+        toast.css('transform', 'translateX(100%)');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 2000);
+    
+    // Manual close
+    toast.find('.btn-close').on('click', function() {
+        toast.css('transform', 'translateX(100%)');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    });
+}
+
+// Check for Django messages and show modal (prevent duplicates)
+$(document).ready(function() {
+    {% if messages %}
+        var messages = [];
+        {% for message in messages %}
+            messages.push({
+                text: '{{ message|escapejs }}',
+                type: '{{ message.tags }}'
+            });
+        {% endfor %}
+        
+        // Show only unique messages
+        var uniqueMessages = [];
+        messages.forEach(function(msg) {
+            if (!uniqueMessages.some(function(unique) {
+                return unique.text === msg.text && unique.type === msg.type;
+            })) {
+                uniqueMessages.push(msg);
+            }
+        });
+        
+        // Show first unique message
+        if (uniqueMessages.length > 0) {
+            showNotificationToast(uniqueMessages[0].text, uniqueMessages[0].type);
+        }
+    {% endif %}
+});
+
+// Bulk Actions Functions
+function updateBulkActions() {
+    const selected = $('.pelajar-checkbox:checked').length;
+    const container = $('#bulkActionsContainer');
+    const count = $('#bulkActionsCount');
+    const dropdown = $('#bulkActionsDropdown');
+    
+    // Always show container, but change style based on selection
+    count.text(selected);
+    
+    if (selected > 0) {
+        dropdown.removeClass('btn-outline-primary').addClass('btn-primary');
+        dropdown.find('i').removeClass('fa-tasks').addClass('fa-check');
+    } else {
+        dropdown.removeClass('btn-primary').addClass('btn-outline-primary');
+        dropdown.find('i').removeClass('fa-check').addClass('fa-tasks');
+    }
+    
+    // Update select all checkbox
+    const totalCheckboxes = $('.pelajar-checkbox').length;
+    const selectAll = $('#selectAll');
+    
+    if (selected === 0) {
+        selectAll.prop('indeterminate', false).prop('checked', false);
+    } else if (selected === totalCheckboxes) {
+        selectAll.prop('indeterminate', false).prop('checked', true);
+    } else {
+        selectAll.prop('indeterminate', true);
+    }
+}
+
+function executeBulkAction(action) {
+    const selected = $('.pelajar-checkbox:checked');
+    
+    if (selected.length === 0) {
+        showError('Pilih minimal satu data');
+        return;
+    }
+    
+    // Get selected IDs
+    const selectedIds = [];
+    selected.each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    // Action labels
+    const actionLabels = {
+        'activate': 'mengaktifkan',
+        'deactivate': 'menonaktifkan', 
+        'delete': 'menghapus'
+    };
+    
+    // Confirm for delete action
+    if (action === 'delete') {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} data pelajar?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Apakah Anda yakin ingin ${actionLabels[action]} ${selectedIds.length} data pelajar?`)) {
+            return;
+        }
+    }
+    
+    showLoading(`Menjalankan aksi ${actionLabels[action]} pada ${selectedIds.length} data...`);
+    
+    // Execute the actual bulk action
+    if (action === 'delete') {
+        bulkDeletePelajar(selectedIds);
+    } else if (action === 'activate') {
+        bulkActivatePelajar(selectedIds);
+    } else if (action === 'deactivate') {
+        bulkDeactivatePelajar(selectedIds);
+    }
+}
+
+function bulkDeletePelajar(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_pelajar_bulk_delete" %}',
+        type: 'POST',
+        data: {
+            'pelajar_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menghapus ${response.deleted_count} data pelajar`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                let errorMessage = response.message || 'Gagal menghapus data pelajar';
+                if (response.errors && response.errors.length > 0) {
+                    errorMessage += '\n\nDetail error:\n' + response.errors.join('\n');
+                }
+                showAlert(errorMessage, 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk delete error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menghapus data pelajar: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkActivatePelajar(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_pelajar_bulk_activate" %}',
+        type: 'POST',
+        data: {
+            'pelajar_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil mengaktifkan ${response.activated_count} data pelajar`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal mengaktifkan data pelajar', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk activate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat mengaktifkan data pelajar: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkDeactivatePelajar(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_pelajar_bulk_deactivate" %}',
+        type: 'POST',
+        data: {
+            'pelajar_ids[]': ids,
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(`Berhasil menonaktifkan ${response.deactivated_count} data pelajar`, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal menonaktifkan data pelajar', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk deactivate error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menonaktifkan data pelajar: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function showError(message) {
+    showAlert(message, 'error');
+}
+
+function showLoading(message) {
+    // Show loading overlay
+    $('body').append(`
+        <div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                <div class="spinner-border text-primary mb-2"></div>
+                <div>${message}</div>
+            </div>
+        </div>
+    `);
+}
+
+function hideLoading() {
+    $('#loadingOverlay').remove();
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-warning';
+    const icon = type === 'success' ? 'fas fa-check-circle' : type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-exclamation-triangle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    $('body').append(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+
+<!-- Import Modal -->
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="fas fa-file-import mr-2"></i>
+                    Import Data Pelajar
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Petunjuk Import:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Download template Excel terlebih dahulu</li>
+                        <li>Isi template dengan data yang akan diimport</li>
+                        <li>Upload file Excel yang sudah diisi</li>
+                        <li>Data duplikat akan dilewati</li>
+                    </ul>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" action="{% url 'admin_panel:references_quick_import' 'pelajar' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="importFile" class="form-label">
+                            <i class="fas fa-file mr-1"></i>
+                            Pilih File <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="importFile" name="file" accept=".xlsx,.xls" required>
+                        <small class="form-text text-muted">
+                            Format yang didukung: Excel (.xlsx, .xls) - Maksimal 10MB
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-download mr-1"></i>
+                            Download Template
+                        </label>
+                        <div class="text-center">
+                            <a href="{% url 'admin_panel:references_get_template' 'penduduk' %}?format=excel" class="btn btn-outline-success">
+                                <i class="fas fa-download mr-1"></i>
+                                Download Template Excel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i>
+                    Batal
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitImport()">
+                    <i class="fas fa-upload mr-1"></i>
+                    Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div class="modal fade" id="bulkActionModal" tabindex="-1" role="dialog" aria-labelledby="bulkActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkActionModalLabel">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Aksi Bulk
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-warning mr-2"></i>
+                    <strong>Peringatan:</strong> Aksi ini akan diterapkan pada <span id="bulkActionCount">0</span> item yang dipilih.
+                </div>
+                <p id="bulkActionMessage">Apakah Anda yakin ingin melanjutkan?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="confirmBulkAction">
+                    <i class="fas fa-check mr-1"></i>
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set current model name for import/export
+window.currentModelName = 'pelajar';
+
+// Import functionality
+function submitImport() {
+    const form = document.querySelector('#importModal form');
+    const formData = new FormData(form);
+    
+    fetch('{% url "admin_panel:references_quick_import" "pelajar" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Import berhasil! ' + data.message);
+            $('#importModal').modal('hide');
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+        alert('Error saat mengimport data');
+    });
+}
+
+// Bulk actions functionality
+let selectedItems = [];
+let currentBulkAction = '';
+
+// Select all checkbox functionality
+$('#selectAll').change(function() {
+    const isChecked = $(this).is(':checked');
+    $('.item-checkbox').prop('checked', isChecked);
+    updateBulkActions();
+});
+
+// Individual checkbox functionality
+$(document).on('change', '.item-checkbox', function() {
+    updateBulkActions();
+});
+
+// Update bulk actions bar
+function updateBulkActions() {
+    selectedItems = $('.item-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+    
+    const count = selectedItems.length;
+    $('#selectedCount').text(count);
+    $('#bulkActionCount').text(count);
+    
+    if (count > 0) {
+        $('#bulkActionsBar').show();
+        $('#bulkDeleteBtn, #bulkDeactivateBtn, #bulkActivateBtn').prop('disabled', false);
+    } else {
+        $('#bulkActionsBar').hide();
+        $('#bulkDeleteBtn, #bulkDeactivateBtn, #bulkActivateBtn').prop('disabled', true);
+    }
+    
+    // Update select all checkbox
+    const totalItems = $('.item-checkbox').length;
+    const checkedItems = $('.item-checkbox:checked').length;
+    
+    if (checkedItems === 0) {
+        $('#selectAll').prop('indeterminate', false).prop('checked', false);
+    } else if (checkedItems === totalItems) {
+        $('#selectAll').prop('indeterminate', false).prop('checked', true);
+    } else {
+        $('#selectAll').prop('indeterminate', true);
+    }
+}
+
+// Bulk delete
+$('#bulkDeleteBtn').click(function() {
+    currentBulkAction = 'delete';
+    $('#bulkActionModalLabel').html('<i class="fas fa-trash mr-2"></i>Konfirmasi Hapus Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin menghapus item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Bulk deactivate
+$('#bulkDeactivateBtn').click(function() {
+    currentBulkAction = 'deactivate';
+    $('#bulkActionModalLabel').html('<i class="fas fa-eye-slash mr-2"></i>Konfirmasi Nonaktifkan Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin menonaktifkan item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Bulk activate
+$('#bulkActivateBtn').click(function() {
+    currentBulkAction = 'activate';
+    $('#bulkActionModalLabel').html('<i class="fas fa-eye mr-2"></i>Konfirmasi Aktifkan Bulk');
+    $('#bulkActionMessage').text('Apakah Anda yakin ingin mengaktifkan item-item yang dipilih?');
+    $('#bulkActionModal').modal('show');
+});
+
+// Clear selection
+$('#clearSelectionBtn').click(function() {
+    $('.item-checkbox').prop('checked', false);
+    $('#selectAll').prop('checked', false).prop('indeterminate', false);
+    updateBulkActions();
+});
+
+// Confirm bulk action
+$('#confirmBulkAction').click(function() {
+    if (selectedItems.length === 0) {
+        alert('Tidak ada item yang dipilih.');
+        return;
+    }
+    
+    $.ajax({
+        url: '{% url "admin_panel:references_bulk_action" %}',
+        type: 'POST',
+        data: {
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val(),
+            'model': 'pelajar',
+            'action': currentBulkAction,
+            'items': selectedItems.join(',')
+        },
+        success: function(response) {
+            if (response.success) {
+                alert(response.message);
+                $('#bulkActionModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function() {
+            alert('Terjadi kesalahan saat memproses aksi bulk.');
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+{% endblock extra_js %}

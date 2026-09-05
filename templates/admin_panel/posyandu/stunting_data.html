@@ -1,0 +1,775 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Data Stunting{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stunting-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .stats-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stunting-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .stunting-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .stunting-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .stunting-status.normal { background: #e8f5e8; color: #2e7d32; }
+    .stunting-status.stunting { background: #ffcdd2; color: #d32f2f; }
+    .stunting-status.severe-stunting { background: #f8bbd9; color: #c2185b; }
+    .stunting-status.risk { background: #fff3e0; color: #f57c00; }
+    .patient-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .growth-chart {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .chart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #bbdefb;
+    }
+    .chart-item:last-child {
+        border-bottom: none;
+    }
+    .chart-label {
+        font-weight: 500;
+        color: #1976d2;
+    }
+    .chart-value {
+        font-weight: bold;
+        color: #1976d2;
+    }
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-box .form-control {
+        padding-left: 40px;
+    }
+    .search-box .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    .stunting-chart {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .stunting-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+    }
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 8px;
+    }
+    .intervention-section {
+        background: #fff3cd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        border-left: 4px solid #ffc107;
+    }
+    .intervention-title {
+        font-weight: 600;
+        color: #856404;
+        margin-bottom: 10px;
+    }
+    .intervention-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .intervention-list li {
+        padding: 5px 0;
+        color: #856404;
+    }
+    .intervention-list li:before {
+        content: "✓ ";
+        color: #28a745;
+        font-weight: bold;
+    }
+    .risk-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    .risk-indicator.low { background: #28a745; }
+    .risk-indicator.medium { background: #ffc107; }
+    .risk-indicator.high { background: #dc3545; }
+    .age-group-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .age-group-filter .btn {
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 0.875rem;
+    }
+    .age-group-filter .btn.active {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'admin_panel:posyandu:posyandu_admin' %}" class="btn btn-outline-primary btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-chart-line text-primary mr-2"></i>
+                            Data Stunting
+                        </h2>
+                        <p class="text-muted mb-0">Kelola data stunting balita dan anak</p>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'admin_panel:posyandu:stunting_data_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Data
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalStuntingData">0</div>
+                <div class="stats-label">Total Data</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="stats-number" id="stuntingCases">0</div>
+                <div class="stats-label">Kasus Stunting</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="stats-number" id="severeStunting">0</div>
+                <div class="stats-label">Stunting Berat</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="stats-number" id="normalGrowth">0</div>
+                <div class="stats-label">Tumbuh Normal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari nama anak...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="statusFilter">
+                    <option value="">Semua Status</option>
+                    <option value="normal">Normal</option>
+                    <option value="stunting">Stunting</option>
+                    <option value="severe-stunting">Stunting Berat</option>
+                    <option value="risk">Berisiko</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="ageFilter">
+                    <option value="">Semua Usia</option>
+                    <option value="0-12">0-12 bulan</option>
+                    <option value="12-24">12-24 bulan</option>
+                    <option value="24-36">24-36 bulan</option>
+                    <option value="36-60">36-60 bulan</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary btn-block" id="clearFilters">
+                    <i class="fas fa-times mr-1"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+        
+        <!-- Age Group Filter -->
+        <div class="age-group-filter">
+            <button class="btn btn-outline-primary active" data-age="all">Semua</button>
+            <button class="btn btn-outline-primary" data-age="0-12">0-12 bulan</button>
+            <button class="btn btn-outline-primary" data-age="12-24">12-24 bulan</button>
+            <button class="btn btn-outline-primary" data-age="24-36">24-36 bulan</button>
+            <button class="btn btn-outline-primary" data-age="36-60">36-60 bulan</button>
+        </div>
+    </div>
+
+    <!-- Stunting Chart -->
+    <div class="stunting-chart">
+        <h5 class="mb-3">
+            <i class="fas fa-chart-pie mr-2"></i>
+            Distribusi Status Stunting
+        </h5>
+        <div class="chart-container">
+            <canvas id="stuntingChart"></canvas>
+        </div>
+        <div class="stunting-legend" id="stuntingLegend">
+            <!-- Legend will be generated here -->
+        </div>
+    </div>
+
+    <!-- Stunting Data List -->
+    <div class="row" id="stuntingDataList">
+        {% if page_obj %}
+            {% for stunting in page_obj %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="stunting-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="mb-1 font-weight-bold">{{ stunting.balita.nama }}</h6>
+                            <small class="text-muted">NIK: {{ stunting.balita.nik }}</small>
+                        </div>
+                        <span class="stunting-status stunting-{{ stunting.status_stunting }}">
+                            {{ stunting.get_status_stunting_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="metric-value">{{ stunting.tinggi_badan }} cm</div>
+                            <div class="metric-label">Tinggi</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-value">{{ stunting.berat_badan }} kg</div>
+                            <div class="metric-label">Berat</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-value">{{ stunting.usia_bulan }} bln</div>
+                            <div class="metric-label">Usia</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stunting-meta mb-3">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt text-primary"></i>
+                            <span>{{ stunting.tanggal_ukur|date:"d M Y" }}</span>
+                        </div>
+                        {% if stunting.z_score_tb_u %}
+                        <div class="meta-item">
+                            <i class="fas fa-chart-line text-info"></i>
+                            <span>Z-Score: {{ stunting.z_score_tb_u }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <a href="{% url 'admin_panel:posyandu:stunting_data_detail' stunting.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'admin_panel:posyandu:stunting_data_update' stunting.id %}" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStuntingData({{ stunting.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <h5>Belum ada data stunting</h5>
+                    <p>Mulai dengan menambahkan data stunting pertama</p>
+                    <a href="{% url 'admin_panel:posyandu:stunting_data_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Data
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-wrapper">
+        <nav aria-label="Stunting data pagination">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteStuntingDataModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus data stunting ini?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Tindakan ini tidak dapat dibatalkan.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash mr-1"></i>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    let currentPage = 1;
+    let currentFilters = {
+        search: '',
+        status: '',
+        age: ''
+    };
+
+    // Load initial data
+    loadStuntingData();
+    initializeChart();
+
+    // Search functionality
+    $('#searchInput').on('input', function() {
+        currentFilters.search = $(this).val();
+        currentPage = 1;
+        loadStuntingData();
+    });
+
+    // Filter functionality
+    $('#statusFilter').on('change', function() {
+        currentFilters.status = $(this).val();
+        currentPage = 1;
+        loadStuntingData();
+    });
+
+    $('#ageFilter').on('change', function() {
+        currentFilters.age = $(this).val();
+        currentPage = 1;
+        loadStuntingData();
+    });
+
+    // Age group filter
+    $('.age-group-filter .btn').on('click', function() {
+        $('.age-group-filter .btn').removeClass('active');
+        $(this).addClass('active');
+        currentFilters.age = $(this).data('age');
+        currentPage = 1;
+        loadStuntingData();
+    });
+
+    // Clear filters
+    $('#clearFilters').on('click', function() {
+        $('#searchInput').val('');
+        $('#statusFilter').val('');
+        $('#ageFilter').val('');
+        $('.age-group-filter .btn').removeClass('active');
+        $('.age-group-filter .btn[data-age="all"]').addClass('active');
+        
+        currentFilters = {
+            search: '',
+            status: '',
+            age: ''
+        };
+        currentPage = 1;
+        loadStuntingData();
+    });
+
+    // Load stunting data
+    function loadStuntingData() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_stunting_data_list" %}',
+            method: 'GET',
+            data: {
+                page: currentPage,
+                search: currentFilters.search,
+                status: currentFilters.status,
+                age: currentFilters.age
+            },
+            success: function(response) {
+                displayStuntingData(response.results);
+                updatePagination(response.pagination);
+                updateStatistics(response.statistics);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading stunting data:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+
+    // Display stunting data
+    function displayStuntingData(stuntingData) {
+        const container = $('#stuntingDataList');
+        
+        if (stuntingData.length === 0) {
+            container.html(`
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>Tidak ada data stunting</h4>
+                        <p>Belum ada data stunting yang tersedia.</p>
+                    </div>
+                </div>
+            `);
+            return;
+        }
+
+        let html = '';
+        stuntingData.forEach(function(data) {
+            const statusLabels = {
+                'normal': 'Normal',
+                'stunting': 'Stunting',
+                'severe-stunting': 'Stunting Berat',
+                'risk': 'Berisiko'
+            };
+
+            const statusClasses = {
+                'normal': 'normal',
+                'stunting': 'stunting',
+                'severe-stunting': 'severe-stunting',
+                'risk': 'risk'
+            };
+
+            const interventionLabels = {
+                'pemberian-makanan': 'Pemberian Makanan',
+                'suplementasi': 'Suplementasi',
+                'konseling': 'Konseling',
+                'monitoring': 'Monitoring',
+                'rujukan': 'Rujukan'
+            };
+
+            html += `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="stunting-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-1">${data.child_name}</h6>
+                                <small class="text-muted">${data.measurement_date}</small>
+                            </div>
+                            <span class="stunting-status ${statusClasses[data.stunting_status]}">
+                                ${statusLabels[data.stunting_status]}
+                            </span>
+                        </div>
+                        
+                        <div class="patient-info">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Usia:</small><br>
+                                    <strong>${data.age_months} bulan</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Jenis Kelamin:</small><br>
+                                    <strong>${data.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="growth-chart">
+                            <h6 class="mb-2">Data Pengukuran</h6>
+                            <div class="chart-item">
+                                <span class="chart-label">Berat Badan:</span>
+                                <span class="chart-value">${data.weight} kg</span>
+                            </div>
+                            <div class="chart-item">
+                                <span class="chart-label">Tinggi Badan:</span>
+                                <span class="chart-value">${data.height} cm</span>
+                            </div>
+                            <div class="chart-item">
+                                <span class="chart-label">BMI:</span>
+                                <span class="chart-value">${data.bmi || '-'}</span>
+                            </div>
+                        </div>
+
+                        ${data.intervention ? `
+                            <div class="intervention-section">
+                                <div class="intervention-title">Intervensi</div>
+                                <ul class="intervention-list">
+                                    <li>${interventionLabels[data.intervention] || data.intervention}</li>
+                                </ul>
+                            </div>
+                        ` : ''}
+
+                        <div class="action-buttons mt-3">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewStuntingData(${data.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <a href="{% url 'admin_panel:posyandu:stunting_data_update' 0 %}" class="btn btn-sm btn-outline-warning" onclick="this.href = this.href.replace('0', ${data.id})">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStuntingData(${data.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Initialize chart
+    function initializeChart() {
+        const ctx = document.getElementById('stuntingChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal', 'Stunting', 'Stunting Berat', 'Berisiko'],
+                datasets: [{
+                    data: [65, 20, 10, 5],
+                    backgroundColor: [
+                        '#e8f5e8',
+                        '#ffcdd2',
+                        '#f8bbd9',
+                        '#fff3e0'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Global functions for actions
+    window.viewStuntingData = function(id) {
+        window.location.href = `{% url "admin_panel:posyandu:stunting_data_detail" 0 %}`.replace('0', id);
+    };
+
+    window.deleteStuntingData = function(id) {
+        $('#deleteStuntingDataModal').modal('show');
+        $('#confirmDelete').off('click').on('click', function() {
+            $.ajax({
+                url: `{% url "admin_panel:posyandu:api_stunting_data_delete" 0 %}`.replace('0', id),
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    $('#deleteStuntingDataModal').modal('hide');
+                    showAlert('Data stunting berhasil dihapus', 'success');
+                    loadStuntingData();
+                },
+                error: function(xhr, status, error) {
+                    showAlert('Error deleting stunting data', 'danger');
+                }
+            });
+        });
+    };
+
+    // Update statistics
+    function updateStatistics(stats) {
+        $('#totalStuntingData').text(stats.total || 0);
+        $('#stuntingCases').text(stats.stunting || 0);
+        $('#severeStunting').text(stats.severe_stunting || 0);
+        $('#normalGrowth').text(stats.normal || 0);
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        // Implementation for pagination
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 2 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

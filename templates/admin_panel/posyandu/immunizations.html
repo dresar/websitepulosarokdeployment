@@ -1,0 +1,810 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Data Imunisasi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .immunization-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .stats-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .immunization-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .immunization-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .vaccine-type {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .vaccine-type.bcg { background: #e3f2fd; color: #1976d2; }
+    .vaccine-type.dpt { background: #f3e5f5; color: #7b1fa2; }
+    .vaccine-type.polio { background: #e8f5e8; color: #388e3c; }
+    .vaccine-type.hepatitis { background: #fff3e0; color: #f57c00; }
+    .vaccine-type.campak { background: #fce4ec; color: #c2185b; }
+    .vaccine-type.other { background: #f5f5f5; color: #616161; }
+    .patient-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .vaccine-schedule {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    .schedule-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #bbdefb;
+    }
+    .schedule-item:last-child {
+        border-bottom: none;
+    }
+    .schedule-date {
+        font-weight: 500;
+        color: #1976d2;
+    }
+    .schedule-status {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .schedule-status.completed {
+        background: #c8e6c9;
+        color: #2e7d32;
+    }
+    .schedule-status.pending {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    .schedule-status.overdue {
+        background: #ffcdd2;
+        color: #d32f2f;
+    }
+    .filter-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .filter-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .filter-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f3f4;
+    }
+    
+    .filter-title {
+        color: #495057;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    
+    .search-box {
+        position: relative;
+    }
+    
+    .search-box .form-control {
+        padding-left: 45px;
+        border-radius: 25px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    
+    .search-box .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .search-box .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .quick-filters {
+        margin-top: 20px;
+    }
+    
+    .filter-group {
+        margin-bottom: 20px;
+    }
+    
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .filter-group-label {
+        display: block;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .filter-buttons .btn {
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid;
+    }
+    
+    .filter-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .filter-buttons .btn.active {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .immunization-list-container {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .immunization-table {
+        margin-bottom: 0;
+    }
+    
+    .immunization-table thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 15px 12px;
+    }
+    
+    .immunization-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .immunization-table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .immunization-table tbody td {
+        padding: 15px 12px;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f4;
+    }
+    
+    .vaccine-type {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .vaccine-type.bcg { background: #e3f2fd; color: #1976d2; }
+    .vaccine-type.dpt { background: #f3e5f5; color: #7b1fa2; }
+    .vaccine-type.polio { background: #e8f5e8; color: #388e3c; }
+    .vaccine-type.hepatitis { background: #fff3e0; color: #f57c00; }
+    .vaccine-type.campak { background: #fce4ec; color: #c2185b; }
+    .vaccine-type.other { background: #f5f5f5; color: #616161; }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.completed {
+        background: #c8e6c9;
+        color: #2e7d32;
+    }
+    
+    .status-badge.pending {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .status-badge.overdue {
+        background: #ffcdd2;
+        color: #d32f2f;
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    .vaccine-chart {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .vaccine-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+    }
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-syringe text-primary mr-2"></i>
+                        Data Imunisasi
+                    </h2>
+                    <p class="text-muted mb-0">Kelola data imunisasi balita dan anak</p>
+                </div>
+                <div>
+                    <a href="{% url 'admin_panel:posyandu:immunization_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Imunisasi
+                    </a>
+                    <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-secondary ml-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalImmunizations">0</div>
+                <div class="stats-label">Total Imunisasi</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="stats-number" id="completedImmunizations">0</div>
+                <div class="stats-label">Selesai</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="stats-number" id="pendingImmunizations">0</div>
+                <div class="stats-label">Menunggu</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <div class="stats-number" id="overdueImmunizations">0</div>
+                <div class="stats-label">Terlambat</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <h5 class="filter-title">
+                <i class="fas fa-filter mr-2"></i>
+                Filter & Pencarian
+            </h5>
+        </div>
+        
+        <!-- Main Filter Row -->
+        <div class="row mb-3">
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari nama anak atau NIK...">
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <select class="form-control" id="vaccineTypeFilter">
+                    <option value="">Semua Jenis Vaksin</option>
+                    <option value="bcg">BCG</option>
+                    <option value="dpt">DPT</option>
+                    <option value="polio">Polio</option>
+                    <option value="hepatitis">Hepatitis B</option>
+                    <option value="campak">Campak</option>
+                    <option value="other">Lainnya</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <select class="form-control" id="statusFilter">
+                    <option value="">Semua Status</option>
+                    <option value="completed">Selesai</option>
+                    <option value="pending">Menunggu</option>
+                    <option value="overdue">Terlambat</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <select class="form-control" id="posyanduFilter">
+                    <option value="">Semua Posyandu</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-3">
+                <button class="btn btn-outline-danger btn-block" id="clearFilters">
+                    <i class="fas fa-times mr-1"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quick Filter Buttons -->
+        <div class="quick-filters">
+            <div class="filter-group">
+                <label class="filter-group-label">Jenis Vaksin:</label>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-primary active" data-vaccine="all">Semua</button>
+                    <button class="btn btn-outline-primary" data-vaccine="bcg">BCG</button>
+                    <button class="btn btn-outline-primary" data-vaccine="dpt">DPT</button>
+                    <button class="btn btn-outline-primary" data-vaccine="polio">Polio</button>
+                    <button class="btn btn-outline-primary" data-vaccine="hepatitis">Hepatitis B</button>
+                    <button class="btn btn-outline-primary" data-vaccine="campak">Campak</button>
+                    <button class="btn btn-outline-primary" data-vaccine="other">Lainnya</button>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-group-label">Status:</label>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-success active" data-status="all">Semua</button>
+                    <button class="btn btn-outline-success" data-status="completed">Selesai</button>
+                    <button class="btn btn-outline-warning" data-status="pending">Menunggu</button>
+                    <button class="btn btn-outline-danger" data-status="overdue">Terlambat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Immunizations List -->
+    <div class="immunization-list-container">
+        <div class="table-responsive">
+            <table class="table table-hover immunization-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Anak</th>
+                        <th>Jenis Vaksin</th>
+                        <th>Tanggal Imunisasi</th>
+                        <th>Status</th>
+                        <th>Posyandu</th>
+                        <th>Petugas</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="immunizationsList">
+                    <!-- Immunizations will be loaded here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <nav aria-label="Immunizations pagination">
+            <ul class="pagination" id="pagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let currentPage = 1;
+    let currentFilters = {
+        search: '',
+        vaccine_type: '',
+        status: '',
+        posyandu: ''
+    };
+
+    // Load initial data
+    loadImmunizations();
+    loadPosyanduOptions();
+
+    // Search functionality
+    $('#searchInput').on('input', function() {
+        currentFilters.search = $(this).val();
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    // Filter functionality
+    $('#vaccineTypeFilter').on('change', function() {
+        currentFilters.vaccine_type = $(this).val();
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    $('#statusFilter').on('change', function() {
+        currentFilters.status = $(this).val();
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    $('#posyanduFilter').on('change', function() {
+        currentFilters.posyandu = $(this).val();
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    // Vaccine type filter buttons
+    $('.filter-buttons .btn[data-vaccine]').on('click', function() {
+        $('.filter-buttons .btn[data-vaccine]').removeClass('active');
+        $(this).addClass('active');
+        currentFilters.vaccine_type = $(this).data('vaccine');
+        $('#vaccineTypeFilter').val(currentFilters.vaccine_type === 'all' ? '' : currentFilters.vaccine_type);
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    // Status filter buttons
+    $('.filter-buttons .btn[data-status]').on('click', function() {
+        $('.filter-buttons .btn[data-status]').removeClass('active');
+        $(this).addClass('active');
+        currentFilters.status = $(this).data('status');
+        $('#statusFilter').val(currentFilters.status === 'all' ? '' : currentFilters.status);
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    // Clear filters
+    $('#clearFilters').on('click', function() {
+        $('#searchInput').val('');
+        $('#vaccineTypeFilter').val('');
+        $('#statusFilter').val('');
+        $('#posyanduFilter').val('');
+        
+        $('.filter-buttons .btn').removeClass('active');
+        $('.filter-buttons .btn[data-vaccine="all"]').addClass('active');
+        $('.filter-buttons .btn[data-status="all"]').addClass('active');
+        
+        currentFilters = {
+            search: '',
+            vaccine_type: '',
+            status: '',
+            posyandu: ''
+        };
+        currentPage = 1;
+        loadImmunizations();
+    });
+
+    // Load immunizations
+    function loadImmunizations() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_immunization_list" %}',
+            method: 'GET',
+            data: {
+                page: currentPage,
+                search: currentFilters.search,
+                vaccine_type: currentFilters.vaccine_type,
+                status: currentFilters.status,
+                posyandu: currentFilters.posyandu
+            },
+            success: function(response) {
+                displayImmunizations(response.results);
+                updatePagination(response.pagination);
+                updateStatistics(response.statistics);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading immunizations:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+
+    // Display immunizations
+    function displayImmunizations(immunizations) {
+        const container = $('#immunizationsList');
+        
+        if (immunizations.length === 0) {
+            container.html(`
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-syringe fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Tidak ada data imunisasi</h5>
+                            <p class="text-muted">Belum ada data imunisasi yang tersedia.</p>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            return;
+        }
+
+        let html = '';
+        immunizations.forEach(function(immunization, index) {
+            const vaccineTypeLabels = {
+                'bcg': 'BCG',
+                'dpt': 'DPT',
+                'polio': 'Polio',
+                'hepatitis': 'Hepatitis B',
+                'campak': 'Campak',
+                'other': 'Lainnya'
+            };
+
+            const statusLabels = {
+                'completed': 'Selesai',
+                'pending': 'Menunggu',
+                'overdue': 'Terlambat'
+            };
+
+            const statusClasses = {
+                'completed': 'completed',
+                'pending': 'pending',
+                'overdue': 'overdue'
+            };
+
+            html += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-2">
+                                <i class="fas fa-child"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">${immunization.child_name || 'Unknown'}</div>
+                                <small class="text-muted">${immunization.child_nik || ''}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="vaccine-type ${immunization.vaccine_type}">
+                            ${vaccineTypeLabels[immunization.vaccine_type] || 'Unknown'}
+                        </span>
+                    </td>
+                    <td>${immunization.immunization_date || '-'}</td>
+                    <td>
+                        <span class="status-badge ${statusClasses[immunization.status]}">
+                            ${statusLabels[immunization.status] || 'Unknown'}
+                        </span>
+                    </td>
+                    <td>${immunization.posyandu_name || '-'}</td>
+                    <td>${immunization.health_worker || '-'}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="/admin-panel/posyandu/immunizations/${immunization.id}/" class="btn btn-sm btn-outline-primary" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="/admin-panel/posyandu/immunizations/${immunization.id}/edit/" class="btn btn-sm btn-outline-warning" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteImmunization(${immunization.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        container.html(html);
+    }
+
+    // Load posyandu options
+    function loadPosyanduOptions() {
+        $.ajax({
+            url: '{% url "admin_panel:posyandu:api_location_list" %}',
+            method: 'GET',
+            success: function(response) {
+                let options = '<option value="">Semua Posyandu</option>';
+                response.results.forEach(function(location) {
+                    options += `<option value="${location.id}">${location.name}</option>`;
+                });
+                $('#posyanduFilter').html(options);
+            }
+        });
+    }
+
+    // Global functions for actions
+    window.deleteImmunization = function(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus data imunisasi ini?')) {
+            $.ajax({
+                url: `{% url "admin_panel:posyandu:api_immunization_delete" 0 %}`.replace('0', id),
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    showAlert('Data imunisasi berhasil dihapus', 'success');
+                    loadImmunizations();
+                },
+                error: function(xhr, status, error) {
+                    showAlert('Error deleting immunization', 'danger');
+                }
+            });
+        }
+    };
+
+    // Update statistics
+    function updateStatistics(stats) {
+        $('#totalImmunizations').text(stats.total || 0);
+        $('#completedImmunizations').text(stats.completed || 0);
+        $('#pendingImmunizations').text(stats.pending || 0);
+        $('#overdueImmunizations').text(stats.overdue || 0);
+    }
+
+    // Update pagination
+    function updatePagination(pagination) {
+        // Implementation for pagination
+    }
+
+    // Show alert with spam prevention
+    let alertCount = 0;
+    const maxAlerts = 2;
+    const alertMessages = new Set();
+    
+    function showAlert(message, type) {
+        // Cek apakah pesan yang sama sudah ditampilkan
+        if (alertMessages.has(message)) {
+            return;
+        }
+        
+        // Batasi jumlah alert
+        if (alertCount >= maxAlerts) {
+            return;
+        }
+        
+        alertMessages.add(message);
+        alertCount++;
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        $('.container-fluid').prepend(alertHtml);
+        
+        // Auto remove setelah 2 detik
+        setTimeout(function() {
+            $('.alert').first().fadeOut(function() {
+                $(this).remove();
+                alertCount--;
+                alertMessages.delete(message);
+            });
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

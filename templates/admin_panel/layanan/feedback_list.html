@@ -1,0 +1,673 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .layanan-wrapper {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+    }
+
+    .filter-card {
+        background: #ffffff;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+    }
+
+    .filter-card .card-body {
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+    .feedback-table {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .feedback-table .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        border: none;
+    }
+
+    .feedback-table .card-title {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .feedback-table .table {
+        margin: 0;
+        background: white;
+    }
+
+    .feedback-table .table thead th {
+        background: #f8f9fa;
+        border: none;
+        padding: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 0.8rem;
+    }
+
+    .feedback-table .table tbody td {
+        padding: 0.5rem;
+        border: none;
+        border-bottom: 1px solid #f8f9fa;
+        vertical-align: middle;
+        font-size: 0.8rem;
+    }
+
+    .feedback-table .table tbody tr:hover {
+        background: #f8f9fa;
+        transform: translateY(-1px);
+        transition: all 0.3s ease;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-group .btn {
+        border-radius: 6px !important;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+        min-width: 40px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-group .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: #212529;
+    }
+
+    .badge-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .badge-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+        color: white;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 0.8rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        background: white;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        border: 2px dashed #dee2e6;
+        margin: 2rem 0;
+    }
+
+    .empty-state i {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin: 2rem 0;
+    }
+
+    .pagination .page-link {
+        border-radius: 10px;
+        margin: 0 0.25rem;
+        border: 2px solid #e9ecef;
+        color: #007bff;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: #007bff;
+        border-color: #007bff;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.1rem;
+    }
+
+    .feedback-preview {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 2px solid #e9ecef;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .layanan-wrapper {
+            padding: 0.25rem 0;
+        }
+        
+        .page-header {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header h4 {
+            font-size: 1rem;
+        }
+        
+        .page-header .btn {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.7rem;
+        }
+        
+        .filter-card .card-body {
+            padding: 0.75rem;
+        }
+        
+        .filter-card .form-control {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.5rem;
+        }
+        
+        .btn-group {
+            flex-direction: row !important;
+            gap: 0.25rem;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+            min-width: 30px;
+            padding: 0.375rem 0.5rem;
+            font-size: 0.7rem;
+            height: 32px;
+        }
+        
+        .feedback-table .card-header {
+            padding: 0.5rem;
+        }
+        
+        .feedback-table .card-title {
+            font-size: 0.9rem;
+        }
+        
+        .feedback-table .table thead th {
+            padding: 0.375rem;
+            font-size: 0.7rem;
+        }
+        
+        .feedback-table .table tbody td {
+            padding: 0.375rem;
+            font-size: 0.7rem;
+        }
+        
+        .badge {
+            padding: 0.125rem 0.375rem;
+            font-size: 0.6rem;
+        }
+        
+        .d-none.d-md-table-cell {
+            display: none !important;
+        }
+        
+        .d-none.d-lg-table-cell {
+            display: none !important;
+        }
+        
+        .d-none.d-sm-table-cell {
+            display: none !important;
+        }
+        
+        .pagination .page-link {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.7rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-header .d-flex {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .page-header .d-flex > div {
+            width: 100%;
+        }
+        
+        .filter-card .row > div {
+            margin-bottom: 0.25rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.375rem;
+            font-size: 0.65rem;
+            min-width: 25px;
+            height: 28px;
+        }
+        
+        .feedback-table .table tbody td {
+            padding: 0.25rem;
+            font-size: 0.65rem;
+        }
+        
+        .page-header h4 {
+            font-size: 0.9rem;
+        }
+        
+        .page-header p {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="layanan-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Feedback & Komentar</h4>
+                            <p class="text-muted mb-0">Kelola feedback dan komentar dari pengguna</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:layanan:feedback_form' %}" class="btn btn-primary">
+                                <i class="fas fa-plus mr-1"></i>Tambah Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter -->
+                <div class="filter-card">
+                    <div class="card-body">
+                        <form method="get" id="filterForm" class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">Semua Status</option>
+                                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Menunggu</option>
+                                    <option value="read" {% if selected_status == 'read' %}selected{% endif %}>Sudah Dibaca</option>
+                                    <option value="replied" {% if selected_status == 'replied' %}selected{% endif %}>Sudah Dibalas</option>
+                                    <option value="closed" {% if selected_status == 'closed' %}selected{% endif %}>Ditutup</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Kategori</label>
+                                <select class="form-control" id="category" name="category">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="complaint" {% if selected_category == 'complaint' %}selected{% endif %}>Keluhan</option>
+                                    <option value="suggestion" {% if selected_category == 'suggestion' %}selected{% endif %}>Saran</option>
+                                    <option value="question" {% if selected_category == 'question' %}selected{% endif %}>Pertanyaan</option>
+                                    <option value="praise" {% if selected_category == 'praise' %}selected{% endif %}>Pujian</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Pencarian</label>
+                                <input type="text" class="form-control" name="search" value="{{ search }}" placeholder="Cari feedback...">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-fill">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="feedback-table">
+                    <div class="card-header">
+                        <h5 class="card-title">
+                            <i class="fas fa-comments mr-2"></i>Daftar Feedback
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th width="5%" class="d-none d-md-table-cell">ID</th>
+                                    <th width="25%">Pengirim</th>
+                                    <th width="30%" class="d-none d-lg-table-cell">Feedback</th>
+                                    <th width="15%" class="d-none d-sm-table-cell">Kategori</th>
+                                    <th width="10%" class="d-none d-sm-table-cell">Status</th>
+                                    <th width="15%" class="d-none d-lg-table-cell">Tanggal</th>
+                                    <th width="15%" class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feedback in feedbacks %}
+                                <tr>
+                                    <td class="d-none d-md-table-cell">
+                                        <span class="badge badge-primary">#{{ feedback.id }}</span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ feedback.name }}</strong>
+                                            <div class="d-md-none">
+                                                <small class="text-muted">{{ feedback.subject|truncatechars:30 }}</small>
+                                                <br>
+                                                <span class="badge badge-{% if feedback.status == 'pending' %}warning{% elif feedback.status == 'read' %}info{% elif feedback.status == 'replied' %}success{% else %}secondary{% endif %} badge-sm">
+                                                    {{ feedback.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ feedback.email }}</small>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="feedback-preview">{{ feedback.subject }}</div>
+                                    </td>
+                                    <td class="d-none d-sm-table-cell">
+                                        <span class="badge badge-{% if feedback.category == 'complaint' %}danger{% elif feedback.category == 'suggestion' %}info{% elif feedback.category == 'question' %}primary{% else %}success{% endif %}">
+                                            {{ feedback.get_category_display }}
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-sm-table-cell">
+                                        <span class="badge badge-{% if feedback.status == 'pending' %}warning{% elif feedback.status == 'read' %}info{% elif feedback.status == 'replied' %}success{% else %}secondary{% endif %}">
+                                            {{ feedback.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        {{ feedback.created_at|date:"d/m/Y H:i" }}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a class="btn btn-outline-primary btn-sm" title="Detail" 
+                                               href="{% url 'admin_panel:layanan:feedback_detail' feedback.id %}" 
+                                               data-bs-toggle="tooltip">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'admin_panel:layanan:feedback_form' %}?id={{ feedback.id }}" 
+                                               class="btn btn-outline-warning btn-sm" title="Edit" 
+                                               data-bs-toggle="tooltip">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if feedback.status == 'pending' %}
+                                            <button class="btn btn-outline-success btn-sm" title="Tandai Dibaca" 
+                                                    onclick="markAsRead({{ feedback.id }})" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-outline-danger btn-sm" title="Hapus" 
+                                                    onclick="deleteFeedback({{ feedback.id }})" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="empty-state">
+                                        <div class="text-center">
+                                            <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                                            <h5 class="text-muted">Belum ada feedback</h5>
+                                            <p class="text-muted">Belum ada feedback dari pengguna</p>
+                                            <a href="{% url 'admin_panel:layanan:feedback_form' %}" class="btn btn-primary mt-3">
+                                                <i class="fas fa-plus mr-1"></i>Tambah Feedback
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                {% if feedbacks.has_other_pages %}
+                <div class="pagination">
+                    <ul class="pagination">
+                        {% if feedbacks.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search %}&search={{ search }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ feedbacks.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ feedbacks.number }} of {{ feedbacks.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {% if feedbacks.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ feedbacks.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ feedbacks.paginator.num_pages }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search %}&search={{ search }}{% endif %}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-submit filter form on change
+    $('#filterForm select, #filterForm input').on('change', function() {
+        $('#filterForm').submit();
+    });
+    
+    // Initialize tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
+});
+
+// Mark as Read Function
+function markAsRead(id) {
+    if (confirm('Tandai feedback ini sebagai sudah dibaca?')) {
+        fetch(`/admin-panel/layanan/feedback/${id}/mark-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                location.reload();
+            } else {
+                showAlert('error', data.message);
+            }
+        })
+        .catch(error => {
+            showAlert('error', 'Terjadi kesalahan saat mengupdate status');
+        });
+    }
+}
+
+// Delete Feedback Function
+function deleteFeedback(id) {
+    if (confirm('Hapus feedback ini? Tindakan ini tidak dapat dibatalkan.')) {
+        $.ajax({
+            url: '{% url "admin_panel:layanan:ajax_delete_item" %}',
+            type: 'POST',
+            data: JSON.stringify({
+                'type': 'feedback',
+                'id': id,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            }),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    location.reload();
+                } else {
+                    showAlert('error', response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                showAlert('error', 'Terjadi kesalahan saat menghapus data');
+            }
+        });
+    }
+}
+
+// Alert function
+function showAlert(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    $('body').prepend(alertHtml);
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

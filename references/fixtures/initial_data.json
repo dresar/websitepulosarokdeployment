@@ -1,0 +1,80 @@
+[
+    {
+        "model": "references.dusun",
+        "pk": 1,
+        "fields": {
+            "name": "Dusun 1",
+            "code": "D001",
+            "description": "Dusun pertama di desa",
+            "created_at": "2024-03-19 00:00:00",
+            "updated_at": "2024-03-19 00:00:00"
+        }
+    },
+    {
+        "model": "references.lorong",
+        "pk": 1,
+        "fields": {
+            "nama_lorong": "Lorong 1",
+            "kode": "L001",
+            "ketua_lorong": "Ahmad",
+            "dusun": 1,
+            "description": "Lorong pertama di Dusun 1",
+            "created_at": "2024-03-19 00:00:00",
+            "updated_at": "2024-03-19 00:00:00"
+        }
+    },
+    {
+        "model": "references.keluarga",
+        "pk": 1,
+        "fields": {
+            "nama_kepala_keluarga": "John Doe",
+            "nomor_kk": "1234567890123456",
+            "rt": "001",
+            "rw": "001",
+            "alamat": "Jl. Contoh No. 1",
+            "dusun": 1,
+            "created_at": "2024-03-19 00:00:00",
+            "updated_at": "2024-03-19 00:00:00"
+        }
+    },
+    {
+        "model": "references.penduduk",
+        "pk": 1,
+        "fields": {
+            "nik": "1234567890123456",
+            "name": "John Doe",
+            "gender": "L",
+            "birth_place": "Jakarta",
+            "birth_date": "1990-01-01",
+            "religion": "Islam",
+            "education": "D4_S1",
+            "occupation": "PNS",
+            "marital_status": "KAWIN",
+            "dusun": 1,
+            "lorong": 1,
+            "address": "Jl. Contoh No. 1",
+            "created_at": "2024-03-19 00:00:00",
+            "updated_at": "2024-03-19 00:00:00"
+        }
+    },
+    {
+        "model": "references.penduduk",
+        "pk": 2,
+        "fields": {
+            "nik": "1234567890123457",
+            "name": "Jane Doe",
+            "gender": "P",
+            "birth_place": "Surabaya",
+            "birth_date": "1992-02-02",
+            "religion": "Islam",
+            "education": "SLTA",
+            "occupation": "Wiraswasta",
+            "marital_status": "KAWIN",
+            "dusun": 1,
+            "lorong": 1,
+            "address": "Jl. Contoh No. 1",
+            "created_at": "2024-03-19 00:00:00",
+            "updated_at": "2024-03-19 00:00:00"
+        }
+    }
+]

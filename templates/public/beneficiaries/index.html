@@ -1,0 +1,619 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .modal {
+        transition: opacity 0.25s ease;
+    }
+    .modal-enter {
+        opacity: 0;
+    }
+    .modal-leave {
+        opacity: 1;
+    }
+    
+    /* Mobile-first responsive design */
+    .hero-stats {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        opacity: 0.9;
+    }
+    
+    /* Mobile navigation tabs */
+    .nav-tabs-mobile {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 0.5rem 0;
+        margin-bottom: 1rem;
+    }
+    
+    .nav-tabs-mobile::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .nav-tab-mobile {
+        flex: 0 0 auto;
+        padding: 0.75rem 1rem;
+        margin-right: 0.5rem;
+        background: white;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+    
+    .nav-tab-mobile.active {
+        background: #3b82f6;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+    }
+    
+    .nav-tab-mobile:active {
+        transform: scale(0.98);
+    }
+    
+    /* Filter section mobile */
+    .filter-mobile {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .filter-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: border-color 0.2s ease;
+    }
+    
+    .filter-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .filter-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .filter-button:active {
+        background: #2563eb;
+        transform: scale(0.98);
+    }
+    
+    /* Content cards mobile */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .content-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        border: 1px solid #f3f4f6;
+    }
+    
+    .content-card:active {
+        transform: scale(0.98);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+        line-height: 1.25;
+    }
+    
+    .card-subtitle {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    .status-badge.miskin {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+    
+    .status-badge.kurang_mampu {
+        background: #fffbeb;
+        color: #d97706;
+    }
+    
+    .status-badge.menengah {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+    
+    .card-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #111827;
+    }
+    
+    .card-actions {
+        padding-top: 0.75rem;
+        border-top: 1px solid #f3f4f6;
+    }
+    
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        background: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+    }
+    
+    .action-button:active {
+        background: #2563eb;
+        transform: scale(0.98);
+    }
+    
+    /* Modal mobile */
+    .modal-mobile {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: flex-end;
+        z-index: 50;
+        padding: 0;
+    }
+    
+    .modal-content-mobile {
+        background: white;
+        border-radius: 1rem 1rem 0 0;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 1.5rem;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .modal-content-mobile.show {
+        transform: translateY(0);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .modal-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0.25rem;
+    }
+    
+    /* Pagination mobile */
+    .pagination-mobile {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .pagination-button {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #374151;
+        text-decoration: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        min-width: 2.5rem;
+        text-align: center;
+    }
+    
+    .pagination-button.active {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+    
+    .pagination-button:active {
+        transform: scale(0.95);
+    }
+    
+    /* Loading states */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    /* Tablet styles */
+    @media (min-width: 640px) {
+        .hero-stats {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .filter-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .content-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .card-details {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    /* Desktop styles */
+    @media (min-width: 1024px) {
+        .hero-stats {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .filter-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .content-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .modal-mobile {
+            align-items: center;
+        }
+        
+        .modal-content-mobile {
+            max-width: 32rem;
+            border-radius: 0.75rem;
+            max-height: 90vh;
+        }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .filter-mobile,
+        .content-card {
+            background: #1f2937;
+            border-color: #374151;
+        }
+        
+        .card-title,
+        .detail-value,
+        .modal-title {
+            color: #f9fafb;
+        }
+        
+        .card-subtitle,
+        .detail-label {
+            color: #9ca3af;
+        }
+        
+        .filter-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        
+        .modal-content-mobile {
+            background: #1f2937;
+        }
+    }
+</style>
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-600/80 to-primary-800/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-800"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4">Data Penerima Bantuan</h1>
+            <p class="text-sm md:text-xl text-primary-100 mb-4 md:mb-8 px-4">Informasi transparansi penyaluran bantuan kepada masyarakat Desa Pulosarok</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-beneficiaries">{{ total_beneficiaries|default:0 }}</div>
+                    <div class="stat-label">Total Penerima</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-programs">{{ total_programs|default:0 }}</div>
+                    <div class="stat-label">Program Bantuan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-distributed">{{ total_distributed|default:0 }}</div>
+                    <div class="stat-label">Bantuan Tersalur</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Navigation Tabs -->
+<section class="bg-white dark:bg-dark-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Mobile Navigation -->
+        <div class="nav-tabs-mobile md:hidden">
+            <button class="nav-tab-mobile active" data-tab="beneficiaries">
+                <i class="fas fa-users mr-1"></i>Penerima
+            </button>
+            <button class="nav-tab-mobile" data-tab="categories">
+                <i class="fas fa-tags mr-1"></i>Kategori
+            </button>
+            <button class="nav-tab-mobile" data-tab="programs">
+                <i class="fas fa-clipboard-list mr-1"></i>Program
+            </button>
+            <button class="nav-tab-mobile" data-tab="statistics">
+                <i class="fas fa-chart-bar mr-1"></i>Statistik
+            </button>
+        </div>
+        
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex flex-wrap border-b border-gray-200 dark:border-dark-600">
+            <button class="tab-btn active px-6 py-4 text-sm font-medium border-b-2 border-primary-600 text-primary-600" data-tab="beneficiaries">
+                <i class="fas fa-users mr-2"></i>Penerima Bantuan
+            </button>
+            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="categories">
+                <i class="fas fa-tags mr-2"></i>Kategori Bantuan
+            </button>
+            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="programs">
+                <i class="fas fa-clipboard-list mr-2"></i>Program Bantuan
+            </button>
+            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="statistics">
+                <i class="fas fa-chart-bar mr-2"></i>Statistik
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Content Sections -->
+<section class="py-6 md:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Penerima Bantuan Tab -->
+        <div id="beneficiaries-tab" class="tab-content">
+            <!-- Filter Section -->
+            <div class="filter-mobile">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Cari Penerima</label>
+                        <input type="text" id="search-beneficiaries" placeholder="Nama penerima..." class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Kategori</label>
+                        <select id="filter-category" class="filter-input">
+                            <option value="">Semua Kategori</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Status Ekonomi</label>
+                        <select id="filter-economic-status" class="filter-input">
+                            <option value="">Semua Status</option>
+                            <option value="miskin">Miskin</option>
+                            <option value="kurang_mampu">Kurang Mampu</option>
+                            <option value="menengah">Menengah</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button id="apply-filter" class="filter-button">
+                            <i class="fas fa-search mr-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beneficiaries List -->
+            <div id="beneficiaries-list" class="content-grid">
+                <!-- Content will be loaded via AJAX -->
+            </div>
+
+            <!-- Pagination -->
+            <div id="beneficiaries-pagination" class="pagination-mobile">
+                <!-- Pagination will be loaded via AJAX -->
+            </div>
+        </div>
+
+        <!-- Categories Tab -->
+        <div id="categories-tab" class="tab-content hidden">
+            <div id="categories-list" class="content-grid">
+                <!-- Content will be loaded via AJAX -->
+            </div>
+        </div>
+
+        <!-- Programs Tab -->
+        <div id="programs-tab" class="tab-content hidden">
+            <!-- Filter Section -->
+            <div class="filter-mobile">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Cari Program</label>
+                        <input type="text" id="search-programs" placeholder="Nama program..." class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Jenis Bantuan</label>
+                        <select id="filter-aid-type" class="filter-input">
+                            <option value="">Semua Jenis</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button id="apply-program-filter" class="filter-button">
+                            <i class="fas fa-search mr-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="programs-list" class="content-grid">
+                <!-- Content will be loaded via AJAX -->
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics-tab" class="tab-content hidden">
+            <div class="content-grid">
+                <!-- Statistics charts will be loaded here -->
+                <div class="content-card">
+                    <h3 class="text-lg font-semibold mb-4">Distribusi per Kategori</h3>
+                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                </div>
+                <div class="content-card">
+                    <h3 class="text-lg font-semibold mb-4">Status Ekonomi Penerima</h3>
+                    <canvas id="economicChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Detail Modal -->
+<div id="detail-modal" class="modal-mobile hidden">
+    <div class="modal-content-mobile">
+        <div class="modal-header">
+            <h3 id="modal-title" class="modal-title">Detail</h3>
+            <button id="close-modal" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="modal-content">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'admin/js/beneficiaries/common.js' %}"></script>
+<script src="{% static 'admin/js/beneficiaries/index.js' %}"></script>
+{% endblock %}

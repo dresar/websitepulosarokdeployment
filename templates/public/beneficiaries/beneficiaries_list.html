@@ -1,0 +1,331 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* Custom styles for enhanced functionality */
+    .beneficiary-card {
+        transition: all 0.3s ease;
+    }
+    
+    .beneficiary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .beneficiary-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .filter-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .dark .filter-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    .pagination-button:hover {
+        transform: translateY(-1px);
+    }
+    
+    .pagination-button:active {
+        transform: scale(0.95);
+    }
+</style>
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 lg:py-16 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/80 to-blue-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Daftar Penerima Bantuan</h1>
+            <p class="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl mx-auto leading-relaxed">
+                Informasi transparansi penyaluran bantuan kepada masyarakat Desa Pulosarok
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="min-h-screen bg-gray-50 dark:bg-dark-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Stats Card -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-6 mb-8 text-white">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="stat-item">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">{{ total_beneficiaries|default:0 }}</h2>
+                    <p class="text-sm opacity-90">Total Penerima</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">{{ categories.count|default:0 }}</h2>
+                    <p class="text-sm opacity-90">Kategori Bantuan</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">{{ page_obj.paginator.count|default:0 }}</h2>
+                    <p class="text-sm opacity-90">Data Ditampilkan</p>
+                </div>
+                <div class="stat-item">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-1">{{ page_obj.paginator.num_pages|default:0 }}</h2>
+                    <p class="text-sm opacity-90">Halaman</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6 mb-8">
+            <form method="get" class="space-y-4 md:space-y-0 md:grid md:grid-cols-4 md:gap-4">
+                <div class="space-y-2">
+                    <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Cari Nama/Kategori
+                    </label>
+                    <input type="text" 
+                           id="search" 
+                           name="search" 
+                           value="{{ search_query|default:'' }}"
+                           placeholder="Masukkan nama atau kategori..."
+                           class="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-dark-700 dark:text-white">
+                </div>
+                <div class="space-y-2">
+                    <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Kategori
+                    </label>
+                    <select id="category" 
+                            name="category"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-dark-700 dark:text-white">
+                        <option value="">Semua Kategori</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:'s' %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label for="economic_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Status Ekonomi
+                    </label>
+                    <select id="economic_status" 
+                            name="economic_status"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-dark-700 dark:text-white">
+                        <option value="">Semua Status</option>
+                        {% for status_key, status_label in economic_statuses %}
+                            <option value="{{ status_key }}" {% if current_economic_status == status_key %}selected{% endif %}>
+                                {{ status_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Aksi
+                    </label>
+                    <div class="flex space-x-2">
+                        <button type="submit" 
+                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-search mr-2"></i>Cari
+                        </button>
+                        <a href="{% url 'beneficiaries:beneficiaries_list' %}" 
+                           class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-undo mr-2"></i>Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results -->
+        {% if page_obj %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {% for beneficiary in page_obj %}
+                    <div class="beneficiary-card bg-white dark:bg-dark-800 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-dark-700">
+                        <div class="flex justify-between items-start mb-4 pb-4 border-b border-gray-200 dark:border-dark-600">
+                            <h3 class="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ beneficiary.person.name }}
+                            </h3>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                {{ beneficiary.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">NIK</p>
+                                    <p class="text-xs sm:text-sm text-gray-900 dark:text-white">{{ beneficiary.person.nik }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">Kategori</p>
+                                    <a href="{% url 'beneficiaries:category_detail' beneficiary.category.id %}" 
+                                       class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                                        {{ beneficiary.category.name }}
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">Status Ekonomi</p>
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                                        {% if beneficiary.economic_status == 'sangat_miskin' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                        {% elif beneficiary.economic_status == 'miskin' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                        {% elif beneficiary.economic_status == 'rentan_miskin' %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                        {% else %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% endif %}">
+                                        {{ beneficiary.get_economic_status_display }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">Anggota Keluarga</p>
+                                    <p class="text-xs sm:text-sm text-gray-900 dark:text-white">{{ beneficiary.family_members_count }} orang</p>
+                                </div>
+                            </div>
+                            
+                            {% if beneficiary.monthly_income %}
+                            <div>
+                                <p class="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">Pendapatan Bulanan</p>
+                                <p class="text-sm text-gray-900 dark:text-white">Rp {{ beneficiary.monthly_income|floatformat:0 }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div>
+                                <p class="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">Tanggal Registrasi</p>
+                                <p class="text-sm text-gray-900 dark:text-white">{{ beneficiary.registration_date|date:"d F Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <div class="flex justify-center items-center space-x-2 mt-8">
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_economic_status %}economic_status={{ current_economic_status }}&{% endif %}page=1" 
+                           class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_economic_status %}economic_status={{ current_economic_status }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+                           class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg font-medium">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'3' %}
+                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_economic_status %}economic_status={{ current_economic_status }}&{% endif %}page={{ num }}" 
+                               class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors duration-200">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_economic_status %}economic_status={{ current_economic_status }}&{% endif %}page={{ page_obj.next_page_number }}" 
+                           class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_economic_status %}economic_status={{ current_economic_status }}&{% endif %}page={{ page_obj.paginator.num_pages }}" 
+                           class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="bg-gray-100 dark:bg-dark-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-search text-3xl text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Tidak ada data penerima bantuan</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">Coba ubah filter pencarian Anda</p>
+                <a href="{% url 'beneficiaries:beneficiaries_list' %}" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                    <i class="fas fa-refresh mr-2"></i>Lihat Semua Data
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+// Enhanced beneficiaries list functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter change
+    const categorySelect = document.getElementById('category');
+    const economicStatusSelect = document.getElementById('economic_status');
+    
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+    
+    if (economicStatusSelect) {
+        economicStatusSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+    
+    // Enhanced search with debouncing
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 3 || this.value.length === 0) {
+                    this.form.submit();
+                }
+            }, 500);
+        });
+    }
+    
+    // Add loading states
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mencari...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+    
+    // Animate cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all beneficiary cards
+    document.querySelectorAll('.beneficiary-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock extra_js %}

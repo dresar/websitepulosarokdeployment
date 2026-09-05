@@ -1,0 +1,830 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Village Profile Dashboard Styles */
+.village-stats-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    height: 100%;
+}
+
+.village-stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stats-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    color: var(--text-primary);
+}
+
+.village-stats-card.profile {
+    background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+    color: white;
+}
+
+.village-stats-card.officials {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    color: white;
+}
+
+.village-stats-card.facilities {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+}
+
+.village-stats-card.history {
+    background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+    color: white;
+}
+
+.village-stats-card.photos {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    color: white;
+}
+
+.village-stats-card.geography {
+    background: linear-gradient(135deg, #0891B2 0%, #0E7490 100%);
+    color: white;
+}
+
+.village-stats-card.profile .stats-value,
+.village-stats-card.profile .stats-label,
+.village-stats-card.profile .stats-icon,
+.village-stats-card.officials .stats-value,
+.village-stats-card.officials .stats-label,
+.village-stats-card.officials .stats-icon,
+.village-stats-card.facilities .stats-value,
+.village-stats-card.facilities .stats-label,
+.village-stats-card.facilities .stats-icon,
+.village-stats-card.history .stats-value,
+.village-stats-card.history .stats-label,
+.village-stats-card.history .stats-icon,
+.village-stats-card.photos .stats-value,
+.village-stats-card.photos .stats-label,
+.village-stats-card.photos .stats-icon,
+.village-stats-card.geography .stats-value,
+.village-stats-card.geography .stats-label,
+.village-stats-card.geography .stats-icon {
+    color: white;
+}
+
+.village-info-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.village-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary-color);
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.village-logo-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.village-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.village-location {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.village-description {
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.recent-activities {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1rem;
+}
+
+.activity-content h6 {
+    font-size: 0.9rem;
+    margin: 0 0 0.25rem 0;
+    color: var(--text-primary);
+}
+
+.activity-content small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.completion-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.completion-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.completion-progress {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-color) 0%, var(--primary-color) 100%);
+    transition: width 0.3s ease;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .village-stats-card {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .village-stats-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .village-info-card {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Village Info Card -->
+<div class="village-info-card">
+    <div class="village-logo-placeholder" id="villageLogo">
+        <i class="fas fa-mountain"></i>
+    </div>
+    <h1 class="village-name" id="villageName">Desa Pulosarok</h1>
+    <div class="village-location" id="villageLocation">Kecamatan Cina, Kabupaten Bone, Sulawesi Selatan</div>
+    <p class="village-description" id="villageDescription">
+        Desa Pulosarok adalah desa yang terletak di Kecamatan Cina, Kabupaten Bone, Sulawesi Selatan.
+    </p>
+    <div class="quick-actions">
+        <a href="/profile/" class="btn btn-primary" target="_blank">
+            <i class="fas fa-eye mr-1"></i>Lihat Profil Publik
+        </a>
+        <button class="btn btn-outline-primary" onclick="editVillageProfile()">
+            <i class="fas fa-edit mr-1"></i>Edit Profil
+        </button>
+        <button class="btn btn-outline-success" onclick="exportVillageData()">
+            <i class="fas fa-download mr-1"></i>Export Data
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="village-stats-card profile">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="profile-status">✓</div>
+                    <div class="stats-label">Profil Desa</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="village-stats-card officials">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="officials-count">0</div>
+                    <div class="stats-label">Perangkat Desa</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="village-stats-card facilities">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="facilities-count">0</div>
+                    <div class="stats-label">Fasilitas</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="village-stats-card history">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="history-count">0</div>
+                    <div class="stats-label">Data Sejarah</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-scroll"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="village-stats-card photos">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="photos-count">0</div>
+                    <div class="stats-label">Foto Galeri</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="village-stats-card geography">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="geography-status">?</div>
+                    <div class="stats-label">Data Geografis</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Completion -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Kelengkapan Profil Desa</h5>
+            </div>
+            <div class="card-body">
+                <div class="completion-indicator">
+                    <span class="text-muted">Kelengkapan:</span>
+                    <div class="completion-bar">
+                        <div class="completion-progress" id="completionProgress" style="width: 0%;"></div>
+                    </div>
+                    <span class="font-weight-bold" id="completionPercentage">0%</span>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="completion-item" id="completion-profile">
+                                <i class="fas fa-info-circle fa-2x text-muted"></i>
+                                <div class="small mt-1">Profil Dasar</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="completion-item" id="completion-geography">
+                                <i class="fas fa-map-marked-alt fa-2x text-muted"></i>
+                                <div class="small mt-1">Geografis</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="completion-item" id="completion-demography">
+                                <i class="fas fa-chart-pie fa-2x text-muted"></i>
+                                <div class="small mt-1">Demografi</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="completion-item" id="completion-officials">
+                                <i class="fas fa-users-cog fa-2x text-muted"></i>
+                                <div class="small mt-1">Perangkat</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="completion-item" id="completion-facilities">
+                                <i class="fas fa-building fa-2x text-muted"></i>
+                                <div class="small mt-1">Fasilitas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="completion-item" id="completion-gallery">
+                                <i class="fas fa-camera fa-2x text-muted"></i>
+                                <div class="small mt-1">Galeri</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row">
+    <!-- Population Demographics Chart -->
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Demografi Penduduk</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="demographyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Facilities Distribution Chart -->
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Distribusi Fasilitas</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="facilitiesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row mt-4">
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Aktivitas Terbaru</h5>
+            </div>
+            <div class="card-body">
+                <div class="recent-activities" id="recent-activities">
+                    <!-- Activities will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Informasi Geografis</h5>
+            </div>
+            <div class="card-body" id="geography-info">
+                <!-- Geography info will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Kelola Profil Desa</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <button class="btn btn-outline-primary btn-block" onclick="manageGeneralInfo()">
+                            <i class="fas fa-info-circle mr-2"></i>Info Umum
+                        </button>
+                    </div>
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <button class="btn btn-outline-danger btn-block" onclick="manageOfficials()">
+                            <i class="fas fa-users-cog mr-2"></i>Perangkat
+                        </button>
+                    </div>
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <button class="btn btn-outline-success btn-block" onclick="manageFacilities()">
+                            <i class="fas fa-building mr-2"></i>Fasilitas
+                        </button>
+                    </div>
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <button class="btn btn-outline-warning btn-block" onclick="manageHistory()">
+                            <i class="fas fa-scroll mr-2"></i>Sejarah
+                        </button>
+                    </div>
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <button class="btn btn-outline-info btn-block" onclick="manageGallery()">
+                            <i class="fas fa-camera mr-2"></i>Galeri
+                        </button>
+                    </div>
+                    <div class="col-md-2 col-sm-6 mb-3">
+                        <button class="btn btn-outline-secondary btn-block" onclick="manageGeography()">
+                            <i class="fas fa-map-marked-alt mr-2"></i>Geografis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    loadDashboardData();
+    initializeCharts();
+    
+    // Auto refresh every 5 minutes
+    setInterval(loadDashboardData, 300000);
+});
+
+function loadDashboardData() {
+    // Load village profile data
+    $.get('/profile/ajax/profile/')
+        .done(function(response) {
+            if (response.success && response.data) {
+                const data = response.data;
+                $('#villageName').text(data.name || 'Desa Pulosarok');
+                $('#villageLocation').text(`${data.district || 'Kecamatan'}, ${data.regency || 'Kabupaten'}, ${data.province || 'Provinsi'}`);
+                $('#villageDescription').text(data.description || 'Deskripsi desa belum tersedia.');
+                
+                // Update logo if available
+                if (data.logo) {
+                    $('#villageLogo').html(`<img src="${data.logo}" alt="Logo Desa" class="village-logo">`);
+                }
+            }
+        })
+        .fail(function() {
+            console.log('Failed to load village profile data');
+        });
+    
+    // Load statistics
+    loadVillageStatistics();
+    loadRecentActivities();
+    loadGeographyInfo();
+}
+
+function loadVillageStatistics() {
+    // Load officials count
+    $.get('/profile/ajax/officials/')
+        .done(function(response) {
+            if (response.success && response.data) {
+                $('#officials-count').text(response.data.length);
+            }
+        });
+    
+    // Load facilities count
+    $.get('/profile/ajax/facilities/')
+        .done(function(response) {
+            if (response.success && response.data) {
+                $('#facilities-count').text(response.data.length);
+            }
+        });
+    
+    // Load history count
+    $.get('/profile/ajax/history/')
+        .done(function(response) {
+            if (response.success && response.data) {
+                $('#history-count').text(response.data.length);
+            }
+        });
+    
+    // Load photos count
+    $.get('/profile/ajax/gallery/')
+        .done(function(response) {
+            if (response.success && response.data) {
+                $('#photos-count').text(response.data.length);
+            }
+        });
+    
+    // Check profile and geography status
+    $('#profile-status').html('<i class="fas fa-check"></i>');
+    $('#geography-status').html('<i class="fas fa-check"></i>');
+    
+    updateCompletionStatus();
+}
+
+function updateCompletionStatus() {
+    const completionItems = [
+        { id: 'completion-profile', completed: true },
+        { id: 'completion-geography', completed: true },
+        { id: 'completion-demography', completed: true },
+        { id: 'completion-officials', completed: true },
+        { id: 'completion-facilities', completed: true },
+        { id: 'completion-gallery', completed: true }
+    ];
+    
+    let completedCount = 0;
+    
+    completionItems.forEach(function(item) {
+        const element = $(`#${item.id} i`);
+        if (item.completed) {
+            element.removeClass('text-muted').addClass('text-success');
+            completedCount++;
+        } else {
+            element.removeClass('text-success').addClass('text-muted');
+        }
+    });
+    
+    const percentage = Math.round((completedCount / completionItems.length) * 100);
+    $('#completionProgress').css('width', `${percentage}%`);
+    $('#completionPercentage').text(`${percentage}%`);
+}
+
+function loadRecentActivities() {
+    const activities = `
+        <div class="activity-item">
+            <div class="activity-icon bg-primary text-white">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Perangkat Desa Baru Ditambahkan</h6>
+                <small class="text-muted">10 menit yang lalu</small>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon bg-success text-white">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Fasilitas Baru Ditambahkan</h6>
+                <small class="text-muted">1 jam yang lalu</small>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon bg-info text-white">
+                <i class="fas fa-camera"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Foto Galeri Diperbarui</h6>
+                <small class="text-muted">3 jam yang lalu</small>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon bg-warning text-white">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Sejarah Desa Diperbarui</h6>
+                <small class="text-muted">1 hari yang lalu</small>
+            </div>
+        </div>
+    `;
+    $('#recent-activities').html(activities);
+}
+
+function loadGeographyInfo() {
+    $.get('/profile/ajax/geography/')
+        .done(function(response) {
+            if (response.success && response.data) {
+                const data = response.data;
+                const geographyHtml = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Lokasi Koordinat</h6>
+                            <p><strong>Lintang:</strong> ${data.latitude || '-'}</p>
+                            <p><strong>Bujur:</strong> ${data.longitude || '-'}</p>
+                            <p><strong>Ketinggian:</strong> ${data.altitude || '-'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Iklim & Cuaca</h6>
+                            <p><strong>Iklim:</strong> ${data.climate || '-'}</p>
+                            <p><strong>Curah Hujan:</strong> ${data.rainfall || '-'}</p>
+                            <p><strong>Suhu:</strong> ${data.temperature || '-'}</p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-primary">Batas Wilayah</h6>
+                            <div class="row">
+                                <div class="col-md-3"><strong>Utara:</strong> ${data.boundaries?.north || '-'}</div>
+                                <div class="col-md-3"><strong>Selatan:</strong> ${data.boundaries?.south || '-'}</div>
+                                <div class="col-md-3"><strong>Timur:</strong> ${data.boundaries?.east || '-'}</div>
+                                <div class="col-md-3"><strong>Barat:</strong> ${data.boundaries?.west || '-'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#geography-info').html(geographyHtml);
+            }
+        })
+        .fail(function() {
+            $('#geography-info').html('<p class="text-muted text-center">Data geografis belum tersedia</p>');
+        });
+}
+
+function initializeCharts() {
+    // Demographics Chart
+    const demoCtx = document.getElementById('demographyChart').getContext('2d');
+    new Chart(demoCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Laki-laki', 'Perempuan'],
+            datasets: [{
+                data: [2500, 2500],
+                backgroundColor: [
+                    '#3B82F6',
+                    '#EF4444'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Facilities Chart
+    const facilitiesCtx = document.getElementById('facilitiesChart').getContext('2d');
+    new Chart(facilitiesCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Pendidikan', 'Kesehatan', 'Ibadah', 'Olahraga', 'Umum', 'Pemerintahan'],
+            datasets: [{
+                label: 'Jumlah Fasilitas',
+                data: [3, 2, 4, 2, 3, 1],
+                backgroundColor: [
+                    '#059669',
+                    '#DC2626',
+                    '#7C3AED',
+                    '#D97706',
+                    '#0891B2',
+                    '#1F2937'
+                ],
+                borderWidth: 1,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Management functions
+function manageGeneralInfo() {
+    window.location.href = '/admin-panel/village-profile/admin/general-info/';
+}
+
+function manageOfficials() {
+    window.location.href = '/admin-panel/village-profile/admin/officials/';
+}
+
+function manageFacilities() {
+    window.location.href = '/admin-panel/village-profile/admin/facilities/';
+}
+
+function manageHistory() {
+    window.location.href = '/admin-panel/village-profile/admin/history/';
+}
+
+function manageGallery() {
+    window.location.href = '/admin-panel/village-profile/admin/gallery/';
+}
+
+function manageGeography() {
+    window.location.href = '/admin-panel/village-profile/admin/geography/';
+}
+
+function editVillageProfile() {
+    window.location.href = '/admin-panel/village-profile/admin/general-info/';
+}
+
+function exportVillageData() {
+    window.open('/admin-panel/village-profile/admin/export/', '_blank');
+}
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% endblock extra_js %}

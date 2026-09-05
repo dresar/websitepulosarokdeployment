@@ -1,0 +1,834 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/business-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-components.css' %}">
+<style>
+/* Enhanced Detail Page Styles */
+.detail-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.detail-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 25px rgba(111, 66, 193, 0.3);
+}
+
+.detail-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.detail-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.detail-badges {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.detail-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.detail-badge-category {
+    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+    color: white;
+}
+
+.detail-badge-status {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.detail-badge-status-inactive {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.detail-badge-status-pending {
+    background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+    color: white;
+}
+
+.detail-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.detail-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.detail-card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #6f42c1;
+    padding: 1.5rem;
+}
+
+.detail-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.detail-card-title i {
+    color: #6f42c1;
+    font-size: 1.1rem;
+}
+
+.detail-card-body {
+    padding: 2rem;
+}
+
+.detail-info-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #6f42c1;
+    transition: all 0.3s ease;
+}
+
+.detail-info-row:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.detail-info-label {
+    font-weight: 700;
+    color: #495057;
+    min-width: 150px;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-info-value {
+    color: #2c3e50;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.detail-info-value a {
+    color: #6f42c1;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.detail-info-value a:hover {
+    color: #5a32a3;
+    text-decoration: underline;
+}
+
+.detail-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-rating .fas {
+    color: #ffc107;
+    font-size: 1.2rem;
+}
+
+.detail-rating .far {
+    color: #dee2e6;
+    font-size: 1.2rem;
+}
+
+.detail-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.detail-price-unit {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.detail-action-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.detail-action-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+    color: white;
+    padding: 1.5rem;
+}
+
+.detail-action-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.detail-action-body {
+    padding: 2rem;
+}
+
+.detail-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    text-decoration: none;
+}
+
+.detail-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    text-decoration: none;
+}
+
+.detail-btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+    color: white;
+    border-color: #ffc107;
+}
+
+.detail-btn-warning:hover {
+    background: linear-gradient(135deg, #ff8f00 0%, #ff6f00 100%);
+    color: white;
+}
+
+.detail-btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    border-color: #6c757d;
+}
+
+.detail-btn-secondary:hover {
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    color: white;
+}
+
+.detail-btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-color: #dc3545;
+}
+
+.detail-btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    color: white;
+}
+
+.detail-file-btn {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-color: #007bff;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    width: auto;
+    display: inline-flex;
+    margin-bottom: 0;
+}
+
+.detail-file-btn:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    color: white;
+}
+
+/* Sertifikat Preview Styles */
+.sertifikat-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sertifikat-image-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.sertifikat-thumbnail {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #e9ecef;
+}
+
+.sertifikat-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    border-color: #6f42c1;
+}
+
+.sertifikat-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.sertifikat-actions .detail-file-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Image Modal Styles */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    animation: fadeIn 0.3s ease;
+}
+
+.image-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    animation: zoomIn 0.3s ease;
+}
+
+.image-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.image-modal-close:hover {
+    background: rgba(0,0,0,0.8);
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .detail-container {
+        padding: 1rem 0;
+    }
+    
+    .detail-header {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .detail-title {
+        font-size: 1.5rem;
+    }
+    
+    .detail-card-body {
+        padding: 1.5rem;
+    }
+    
+    .detail-info-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .detail-info-label {
+        min-width: auto;
+        font-size: 0.85rem;
+    }
+    
+    .detail-badges {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .detail-action-body {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .detail-header {
+        padding: 1rem;
+    }
+    
+    .detail-title {
+        font-size: 1.25rem;
+    }
+    
+    .detail-card-body {
+        padding: 1rem;
+    }
+    
+    .detail-action-body {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="container-fluid">
+        <!-- Header Section -->
+        <div class="detail-header">
+            <h1 class="detail-title">{{ layanan.nama }}</h1>
+            <p class="detail-subtitle">Detail lengkap layanan jasa</p>
+            <div class="detail-badges">
+                <span class="detail-badge detail-badge-category">
+                    <i class="fas fa-tag"></i> {{ layanan.get_kategori_display }}
+                </span>
+                <span class="detail-badge {% if layanan.status == 'aktif' %}detail-badge-status{% elif layanan.status == 'tidak_aktif' %}detail-badge-status-inactive{% else %}detail-badge-status-pending{% endif %}">
+                    {% if layanan.status == 'aktif' %}
+                        <i class="fas fa-check-circle"></i> Aktif
+                    {% elif layanan.status == 'tidak_aktif' %}
+                        <i class="fas fa-times-circle"></i> Tidak Aktif
+                    {% else %}
+                        <i class="fas fa-clock"></i> Pending
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+
+            <!-- Informasi Dasar -->
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-info-circle"></i>Informasi Dasar Layanan
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Nama Layanan:</div>
+                        <div class="detail-info-value">{{ layanan.nama|default:"-" }}</div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Kategori:</div>
+                        <div class="detail-info-value">
+                            <span class="detail-badge detail-badge-category">
+                                {{ layanan.get_kategori_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Deskripsi:</div>
+                        <div class="detail-info-value">{{ layanan.deskripsi|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informasi Penyedia -->
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-user"></i>Informasi Penyedia
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Nama Penyedia:</div>
+                        <div class="detail-info-value">{{ layanan.penyedia|default:"-" }}</div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Telepon:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.telepon %}
+                                <a href="tel:{{ layanan.telepon }}">
+                                    <i class="fas fa-phone"></i> {{ layanan.telepon }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Email:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.email %}
+                                <a href="mailto:{{ layanan.email }}">
+                                    <i class="fas fa-envelope"></i> {{ layanan.email }}
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Website:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.website %}
+                                <a href="{{ layanan.website }}" target="_blank">
+                                    <i class="fas fa-globe"></i> {{ layanan.website }}
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Alamat:</div>
+                        <div class="detail-info-value">{{ layanan.alamat|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengalaman & Kualitas -->
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-star"></i>Pengalaman & Kualitas
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Pengalaman:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.pengalaman %}
+                                <i class="fas fa-calendar-alt"></i> {{ layanan.pengalaman }} tahun
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Rating:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.rating %}
+                                <div class="detail-rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= layanan.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ml-2">{{ layanan.rating }}</span>
+                                </div>
+                            {% else %}
+                                Belum ada rating
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Sertifikat:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.sertifikat %}
+                                <div class="sertifikat-preview">
+                                    {% if layanan.sertifikat.url|slice:"-4:" == ".jpg" or layanan.sertifikat.url|slice:"-4:" == ".png" or layanan.sertifikat.url|slice:"-5:" == ".jpeg" or layanan.sertifikat.url|slice:"-4:" == ".gif" or layanan.sertifikat.url|slice:"-5:" == ".webp" %}
+                                        <!-- Preview untuk gambar -->
+                                        <div class="sertifikat-image-preview">
+                                            <img src="{{ layanan.sertifikat.url }}" alt="Sertifikat" class="sertifikat-thumbnail" onclick="openImageModal('{{ layanan.sertifikat.url }}')">
+                                            <div class="sertifikat-actions">
+                                                <a href="{{ layanan.sertifikat.url }}" target="_blank" class="detail-file-btn">
+                                                    <i class="fas fa-external-link-alt"></i> Buka Gambar
+                                                </a>
+                                                <a href="{{ layanan.sertifikat.url }}" download class="detail-file-btn">
+                                                    <i class="fas fa-download"></i> Download
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <!-- Link download untuk file non-gambar -->
+                                        <a href="{{ layanan.sertifikat.url }}" target="_blank" class="detail-file-btn">
+                                            <i class="fas fa-file-pdf"></i> Lihat Sertifikat
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Harga & Satuan -->
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-dollar-sign"></i>Harga & Satuan
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Harga:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.harga_min and layanan.harga_max %}
+                                <div class="detail-price">
+                                    <i class="fas fa-money-bill-wave"></i> 
+                                    {{ layanan.harga_min|currency_idr }} - {{ layanan.harga_max|currency_idr }}
+                                </div>
+                                <div class="detail-price-unit">{{ layanan.get_satuan_harga_display }}</div>
+                            {% else %}
+                                Hubungi penyedia
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waktu & Area Layanan -->
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-clock"></i>Waktu & Area Layanan
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Waktu Layanan:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.waktu_layanan %}
+                                <i class="fas fa-clock"></i> {{ layanan.waktu_layanan }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Area Layanan:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.area_layanan %}
+                                <i class="fas fa-map-marker-alt"></i> {{ layanan.area_layanan }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keunggulan -->
+            {% if layanan.keunggulan %}
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-trophy"></i>Keunggulan
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Keunggulan:</div>
+                        <div class="detail-info-value">{{ layanan.keunggulan }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Syarat & Ketentuan -->
+            {% if layanan.syarat_ketentuan %}
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-file-contract"></i>Syarat & Ketentuan
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Syarat & Ketentuan:</div>
+                        <div class="detail-info-value">{{ layanan.syarat_ketentuan }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Action Buttons Sidebar -->
+        <div class="col-lg-4">
+            <div class="detail-action-card">
+                <div class="detail-action-header">
+                    <h5 class="detail-action-title">
+                        <i class="fas fa-cogs"></i>Aksi
+                    </h5>
+                </div>
+                <div class="detail-action-body">
+                    <a href="{% url 'admin_panel:layanan_jasa_edit' layanan.id %}" class="detail-btn detail-btn-warning">
+                        <i class="fas fa-edit"></i>Edit Layanan
+                    </a>
+                    <a href="{% url 'admin_panel:layanan_jasa_list' %}" class="detail-btn detail-btn-secondary">
+                        <i class="fas fa-arrow-left"></i>Kembali ke Daftar
+                    </a>
+                    <a href="{% url 'admin_panel:layanan_jasa_delete' layanan.id %}" 
+                       class="detail-btn detail-btn-danger"
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus layanan jasa {{ layanan.nama }}?')">
+                        <i class="fas fa-trash"></i>Hapus Layanan
+                    </a>
+                </div>
+            </div>
+
+            <!-- Informasi Tambahan -->
+            <div class="detail-card">
+                <div class="detail-card-header">
+                    <h5 class="detail-card-title">
+                        <i class="fas fa-info"></i>Informasi Tambahan
+                    </h5>
+                </div>
+                <div class="detail-card-body">
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">ID Layanan:</div>
+                        <div class="detail-info-value">#{{ layanan.id }}</div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Dibuat:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.created_at %}
+                                <i class="fas fa-calendar-plus"></i> {{ layanan.created_at|date:"d F Y, H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <div class="detail-info-label">Diperbarui:</div>
+                        <div class="detail-info-value">
+                            {% if layanan.updated_at %}
+                                <i class="fas fa-calendar-check"></i> {{ layanan.updated_at|date:"d F Y, H:i" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Image Modal -->
+<div id="imageModal" class="image-modal">
+    <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+    <img class="image-modal-content" id="modalImage">
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh status badge color
+document.addEventListener('DOMContentLoaded', function() {
+    const statusBadge = document.querySelector('.status-badge');
+    if (statusBadge) {
+        const status = statusBadge.classList[1].replace('status-', '');
+        console.log('Layanan Status:', status);
+    }
+    
+    const kategoriBadge = document.querySelector('.kategori-badge');
+    if (kategoriBadge) {
+        const kategori = kategoriBadge.classList[1].replace('kategori-', '');
+        console.log('Layanan Kategori:', kategori);
+    }
+});
+
+// Image Modal Functions
+function openImageModal(imageUrl) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    
+    modal.classList.add('show');
+    modalImg.src = imageUrl;
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = 'auto'; // Restore scrolling
+}
+
+// Close modal when clicking outside the image
+document.getElementById('imageModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+</script>
+{% endblock extra_js %}

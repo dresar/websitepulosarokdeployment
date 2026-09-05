@@ -1,0 +1,613 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Posyandu Dashboard Styles - Bootstrap 4.6.2 Compatible */
+.stats-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.15s ease-in-out;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    height: 100%;
+    margin-bottom: 1rem;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.stats-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #495057;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+    color: #495057;
+}
+
+.stats-card.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    color: white !important;
+}
+
+.stats-card.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+    color: white !important;
+}
+
+.stats-card.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+    color: white !important;
+}
+
+.stats-card.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+    color: white !important;
+}
+
+.stats-card.bg-success .stats-value,
+.stats-card.bg-success .stats-label,
+.stats-card.bg-success .stats-icon,
+.stats-card.bg-info .stats-value,
+.stats-card.bg-info .stats-label,
+.stats-card.bg-info .stats-icon,
+.stats-card.bg-warning .stats-value,
+.stats-card.bg-warning .stats-label,
+.stats-card.bg-warning .stats-icon,
+.stats-card.bg-danger .stats-value,
+.stats-card.bg-danger .stats-label,
+.stats-card.bg-danger .stats-icon {
+    color: white !important;
+}
+
+.btn-outline-pink {
+    color: #e83e8c;
+    border-color: #e83e8c;
+}
+
+.btn-outline-pink:hover {
+    color: #fff;
+    background-color: #e83e8c;
+    border-color: #e83e8c;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.recent-activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.recent-activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1rem;
+}
+
+.activity-content h6 {
+    font-size: 0.9rem;
+    margin: 0 0 0.25rem 0;
+    color: #495057;
+}
+
+.activity-content small {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-value {
+        font-size: 2rem;
+    }
+    
+    .stats-icon {
+        font-size: 2rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-card {
+        padding: 1rem;
+    }
+    
+    .stats-value {
+        font-size: 1.75rem;
+    }
+    
+    .stats-icon {
+        font-size: 1.75rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard Posyandu
+                </h2>
+                <p class="text-muted mb-0">Ringkasan data dan statistik posyandu</p>
+            </div>
+            <div>
+                <a href="{% url 'admin_panel:dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Kembali ke Dashboard Utama
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card bg-success">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="total-locations">{{ total_locations|default:0 }}</div>
+                    <div class="stats-label">Total Lokasi Posyandu</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card bg-info">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="active-locations">{{ active_locations|default:0 }}</div>
+                    <div class="stats-label">Lokasi Aktif</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card bg-warning">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="total-kaders">{{ total_kaders|default:0 }}</div>
+                    <div class="stats-label">Total Kader Posyandu</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-user-nurse"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card bg-danger">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="total-schedules">{{ total_schedules|default:0 }}</div>
+                    <div class="stats-label">Jadwal Aktif</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Health Statistics -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="total-health-records">{{ total_health_records|default:0 }}</div>
+                    <div class="stats-label">Rekam Kesehatan</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="total-immunizations">{{ total_immunizations|default:0 }}</div>
+                    <div class="stats-label">Data Imunisasi</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-syringe"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="total-ibu-hamil">{{ total_ibu_hamil|default:0 }}</div>
+                    <div class="stats-label">Ibu Hamil</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-baby"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stats-value" id="stunting-count">{{ stunting_count|default:0 }}</div>
+                    <div class="stats-label">Kasus Stunting</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Summary -->
+<div class="row">
+    <!-- Monthly Health Records Summary -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Rekam Kesehatan Bulanan</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Bulan</th>
+                                <th>Rekam Kesehatan</th>
+                                <th>Imunisasi</th>
+                                <th>Ibu Hamil</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Januari</td>
+                                <td><span class="badge bg-success">45</span></td>
+                                <td><span class="badge bg-info">32</span></td>
+                                <td><span class="badge bg-warning">12</span></td>
+                            </tr>
+                            <tr>
+                                <td>Februari</td>
+                                <td><span class="badge bg-success">38</span></td>
+                                <td><span class="badge bg-info">28</span></td>
+                                <td><span class="badge bg-warning">15</span></td>
+                            </tr>
+                            <tr>
+                                <td>Maret</td>
+                                <td><span class="badge bg-success">52</span></td>
+                                <td><span class="badge bg-info">41</span></td>
+                                <td><span class="badge bg-warning">18</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Health Status Distribution -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Distribusi Status Kesehatan</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Sehat</span>
+                    <span class="badge bg-success">65%</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Kurang Gizi</span>
+                    <span class="badge bg-warning">20%</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Stunting</span>
+                    <span class="badge bg-danger">10%</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Obesitas</span>
+                    <span class="badge bg-info">5%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row mt-4">
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Aktivitas Terbaru</h5>
+            </div>
+            <div class="card-body" id="recent-activities">
+                <!-- Activities will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Jadwal Mendatang</h5>
+            </div>
+            <div class="card-body" id="upcoming-schedules">
+                <!-- Schedules will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-bolt mr-2"></i>Aksi Cepat Posyandu
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:locations' %}" class="btn btn-outline-primary btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                            <span>Lokasi Posyandu</span>
+                            <small class="text-muted">Kelola lokasi</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:kaders' %}" class="btn btn-outline-info btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-user-nurse fa-2x mb-2"></i>
+                            <span>Kader Posyandu</span>
+                            <small class="text-muted">Kelola kader</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:schedules' %}" class="btn btn-outline-success btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                            <span>Jadwal Kegiatan</span>
+                            <small class="text-muted">Kelola jadwal</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:health_records' %}" class="btn btn-outline-warning btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-heartbeat fa-2x mb-2"></i>
+                            <span>Rekam Kesehatan</span>
+                            <small class="text-muted">Data kesehatan</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:ibu_hamil' %}" class="btn btn-outline-pink btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-baby fa-2x mb-2"></i>
+                            <span>Ibu Hamil</span>
+                            <small class="text-muted">Data kehamilan</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:immunizations' %}" class="btn btn-outline-secondary btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-syringe fa-2x mb-2"></i>
+                            <span>Imunisasi</span>
+                            <small class="text-muted">Data vaksin</small>
+                        </a>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:nutrition_data' %}" class="btn btn-outline-dark btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-apple-alt fa-2x mb-2"></i>
+                            <span>Data Gizi</span>
+                            <small class="text-muted">Status gizi</small>
+                        </a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <a href="{% url 'admin_panel:posyandu:stunting_data' %}" class="btn btn-outline-danger btn-block h-100 d-flex flex-column justify-content-center">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <span>Data Stunting</span>
+                            <small class="text-muted">Monitoring stunting</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadDashboardData();
+    
+    // Auto refresh every 5 minutes
+    setInterval(loadDashboardData, 300000);
+});
+
+function loadDashboardData() {
+    // Load statistics
+    $.get('{% url "admin_panel:posyandu:api_statistics" %}')
+        .done(function(data) {
+            $('#total-locations').text(data.total_locations || 0);
+            $('#active-locations').text(data.active_locations || 0);
+            $('#total-kaders').text(data.total_kaders || 0);
+            $('#total-schedules').text(data.total_schedules || 0);
+            $('#total-health-records').text(data.total_health_records || 0);
+            $('#total-immunizations').text(data.total_immunizations || 0);
+            $('#total-ibu-hamil').text(data.total_ibu_hamil || 0);
+            $('#stunting-count').text(data.total_stunting_data || 0);
+        })
+        .fail(function() {
+            console.log('Failed to load statistics');
+        });
+    
+    loadRecentActivities();
+    loadUpcomingSchedules();
+}
+
+function loadRecentActivities() {
+    const activities = `
+        <div class="recent-activity-item">
+            <div class="activity-icon bg-success text-white">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Pemeriksaan Kesehatan Baru</h6>
+                <small class="text-muted">5 menit yang lalu</small>
+            </div>
+        </div>
+        <div class="recent-activity-item">
+            <div class="activity-icon bg-info text-white">
+                <i class="fas fa-syringe"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Imunisasi Balita</h6>
+                <small class="text-muted">15 menit yang lalu</small>
+            </div>
+        </div>
+        <div class="recent-activity-item">
+            <div class="activity-icon bg-warning text-white">
+                <i class="fas fa-calendar"></i>
+            </div>
+            <div class="activity-content">
+                <h6>Jadwal Baru Ditambahkan</h6>
+                <small class="text-muted">1 jam yang lalu</small>
+            </div>
+        </div>
+    `;
+    $('#recent-activities').html(activities);
+}
+
+function loadUpcomingSchedules() {
+    $.get('{% url "admin_panel:posyandu:api_schedule_list" %}')
+        .done(function(data) {
+            let schedulesHtml = '';
+            if (data.results && data.results.length > 0) {
+                data.results.slice(0, 5).forEach(function(schedule) {
+                    schedulesHtml += `
+                        <div class="recent-activity-item">
+                            <div class="activity-icon bg-primary text-white">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6>${schedule.title}</h6>
+                                <small class="text-muted">${schedule.schedule_date} - ${schedule.start_time}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                schedulesHtml = '<p class="text-muted text-center">Tidak ada jadwal mendatang</p>';
+            }
+            $('#upcoming-schedules').html(schedulesHtml);
+        })
+        .fail(function() {
+            $('#upcoming-schedules').html('<p class="text-danger text-center">Gagal memuat jadwal</p>');
+        });
+}
+
+// Toast notification function with spam prevention
+let toastCount = 0;
+const maxToasts = 2;
+const toastMessages = new Set();
+
+function showToast(type, message) {
+    // Cek apakah pesan yang sama sudah ditampilkan
+    if (toastMessages.has(message)) {
+        return;
+    }
+    
+    // Batasi jumlah toast
+    if (toastCount >= maxToasts) {
+        return;
+    }
+    
+    toastMessages.add(message);
+    toastCount++;
+    
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    
+    // Auto remove setelah 3 detik
+    setTimeout(() => {
+        toast.remove();
+        toastCount--;
+        toastMessages.delete(message);
+    }, 3000);
+}
+</script>
+{% endblock extra_js %}

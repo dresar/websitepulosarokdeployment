@@ -1,0 +1,772 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/business-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-components.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-local-colors.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/business-autocomplete.css' %}">
+<style>
+/* Enhanced UMKM Form Styles */
+.business-form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* Force form fields to be interactive */
+input, textarea, select {
+    pointer-events: auto !important;
+    cursor: text !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    pointer-events: auto !important;
+    cursor: text !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+}
+
+/* Currency Input Styling */
+.currency-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.currency-input-wrapper input {
+    flex: 1;
+}
+
+.currency-display {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9rem;
+    color: #495057;
+    min-width: 120px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.business-form-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.business-form-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.business-form-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.business-form-body {
+    padding: 2rem;
+}
+
+.business-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.business-form-col-6 {
+    display: flex;
+    flex-direction: column;
+}
+
+.business-form-col-12 {
+    display: flex;
+    flex-direction: column;
+}
+
+.business-form-section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #28a745;
+}
+
+.business-form-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.business-form-section-title i {
+    color: #28a745;
+    font-size: 1rem;
+}
+
+.business-form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.business-form-label-required::after {
+    content: ' *';
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.business-form-control,
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="datetime-local"],
+textarea,
+select {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    width: 100%;
+    pointer-events: auto;
+    cursor: text;
+    user-select: text;
+}
+
+.business-form-control:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    background: white;
+    outline: none;
+}
+
+.business-form-control:hover,
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="number"]:hover,
+input[type="tel"]:hover,
+input[type="url"]:hover,
+input[type="date"]:hover,
+input[type="datetime-local"]:hover,
+textarea:hover,
+select:hover {
+    border-color: #28a745;
+    background: white;
+}
+
+.business-form-help {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.business-form-feedback {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.business-form-feedback-invalid {
+    color: #dc3545;
+}
+
+.business-form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e2e8f0;
+    gap: 1rem;
+}
+
+.business-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.business-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.business-btn:hover::before {
+    left: 100%;
+}
+
+.business-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.business-btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.business-btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.business-btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-color: #28a745;
+}
+
+.business-btn-success:hover {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    border-color: #20c997;
+    color: white;
+}
+
+/* Form Validation States */
+.business-form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.business-form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .business-form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .business-form-body {
+        padding: 1.5rem;
+    }
+    
+    .business-form-footer {
+        flex-direction: column;
+        padding: 1rem 1.5rem;
+    }
+    
+    .business-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .business-form-body {
+        padding: 1rem;
+    }
+    
+    .business-form-footer {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="business-container business-umkm-theme">
+    <div class="business-page-header">
+        <div>
+            <h1 class="business-page-title">
+                <i class="fas fa-industry"></i>{% if is_edit %}Edit UMKM{% else %}Tambah UMKM{% endif %}
+            </h1>
+            <p class="business-page-subtitle">{% if is_edit %}Perbarui data UMKM{% else %}Isi form untuk menambahkan UMKM baru{% endif %}</p>
+        </div>
+        <div class="business-page-actions">
+            <a href="{% url 'admin_panel:umkm_list' %}" class="business-btn business-btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>Kembali
+            </a>
+        </div>
+    </div>
+
+    <div class="business-form-container">
+        <div class="business-form-header">
+            <h3 class="business-form-title">
+                <i class="fas fa-industry"></i>Form Data UMKM
+            </h3>
+        </div>
+        <div class="business-form-body">
+            <form method="post" class="needs-validation" novalidate id="umkmForm">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <!-- Debug Information -->
+                {% if form %}
+                    <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <strong>Debug:</strong> Form object exists. Fields: {{ form.fields.keys|join:", " }}
+                    </div>
+                {% else %}
+                    <div style="background: #ffcccc; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <strong>Error:</strong> Form object is None!
+                    </div>
+                {% endif %}
+                
+                <!-- Informasi Dasar Usaha -->
+                <div class="business-form-section">
+                    <h4 class="business-form-section-title">
+                        <i class="fas fa-building"></i> Informasi Dasar Usaha
+                    </h4>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_nama_usaha">
+                                Nama Usaha
+                            </label>
+                            {{ form.nama_usaha }}
+                            {% for error in form.nama_usaha.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_jenis_usaha">
+                                Jenis Usaha
+                            </label>
+                            {{ form.jenis_usaha }}
+                            {% for error in form.jenis_usaha.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_skala_usaha">
+                                Skala Usaha
+                            </label>
+                            {{ form.skala_usaha }}
+                            {% for error in form.skala_usaha.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_tanggal_mulai">
+                                Tanggal Mulai Usaha
+                            </label>
+                            {{ form.tanggal_mulai }}
+                            {% for error in form.tanggal_mulai.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Pemilik -->
+                <div class="business-form-section">
+                    <h4 class="business-form-section-title">
+                        <i class="fas fa-user"></i> Informasi Pemilik
+                    </h4>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_pemilik">
+                                Pemilik Usaha
+                            </label>
+                            {{ form.pemilik }}
+                            {% for error in form.pemilik.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_telepon">
+                                Nomor Telepon
+                            </label>
+                            {{ form.telepon }}
+                            {% for error in form.telepon.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label" for="id_email">
+                                Email
+                            </label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <label class="business-form-label" for="id_nomor_izin">
+                                Nomor Izin Usaha
+                            </label>
+                            {{ form.nomor_izin }}
+                            {% for error in form.nomor_izin.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label" for="id_nik_pemilik">
+                                NIK Pemilik
+                            </label>
+                            {{ form.nik_pemilik }}
+                            {% for error in form.nik_pemilik.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <!-- Empty column for layout balance -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alamat -->
+                <div class="business-form-section">
+                    <h4 class="business-form-section-title">
+                        <i class="fas fa-map-marker-alt"></i> Alamat
+                    </h4>
+                    <div class="business-form-row">
+                        <div class="business-form-col-12">
+                            <label class="business-form-label business-form-label-required" for="id_alamat_usaha">
+                                Alamat Usaha
+                            </label>
+                            {{ form.alamat_usaha }}
+                            {% for error in form.alamat_usaha.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-12">
+                            <label class="business-form-label business-form-label-required" for="id_alamat_pemilik">
+                                Alamat Pemilik
+                            </label>
+                            {{ form.alamat_pemilik }}
+                            {% for error in form.alamat_pemilik.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Keuangan -->
+                <div class="business-form-section">
+                    <h4 class="business-form-section-title">
+                        <i class="fas fa-chart-line"></i> Informasi Keuangan
+                    </h4>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_modal_awal">
+                                Modal Awal
+                            </label>
+                            <div class="currency-input-wrapper">
+                                {{ form.modal_awal }}
+                                <span class="currency-display" id="modal_awal_display">
+                                    Rp 0,00
+                                </span>
+                            </div>
+                            {% for error in form.modal_awal.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_omzet_bulanan">
+                                Omzet Bulanan
+                            </label>
+                            <div class="currency-input-wrapper">
+                                {{ form.omzet_bulanan }}
+                                <span class="currency-display" id="omzet_bulanan_display">
+                                    Rp 0,00
+                                </span>
+                            </div>
+                            {% for error in form.omzet_bulanan.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_jumlah_karyawan">
+                                Jumlah Karyawan
+                            </label>
+                            {{ form.jumlah_karyawan }}
+                            {% for error in form.jumlah_karyawan.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="business-form-col-6">
+                            <label class="business-form-label business-form-label-required" for="id_status">
+                                Status Usaha
+                            </label>
+                            {{ form.status }}
+                            {% for error in form.status.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Produk -->
+                <div class="business-form-section">
+                    <h4 class="business-form-section-title">
+                        <i class="fas fa-box"></i> Informasi Produk
+                    </h4>
+                    <div class="business-form-row">
+                        <div class="business-form-col-12">
+                            <label class="business-form-label business-form-label-required" for="id_produk_utama">
+                                Produk Utama
+                            </label>
+                            {{ form.produk_utama }}
+                            {% for error in form.produk_utama.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-12">
+                            <label class="business-form-label business-form-label-required" for="id_target_pasar">
+                                Target Pasar
+                            </label>
+                            {{ form.target_pasar }}
+                            {% for error in form.target_pasar.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="business-form-row">
+                        <div class="business-form-col-12">
+                            <label class="business-form-label" for="id_keterangan">
+                                Keterangan Tambahan
+                            </label>
+                            {{ form.keterangan }}
+                            {% for error in form.keterangan.errors %}
+                                <div class="business-form-feedback business-form-feedback-invalid">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="business-form-footer">
+                    <a href="{% url 'admin_panel:umkm_list' %}" class="business-btn business-btn-outline-secondary">
+                        <i class="fas fa-times"></i>Batal
+                    </a>
+                    <button type="submit" class="business-btn business-btn-success">
+                        <i class="fas fa-save"></i>{% if is_edit %}Simpan Perubahan{% else %}Simpan{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin/business-autocomplete.js' %}"></script>
+<script src="{% static 'js/admin/business-notifications.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize autocomplete for penduduk fields
+    const autocompleteFields = document.querySelectorAll('.penduduk-autocomplete');
+    autocompleteFields.forEach(field => {
+        new PendudukAutocomplete(field);
+    });
+    
+    // Override API endpoint for business forms
+    if (window.PendudukAutocomplete) {
+        const originalSearchPenduduk = PendudukAutocomplete.prototype.searchPenduduk;
+        PendudukAutocomplete.prototype.searchPenduduk = async function(query) {
+            if (query.length < 2) {
+                this.hideDropdown();
+                return;
+            }
+            
+            this.showLoading();
+            
+            try {
+                console.log('Searching penduduk with query:', query);
+                const response = await fetch(`/admin-panel/business/api/penduduk-search/?q=${encodeURIComponent(query)}`);
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success && data.results) {
+                    this.results = data.results;
+                    console.log('Found results:', this.results.length);
+                    this.displayResults();
+                } else {
+                    console.error('API error:', data.message);
+                    this.results = [];
+                    this.showError(data.message || 'Terjadi kesalahan saat mencari data');
+                }
+            } catch (error) {
+                console.error('Error searching penduduk:', error);
+                this.results = [];
+                this.showError('Terjadi kesalahan saat mencari data');
+            }
+        };
+        
+        const originalLoadInitialData = PendudukAutocomplete.prototype.loadInitialData;
+        PendudukAutocomplete.prototype.loadInitialData = async function() {
+            try {
+                const response = await fetch('/admin-panel/business/api/penduduk-search/?limit=10');
+                const data = await response.json();
+                
+                if (data.success && data.results) {
+                    this.results = data.results;
+                } else {
+                    console.error('Error loading initial data:', data.message);
+                    this.results = [];
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                this.results = [];
+            }
+        };
+    }
+    
+    // Initialize currency display updates
+    const modalAwalInput = document.getElementById('id_modal_awal');
+    const omzetBulananInput = document.getElementById('id_omzet_bulanan');
+    const modalAwalDisplay = document.getElementById('modal_awal_display');
+    const omzetBulananDisplay = document.getElementById('omzet_bulanan_display');
+    
+    function formatCurrency(value) {
+        if (!value || value === '') return 'Rp 0,00';
+        
+        const numValue = parseFloat(value) || 0;
+        const formatted = numValue.toLocaleString('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        return formatted;
+    }
+    
+    function updateCurrencyDisplay(input, display) {
+        if (input && display) {
+            display.textContent = formatCurrency(input.value);
+        }
+    }
+    
+    // Update currency display on input
+    if (modalAwalInput && modalAwalDisplay) {
+        // Update initial value
+        updateCurrencyDisplay(modalAwalInput, modalAwalDisplay);
+        
+        modalAwalInput.addEventListener('input', function() {
+            updateCurrencyDisplay(modalAwalInput, modalAwalDisplay);
+        });
+    }
+    
+    if (omzetBulananInput && omzetBulananDisplay) {
+        // Update initial value
+        updateCurrencyDisplay(omzetBulananInput, omzetBulananDisplay);
+        
+        omzetBulananInput.addEventListener('input', function() {
+            updateCurrencyDisplay(omzetBulananInput, omzetBulananDisplay);
+        });
+    }
+    
+    // Ensure all form fields are clickable and interactive
+    const formFields = document.querySelectorAll('input, textarea, select');
+    formFields.forEach(field => {
+        field.style.pointerEvents = 'auto';
+        field.style.cursor = 'text';
+        field.style.userSelect = 'text';
+        field.style.webkitUserSelect = 'text';
+        field.style.mozUserSelect = 'text';
+        field.style.msUserSelect = 'text';
+        field.removeAttribute('readonly');
+        field.removeAttribute('disabled');
+        
+        // Force enable the field
+        field.disabled = false;
+        field.readOnly = false;
+        
+        // Add event listeners to ensure interaction
+        field.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.focus();
+        });
+        
+        field.addEventListener('focus', function(e) {
+            e.stopPropagation();
+        });
+    });
+    
+    // Additional check after a short delay
+    setTimeout(() => {
+        const allFields = document.querySelectorAll('input, textarea, select');
+        allFields.forEach(field => {
+            if (field.disabled) {
+                field.disabled = false;
+            }
+            if (field.readOnly) {
+                field.readOnly = false;
+            }
+            field.style.pointerEvents = 'auto';
+        });
+    }, 1000);
+    
+    // Form is now handled by business-notifications.js
+    console.log('UMKM form initialized with autocomplete, currency display, and notifications');
+});
+</script>
+{% endblock extra_js %}

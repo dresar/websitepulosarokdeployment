@@ -1,0 +1,391 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Ibu Hamil{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .info-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .info-item {
+        margin-bottom: 15px;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .info-value {
+        color: #6c757d;
+        line-height: 1.5;
+    }
+    .pregnancy-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .status-normal { background: #e8f5e8; color: #2e7d32; }
+    .status-risiko { background: #fff3e0; color: #f57c00; }
+    .status-tinggi { background: #ffcdd2; color: #d32f2f; }
+    .checkup-list {
+        list-style: none;
+        padding: 0;
+    }
+    .checkup-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #007bff;
+    }
+    .checkup-date {
+        font-weight: 600;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    .checkup-details {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Detail Header -->
+    <div class="detail-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:ibu_hamil' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-baby mr-3"></i>
+                        Detail Ibu Hamil
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Informasi lengkap data ibu hamil</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="#" class="btn btn-light" onclick="editIbuHamil()">
+                    <i class="fas fa-edit mr-2"></i>
+                    Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mother Information -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-user mr-2"></i>
+            Informasi Ibu
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Nama Ibu</div>
+                    <div class="info-value" id="motherName">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">NIK</div>
+                    <div class="info-value" id="motherNik">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tanggal Lahir</div>
+                    <div class="info-value" id="motherBirthDate">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Umur</div>
+                    <div class="info-value" id="motherAge">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Alamat</div>
+                    <div class="info-value" id="motherAddress">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">No. Telepon</div>
+                    <div class="info-value" id="motherPhone">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Pekerjaan</div>
+                    <div class="info-value" id="motherJob">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Posyandu</div>
+                    <div class="info-value" id="posyanduName">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pregnancy Information -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-heart mr-2"></i>
+            Informasi Kehamilan
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Usia Kehamilan</div>
+                    <div class="info-value" id="pregnancyAge">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">HPHT (Hari Pertama Haid Terakhir)</div>
+                    <div class="info-value" id="lastMenstruation">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">HPL (Hari Perkiraan Lahir)</div>
+                    <div class="info-value" id="estimatedBirthDate">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Kehamilan Ke-</div>
+                    <div class="info-value" id="pregnancyNumber">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status Risiko</div>
+                    <div class="info-value">
+                        <span class="pregnancy-status status-normal" id="riskStatus">-</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Berat Badan Sebelum Hamil</div>
+                    <div class="info-value" id="prePregnancyWeight">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Health Status -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-heartbeat mr-2"></i>
+            Status Kesehatan Saat Ini
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Berat Badan Saat Ini</div>
+                    <div class="info-value" id="currentWeight">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tinggi Badan</div>
+                    <div class="info-value" id="height">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tekanan Darah</div>
+                    <div class="info-value" id="bloodPressure">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Kadar Hemoglobin</div>
+                    <div class="info-value" id="hemoglobin">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Protein Urin</div>
+                    <div class="info-value" id="proteinUrine">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Lingkar Lengan Atas</div>
+                    <div class="info-value" id="armCircumference">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkup History -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-clipboard-list mr-2"></i>
+            Riwayat Pemeriksaan
+        </h5>
+        <ul class="checkup-list" id="checkupHistory">
+            <!-- Checkup history will be loaded here -->
+        </ul>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-lightbulb mr-2"></i>
+            Rekomendasi
+        </h5>
+        <div class="info-value" id="recommendations">-</div>
+    </div>
+
+    <!-- Notes -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-sticky-note mr-2"></i>
+            Catatan
+        </h5>
+        <div class="info-value" id="notes">-</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadIbuHamilDetail();
+});
+
+function loadIbuHamilDetail() {
+    const ibuHamilId = getIbuHamilIdFromUrl();
+    if (ibuHamilId) {
+        $.ajax({
+            url: `{% url 'posyandu:api_ibu_hamil_update' 0 %}`.replace('0', ibuHamilId),
+            method: 'GET',
+            success: function(response) {
+                populateIbuHamilDetail(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading ibu hamil detail:', error);
+                showAlert('Error loading data', 'danger');
+            }
+        });
+    }
+}
+
+function getIbuHamilIdFromUrl() {
+    const path = window.location.pathname;
+    const matches = path.match(/ibu-hamil\/(\d+)/);
+    return matches ? matches[1] : null;
+}
+
+function populateIbuHamilDetail(data) {
+    // Mother Information
+    $('#motherName').text(data.penduduk_name || '-');
+    $('#motherNik').text(data.penduduk_nik || '-');
+    $('#motherBirthDate').text(data.penduduk_birth_date || '-');
+    $('#motherAge').text(calculateAge(data.penduduk_birth_date) + ' tahun');
+    $('#motherAddress').text(data.penduduk_address || '-');
+    $('#motherPhone').text(data.penduduk_phone || '-');
+    $('#motherJob').text(data.penduduk_occupation || '-');
+    $('#posyanduName').text(data.posyandu_name || '-');
+    
+    // Pregnancy Information
+    $('#pregnancyAge').text(data.usia_kehamilan + ' minggu');
+    $('#lastMenstruation').text(data.tanggal_hpht || '-');
+    $('#estimatedBirthDate').text(data.tanggal_perkiraan_lahir || '-');
+    $('#pregnancyNumber').text(data.riwayat_kehamilan || '-');
+    
+    // Risk Status
+    const riskStatus = data.risiko_kehamilan === 'tinggi' ? 'status-tinggi' : 'status-normal';
+    const riskText = data.risiko_kehamilan === 'tinggi' ? 'Risiko Tinggi' : 'Risiko Rendah';
+    $('#riskStatus').removeClass('status-normal status-risiko status-tinggi').addClass(riskStatus).text(riskText);
+    
+    $('#prePregnancyWeight').text(data.berat_badan_sebelum_hamil ? data.berat_badan_sebelum_hamil + ' kg' : '-');
+    
+    // Current Health Status
+    $('#currentWeight').text(data.berat_badan_sebelum_hamil ? data.berat_badan_sebelum_hamil + ' kg' : '-');
+    $('#height').text(data.tinggi_badan ? data.tinggi_badan + ' cm' : '-');
+    $('#bloodPressure').text('-');
+    $('#hemoglobin').text('-');
+    $('#proteinUrine').text('-');
+    $('#armCircumference').text('-');
+    
+    // Recommendations
+    let recommendations = '';
+    if (data.usia_kehamilan <= 12) {
+        recommendations = 'Trimester 1: Konsumsi asam folat, hindari rokok dan alkohol, lakukan pemeriksaan rutin.';
+    } else if (data.usia_kehamilan <= 27) {
+        recommendations = 'Trimester 2: Perbanyak protein dan kalsium, lakukan USG, perhatikan gerakan janin.';
+    } else {
+        recommendations = 'Trimester 3: Siapkan persalinan, perhatikan tanda-tanda persalinan, istirahat cukup.';
+    }
+    $('#recommendations').text(recommendations);
+    
+    // Notes
+    $('#notes').text(data.keterangan || 'Tidak ada catatan.');
+    
+    // Checkup History (placeholder)
+    $('#checkupHistory').html('<li class="checkup-item"><div class="checkup-date">Belum ada riwayat pemeriksaan</div><div class="checkup-details">Data pemeriksaan akan ditampilkan di sini</div></li>');
+}
+
+function editIbuHamil() {
+    const ibuHamilId = getIbuHamilIdFromUrl();
+    if (ibuHamilId) {
+        window.location.href = `{% url 'admin_panel:posyandu:ibu_hamil_update' 0 %}`.replace('0', ibuHamilId);
+    }
+}
+
+function calculateAge(birthDate) {
+    if (!birthDate) return 0;
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    return Math.max(0, age);
+}
+
+// Show alert with spam prevention
+let alertCount = 0;
+const maxAlerts = 2;
+const alertMessages = new Set();
+
+function showAlert(message, type) {
+    if (alertMessages.has(message)) {
+        return;
+    }
+    
+    if (alertCount >= maxAlerts) {
+        return;
+    }
+    
+    alertMessages.add(message);
+    alertCount++;
+    
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    $('.container-fluid').prepend(alertHtml);
+    
+    setTimeout(function() {
+        $('.alert').first().fadeOut(function() {
+            $(this).remove();
+            alertCount--;
+            alertMessages.delete(message);
+        });
+    }, 3000);
+}
+</script>
+{% endblock %}
+

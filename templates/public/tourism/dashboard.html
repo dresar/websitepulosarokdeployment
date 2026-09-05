@@ -1,0 +1,535 @@
+{% extends 'public/base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block extra_css %}
+<style>
+    /* Tourism Dashboard Specific Styles */
+    .hero-section {
+        background: linear-gradient(135deg, #3B82F6 0%, #10B981 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%23ffffff" opacity="0.1"/></svg>');
+        background-size: 50% 100%;
+        animation: wave-animation 20s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+    }
+    
+    @keyframes wave-animation {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    
+    .tourism-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .tourism-card {
+        border-color: #374151;
+    }
+    
+    .tourism-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .tourism-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .featured-badge {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .category-badge {
+        background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .event-badge {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    .package-badge {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+    }
+    
+    /* Statistics Cards */
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .dark .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+        color: white;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .dark .stat-card:hover {
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 640px) {
+        .tourism-card {
+            margin-bottom: 0.5rem;
+        }
+        
+        .tourism-card .p-4 {
+            padding: 0.5rem;
+        }
+        
+        .tourism-card h3 {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        
+        .tourism-card p {
+            font-size: 0.625rem;
+            line-height: 0.875rem;
+        }
+        
+        .stat-card {
+            padding: 0.75rem;
+        }
+        
+        .hero-section {
+            padding: 1rem 0;
+        }
+        
+        .hero-section h1 {
+            font-size: 1.5rem;
+        }
+        
+        .hero-section p {
+            font-size: 0.875rem;
+        }
+    }
+    
+    /* Loading States */
+    .loading-skeleton {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Video Background */
+    .video-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-white py-16 sm:py-24 relative">
+    {% if hero_video %}
+    <video class="video-background" autoplay muted loop>
+        <source src="{{ hero_video.url }}" type="video/mp4">
+    </video>
+    {% elif hero_youtube %}
+    <div class="video-background">
+        <iframe src="{{ hero_youtube }}" frameborder="0" allowfullscreen></iframe>
+    </div>
+    {% elif hero_image %}
+    <div class="video-background" style="background-image: url('{{ hero_image.url }}'); background-size: cover; background-position: center;"></div>
+    {% endif %}
+    
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-3xl sm:text-4xl lg:text-6xl font-bold mb-6">
+                {{ dashboard_config.title|default:"Wisata Desa Pulosarok" }}
+            </h1>
+            <p class="text-lg sm:text-xl lg:text-2xl opacity-90 max-w-4xl mx-auto mb-8">
+                {{ dashboard_config.description|default:"Jelajahi keindahan alam, kekayaan budaya, dan kelezatan kuliner yang menanti Anda di setiap sudut desa kami." }}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{% url 'tourism:location_list' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <i class="fas fa-map-marker-alt mr-2"></i>Jelajahi Destinasi
+                </a>
+                <a href="{% url 'tourism:search' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-primary-600 transition-colors duration-200">
+                    <i class="fas fa-search mr-2"></i>Cari Wisata
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<div class="bg-gray-50 dark:bg-gray-800 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div class="stat-card">
+                <div class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">{{ total_locations }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Destinasi Wisata</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-3xl font-bold text-secondary-600 dark:text-secondary-400 mb-2">{{ total_categories }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Kategori Wisata</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">{{ total_events }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Event Wisata</div>
+            </div>
+            <div class="stat-card">
+                <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">{{ featured_packages.count }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Paket Wisata</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Locations Section -->
+{% if dashboard_config.show_featured_locations and featured_locations %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Destinasi Unggulan</h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Temukan destinasi wisata terbaik yang telah dipilih khusus untuk Anda
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for location in featured_locations %}
+            <div class="tourism-card bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                <div class="relative">
+                    {% if location.get_featured_image %}
+                    <img src="{{ location.get_featured_image }}" 
+                         alt="{{ location.title }}" 
+                         class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-image text-4xl text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-4 right-4">
+                        <span class="featured-badge">Unggulan</span>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                        {{ location.title }}
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                        {{ location.short_description }}
+                    </p>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="category-badge">{{ location.category.name }}</span>
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            <span>{{ location.location_type_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'tourism:location_detail' location.slug %}" 
+                       class="block w-full bg-primary-600 hover:bg-primary-700 text-white text-center font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                        <i class="fas fa-eye mr-2"></i>Lihat Detail
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories Section -->
+{% if dashboard_config.show_categories and categories %}
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Kategori Wisata</h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Jelajahi berbagai kategori wisata yang tersedia di desa kami
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for category in categories %}
+            <div class="tourism-card bg-white dark:bg-gray-800 rounded-lg p-6 text-center">
+                <div class="mb-4">
+                    {% if category.icon %}
+                    <i class="{{ category.icon }} text-4xl text-primary-600 dark:text-primary-400"></i>
+                    {% else %}
+                    <i class="fas fa-tag text-4xl text-primary-600 dark:text-primary-400"></i>
+                    {% endif %}
+                </div>
+                
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {{ category.name }}
+                </h3>
+                
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    {{ category.description|truncatechars:80 }}
+                </p>
+                
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {{ category.location_count }} destinasi
+                </div>
+                
+                <a href="{% url 'tourism:category_detail' category.id %}" 
+                   class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
+                    <span>Jelajahi</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Upcoming Events Section -->
+{% if dashboard_config.show_events and upcoming_events %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Event Mendatang</h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Jangan lewatkan event-event menarik yang akan segera hadir
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for event in upcoming_events %}
+            <div class="tourism-card bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                <div class="relative">
+                    {% if event.image %}
+                    <img src="{{ event.image.url }}" 
+                         alt="{{ event.title }}" 
+                         class="w-full h-32 object-cover">
+                    {% else %}
+                    <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-calendar text-2xl text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-2 right-2">
+                        <span class="event-badge">{{ event.get_event_type_display }}</span>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        {{ event.title }}
+                    </h3>
+                    
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>{{ event.start_date|date:"d M Y" }}</span>
+                    </div>
+                    
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>{{ event.tourism_location.title }}</span>
+                    </div>
+                    
+                    <a href="{% url 'tourism:event_detail' event.id %}" 
+                       class="block w-full bg-orange-600 hover:bg-orange-700 text-white text-center font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-sm">
+                        <i class="fas fa-info-circle mr-1"></i>Detail Event
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Packages Section -->
+{% if dashboard_config.show_packages and featured_packages %}
+<section class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Paket Wisata Unggulan</h2>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Nikmati pengalaman wisata terbaik dengan paket-paket yang telah kami siapkan
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for package in featured_packages %}
+            <div class="tourism-card bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+                <div class="relative">
+                    {% if package.image %}
+                    <img src="{{ package.image.url }}" 
+                         alt="{{ package.title }}" 
+                         class="w-full h-32 object-cover">
+                    {% else %}
+                    <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-suitcase text-2xl text-gray-400"></i>
+                    </div>
+                    {% endif %}
+                    <div class="absolute top-2 right-2">
+                        <span class="package-badge">{{ package.get_package_type_display }}</span>
+                    </div>
+                </div>
+                
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                        {{ package.title }}
+                    </h3>
+                    
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                        <i class="fas fa-clock mr-2"></i>
+                        <span>{{ package.duration }}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-lg font-bold text-primary-600 dark:text-primary-400">
+                            {{ package.price|currency_idr }}
+                        </span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ package.currency }}
+                        </span>
+                    </div>
+                    
+                    <a href="{% url 'tourism:package_detail' package.id %}" 
+                       class="block w-full bg-green-600 hover:bg-green-700 text-white text-center font-medium py-2 px-3 rounded-lg transition-colors duration-200 text-sm">
+                        <i class="fas fa-shopping-cart mr-1"></i>Lihat Paket
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Call to Action Section -->
+<section class="py-16 bg-primary-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold mb-4">Siap Memulai Petualangan?</h2>
+        <p class="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+            Jelajahi keindahan alam dan kekayaan budaya Desa Pulosarok
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'tourism:location_list' %}" 
+               class="inline-flex items-center px-8 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                <i class="fas fa-map-marker-alt mr-2"></i>Jelajahi Semua Destinasi
+            </a>
+            <a href="{% url 'tourism:package_list' %}" 
+               class="inline-flex items-center px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-primary-600 transition-colors duration-200">
+                <i class="fas fa-suitcase mr-2"></i>Lihat Paket Wisata
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class TourismDashboard {
+    constructor() {
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.loadStatistics();
+    }
+    
+    setupEventListeners() {
+        // Add any interactive features here
+        console.log('Tourism Dashboard initialized');
+    }
+    
+    async loadStatistics() {
+        try {
+            // Load additional statistics if needed
+            console.log('Statistics loaded');
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+        }
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    new TourismDashboard();
+});
+</script>
+{% endblock %}
+

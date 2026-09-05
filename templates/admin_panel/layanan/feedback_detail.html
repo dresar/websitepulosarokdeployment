@@ -1,0 +1,443 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .layanan-wrapper {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .detail-card {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .detail-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: #fff;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .detail-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .detail-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    .stats-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+    }
+
+    .info-section {
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .info-section-title {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 1.5rem 2rem;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+
+    .info-section-title i {
+        margin-right: 0.75rem;
+        color: #007bff;
+        font-size: 1.2rem;
+    }
+
+    .info-section-content {
+        padding: 2rem;
+    }
+
+    .info-item {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        color: #2c3e50;
+        font-size: 1rem;
+        word-break: break-word;
+        font-weight: 500;
+    }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .badge-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+    }
+
+    .badge-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+        color: white;
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: #212529;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        color: #212529;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .message-content {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #007bff;
+        line-height: 1.6;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+
+    .reply-section {
+        background: #e3f2fd;
+        border-radius: 10px;
+        padding: 1.5rem;
+        border-left: 4px solid #28a745;
+        margin-top: 1rem;
+    }
+
+    .reply-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .reply-header i {
+        color: #28a745;
+        margin-right: 0.5rem;
+    }
+
+    .reply-header h6 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .reply-content {
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    .reply-meta {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .layanan-wrapper {
+            padding: 1rem 0;
+        }
+        
+        .page-header {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-header {
+            padding: 1.5rem;
+        }
+        
+        .detail-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .info-section-content {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="layanan-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>Detail Feedback</h4>
+                            <p class="text-muted mb-0">Detail lengkap feedback dari pengguna</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card mb-4">
+                    <div class="detail-header">
+                        <div class="stats-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <h1>Feedback #{{ feedback.id }}</h1>
+                        <p>Dari: {{ feedback.name }}</p>
+                    </div>
+                </div>
+
+                <!-- Feedback Information -->
+                <div class="info-section">
+                    <h5 class="info-section-title">
+                        <i class="fas fa-info-circle mr-2"></i>Informasi Feedback
+                    </h5>
+                    <div class="info-section-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Nama Pengirim</div>
+                                    <div class="info-value">{{ feedback.name }}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">
+                                        <a href="mailto:{{ feedback.email }}" class="text-decoration-none">
+                                            <i class="fas fa-envelope mr-1"></i>{{ feedback.email }}
+                                        </a>
+                                    </div>
+                                </div>
+                                {% if feedback.phone %}
+                                <div class="info-item">
+                                    <div class="info-label">Telepon</div>
+                                    <div class="info-value">
+                                        <a href="tel:{{ feedback.phone }}" class="text-decoration-none">
+                                            <i class="fas fa-phone mr-1"></i>{{ feedback.phone }}
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Rating</div>
+                                    <div class="info-value">
+                                        <span class="rating-stars">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= feedback.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                        <span class="text-muted ml-2">({{ feedback.rating }}/5)</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Kategori</div>
+                                    <div class="info-value">
+                                        <span class="badge badge-{% if feedback.category == 'general' %}info{% elif feedback.category == 'service' %}primary{% elif feedback.category == 'complaint' %}danger{% else %}warning{% endif %}">
+                                            {{ feedback.get_category_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">
+                                        <span class="badge badge-{% if feedback.is_read %}success{% else %}warning{% endif %}">
+                                            {% if feedback.is_read %}Sudah Dibaca{% else %}Belum Dibaca{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback Message -->
+                <div class="info-section">
+                    <h5 class="info-section-title">
+                        <i class="fas fa-comment-dots mr-2"></i>Pesan Feedback
+                    </h5>
+                    <div class="info-section-content">
+                        <div class="message-content">
+                            {{ feedback.message|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Reply -->
+                {% if feedback.reply %}
+                <div class="info-section">
+                    <h5 class="info-section-title">
+                        <i class="fas fa-reply mr-2"></i>Balasan Admin
+                    </h5>
+                    <div class="info-section-content">
+                        <div class="reply-section">
+                            <div class="reply-header">
+                                <i class="fas fa-user-shield"></i>
+                                <h6>Balasan dari Admin</h6>
+                            </div>
+                            <div class="reply-content">
+                                {{ feedback.reply|linebreaks }}
+                            </div>
+                            <div class="reply-meta">
+                                Dibalas pada: {{ feedback.replied_at|date:"d F Y, H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="info-section">
+                    <h5 class="info-section-title">
+                        <i class="fas fa-cogs mr-2"></i>Aksi
+                    </h5>
+                    <div class="info-section-content">
+                        <div class="btn-group">
+                            <a href="{% url 'admin_panel:layanan:feedback_form' %}?id={{ feedback.id }}" class="btn btn-warning">
+                                <i class="fas fa-edit mr-1"></i>Edit Feedback
+                            </a>
+                            {% if not feedback.is_read %}
+                            <a href="{% url 'admin_panel:layanan:feedback_mark_read' feedback.id %}" class="btn btn-success">
+                                <i class="fas fa-check mr-1"></i>Tandai Dibaca
+                            </a>
+                            {% endif %}
+                            {% if not feedback.reply %}
+                            <a href="{% url 'admin_panel:layanan:feedback_reply' feedback.id %}" class="btn btn-primary">
+                                <i class="fas fa-reply mr-1"></i>Balas Feedback
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'admin_panel:layanan:feedback_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-list mr-1"></i>Daftar Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

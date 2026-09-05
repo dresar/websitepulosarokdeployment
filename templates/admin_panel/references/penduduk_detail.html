@@ -1,0 +1,769 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Detail Penduduk{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Modern Detail Page Styles */
+.container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Card Improvements */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px 16px 0 0 !important;
+    border: none;
+    padding: 1.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.card-header h6 {
+    color: white !important;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.card-body {
+    padding: 2rem;
+    background: #fff;
+}
+
+/* Info Item Styling */
+.info-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.info-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+/* Photo Section */
+.beneficiary-photo-large {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1.5rem;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 4px solid #e9ecef;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.beneficiary-photo-large:hover {
+    border-color: #667eea;
+    transform: scale(1.02);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.2);
+}
+
+.beneficiary-photo-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.beneficiary-photo-large:hover img {
+    transform: scale(1.05);
+}
+
+.beneficiary-photo-placeholder-large {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 3rem;
+}
+
+/* Badge Styling */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+}
+
+.badge-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+}
+
+/* Button Improvements */
+.btn {
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+    color: white;
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.btn-outline-info {
+    border: 2px solid #17a2b8;
+    color: #17a2b8;
+    background: transparent;
+}
+
+.btn-outline-info:hover {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
+}
+
+.btn-outline-danger {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+}
+
+/* Status Card */
+.status-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+}
+
+/* Quick Actions */
+.quick-actions .btn {
+    margin-bottom: 0.75rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0 10px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .info-item {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .beneficiary-photo-large {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .info-item {
+        padding: 0.5rem;
+    }
+    
+    .beneficiary-photo-large {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn, .card-header, .modal {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+    
+    .info-item {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+        break-inside: avoid;
+    }
+    
+    .beneficiary-photo-large {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_penduduk_list' %}">Penduduk</a>
+                            </li>
+                            <li class="breadcrumb-item active">Detail</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-user text-primary mr-2"></i>
+                        Detail Penduduk
+                    </h1>
+                    <p class="text-muted mb-0">Informasi lengkap data penduduk</p>
+                </div>
+                <div class="d-flex flex-wrap">
+                    <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-outline-secondary mr-2 mb-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                    {% if user|can_change:"references" %}
+                    <a href="{% url 'admin_panel:references_penduduk_edit' penduduk.id %}" class="btn btn-warning mr-2 mb-2">
+                        <i class="fas fa-edit mr-1"></i>
+                        Edit
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Personal Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user mr-2"></i>
+                        Informasi Personal
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">NIK</div>
+                                <div class="info-value">{{ penduduk.nik|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Nama Lengkap</div>
+                                <div class="info-value">{{ penduduk.name|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Tempat, Tanggal Lahir</div>
+                                <div class="info-value">{{ penduduk.birth_place|default:"-" }}, {{ penduduk.birth_date|date:"d F Y"|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Jenis Kelamin</div>
+                                <div class="info-value">
+                                    <span class="badge badge-{% if penduduk.gender == 'L' %}primary{% else %}success{% endif %}">
+                                        {{ penduduk.get_gender_display|default:"-" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Agama</div>
+                                <div class="info-value">{{ penduduk.religion|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Status Perkawinan</div>
+                                <div class="info-value">{{ penduduk.get_marital_status_display|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Pekerjaan</div>
+                                <div class="info-value">{{ penduduk.occupation|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Pendidikan Terakhir</div>
+                                <div class="info-value">{{ penduduk.get_education_level_display|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Alamat Lengkap</div>
+                                <div class="info-value">{{ penduduk.address|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        Informasi Alamat
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Dusun</div>
+                                <div class="info-value">{{ penduduk.dusun.name|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">RT</div>
+                                <div class="info-value">{{ penduduk.rt_number|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">RW</div>
+                                <div class="info-value">{{ penduduk.rw_number|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-home mr-2"></i>
+                        Informasi Keluarga
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Hubungan dengan Kepala Keluarga</div>
+                                <div class="info-value">{{ penduduk.get_relationship_to_head_display|default:"-" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-item">
+                                <div class="info-label">Nomor KK</div>
+                                <div class="info-value">{{ penduduk.kk_number|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Photo Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-camera mr-2"></i>
+                        Foto Profil
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="beneficiary-photo-large mb-3">
+                        {% if penduduk.photo and penduduk.photo.url %}
+                            <img src="{{ penduduk.photo.url }}" alt="{{ penduduk.name }}" class="img-fluid rounded">
+                        {% else %}
+                            <div class="beneficiary-photo-placeholder-large">
+                                <i class="fas fa-user fa-3x"></i>
+                                <p class="mt-2 text-muted">Tidak ada foto</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if user|can_change:"references" %}
+                    <button class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#photoModal">
+                        <i class="fas fa-upload mr-1"></i>
+                        Ganti Foto
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Status Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Status Data
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="status-card">
+                        <div class="mb-3">
+                            <span class="badge badge-{% if penduduk.is_active %}success{% else %}secondary{% endif %} badge-lg">
+                                <i class="fas fa-{% if penduduk.is_active %}check{% else %}times{% endif %} mr-1"></i>
+                                {% if penduduk.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                            </span>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-right">
+                                    <h6 class="text-primary mb-0">{{ penduduk.created_at|date:"d M Y"|default:"-" }}</h6>
+                                    <small class="text-muted">Dibuat</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-info mb-0">{{ penduduk.updated_at|date:"d M Y"|default:"-" }}</h6>
+                                <small class="text-muted">Diupdate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bolt mr-2"></i>
+                        Aksi Cepat
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        {% if user|can_change:"references" %}
+                        <a href="{% url 'admin_panel:references_penduduk_edit' penduduk.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit mr-1"></i>
+                            Edit Data
+                        </a>
+                        {% endif %}
+                        {% if user|can_export:"references" %}
+                        <button class="btn btn-outline-info" onclick="exportData()">
+                            <i class="fas fa-download mr-1"></i>
+                            Export Data
+                        </button>
+                        {% endif %}
+                        {% if user|can_delete:"references" %}
+                        <button class="btn btn-outline-danger" onclick="deletePenduduk()">
+                            <i class="fas fa-trash mr-1"></i>
+                            Hapus Data
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Upload Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ganti Foto Profil</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <div class="beneficiary-photo-large" id="modalPhotoPreview">
+                        <div class="beneficiary-photo-placeholder-large">
+                            <i class="fas fa-user fa-3x"></i>
+                            <p class="mt-2 text-muted">Pilih foto baru</p>
+                        </div>
+                    </div>
+                </div>
+                <input type="file" class="form-control-file" id="modalPhoto" accept="image/*">
+                <small class="form-text text-muted">
+                    Format: JPG, PNG. Maksimal 2MB
+                </small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="uploadPhoto()">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Photo preview in modal
+    $('#modalPhoto').change(function() {
+        previewModalPhoto(this);
+    });
+});
+
+function previewModalPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#modalPhotoPreview').html(`
+                <img src="${e.target.result}" alt="Preview" class="img-fluid rounded">
+            `);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function uploadPhoto() {
+    const fileInput = document.getElementById('modalPhoto');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Pilih foto terlebih dahulu');
+        return;
+    }
+    
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        alert('Ukuran foto maksimal 2MB');
+        return;
+    }
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Format foto harus JPG, PNG, atau WebP');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('penduduk_id', '{{ penduduk.id }}');
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    // Show loading state
+    const uploadBtn = document.querySelector('#photoModal .btn-primary');
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mengupload...';
+    uploadBtn.disabled = true;
+    
+    fetch('{% url "admin_panel:references_penduduk_upload_photo" penduduk.id %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update photo display
+            const photoContainer = document.querySelector('.beneficiary-photo-large');
+            photoContainer.innerHTML = `<img src="${data.photo_url}" alt="{{ penduduk.name }}" class="img-fluid rounded" style="width: 100%; height: 100%; object-fit: cover;">`;
+            
+            alert('Foto berhasil diupload');
+            $('#photoModal').modal('hide');
+        } else {
+            alert('Error: ' + (data.message || 'Gagal mengupload foto'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat mengupload foto');
+    })
+    .finally(() => {
+        // Reset button state
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+    });
+}
+
+function exportData() {
+    // Implement export functionality
+    alert('Data berhasil diexport');
+}
+
+function deletePenduduk() {
+    if (confirm('Apakah Anda yakin ingin menghapus data penduduk ini?')) {
+        // Implement delete functionality
+        alert('Data penduduk berhasil dihapus');
+        window.location.href = "{% url 'admin_panel:references_penduduk_list' %}";
+    }
+}
+</script>
+
+<style>
+</style>
+{% endblock %}

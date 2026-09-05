@@ -1,0 +1,69 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-8 sm:py-12 overflow-hidden">
+    {% if village_profile.profile_image %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ village_profile.profile_image.url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/80 to-purple-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Perangkat Desa</h1>
+            <p class="text-sm sm:text-base opacity-90">Struktur organisasi dan perangkat Desa Pulosarok</p>
+        </div>
+    </div>
+</section>
+
+<!-- Officials Content -->
+<section class="py-4 sm:py-6 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if officials %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {% for official in officials %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 text-center hover:shadow-md transition-shadow duration-200">
+                {% if official.photo %}
+                    <img src="{{ official.photo.url }}" alt="{{ official.name }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-indigo-500 mx-auto mb-3">
+                {% else %}
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-500 flex items-center justify-center text-white mx-auto mb-3">
+                        <i class="fas fa-user text-lg sm:text-xl"></i>
+                    </div>
+                {% endif %}
+                <h4 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-1">{{ official.name }}</h4>
+                <p class="text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2">{{ official.position_display }}</p>
+                {% if official.education %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    <i class="fas fa-graduation-cap mr-1"></i>{{ official.education }}
+                </p>
+                {% endif %}
+                {% if official.phone %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    <i class="fas fa-phone mr-1"></i>{{ official.phone }}
+                </p>
+                {% endif %}
+                {% if official.email %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    <i class="fas fa-envelope mr-1"></i>{{ official.email }}
+                </p>
+                {% endif %}
+                {% if official.start_date %}
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    <i class="fas fa-calendar mr-1"></i>Mulai: {{ official.start_date|date:"M Y" }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 sm:py-12">
+            <i class="fas fa-users text-4xl sm:text-5xl text-gray-400 mb-3"></i>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">Data perangkat desa belum tersedia</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-500">Informasi perangkat desa akan segera ditambahkan</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

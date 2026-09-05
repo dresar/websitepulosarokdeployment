@@ -1,0 +1,693 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}{{ form_title|default:"Tambah Keluarga" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+    padding: 1.5rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.anggota-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.anggota-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.anggota-item:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.anggota-item.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e6f0ff 100%);
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background-color 0.3s ease;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.selected-anggota {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.selected-anggota .badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+}
+
+.breadcrumb {
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: #764ba2;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.custom-switch .custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid form-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_keluarga_list' %}">Keluarga</a>
+                            </li>
+                            <li class="breadcrumb-item active">{{ form_title|default:"Tambah" }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-{{ form_icon|default:'plus' }} text-primary mr-2"></i>
+                        {{ form_title|default:"Tambah Keluarga" }}
+                    </h1>
+                    <p class="text-muted mb-0">{{ form_subtitle|default:"Lengkapi data keluarga baru" }}</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'admin_panel:references_keluarga_list' %}" class="btn btn-outline-secondary mr-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                    <a href="{% url 'admin_panel:references_keluarga_list' %}" class="btn btn-success mr-2">
+                        <i class="fas fa-file-import mr-1"></i>
+                        Import Data
+                    </a>
+                    {% if keluarga %}
+                    <button type="submit" form="keluargaForm" class="btn btn-primary">
+                        <i class="fas fa-users mr-1"></i>
+                        Update Anggota
+                    </button>
+                    {% else %}
+                    <button type="submit" form="keluargaForm" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i>
+                        Simpan
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="keluargaForm" method="post" novalidate action="{% if keluarga %}{% url 'admin_panel:references_keluarga_update_anggota' keluarga.id %}{% else %}{% url 'admin_panel:references_keluarga_add' %}{% endif %}">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <div class="card shadow fade-in">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold">
+                            <i class="fas fa-home mr-2"></i>
+                            Informasi Keluarga
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% if keluarga %}
+                        <!-- Readonly mode for existing keluarga -->
+                        <div class="row">
+                            <!-- Nomor KK (Readonly) -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor KK</label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-id-card text-primary mr-2"></i>
+                                    <strong>{{ keluarga.nomor_kk|default:"-" }}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Nama Kepala Keluarga (Readonly) -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nama Kepala Keluarga</label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-user-tie text-primary mr-2"></i>
+                                    <strong>{{ keluarga.nama_kepala_keluarga|default:"-" }}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Alamat (Readonly) -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Alamat Lengkap</label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-map-marker-alt text-primary mr-2"></i>
+                                    {{ keluarga.alamat|default:"-" }}
+                                </div>
+                            </div>
+
+                            <!-- Dusun (Readonly) -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Dusun</label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-home text-primary mr-2"></i>
+                                    {{ keluarga.dusun.name|default:"-" }}
+                                </div>
+                            </div>
+
+                            <!-- RT (Readonly) -->
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">RT</label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-building text-primary mr-2"></i>
+                                    {{ keluarga.rt|default:"-" }}
+                                </div>
+                            </div>
+
+                            <!-- RW (Readonly) -->
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">RW</label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-city text-primary mr-2"></i>
+                                    {{ keluarga.rw|default:"-" }}
+                                </div>
+                            </div>
+
+                            <!-- Edit Button -->
+                            <div class="col-12 mb-3">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <strong>Informasi:</strong> Untuk mengedit data kepala keluarga, silakan 
+                                    {% if kepala_keluarga_id %}
+                                    <a href="{% url 'admin_panel:references_penduduk_edit' kepala_keluarga_id %}" class="alert-link">
+                                        klik di sini
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted">Data kepala keluarga tidak ditemukan</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Create mode for new keluarga -->
+                        <div class="row">
+                            <!-- Nomor KK -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nomor_kk" class="form-label">
+                                    Nomor KK <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nomor_kk" name="nomor_kk" 
+                                       value="{{ keluarga.nomor_kk|default:'' }}" required>
+                                <div class="invalid-feedback">
+                                    Nomor KK harus diisi dan terdiri dari 16 digit angka.
+                                </div>
+                            </div>
+
+                            <!-- Nama Kepala Keluarga -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nama_kepala_keluarga" class="form-label">
+                                    Nama Kepala Keluarga <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nama_kepala_keluarga" name="nama_kepala_keluarga" 
+                                       value="{{ keluarga.nama_kepala_keluarga|default:'' }}" required>
+                                <div class="invalid-feedback">
+                                    Nama kepala keluarga harus diisi.
+                                </div>
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="col-12 mb-3">
+                                <label for="alamat" class="form-label">
+                                    Alamat Lengkap <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="alamat" name="alamat" rows="3" required>{{ keluarga.alamat|default:'' }}</textarea>
+                                <div class="invalid-feedback">
+                                    Alamat harus diisi.
+                                </div>
+                            </div>
+
+                            <!-- Dusun -->
+                            <div class="col-md-6 mb-3">
+                                <label for="dusun" class="form-label">
+                                    Dusun <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="dusun" name="dusun" required>
+                                    <option value="">Pilih Dusun</option>
+                                    {% for dusun in dusun_list %}
+                                    <option value="{{ dusun.id }}" {% if keluarga.dusun.id == dusun.id %}selected{% endif %}>{{ dusun.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Dusun harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- RT -->
+                            <div class="col-md-3 mb-3">
+                                <label for="rt" class="form-label">RT</label>
+                                <input type="number" class="form-control" id="rt" name="rt" 
+                                       value="{{ keluarga.rt|default:'' }}" min="1">
+                            </div>
+
+                            <!-- RW -->
+                            <div class="col-md-3 mb-3">
+                                <label for="rw" class="form-label">RW</label>
+                                <input type="number" class="form-control" id="rw" name="rw" 
+                                       value="{{ keluarga.rw|default:'' }}" min="1">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Anggota Keluarga Section -->
+                <div class="card shadow fade-in mt-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold">
+                            <i class="fas fa-users mr-2"></i>
+                            Anggota Keluarga
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="anggota-section">
+                            <!-- Search Box -->
+                            <div class="search-box mb-3">
+                                <label for="searchPenduduk" class="form-label">Cari Penduduk</label>
+                                <input type="text" class="form-control" id="searchPenduduk" placeholder="Ketik nama atau NIK penduduk...">
+                                <div class="search-results" id="searchResults"></div>
+                            </div>
+
+                            <!-- Selected Anggota -->
+                            <div class="selected-anggota" id="selectedAnggota">
+                                {% for anggota in current_anggota %}
+                                <span class="badge" data-id="{{ anggota.id }}">
+                                    <i class="fas fa-user mr-1"></i>
+                                    {{ anggota.name }} ({{ anggota.nik }})
+                                    <button type="button" class="btn-close" onclick="removeAnggota({{ anggota.id }})" style="margin-left: 5px;">×</button>
+                                </span>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Hidden inputs for selected anggota -->
+                            {% for anggota in current_anggota %}
+                            <input type="hidden" name="anggota_keluarga" value="{{ anggota.id }}">
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Status -->
+                <div class="card shadow mb-4 fade-in">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold">
+                            <i class="fas fa-toggle-on mr-2"></i>
+                            Status
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" 
+                                       {% if keluarga.is_active != False %}checked{% endif %}>
+                                <label class="custom-control-label" for="is_active">
+                                    Keluarga Aktif
+                                </label>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            Keluarga yang tidak aktif tidak akan muncul dalam laporan.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow fade-in">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            {% if keluarga %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-users mr-1"></i>
+                                Update Anggota
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i>
+                                Simpan Data
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'admin_panel:references_keluarga_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times mr-1"></i>
+                                Batal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedAnggota = new Set();
+let searchTimeout;
+
+$(document).ready(function() {
+    // Initialize selected anggota from existing data
+    {% for anggota in current_anggota %}
+    selectedAnggota.add({{ anggota.id }});
+    {% endfor %}
+    
+    // Form validation
+    $('#keluargaForm').on('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+        }
+    });
+    
+    // KK validation
+    $('#nomor_kk').on('input', function() {
+        validateKK(this);
+    });
+    
+    // Search penduduk
+    $('#searchPenduduk').on('input', function() {
+        const query = $(this).val();
+        if (query.length >= 2) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchPenduduk(query);
+            }, 300);
+        } else {
+            $('#searchResults').hide();
+        }
+    });
+    
+    // Hide search results when clicking outside
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.search-box').length) {
+            $('#searchResults').hide();
+        }
+    });
+});
+
+function searchPenduduk(query) {
+    // Show loading indicator
+    $('#searchResults').html('<div class="search-result-item"><i class="fas fa-spinner fa-spin mr-2"></i>Mencari...</div>').show();
+    
+    fetch(`/admin-panel/api/references/residents/search/?q=${encodeURIComponent(query)}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data && Array.isArray(data.data)) {
+                displaySearchResults(data.data);
+            } else {
+                console.error('API returned error or invalid data structure:', data);
+                $('#searchResults').html('<div class="search-result-item">Tidak ada data ditemukan</div>').show();
+            }
+        })
+        .catch(error => {
+            console.error('Error searching penduduk:', error);
+            $('#searchResults').html('<div class="search-result-item">Error saat mencari data</div>').show();
+        });
+}
+
+function displaySearchResults(pendudukList) {
+    const resultsContainer = $('#searchResults');
+    resultsContainer.empty();
+    
+    if (pendudukList.length === 0) {
+        resultsContainer.html('<div class="search-result-item">Tidak ada data ditemukan</div>');
+    } else {
+        pendudukList.forEach(penduduk => {
+            const isSelected = selectedAnggota.has(penduduk.id);
+            const itemClass = isSelected ? 'search-result-item selected' : 'search-result-item';
+            const itemHtml = `
+                <div class="${itemClass}" data-id="${penduduk.id}" onclick="toggleAnggota(${penduduk.id}, '${penduduk.name}', '${penduduk.nik}')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${penduduk.name}</strong>
+                            <br>
+                            <small class="text-muted">NIK: ${penduduk.nik || 'Tidak ada'}</small>
+                        </div>
+                        <div>
+                            <i class="fas fa-${isSelected ? 'check-circle text-success' : 'plus-circle text-primary'}"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultsContainer.append(itemHtml);
+        });
+    }
+    
+    resultsContainer.show();
+}
+
+function toggleAnggota(id, name, nik) {
+    if (selectedAnggota.has(id)) {
+        removeAnggota(id);
+    } else {
+        addAnggota(id, name, nik);
+    }
+}
+
+function addAnggota(id, name, nik) {
+    selectedAnggota.add(id);
+    
+    // Add to selected display
+    const badge = `
+        <span class="badge" data-id="${id}">
+            <i class="fas fa-user mr-1"></i>
+            ${name} (${nik})
+            <button type="button" class="btn-close" onclick="removeAnggota(${id})" style="margin-left: 5px;">×</button>
+        </span>
+    `;
+    $('#selectedAnggota').append(badge);
+    
+    // Add hidden input
+    const hiddenInput = `<input type="hidden" name="anggota_keluarga" value="${id}">`;
+    $('#keluargaForm').append(hiddenInput);
+    
+    // Update search results
+    $(`.search-result-item[data-id="${id}"]`).addClass('selected');
+    $(`.search-result-item[data-id="${id}"] .fas`).removeClass('fa-plus-circle text-primary').addClass('fa-check-circle text-success');
+}
+
+function removeAnggota(id) {
+    selectedAnggota.delete(id);
+    
+    // Remove from selected display
+    $(`.badge[data-id="${id}"]`).remove();
+    
+    // Remove hidden input
+    $(`input[name="anggota_keluarga"][value="${id}"]`).remove();
+    
+    // Update search results
+    $(`.search-result-item[data-id="${id}"]`).removeClass('selected');
+    $(`.search-result-item[data-id="${id}"] .fas`).removeClass('fa-check-circle text-success').addClass('fa-plus-circle text-primary');
+}
+
+function validateForm() {
+    let isValid = true;
+    const form = document.getElementById('keluargaForm');
+    
+    // Clear previous validation
+    form.classList.remove('was-validated');
+    
+    // Required fields
+    const requiredFields = ['nomor_kk', 'nama_kepala_keluarga', 'alamat', 'dusun'];
+    
+    requiredFields.forEach(function(fieldName) {
+        const field = document.getElementById(fieldName);
+        if (!field.value.trim()) {
+            field.setCustomValidity('Field ini harus diisi');
+            isValid = false;
+        } else {
+            field.setCustomValidity('');
+        }
+    });
+    
+    // KK validation
+    const kk = document.getElementById('nomor_kk');
+    if (kk.value && !/^\d{16}$/.test(kk.value)) {
+        kk.setCustomValidity('Nomor KK harus terdiri dari 16 digit angka');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        form.classList.add('was-validated');
+    }
+    
+    return isValid;
+}
+
+function validateKK(input) {
+    const kk = input.value;
+    if (kk && !/^\d{16}$/.test(kk)) {
+        input.setCustomValidity('Nomor KK harus terdiri dari 16 digit angka');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+</script>
+{% endblock %}

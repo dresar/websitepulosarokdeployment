@@ -1,0 +1,248 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+.hero-images-wrapper {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.form-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.form-card .card-body {
+    padding: 3rem;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-height: 50px;
+    width: 100%;
+    background-color: #fff;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    background-color: #fff;
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 0;
+    border-top: 2px solid #e9ecef;
+    margin-top: 3rem;
+    gap: 1rem;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="hero-images-wrapper">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-8 col-lg-10">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>{% if image %}Edit{% else %}Tambah{% endif %} Hero Image</h4>
+                            <p class="text-muted mb-0">{% if image %}Edit gambar hero{% else %}Tambah gambar hero baru{% endif %}</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:hero_images:hero_images_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label for="name" class="form-label">Nama Gambar *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{% if image %}{{ image.name }}{% endif %}" 
+                                       placeholder="Masukkan nama gambar" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="page" class="form-label">Halaman *</label>
+                                <select class="form-control" id="page" name="page" required>
+                                    {% if image %}
+                                    <!-- When editing, show current page first and selected -->
+                                    <option value="{{ image.page }}" selected>{{ image.get_page_display }}</option>
+                                    {% else %}
+                                    <option value="">Pilih halaman</option>
+                                    {% endif %}
+                                    {% for value, display in available_pages %}
+                                    <option value="{{ value }}">{{ display }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if not available_pages and not image %}
+                                <div class="alert alert-warning mt-2">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    <strong>Semua halaman sudah memiliki hero image!</strong>
+                                    <br>Silakan edit hero image yang sudah ada atau hapus salah satu untuk menambah yang baru.
+                                </div>
+                                {% endif %}
+                                {% if image %}
+                                <div class="alert alert-info mt-2">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <strong>Sedang mengedit hero image untuk halaman:</strong> {{ image.get_page_display }}
+                                    <br><small>Anda dapat mengubah halaman ini ke halaman lain yang tersedia.</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="image" class="form-label">Gambar *</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" {% if not image %}required{% endif %}>
+                                {% if image and image.image %}
+                                <div class="mt-2">
+                                    <strong>Gambar saat ini:</strong><br>
+                                    <img src="{{ image.image.url }}" alt="{{ image.name }}" class="image-preview">
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if not image or image.is_active %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_active">
+                                        Aktif
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <a href="{% url 'admin_panel:hero_images:hero_images_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left mr-1"></i>Kembali
+                                </a>
+                                {% if available_pages or image %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i>{% if image %}Update{% else %}Simpan{% endif %}
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-primary" disabled>
+                                    <i class="fas fa-save mr-1"></i>Simpan
+                                </button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Disable form if no available pages
+    {% if not available_pages and not image %}
+    $('form').find('input, select, textarea').prop('disabled', true);
+    $('form').find('button[type="submit"]').prop('disabled', true);
+    {% endif %}
+    
+    // Add page change validation
+    $('#page').change(function() {
+        var selectedPage = $(this).val();
+        if (selectedPage) {
+            // Check if page already has hero image
+            $.ajax({
+                url: '{% url "admin_panel:hero_images:check_page_exists" %}',
+                type: 'GET',
+                data: {
+                    'page': selectedPage,
+                    {% if image %}'exclude_id': {{ image.id }},{% endif %}
+                },
+                success: function(response) {
+                    if (response.exists) {
+                        alert('Halaman "' + selectedPage + '" sudah memiliki hero image!');
+                        $('#page').val('');
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock extra_js %}

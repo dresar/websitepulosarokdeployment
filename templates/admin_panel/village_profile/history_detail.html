@@ -1,0 +1,687 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* History Detail Styles - Bootstrap 4 Compatible */
+.history-detail-container {
+    background: #f8f9fa;
+    min-height: calc(100vh - 200px);
+    padding: 20px 0;
+}
+
+.history-detail-card {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.history-detail-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #dc3545, #c82333);
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.history-detail-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.history-detail-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+}
+
+.history-detail-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.history-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.history-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.history-meta-item i {
+    font-size: 1rem;
+}
+
+.history-detail-body {
+    padding: 2rem;
+}
+
+.history-detail-image {
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    margin: 0 auto 2rem auto;
+    display: block;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.history-detail-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.history-detail-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #495057;
+    margin-bottom: 2rem;
+}
+
+.history-detail-content p {
+    margin-bottom: 1.5rem;
+}
+
+.history-detail-content h1,
+.history-detail-content h2,
+.history-detail-content h3,
+.history-detail-content h4,
+.history-detail-content h5,
+.history-detail-content h6 {
+    color: #dc3545;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.history-detail-content ul,
+.history-detail-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.history-detail-content li {
+    margin-bottom: 0.5rem;
+}
+
+.history-detail-content blockquote {
+    border-left: 4px solid #dc3545;
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.history-detail-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.history-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.history-info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.history-info-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #dc3545;
+}
+
+.history-info-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.history-info-content h6 {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.history-info-content p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.history-detail-actions {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.history-share-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.history-share-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.history-share-btn:hover {
+    transform: scale(1.1);
+    text-decoration: none;
+    color: white;
+}
+
+.history-share-btn.facebook {
+    background: #3b5998;
+}
+
+.history-share-btn.twitter {
+    background: #1da1f2;
+}
+
+.history-share-btn.whatsapp {
+    background: #25d366;
+}
+
+.history-share-btn.copy {
+    background: #6c757d;
+}
+
+.history-navigation {
+    display: flex;
+    gap: 1rem;
+}
+
+.history-nav-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.history-nav-btn:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.history-nav-btn.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.history-nav-btn.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.history-nav-btn.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.history-nav-btn.btn-danger:hover {
+    background-color: #c82333;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .history-detail-container {
+        padding: 15px 0;
+    }
+    
+    .history-detail-header {
+        padding: 1.5rem;
+    }
+    
+    .history-detail-title {
+        font-size: 1.5rem;
+    }
+    
+    .history-detail-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .history-detail-body {
+        padding: 1.5rem;
+    }
+    
+    .history-detail-image {
+        height: 250px;
+    }
+    
+    .history-detail-content {
+        font-size: 1rem;
+    }
+    
+    .history-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .history-detail-actions {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem 1.5rem;
+    }
+    
+    .history-navigation {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .history-detail-header {
+        padding: 1rem;
+    }
+    
+    .history-detail-title {
+        font-size: 1.25rem;
+    }
+    
+    .history-detail-body {
+        padding: 1rem;
+    }
+    
+    .history-detail-image {
+        height: 200px;
+    }
+    
+    .history-detail-content {
+        font-size: 0.95rem;
+    }
+    
+    .history-share-buttons {
+        justify-content: center;
+    }
+    
+    .history-navigation {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="history-detail-container">
+    <div class="container">
+
+        <!-- History Detail Card -->
+        <div class="history-detail-card">
+            <!-- Header -->
+            <div class="history-detail-header">
+                <h1 class="history-detail-title" id="historyTitle">
+                    <i class="fas fa-scroll mr-2"></i>Loading...
+                </h1>
+                <div class="history-detail-meta" id="historyMeta">
+                    <!-- Meta items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="history-detail-body">
+                <!-- Featured Image -->
+                <div id="historyImageContainer" style="display: none;">
+                    <img id="historyImage" class="history-detail-image" alt="History Image">
+                </div>
+
+                <!-- Content -->
+                <div class="history-detail-content" id="historyContent">
+                    <!-- Content will be loaded here -->
+                </div>
+
+                <!-- Info Grid -->
+                <div class="history-detail-info">
+                    <h5 class="mb-3">
+                        <i class="fas fa-info-circle mr-2"></i>Informasi Detail
+                    </h5>
+                    <div class="history-info-grid" id="historyInfoGrid">
+                        <!-- Info items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="history-detail-actions">
+                <div class="history-share-buttons">
+                    <a href="#" class="history-share-btn facebook" onclick="shareOnFacebook()" title="Share on Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="history-share-btn twitter" onclick="shareOnTwitter()" title="Share on Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="history-share-btn whatsapp" onclick="shareOnWhatsApp()" title="Share on WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <button class="history-share-btn copy" onclick="copyLink()" title="Copy Link">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                
+                <div class="history-navigation">
+                    <a href="{% url "village_profile:admin_history" %}" class="history-nav-btn btn-outline-danger">
+                        <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar
+                    </a>
+                    <button class="history-nav-btn btn-danger" onclick="editHistory()">
+                        <i class="fas fa-edit mr-1"></i>Edit Sejarah
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="text-center py-5">
+    <div class="spinner-border text-danger" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Memuat detail sejarah...</p>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+let currentHistoryId = null;
+
+$(document).ready(function() {
+    // Get history ID from URL
+    const pathParts = window.location.pathname.split('/');
+    currentHistoryId = pathParts[pathParts.length - 2]; // Get second to last part
+    
+    if (currentHistoryId) {
+        loadHistoryDetail(currentHistoryId);
+    } else {
+        showError('ID sejarah tidak ditemukan');
+    }
+});
+
+function loadHistoryDetail(historyId) {
+    $('#loadingOverlay').show();
+    $('.history-detail-card').hide();
+    
+    // Load real data from Django template context
+    {% if history %}
+    const historyData = {
+        id: {{ history.id }},
+        title: '{{ history.title|escapejs }}',
+        history_type: '{{ history.history_type }}',
+        summary: '{{ history.summary|escapejs }}',
+        content: `{{ history.content|linebreaksbr|escapejs }}`,
+        year_start: {{ history.year_start|default:"null" }},
+        year_end: {{ history.year_end|default:"null" }},
+        period_start: '{{ history.period_start|default:""|escapejs }}',
+        period_end: '{{ history.period_end|default:""|escapejs }}',
+        source: '{{ history.source|default:""|escapejs }}',
+        author: '{{ history.author|default:""|escapejs }}',
+        featured_image: {% if history.featured_image %}'{{ history.featured_image.url }}'{% else %}null{% endif %},
+        featured_image_caption: '{{ history.featured_image_caption|default:""|escapejs }}',
+        is_featured: {{ history.is_featured|yesno:"true,false" }},
+        view_count: {{ history.view_count }},
+        created_at: '{{ history.created_at|date:"Y-m-d" }}',
+        updated_at: '{{ history.updated_at|date:"Y-m-d" }}'
+    };
+    
+    setTimeout(function() {
+        displayHistoryDetail(historyData);
+    }, 500);
+    {% else %}
+    showError('Data sejarah tidak ditemukan');
+    {% endif %}
+}
+
+function displayHistoryDetail(data) {
+    // Set title
+    $('#historyTitle').html(`<i class="fas fa-scroll mr-2"></i>${data.title}`);
+    
+    // Set meta information
+    const typeBadge = getHistoryTypeBadge(data.history_type);
+    const periodText = data.year_start ? 
+        (data.year_end ? `${data.year_start} - ${data.year_end}` : `Sejak ${data.year_start}`) : 
+        (data.period_start || 'Tidak Diketahui');
+    
+    $('#historyMeta').html(`
+        <div class="history-meta-item">
+            <i class="fas fa-tag"></i>
+            <span>${typeBadge}</span>
+        </div>
+        <div class="history-meta-item">
+            <i class="fas fa-calendar"></i>
+            <span>${periodText}</span>
+        </div>
+        <div class="history-meta-item">
+            <i class="fas fa-eye"></i>
+            <span>${data.view_count} views</span>
+        </div>
+        ${data.is_featured ? `
+        <div class="history-meta-item">
+            <i class="fas fa-star"></i>
+            <span>Unggulan</span>
+        </div>
+        ` : ''}
+    `);
+    
+    // Set image
+    if (data.featured_image) {
+        $('#historyImage').attr('src', data.featured_image).attr('alt', data.title);
+        $('#historyImageContainer').show();
+    } else {
+        $('#historyImageContainer').hide();
+    }
+    
+    // Set content with proper formatting
+    const formattedContent = data.content
+        .replace(/\\n/g, '\n')
+        .replace(/\n/g, '<br>')
+        .replace(/<br><br>/g, '</p><p>')
+        .replace(/^/, '<p>')
+        .replace(/$/, '</p>');
+    $('#historyContent').html(formattedContent);
+    
+    // Set info grid
+    $('#historyInfoGrid').html(`
+        <div class="history-info-item">
+            <div class="history-info-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="history-info-content">
+                <h6>Penulis</h6>
+                <p>${data.author || 'Tidak Diketahui'}</p>
+            </div>
+        </div>
+        <div class="history-info-item">
+            <div class="history-info-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="history-info-content">
+                <h6>Sumber</h6>
+                <p>${data.source || 'Tidak Diketahui'}</p>
+            </div>
+        </div>
+        <div class="history-info-item">
+            <div class="history-info-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="history-info-content">
+                <h6>Terakhir Diperbarui</h6>
+                <p>${formatDate(data.updated_at)}</p>
+            </div>
+        </div>
+        <div class="history-info-item">
+            <div class="history-info-icon">
+                <i class="fas fa-calendar-plus"></i>
+            </div>
+            <div class="history-info-content">
+                <h6>Dibuat</h6>
+                <p>${formatDate(data.created_at)}</p>
+            </div>
+        </div>
+    `);
+    
+    // Show content
+    $('#loadingOverlay').hide();
+    $('.history-detail-card').show();
+}
+
+function getHistoryTypeBadge(type) {
+    const types = {
+        'FOUNDING': 'Sejarah Berdiri',
+        'DEVELOPMENT': 'Perkembangan',
+        'CULTURE': 'Budaya & Tradisi',
+        'ECONOMY': 'Ekonomi',
+        'SOCIAL': 'Sosial',
+        'GOVERNMENT': 'Pemerintahan',
+        'OTHER': 'Lainnya'
+    };
+    return types[type] || type;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function shareOnFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent($('#historyTitle').text());
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank');
+}
+
+function shareOnTwitter() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent($('#historyTitle').text());
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank');
+}
+
+function shareOnWhatsApp() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent($('#historyTitle').text());
+    window.open(`https://wa.me/?text=${title}%20${url}`, '_blank');
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+        showToast('success', 'Link berhasil disalin ke clipboard');
+    }).catch(function() {
+        showToast('error', 'Gagal menyalin link');
+    });
+}
+
+function editHistory() {
+    window.location.href = `{% url "village_profile:admin_history" %}?edit=${currentHistoryId}`;
+}
+
+function showError(message) {
+    $('#loadingOverlay').html(`
+        <div class="text-center py-5">
+            <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+            <h5 class="text-danger">Error</h5>
+            <p class="text-muted">${message}</p>
+            <a href="{% url "village_profile:admin_history" %}" class="btn btn-danger">
+                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar
+            </a>
+        </div>
+    `);
+}
+
+// Toast notification function
+function showToast(type, message) {
+    const toast = $(`
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `);
+    
+    if (!$('#toast-container').length) {
+        $('body').append('<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+    }
+    
+    $('#toast-container').append(toast);
+    toast.toast('show');
+    setTimeout(() => toast.remove(), 5000);
+}
+</script>
+{% endblock extra_js %}

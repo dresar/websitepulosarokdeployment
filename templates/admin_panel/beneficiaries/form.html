@@ -1,0 +1,707 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/beneficiaries.css' %}">
+<style>
+/* Light Theme Form Improvements */
+.admin-forms {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.page-header {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.form-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.form-card .card-body {
+    padding: 3rem;
+    background: #ffffff;
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.form-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+}
+
+.form-section-title i {
+    margin-right: 0.75rem;
+    color: #007bff;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    display: block;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    min-height: 50px;
+    width: 100%;
+    background-color: #fff;
+    font-weight: 500;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    background-color: #fff;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 1;
+    font-style: italic;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.75rem;
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: white;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: white;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 0;
+    border-top: 2px solid #e9ecef;
+    margin-top: 3rem;
+    gap: 1rem;
+}
+
+.action-buttons .btn {
+    padding: 1rem 2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    min-height: 50px;
+    min-width: 150px;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.action-buttons .d-flex {
+    gap: 1rem;
+}
+
+/* Input group improvements */
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.input-group .form-control {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    margin-bottom: 0;
+    min-height: 50px;
+    font-size: 1.1rem;
+    padding: 1rem 1.25rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group-append {
+    display: flex;
+}
+
+.input-group-append .btn {
+    position: relative;
+    z-index: 2;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0;
+    min-height: 50px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: 2px solid #007bff;
+    border-left: 0;
+}
+
+.input-group .form-control:focus {
+    z-index: 3;
+}
+
+/* Selected penduduk card */
+#selectedPenduduk {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 2px solid #e1f5fe;
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+#selectedPenduduk .card-body {
+    padding: 1.5rem;
+    background: transparent;
+}
+
+#selectedPenduduk .card-title {
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+#selectedPenduduk h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#selectedPenduduk p {
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-forms {
+        padding: 1rem 0;
+    }
+    
+    .page-header {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+    
+    .action-buttons .d-flex {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .form-control {
+        font-size: 1rem;
+        padding: 0.875rem 1rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .input-group-append {
+        margin-top: 0.5rem;
+    }
+    
+    .input-group-append .btn {
+        border-radius: 10px;
+        border-left: 2px solid #007bff;
+    }
+    
+    .input-group .form-control {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-card .card-body {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .form-control {
+        font-size: 0.95rem;
+        padding: 0.75rem 0.875rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="admin-forms">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10 col-lg-11">
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4>{% if beneficiary %}Edit Data Penerima Bantuan{% else %}Tambah Penerima Bantuan Baru{% endif %}</h4>
+                            <p class="text-muted mb-0">{% if beneficiary %}Perbarui data penerima bantuan{% else %}Isi form untuk menambahkan penerima bantuan baru{% endif %}</p>
+                        </div>
+                        <div>
+                            <a href="{% url 'admin_panel:beneficiaries_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i>Kembali ke Daftar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="card-body">
+                        <form id="beneficiaryForm" method="post" class="needs-validation" novalidate data-edit="{% if beneficiary %}true{% else %}false{% endif %}">
+                            {% csrf_token %}
+
+                            {% if not beneficiary %}
+                            <div class="form-section">
+                                <h6 class="form-section-title"><i class="fas fa-user mr-2"></i>Pilih Data Penduduk</h6>
+                                <div class="form-group">
+                                    <label for="pendudukSearch" class="form-label">Cari Data Penduduk</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="pendudukSearch" placeholder="Cari berdasarkan nama atau NIK..." {% if not beneficiary %}required{% endif %}>
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-primary" id="searchPendudukBtn">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small class="form-text">
+                                        <span id="pendudukCount">{% if penduduk_list %}Total penduduk: {{ penduduk_list|length }} orang{% endif %}</span>
+                                        <span id="searchStatus" class="ml-2"></span>
+                                    </small>
+                                    <select class="form-control mt-2" id="pendudukSelect"></select>
+                                </div>
+                                <div class="card" id="selectedPenduduk" style="display: none;">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="fas fa-check-circle"></i>Data Penduduk Terpilih</h6>
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h6 class="mb-1" id="pendudukName"></h6>
+                                                <p class="text-muted mb-1">NIK: <span id="pendudukNik"></span></p>
+                                                <p class="text-muted mb-0">Alamat: <span id="pendudukAddress"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="pendudukId" name="penduduk_id" {% if beneficiary %}value="{{ beneficiary.person.id }}"{% endif %}>
+                            </div>
+                            {% endif %}
+
+                            <div class="form-section">
+                                <h6 class="form-section-title"><i class="fas fa-hand-holding-heart mr-2"></i>Informasi Penerima Bantuan</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="category" class="form-label">Kategori Bantuan</label>
+                                            <select class="form-control" id="category" name="category" required>
+                                                <option value="">Pilih Kategori</option>
+                                                {% for category in categories %}
+                                                <option value="{{ category.id }}" {% if beneficiary and beneficiary.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="registration_date" class="form-label">Tanggal Pendaftaran</label>
+                                            <input type="date" class="form-control" id="registration_date" name="registration_date" value="{% if beneficiary and beneficiary.registration_date %}{{ beneficiary.registration_date|date:'Y-m-d' }}{% endif %}" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="economic_status" class="form-label">Status Ekonomi</label>
+                                            <select class="form-control" id="economic_status" name="economic_status">
+                                                <option value="">Pilih Status Ekonomi</option>
+                                                <option value="miskin" {% if beneficiary and beneficiary.economic_status == 'miskin' %}selected{% endif %}>Miskin</option>
+                                                <option value="sangat_miskin" {% if beneficiary and beneficiary.economic_status == 'sangat_miskin' %}selected{% endif %}>Sangat Miskin</option>
+                                                <option value="rentan_miskin" {% if beneficiary and beneficiary.economic_status == 'rentan_miskin' %}selected{% endif %}>Rentan Miskin</option>
+                                                <option value="tidak_miskin" {% if beneficiary and beneficiary.economic_status == 'tidak_miskin' %}selected{% endif %}>Tidak Miskin</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="monthly_income" class="form-label">Pendapatan Bulanan (Rp)</label>
+                                            <input type="text" class="form-control" id="monthly_income" name="monthly_income" value="{% if beneficiary %}{{ beneficiary.monthly_income|default:'' }}{% endif %}" placeholder="0" inputmode="numeric">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="family_members_count" class="form-label">Jumlah Anggota Keluarga</label>
+                                            <input type="number" class="form-control" id="family_members_count" name="family_members_count" value="{% if beneficiary %}{{ beneficiary.family_members_count|default:1 }}{% else %}1{% endif %}" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="status" class="form-label">Status Penerima</label>
+                                            <select class="form-control" id="status" name="status">
+                                                <option value="aktif" {% if beneficiary and beneficiary.status == 'aktif' %}selected{% endif %}>Aktif</option>
+                                                <option value="tidak_aktif" {% if beneficiary and beneficiary.status == 'tidak_aktif' %}selected{% endif %}>Tidak Aktif</option>
+                                                <option value="lulus" {% if beneficiary and beneficiary.status == 'lulus' %}selected{% endif %}>Lulus</option>
+                                                <option value="pindah" {% if beneficiary and beneficiary.status == 'pindah' %}selected{% endif %}>Pindah</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h6 class="form-section-title"><i class="fas fa-home mr-2"></i>Informasi Tambahan</h6>
+                                <div class="form-group">
+                                    <label for="house_condition" class="form-label">Kondisi Rumah</label>
+                                    <textarea class="form-control" id="house_condition" name="house_condition" rows="3">{% if beneficiary %}{{ beneficiary.house_condition|default:'' }}{% endif %}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="special_needs" class="form-label">Kebutuhan Khusus</label>
+                                    <textarea class="form-control" id="special_needs" name="special_needs" rows="3">{% if beneficiary %}{{ beneficiary.special_needs|default:'' }}{% endif %}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notes" class="form-label">Catatan</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3">{% if beneficiary %}{{ beneficiary.notes|default:'' }}{% endif %}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <a href="{% url 'admin_panel:beneficiaries_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left mr-1"></i>Kembali
+                                </a>
+                                <div class="d-flex">
+                                    {% if not beneficiary %}
+                                    <button type="button" class="btn btn-outline-primary mr-2" id="resetBtn">
+                                        <i class="fas fa-undo mr-1"></i>Reset
+                                    </button>
+                                    {% endif %}
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save mr-1"></i>Simpan{% if beneficiary %} Perubahan{% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+(function(){
+  const isEdit = document.getElementById('beneficiaryForm').dataset.edit === 'true';
+  const form = document.getElementById('beneficiaryForm');
+  if (!isEdit) {
+    let selectedPenduduk = null;
+    let searchTimeout;
+    const searchInput = document.getElementById('pendudukSearch');
+    const searchBtn = document.getElementById('searchPendudukBtn');
+    const pendudukSelect = document.getElementById('pendudukSelect');
+    const statusEl = document.getElementById('searchStatus');
+    const selectedBox = document.getElementById('selectedPenduduk');
+    const pendudukId = document.getElementById('pendudukId');
+    const updateSelected = (p)=>{
+      selectedPenduduk = p; pendudukId.value = p.id;
+      document.getElementById('pendudukName').textContent=p.name;
+      document.getElementById('pendudukNik').textContent=p.nik;
+      document.getElementById('pendudukAddress').textContent=p.address||'-';
+      selectedBox.style.display='block';
+      statusEl.innerHTML = '<span class="text-success">Dipilih: '+p.name+'</span>';
+    };
+    function doSearch(q){
+      console.log('Searching for ALL penduduk:', q);
+      statusEl.innerHTML='<i class="fas fa-spinner fa-spin"></i> Memuat semua data penduduk...';
+      // Ambil SEMUA data penduduk untuk pendaftaran beneficiaries
+      fetch('{% url "admin_panel:api_penduduk_search" %}?q='+encodeURIComponent(q||''))
+        .then(r=>{
+          console.log('Response status:', r.status);
+          if (!r.ok) {
+            throw new Error(`HTTP error! status: ${r.status}`);
+          }
+          return r.json();
+        }).then(data=>{
+          console.log('Response data:', data);
+          console.log('Data success:', data.success);
+          console.log('Data results:', data.results);
+          console.log('Data penduduk:', data.penduduk);
+          console.log('Data total:', data.total);
+          
+          // Handle different response formats
+          let list = [];
+          if (data.success && data.results) {
+            list = data.results;
+          } else if (data.penduduk) {
+            list = data.penduduk;
+          } else if (Array.isArray(data)) {
+            list = data;
+          } else {
+            console.error('Unexpected data format:', data);
+            statusEl.innerHTML='<span class="text-danger">Format data tidak dikenali</span>';
+            return;
+          }
+          
+          pendudukSelect.innerHTML='';
+          if(!list || !list.length){
+            const emptyOpt=document.createElement('option');
+            emptyOpt.value='';
+            emptyOpt.textContent='Tidak ada data penduduk';
+            pendudukSelect.appendChild(emptyOpt);
+            statusEl.innerHTML='<span class="text-warning">0 hasil</span>';
+            return;
+          }
+          const placeholder=document.createElement('option');
+          placeholder.value='';
+          placeholder.textContent='Pilih penduduk untuk didaftarkan sebagai penerima bantuan';
+          pendudukSelect.appendChild(placeholder);
+          list.forEach(p=>{
+            const opt=document.createElement('option');
+            opt.value=p.id;
+            opt.textContent=p.name+' - '+p.nik;
+            opt.dataset.name=p.name;
+            opt.dataset.nik=p.nik;
+            opt.dataset.address=p.address||'';
+            pendudukSelect.appendChild(opt);
+          });
+          statusEl.innerHTML='<span class="text-success">Ditemukan '+list.length+' penduduk (semua data penduduk)</span>';
+        }).catch(err=>{ 
+          console.error('Search error details:', err);
+          console.error('Error message:', err.message);
+          console.error('Error stack:', err.stack);
+          statusEl.innerHTML='<span class="text-danger">Gagal memuat data penduduk: ' + err.message + '</span>'; 
+        });
+    }
+    
+    // Enhanced search with filtering
+    function filterDropdown(searchTerm) {
+      const options = pendudukSelect.options;
+      let visibleCount = 0;
+      
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const text = option.textContent.toLowerCase();
+        const search = searchTerm.toLowerCase();
+        
+        if (option.value === '' || text.includes(search)) {
+          option.style.display = 'block';
+          if (option.value !== '') visibleCount++;
+        } else {
+          option.style.display = 'none';
+        }
+      }
+      
+      statusEl.innerHTML = `<span class="text-info">${visibleCount} penduduk tersedia</span>`;
+    }
+    if (searchInput){
+      searchInput.addEventListener('input',()=>{ 
+        clearTimeout(searchTimeout); 
+        const q=searchInput.value; 
+        if(q.length>=2){ 
+          searchTimeout=setTimeout(()=>doSearch(q),300);
+        } else { 
+          doSearch(''); 
+        }
+        // Also filter existing dropdown options
+        filterDropdown(q);
+      });
+    }
+    if (searchBtn){ searchBtn.addEventListener('click',()=>{ const q=searchInput.value; doSearch(q.length?q:''); }); }
+    doSearch('');
+    if(pendudukSelect){
+      pendudukSelect.addEventListener('change',()=>{
+        const opt=pendudukSelect.options[pendudukSelect.selectedIndex];
+        if(!opt || !opt.value){ return; }
+        updateSelected({ id: opt.value, name: opt.dataset.name, nik: opt.dataset.nik, address: opt.dataset.address });
+      });
+    }
+    const resetBtn=document.getElementById('resetBtn'); if(resetBtn){ resetBtn.addEventListener('click',()=>{ form.reset(); selectedPenduduk=null; pendudukId.value=''; selectedBox.style.display='none'; if(pendudukSelect){ pendudukSelect.selectedIndex=0; } }); }
+  }
+
+  // Format monthly income as Rupiah-like with dots
+  const incomeInput = document.getElementById('monthly_income');
+  function parseNum(x){ return String(x||'').replace(/\./g,'').replace(/[^0-9]/g,''); }
+  function formatRupiah(x){ if(!x) return ''; let s=parseNum(x); if(!s) return ''; return s.replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+  if(incomeInput){
+    incomeInput.addEventListener('input',function(){ this.value = formatRupiah(this.value); });
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const original = submitBtn.innerHTML; submitBtn.disabled=true; submitBtn.innerHTML='<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...';
+    const payload = {
+      category_id: document.getElementById('category').value,
+      registration_date: document.getElementById('registration_date').value,
+      economic_status: document.getElementById('economic_status').value,
+      monthly_income: parseNum(document.getElementById('monthly_income').value)||0,
+      family_members_count: document.getElementById('family_members_count').value||1,
+      status: document.getElementById('status').value,
+      house_condition: document.getElementById('house_condition').value,
+      special_needs: document.getElementById('special_needs').value,
+      notes: document.getElementById('notes').value
+    };
+    if(!isEdit){ 
+      const pendudukIdValue = document.getElementById('pendudukId').value;
+      console.log('Penduduk ID value:', pendudukIdValue);
+      if(!pendudukIdValue || pendudukIdValue === ''){
+        alert('Silakan pilih penduduk terlebih dahulu');
+        submitBtn.disabled=false; submitBtn.innerHTML=original;
+        return;
+      }
+      payload.penduduk_id = pendudukIdValue;
+    }
+    
+    console.log('Payload being sent:', payload);
+    fetch(window.location.href,{ method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]').value}, body: JSON.stringify(payload) })
+      .then(function(r){
+        return r.json().then(function(j){ return { ok: r.ok, status: r.status, json: j }; }).catch(function(){ return { ok: r.ok, status: r.status, json: null }; });
+      })
+      .then(function(res){ var ok=res.ok, json=res.json; 
+        if(json && (json.success || json.status==='success')){ window.location.href = '{% url "admin_panel:beneficiaries_list" %}'; }
+        else { alert((json && (json.message||'Gagal menyimpan'))||'Gagal menyimpan'); }
+      })
+      .catch(function(){ alert('Terjadi kesalahan'); })
+      .finally(function(){ submitBtn.disabled=false; submitBtn.innerHTML=original; });
+  });
+
+  // Initialize tooltips for Bootstrap 4
+  $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[title]').tooltip({
+        placement: 'top',
+        trigger: 'hover'
+    });
+  });
+})();
+</script>
+{% endblock extra_js %}
+

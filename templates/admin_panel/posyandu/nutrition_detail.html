@@ -1,0 +1,231 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}Detail Data Gizi{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .info-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .info-item {
+        margin-bottom: 15px;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    .info-value {
+        color: #6c757d;
+        line-height: 1.5;
+    }
+    .nutrition-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .status-baik { background: #e8f5e8; color: #2e7d32; }
+    .status-kurang { background: #fff3e0; color: #f57c00; }
+    .status-buruk { background: #ffcdd2; color: #d32f2f; }
+    .status-lebih { background: #e3f2fd; color: #1976d2; }
+    .chart-container {
+        height: 200px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Detail Header -->
+    <div class="detail-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-2">
+                    <a href="{% url 'admin_panel:posyandu:nutrition_data' %}" class="btn btn-outline-light btn-sm me-3">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Kembali
+                    </a>
+                    <h2 class="mb-0">
+                        <i class="fas fa-apple-alt mr-3"></i>
+                        Detail Data Gizi
+                    </h2>
+                </div>
+                <p class="mb-0 opacity-75">Informasi lengkap data gizi dan nutrisi</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="#" class="btn btn-light" onclick="editNutrition()">
+                    <i class="fas fa-edit mr-2"></i>
+                    Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Child Information -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-child mr-2"></i>
+            Informasi Anak
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Nama Anak</div>
+                    <div class="info-value" id="childName">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">NIK</div>
+                    <div class="info-value" id="childNik">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tanggal Lahir</div>
+                    <div class="info-value" id="childBirthDate">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Usia</div>
+                    <div class="info-value" id="childAge">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Jenis Kelamin</div>
+                    <div class="info-value" id="childGender">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Posyandu</div>
+                    <div class="info-value" id="posyanduName">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nutrition Measurement -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-ruler-combined mr-2"></i>
+            Data Pengukuran
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Tanggal Pengukuran</div>
+                    <div class="info-value" id="measurementDate">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Berat Badan (kg)</div>
+                    <div class="info-value" id="weight">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tinggi Badan (cm)</div>
+                    <div class="info-value" id="height">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Lingkar Lengan Atas (cm)</div>
+                    <div class="info-value" id="armCircumference">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status Gizi</div>
+                    <div class="info-value">
+                        <span class="nutrition-status status-baik" id="nutritionStatus">-</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Petugas Kesehatan</div>
+                    <div class="info-value" id="healthWorker">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nutrition Analysis -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-chart-line mr-2"></i>
+            Analisis Gizi
+        </h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Indeks BB/U (Berat Badan/Umur)</div>
+                    <div class="info-value" id="weightForAge">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Indeks TB/U (Tinggi Badan/Umur)</div>
+                    <div class="info-value" id="heightForAge">-</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Indeks BB/TB (Berat Badan/Tinggi Badan)</div>
+                    <div class="info-value" id="weightForHeight">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">BMI</div>
+                    <div class="info-value" id="bmi">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-lightbulb mr-2"></i>
+            Rekomendasi
+        </h5>
+        <div class="info-value" id="recommendations">-</div>
+    </div>
+
+    <!-- Notes -->
+    <div class="info-card">
+        <h5 class="section-title">
+            <i class="fas fa-sticky-note mr-2"></i>
+            Catatan
+        </h5>
+        <div class="info-value" id="notes">-</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    loadNutritionDetail();
+});
+
+function loadNutritionDetail() {
+    // Placeholder for loading nutrition detail
+    console.log('Loading nutrition detail...');
+}
+
+function editNutrition() {
+    // Placeholder for edit functionality
+    window.location.href = '#edit';
+}
+</script>
+{% endblock %}
+

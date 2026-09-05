@@ -1,0 +1,923 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/complaints-layout.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/complaints-components.css' %}">
+<style>
+/* Enhanced Complaints Detail Styles */
+.complaints-detail-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.complaints-detail-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    border-bottom: none;
+}
+
+.complaints-detail-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.complaints-detail-title i {
+    color: white;
+    opacity: 0.9;
+}
+
+.complaints-detail-body {
+    padding: 2rem;
+}
+
+.complaints-detail-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.complaints-detail-btn {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.complaints-detail-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.complaints-detail-btn:hover::before {
+    left: 100%;
+}
+
+.complaints-detail-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.complaints-detail-btn-primary {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-color: #dc3545;
+}
+
+.complaints-detail-btn-primary:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    border-color: #c82333;
+    color: white;
+}
+
+.complaints-detail-btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.complaints-detail-btn-outline-secondary:hover {
+    background: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.complaints-detail-btn-outline-warning {
+    border-color: #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.complaints-detail-btn-outline-warning:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.complaints-detail-btn-outline-info {
+    border-color: #17a2b8;
+    color: #17a2b8;
+    background: transparent;
+}
+
+.complaints-detail-btn-outline-info:hover {
+    background: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.complaints-detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.complaints-detail-info-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    border-left: 4px solid #dc3545;
+}
+
+.complaints-detail-info-card h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.complaints-detail-info-item:last-child {
+    border-bottom: none;
+}
+
+.complaints-detail-info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-info-value {
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-detail-badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.complaints-detail-badge-in-progress {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.complaints-detail-badge-resolved {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.complaints-detail-badge-rejected {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.complaints-detail-badge-high {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.complaints-detail-badge-medium {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.complaints-detail-badge-low {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.complaints-detail-badge-urgent {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.complaints-detail-description {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.complaints-detail-description h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-description p {
+    color: #6c757d;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.complaints-detail-attachment {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.complaints-detail-attachment h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.complaints-detail-attachment-icon {
+    font-size: 2rem;
+    color: #dc3545;
+}
+
+.complaints-detail-attachment-info {
+    flex: 1;
+}
+
+.complaints-detail-attachment-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.complaints-detail-attachment-size {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.complaints-detail-attachment-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.complaints-detail-attachment-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dc3545;
+    background: transparent;
+    color: #dc3545;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.complaints-detail-attachment-btn:hover {
+    background: #dc3545;
+    color: white;
+    text-decoration: none;
+}
+
+.complaints-detail-updates {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.complaints-detail-updates h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-update-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 1rem;
+}
+
+.complaints-detail-update-item:last-child {
+    margin-bottom: 0;
+}
+
+.complaints-detail-update-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-update-content {
+    flex: 1;
+}
+
+.complaints-detail-update-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.complaints-detail-update-author {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-update-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.complaints-detail-update-message {
+    color: #6c757d;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.complaints-detail-update-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.5rem;
+}
+
+.complaints-detail-add-update {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.complaints-detail-add-update h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+.complaints-detail-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.complaints-detail-form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaints-detail-form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    width: 100%;
+}
+
+.complaints-detail-form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    background: white;
+    outline: none;
+}
+
+.complaints-detail-form-control:hover {
+    border-color: #dc3545;
+    background: white;
+}
+
+.complaints-detail-form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.complaints-detail-form-feedback {
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.complaints-detail-form-feedback-invalid {
+    color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .complaints-detail-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .complaints-detail-info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .complaints-detail-body {
+        padding: 1.5rem;
+    }
+    
+    .complaints-detail-header {
+        padding: 1rem;
+    }
+    
+    .complaints-detail-title {
+        font-size: 1.1rem;
+    }
+    
+    .complaints-detail-info-card {
+        padding: 1rem;
+    }
+    
+    .complaints-detail-update-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .complaints-detail-update-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .complaints-detail-body {
+        padding: 1rem;
+    }
+    
+    .complaints-detail-header {
+        padding: 1rem;
+    }
+    
+    .complaints-detail-title {
+        font-size: 1rem;
+    }
+    
+    .complaints-detail-info-card {
+        padding: 0.75rem;
+    }
+    
+    .complaints-detail-info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .complaints-detail-attachment-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .complaints-detail-attachment-actions {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="complaints-detail-container">
+    <div class="complaints-detail-header">
+        <h3 class="complaints-detail-title">
+            <i class="fas fa-exclamation-triangle"></i>Detail Keluhan
+        </h3>
+    </div>
+    <div class="complaints-detail-body">
+        <div class="complaints-detail-actions">
+            <a href="{% url 'admin_panel:complaints_list' %}" class="complaints-detail-btn complaints-detail-btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i>Kembali
+            </a>
+            <div>
+                <button type="button" class="complaints-detail-btn complaints-detail-btn-outline-warning" onclick="openUpdateModal()">
+                    <i class="fas fa-edit"></i>Update Status
+                </button>
+                <button type="button" class="complaints-detail-btn complaints-detail-btn-outline-info" onclick="openAddUpdateModal()">
+                    <i class="fas fa-plus"></i>Tambah Update
+                </button>
+            </div>
+        </div>
+        
+        <div class="complaints-detail-info-grid">
+            <div class="complaints-detail-info-card">
+                <h6><i class="fas fa-info-circle"></i> Informasi Keluhan</h6>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">ID Keluhan:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.complaint_id }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Judul:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.title }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Kategori:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.category.name }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Status:</span>
+                    <span class="complaints-detail-badge complaints-detail-badge-{{ complaint.status }}">
+                        {{ complaint.get_status_display }}
+                    </span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Prioritas:</span>
+                    <span class="complaints-detail-badge complaints-detail-badge-{{ complaint.priority }}">
+                        {{ complaint.get_priority_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="complaints-detail-info-card">
+                <h6><i class="fas fa-user"></i> Informasi Pelapor</h6>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Nama:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.reporter_name }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Email:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.reporter_email }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Telepon:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.reporter_phone|default:"-" }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Alamat:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.reporter_address|default:"-" }}</span>
+                </div>
+            </div>
+            
+            <div class="complaints-detail-info-card">
+                <h6><i class="fas fa-calendar"></i> Informasi Waktu</h6>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Tanggal Dibuat:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.created_at|date:"d M Y H:i" }}</span>
+                </div>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Tanggal Diperbarui:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.updated_at|date:"d M Y H:i" }}</span>
+                </div>
+                {% if complaint.incident_date %}
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Tanggal Kejadian:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.incident_date|date:"d M Y H:i" }}</span>
+                </div>
+                {% endif %}
+                {% if complaint.resolved_at %}
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Tanggal Selesai:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.resolved_at|date:"d M Y H:i" }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="complaints-detail-info-card">
+                <h6><i class="fas fa-cogs"></i> Penanganan</h6>
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Ditugaskan Kepada:</span>
+                    <span class="complaints-detail-info-value">
+                        {% if complaint.assigned_to %}
+                            {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username }}
+                        {% else %}
+                            Belum ditugaskan
+                        {% endif %}
+                    </span>
+                </div>
+                {% if complaint.admin_notes %}
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Catatan Admin:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.admin_notes }}</span>
+                </div>
+                {% endif %}
+                {% if complaint.resolution %}
+                <div class="complaints-detail-info-item">
+                    <span class="complaints-detail-info-label">Penyelesaian:</span>
+                    <span class="complaints-detail-info-value">{{ complaint.resolution }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if complaint.location %}
+        <div class="complaints-detail-info-card">
+            <h6><i class="fas fa-map-marker-alt"></i> Lokasi Kejadian</h6>
+            <p class="complaints-detail-info-value">{{ complaint.location }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="complaints-detail-description">
+            <h6><i class="fas fa-file-alt"></i> Deskripsi Keluhan</h6>
+            <p>{{ complaint.description|linebreaks }}</p>
+        </div>
+        
+        {% if complaint.attachment %}
+        <div class="complaints-detail-attachment">
+            <h6><i class="fas fa-paperclip"></i> File Lampiran</h6>
+            <div class="complaints-detail-attachment-item">
+                <div class="complaints-detail-attachment-icon">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="complaints-detail-attachment-info">
+                    <div class="complaints-detail-attachment-name">{{ complaint.attachment.name|default:"File Lampiran" }}</div>
+                    <div class="complaints-detail-attachment-size">
+                        {% if complaint.attachment.size %}
+                            {{ complaint.attachment.size|filesizeformat }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="complaints-detail-attachment-actions">
+                    <a href="{{ complaint.attachment.url }}" class="complaints-detail-attachment-btn" target="_blank">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                    <a href="{{ complaint.attachment.url }}" class="complaints-detail-attachment-btn" target="_blank">
+                        <i class="fas fa-eye"></i> Lihat
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if updates %}
+        <div class="complaints-detail-updates">
+            <h6><i class="fas fa-history"></i> Riwayat Update</h6>
+            {% for update in updates %}
+            <div class="complaints-detail-update-item">
+                <div class="complaints-detail-update-avatar">
+                    {{ update.updated_by.username|first|upper }}
+                </div>
+                <div class="complaints-detail-update-content">
+                    <div class="complaints-detail-update-header">
+                        <span class="complaints-detail-update-author">{{ update.updated_by.get_full_name|default:update.updated_by.username }}</span>
+                        <span class="complaints-detail-update-date">{{ update.created_at|date:"d M Y H:i" }}</span>
+                    </div>
+                    <p class="complaints-detail-update-message">{{ update.message }}</p>
+                    {% if update.status != complaint.status %}
+                    <span class="complaints-detail-update-status complaints-detail-badge-{{ update.status }}">
+                        Status: {{ update.get_status_display }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="complaints-detail-add-update">
+            <h6><i class="fas fa-plus-circle"></i> Tambah Update</h6>
+            <form id="addUpdateForm">
+                {% csrf_token %}
+                <div class="complaints-detail-form-group">
+                    <label class="complaints-detail-form-label" for="updateStatus">Status</label>
+                    <select class="complaints-detail-form-control" id="updateStatus" name="status">
+                        <option value="pending" {% if complaint.status == 'pending' %}selected{% endif %}>Menunggu</option>
+                        <option value="in_review" {% if complaint.status == 'in_review' %}selected{% endif %}>Sedang Ditinjau</option>
+                        <option value="in_progress" {% if complaint.status == 'in_progress' %}selected{% endif %}>Sedang Diproses</option>
+                        <option value="resolved" {% if complaint.status == 'resolved' %}selected{% endif %}>Selesai</option>
+                        <option value="rejected" {% if complaint.status == 'rejected' %}selected{% endif %}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="complaints-detail-form-group">
+                    <label class="complaints-detail-form-label" for="updateMessage">Pesan Update</label>
+                    <textarea class="complaints-detail-form-control" id="updateMessage" name="message" rows="4" required></textarea>
+                    <div class="complaints-detail-form-feedback complaints-detail-form-feedback-invalid" id="messageError" style="display: none;"></div>
+                </div>
+                <button type="button" class="complaints-detail-btn complaints-detail-btn-primary" onclick="addUpdate()">
+                    <i class="fas fa-save"></i>Simpan Update
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit"></i>Update Status Keluhan
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="updateStatusForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="newStatus">Status Baru</label>
+                        <select class="form-control" id="newStatus" name="status" required>
+                            <option value="pending">Menunggu</option>
+                            <option value="in_review">Sedang Ditinjau</option>
+                            <option value="in_progress">Sedang Diproses</option>
+                            <option value="resolved">Selesai</option>
+                            <option value="rejected">Ditolak</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="statusNotes">Catatan</label>
+                        <textarea class="form-control" id="statusNotes" name="notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-warning" onclick="updateStatus()">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Set current status in update modal
+    $('#newStatus').val('{{ complaint.status }}');
+});
+
+function openUpdateModal() {
+    $('#updateModal').modal('show');
+}
+
+function openAddUpdateModal() {
+    // Scroll to add update form
+    $('html, body').animate({
+        scrollTop: $('.complaints-detail-add-update').offset().top - 100
+    }, 500);
+}
+
+function updateStatus() {
+    const formData = {
+        status: $('#newStatus').val(),
+        notes: $('#statusNotes').val()
+    };
+    
+    $.ajax({
+        url: '{% url "admin_panel:complaint_add_update" complaint.id %}',
+        method: 'POST',
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(data) {
+            if (data.success) {
+                $('#updateModal').modal('hide');
+                showAlert(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert(data.message, 'error');
+            }
+        },
+        error: function() {
+            showAlert('Terjadi kesalahan saat mengupdate status', 'error');
+        }
+    });
+}
+
+function addUpdate() {
+    const formData = {
+        status: $('#updateStatus').val(),
+        message: $('#updateMessage').val()
+    };
+    
+    if (!formData.message.trim()) {
+        showFieldError('messageError', 'Pesan update harus diisi');
+        return;
+    }
+    
+    $.ajax({
+        url: '{% url "admin_panel:complaint_add_update" complaint.id %}',
+        method: 'POST',
+        data: JSON.stringify(formData),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(data) {
+            if (data.success) {
+                showAlert(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showAlert(data.message, 'error');
+            }
+        },
+        error: function() {
+            showAlert('Terjadi kesalahan saat menambah update', 'error');
+        }
+    });
+}
+
+function showFieldError(fieldId, message) {
+    $(`#${fieldId}`).text(message).show();
+    $(`#${fieldId}`).closest('.complaints-detail-form-group').find('.complaints-detail-form-control').addClass('is-invalid');
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.complaints-detail-body').prepend(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,1850 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}Data Penduduk{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Custom Styles for Penduduk List */
+.penduduk-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.penduduk-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: #007bff;
+}
+
+.penduduk-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.penduduk-photo:hover {
+    transform: scale(1.1);
+    border-color: #007bff;
+}
+
+.penduduk-photo-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.penduduk-photo-placeholder:hover {
+    transform: scale(1.1);
+}
+
+.card-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #e9ecef;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.card-photo:hover {
+    transform: scale(1.05);
+    border-color: #007bff;
+}
+
+.card-photo-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 auto;
+}
+
+.card-photo-placeholder:hover {
+    transform: scale(1.05);
+}
+
+.badge-custom {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.btn-action {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.view-toggle .btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.view-toggle .btn.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.pagination-custom .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+    color: #007bff;
+    transition: all 0.3s ease;
+}
+
+.pagination-custom .page-link:hover {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.pagination-custom .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+.filter-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.data-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* Filter Form Improvements */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+    padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.form-control option {
+    padding: 0.5rem;
+    font-size: 14px;
+}
+
+/* Dropdown specific styling */
+select.form-control {
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+select.form-control:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23007bff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* Filter card improvements */
+.filter-card .card-body {
+    padding: 1.5rem;
+}
+
+.filter-card .form-control {
+    border: 2px solid #e9ecef;
+    font-weight: 500;
+}
+
+.filter-card .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+
+/* Bulk Actions Improvements */
+.bulk-actions-container {
+    position: relative;
+}
+
+.bulk-actions-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.bulk-actions-indicator.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #f8d7da;
+    color: #721c24 !important;
+}
+
+/* Modal improvements */
+.modal {
+    z-index: 1055;
+}
+
+.modal-backdrop {
+    z-index: 1050;
+}
+
+.modal .close {
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1;
+    opacity: 0.5;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.modal .close:hover {
+    opacity: 0.75;
+}
+
+.modal .close:focus {
+    outline: none;
+    opacity: 1;
+}
+
+/* Ensure modal backdrop is clickable */
+.modal-backdrop.show {
+    opacity: 0.5;
+}
+
+/* Dropdown improvements */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .filter-card .card-body {
+        padding: 1rem;
+    }
+    
+    .form-control {
+        font-size: 16px; /* Prevent zoom on mobile */
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .bulk-actions-container .btn {
+        font-size: 12px;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-lg-2, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+    
+    .d-flex.align-items-end {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .d-flex.align-items-end .btn {
+        margin-bottom: 0.5rem;
+        margin-right: 0 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .penduduk-card:hover {
+        transform: none;
+    }
+    
+    .penduduk-photo:hover,
+    .card-photo:hover,
+    .card-photo-placeholder:hover {
+        transform: none;
+    }
+    
+    .btn-action:hover {
+        transform: none;
+    }
+    
+    .form-control {
+        font-size: 16px; /* Prevent zoom on mobile */
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <h1 class="h3 mb-1 text-dark font-weight-bold">
+                        <i class="fas fa-users text-primary mr-2"></i>
+                        Data Penduduk
+                    </h1>
+                    <p class="text-muted mb-0">Kelola data penduduk desa secara terpusat</p>
+                </div>
+                <div class="d-flex flex-wrap">
+                    {% if user|can_add:"references" %}
+                    <a href="{% url 'admin_panel:references_penduduk_add' %}" class="btn btn-primary mr-2 mb-2">
+                        <i class="fas fa-plus mr-1"></i>
+                        Tambah Penduduk
+                    </a>
+                    {% endif %}
+                    
+                    <!-- Smart Import Button -->
+                    <button type="button" class="btn btn-info mr-2 mb-2" data-bs-toggle="modal" data-bs-target="#smartImportModal">
+                        <i class="fas fa-file-import mr-1"></i>
+                        Import Penduduk
+                    </button>
+                    
+                    <!-- Export Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle" type="button" id="exportDropdownBtn" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i>
+                            Export Data
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdownBtn">
+                            <h6 class="dropdown-header">
+                                <i class="fas fa-file mr-1"></i>
+                                Pilih Format Export
+                            </h6>
+                            <div class="dropdown-divider"></div>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_excel' %}">
+                                <i class="fas fa-file-excel text-success mr-2"></i>
+                                <span>Excel (.xlsx)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_csv' %}">
+                                <i class="fas fa-file-csv text-info mr-2"></i>
+                                <span>CSV (.csv)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_json' %}">
+                                <i class="fas fa-file-code text-warning mr-2"></i>
+                                <span>JSON (.json)</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_pdf' %}">
+                                <i class="fas fa-file-pdf text-danger mr-2"></i>
+                                <span>PDF (.pdf)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                  
+    <!-- Filter Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filter & Pencarian
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 mb-3">
+                                <label for="search" class="form-label font-weight-bold">Cari Nama/NIK</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ request.GET.search }}" placeholder="Masukkan nama atau NIK..." 
+                                       style="min-height: 40px; font-size: 14px;">
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="gender" class="form-label font-weight-bold">Jenis Kelamin</label>
+                                <select class="form-control" id="gender" name="gender" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua</option>
+                                    <option value="L" {% if request.GET.gender == 'L' %}selected{% endif %}>Laki-laki</option>
+                                    <option value="P" {% if request.GET.gender == 'P' %}selected{% endif %}>Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="dusun" class="form-label font-weight-bold">Dusun</label>
+                                <select class="form-control" id="dusun" name="dusun" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Dusun</option>
+                                    {% for dusun in dusun_options %}
+                                        <option value="{{ dusun.id }}" {% if request.GET.dusun == dusun.id|stringformat:"s" %}selected{% endif %}>{{ dusun.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-lg-2 col-md-6 mb-3">
+                                <label for="marital_status" class="form-label font-weight-bold">Status</label>
+                                <select class="form-control" id="marital_status" name="marital_status" style="min-height: 40px; font-size: 14px;">
+                                    <option value="">Semua Status</option>
+                                    <option value="BELUM_KAWIN" {% if request.GET.marital_status == 'BELUM_KAWIN' %}selected{% endif %}>Belum Kawin</option>
+                                    <option value="KAWIN" {% if request.GET.marital_status == 'KAWIN' %}selected{% endif %}>Kawin</option>
+                                    <option value="CERAI_HIDUP" {% if request.GET.marital_status == 'CERAI_HIDUP' %}selected{% endif %}>Cerai Hidup</option>
+                                    <option value="CERAI_MATI" {% if request.GET.marital_status == 'CERAI_MATI' %}selected{% endif %}>Cerai Mati</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-1 col-md-6 mb-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary mr-2">
+                                    <i class="fas fa-search mr-1"></i>
+                                    Cari
+                                </button>
+                                <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times mr-1"></i>
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card data-card">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-table mr-2"></i>
+                        Daftar Penduduk
+                    </h6>
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted mr-3">
+                            Menampilkan {{ page_obj.start_index|default:0 }} - {{ page_obj.end_index|default:0 }} dari {{ page_obj.paginator.count|default:0 }} data
+                        </span>
+                        {% if debug_info %}
+                        <small class="text-info mr-3">
+                            Debug: Total={{ debug_info.total_count }}, Active={{ debug_info.active_count }}, Filtered={{ debug_info.filtered_count }}, Page={{ debug_info.page_count }}
+                        </small>
+                        {% endif %}
+                        <div class="btn-group btn-group-sm view-toggle" role="group">
+                            <button type="button" class="btn btn-outline-secondary active" onclick="changeView('table')" id="tableViewBtn">
+                                <i class="fas fa-table"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="changeView('card')" id="cardViewBtn">
+                                <i class="fas fa-th"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Table View -->
+                    <div id="tableView" class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th width="50">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="selectAll">
+                                            <label class="custom-control-label" for="selectAll"></label>
+                                        </div>
+                                    </th>
+                                    <th>Foto</th>
+                                    <th>Nama</th>
+                                    <th>NIK</th>
+                                    <th>Jenis Kelamin</th>
+                                    <th>Dusun</th>
+                                    <th>Status</th>
+                                    <th width="150">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendudukTableBody">
+                                {% if page_obj %}
+                                    {% for penduduk in page_obj %}
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input penduduk-checkbox" 
+                                                       id="penduduk_{{ penduduk.id }}" value="{{ penduduk.id }}">
+                                                <label class="custom-control-label" for="penduduk_{{ penduduk.id }}"></label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="beneficiary-photo">
+                                                {% if penduduk.photo and penduduk.photo.url %}
+                                                    <img src="{{ penduduk.photo.url }}" alt="{{ penduduk.name }}" 
+                                                         class="penduduk-photo" 
+                                                         onclick="showImageModal('{{ penduduk.photo.url }}', '{{ penduduk.name|escapejs }}')">
+                                                {% else %}
+                                                    <div class="penduduk-photo-placeholder" 
+                                                         onclick="showImageModal('', '{{ penduduk.name|escapejs }}')">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="beneficiary-name font-weight-bold">{{ penduduk.name }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="beneficiary-nik text-muted">{{ penduduk.nik }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{% if penduduk.gender == 'L' %}primary{% else %}success{% endif %} badge-custom">
+                                                {{ penduduk.gender }}
+                                            </span>
+                                        </td>
+                                        <td>{{ penduduk.dusun.name|default:"-" }}</td>
+                                        <td>
+                                            <span class="badge badge-{% if penduduk.is_active %}success{% else %}secondary{% endif %} badge-custom">
+                                                <i class="fas fa-{% if penduduk.is_active %}check-circle{% else %}times-circle{% endif %} mr-1"></i>
+                                                {% if penduduk.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'admin_panel:references_penduduk_detail' penduduk.id %}" 
+                                                   class="btn btn-outline-primary btn-sm btn-action" title="Lihat Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if user|can_change:"references" %}
+                                                <a href="{% url 'admin_panel:references_penduduk_edit' penduduk.id %}" 
+                                                   class="btn btn-outline-warning btn-sm btn-action" title="Edit Data">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                {% endif %}
+                                                {% if user|can_delete:"references" %}
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-action" 
+                                                        title="Hapus Data" 
+                                                        data-id="{{ penduduk.id }}"
+                                                        data-name="{{ penduduk.name }}"
+                                                        data-nik="{{ penduduk.nik }}"
+                                                        data-dusun="{{ penduduk.dusun.name|default:'-' }}"
+                                                        data-gender="{{ penduduk.get_gender_display }}"
+                                                        data-photo="{% if penduduk.photo and penduduk.photo.url %}{{ penduduk.photo.url }}{% else %}{% endif %}"
+                                                        onclick="showDeleteModalFromData(this)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                                            <h5 class="text-muted">Tidak ada data penduduk</h5>
+                                            <p class="text-muted">Gunakan tombol "Tambah Penduduk" di atas untuk menambahkan data baru</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Card View -->
+                    <div id="cardView" class="d-none p-4">
+                        <div class="row" id="pendudukCardContainer">
+                            {% if page_obj %}
+                                {% for penduduk in page_obj %}
+                                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                                    <div class="card penduduk-card h-100">
+                                        <div class="card-body p-4 text-center">
+                                            <!-- Photo Section -->
+                                            <div class="mb-3">
+                                                {% if penduduk.photo and penduduk.photo.url %}
+                                                    <img src="{{ penduduk.photo.url }}" alt="{{ penduduk.name }}" 
+                                                         class="card-photo" 
+                                                         onclick="showImageModal('{{ penduduk.photo.url }}', '{{ penduduk.name|escapejs }}')">
+                                                {% else %}
+                                                    <div class="card-photo-placeholder" 
+                                                         onclick="showImageModal('', '{{ penduduk.name|escapejs }}')">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Name and NIK -->
+                                            <h6 class="beneficiary-name mb-1 text-dark font-weight-bold">{{ penduduk.name }}</h6>
+                                            <small class="text-muted d-block mb-3">{{ penduduk.nik }}</small>
+                                            
+                                            <!-- Status Badges -->
+                                            <div class="d-flex justify-content-center mb-3">
+                                                <span class="badge badge-{% if penduduk.gender == 'L' %}primary{% else %}success{% endif %} badge-custom mr-2">
+                                                    {{ penduduk.gender }}
+                                                </span>
+                                                <span class="badge badge-{% if penduduk.is_active %}success{% else %}secondary{% endif %} badge-custom">
+                                                    <i class="fas fa-{% if penduduk.is_active %}check-circle{% else %}times-circle{% endif %} mr-1"></i>
+                                                    {% if penduduk.is_active %}Aktif{% else %}Tidak Aktif{% endif %}
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Location -->
+                                            <div class="mb-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                                    {{ penduduk.dusun.name|default:"-" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="card-footer bg-transparent border-0 p-3">
+                                            <div class="btn-group w-100" role="group">
+                                                <a href="{% url 'admin_panel:references_penduduk_detail' penduduk.id %}" 
+                                                   class="btn btn-outline-primary btn-sm flex-fill btn-action" 
+                                                   title="Lihat Detail">
+                                                    <i class="fas fa-eye mr-1"></i>Detail
+                                                </a>
+                                                {% if user|can_change:"references" %}
+                                                <a href="{% url 'admin_panel:references_penduduk_edit' penduduk.id %}" 
+                                                   class="btn btn-outline-warning btn-sm flex-fill btn-action" 
+                                                   title="Edit Data">
+                                                    <i class="fas fa-edit mr-1"></i>Edit
+                                                </a>
+                                                {% endif %}
+                                                {% if user|can_delete:"references" %}
+                                                <button type="button" class="btn btn-outline-danger btn-sm flex-fill btn-action" 
+                                                        title="Hapus Data" 
+                                                        data-id="{{ penduduk.id }}"
+                                                        data-name="{{ penduduk.name }}"
+                                                        data-nik="{{ penduduk.nik }}"
+                                                        data-dusun="{{ penduduk.dusun.name|default:'-' }}"
+                                                        data-gender="{{ penduduk.get_gender_display }}"
+                                                        data-photo="{% if penduduk.photo and penduduk.photo.url %}{{ penduduk.photo.url }}{% else %}{% endif %}"
+                                                        onclick="showDeleteModalFromData(this)">
+                                                    <i class="fas fa-trash mr-1"></i>Hapus
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-12">
+                                    <div class="empty-state">
+                                        <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
+                                        <h5 class="text-muted">Tidak ada data penduduk</h5>
+                                        <p class="text-muted">Gunakan tombol "Tambah Penduduk" di atas untuk menambahkan data baru</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bulk Actions - Always Visible -->
+                <div class="card-footer py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="bulk-actions-container" id="bulkActionsContainer">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="bulkActionsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-tasks mr-1"></i>
+                                    <span id="bulkActionsText">Aksi Massal</span>
+                                    <span class="badge badge-light ml-2" id="bulkActionsCount">0</span>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="bulkActionsDropdown">
+                                    <a class="dropdown-item" href="#" onclick="executeBulkAction('activate')">
+                                        <i class="fas fa-check text-success mr-2"></i>Aktifkan
+                                    </a>
+                                    <a class="dropdown-item" href="#" onclick="executeBulkAction('deactivate')">
+                                        <i class="fas fa-pause text-warning mr-2"></i>Nonaktifkan
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item text-danger" href="#" onclick="executeBulkAction('delete')">
+                                        <i class="fas fa-trash mr-2"></i>Hapus Data
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-muted">
+                            Menampilkan {{ page_obj.start_index|default:0 }} - {{ page_obj.end_index|default:0 }} dari {{ page_obj.paginator.count|default:0 }} data
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="card-footer py-3">
+                    <nav aria-label="Pagination">
+                        <ul class="pagination justify-content-center mb-0 pagination-custom" id="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.dusun %}&dusun={{ request.GET.dusun }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.marital_status %}&marital_status={{ request.GET.marital_status }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.dusun %}&dusun={{ request.GET.dusun }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.marital_status %}&marital_status={{ request.GET.marital_status }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.dusun %}&dusun={{ request.GET.dusun }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.marital_status %}&marital_status={{ request.GET.marital_status }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.dusun %}&dusun={{ request.GET.dusun }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.marital_status %}&marital_status={{ request.GET.marital_status }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.dusun %}&dusun={{ request.GET.dusun }}{% endif %}{% if request.GET.gender %}&gender={{ request.GET.gender }}{% endif %}{% if request.GET.marital_status %}&marital_status={{ request.GET.marital_status }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal - Simplified -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Foto Penduduk</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="modalImageContainer">
+                    <img id="modalImage" src="" alt="" class="img-fluid rounded" style="max-height: 500px;">
+                    <div id="modalNoImage" class="d-none">
+                        <div class="empty-state">
+                            <i class="fas fa-user fa-5x text-muted mb-3"></i>
+                            <p class="text-muted">Tidak ada foto tersedia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times mr-1"></i>Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal - Simplified -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-trash mr-2"></i>
+                    Hapus Data
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                </div>
+                <h6 class="font-weight-bold">Hapus data penduduk?</h6>
+                <p class="text-muted mb-0">
+                    <strong id="deleteName">-</strong><br>
+                    <small>NIK: <span id="deleteNik">-</span></small>
+                </p>
+                <div class="alert alert-warning mt-3 mb-0">
+                    <small><i class="fas fa-info-circle mr-1"></i>Tindakan ini tidak dapat dibatalkan!</small>
+                </div>
+                
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="penduduk_id" id="deletePendudukId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash mr-1"></i>Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-submit form on filter change
+    $('#filterForm select').change(function() {
+        $('#filterForm').submit();
+    });
+    
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        $('.penduduk-checkbox').prop('checked', this.checked);
+        updateBulkActions();
+    });
+    
+    // Bind checkbox change events
+    $('.penduduk-checkbox').change(function() {
+        updateBulkActions();
+    });
+    
+    // Initialize tooltips
+    $('[title]').tooltip();
+    
+    // Enhanced modal and dropdown functionality
+    $(document).ready(function() {
+        // Initialize Bootstrap 5 components
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize dropdowns
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+            return new bootstrap.Dropdown(dropdownToggleEl);
+        });
+        
+        // Close modal on escape key
+        $(document).keyup(function(e) {
+            if (e.keyCode === 27) { // Escape key
+                $('.modal.show').modal('hide');
+            }
+        });
+        
+        // Close modal when clicking outside - using Bootstrap events
+        $('.modal').on('click', function(e) {
+            if (e.target === this) {
+                $(this).modal('hide');
+            }
+        });
+        
+        // Force close modal with data-dismiss
+        $('[data-dismiss="modal"]').on('click', function() {
+            $(this).closest('.modal').modal('hide');
+        });
+        
+        // Additional close button functionality
+        $('.modal .close').on('click', function() {
+            $(this).closest('.modal').modal('hide');
+        });
+        
+        // Manual dropdown handling for export
+        $('#exportDropdownBtn').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).next('.dropdown-menu').toggle();
+        });
+        
+        // Close dropdown when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dropdown').length) {
+                $('.dropdown-menu').hide();
+            }
+        });
+        
+        // Debug dropdown and modal events
+        console.log('Bootstrap components initialized');
+    });
+    
+    // Confirm delete button - simplified
+    $('#confirmDeleteBtn').on('click', function() {
+        submitDeleteForm();
+    });
+    
+    // Additional modal close handlers
+    $(document).on('click', '.modal .close', function() {
+        $(this).closest('.modal').modal('hide');
+    });
+    
+    // Force close all modals function
+    window.closeAllModals = function() {
+        $('.modal').modal('hide');
+    };
+    
+    // Debug modal events
+    $('.modal').on('show.bs.modal', function() {
+        console.log('Modal showing:', this.id);
+    });
+    
+    $('.modal').on('hide.bs.modal', function() {
+        console.log('Modal hiding:', this.id);
+    });
+});
+
+function changeView(view) {
+    if (view === 'table') {
+        $('#tableView').removeClass('d-none');
+        $('#cardView').addClass('d-none');
+        $('#tableViewBtn').addClass('active');
+        $('#cardViewBtn').removeClass('active');
+    } else {
+        $('#tableView').addClass('d-none');
+        $('#cardView').removeClass('d-none');
+        $('#tableViewBtn').removeClass('active');
+        $('#cardViewBtn').addClass('active');
+    }
+}
+
+function showImageModal(imageUrl, name) {
+    $('#imageModalLabel').text(`Foto ${name}`);
+    
+    if (imageUrl && imageUrl !== '') {
+        $('#modalImage').attr('src', imageUrl).attr('alt', name).removeClass('d-none');
+        $('#modalNoImage').addClass('d-none');
+    } else {
+        $('#modalImage').addClass('d-none');
+        $('#modalNoImage').removeClass('d-none');
+    }
+    
+    $('#imageModal').modal('show');
+}
+
+function showDeleteModal(id, name, nik, dusun, gender, photoUrl) {
+    // Set form action
+    $('#deleteForm').attr('action', '{% url "admin_panel:references_penduduk_delete" 0 %}'.replace('0', id));
+    $('#deletePendudukId').val(id);
+    
+    // Set data details - simplified
+    $('#deleteName').text(name);
+    $('#deleteNik').text(nik);
+    
+    // Show modal
+    $('#deleteModal').modal('show');
+}
+
+function showDeleteModalFromData(button) {
+    const id = button.getAttribute('data-id');
+    const name = button.getAttribute('data-name');
+    const nik = button.getAttribute('data-nik');
+    const dusun = button.getAttribute('data-dusun');
+    const gender = button.getAttribute('data-gender');
+    const photo = button.getAttribute('data-photo');
+    
+    showDeleteModal(id, name, nik, dusun, gender, photo);
+}
+
+function submitDeleteForm() {
+    const form = $('#deleteForm');
+    const formData = new FormData(form[0]);
+    const btn = $('#confirmDeleteBtn');
+    const originalText = btn.html();
+    
+    // Show loading
+    btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Menghapus...');
+    btn.prop('disabled', true);
+    
+    $.ajax({
+        url: form.attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                // Show success message
+                showAlert(response.message, 'success');
+                
+                // Close modal
+                $('#deleteModal').modal('hide');
+                
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Terjadi kesalahan saat menghapus data', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            let message = 'Terjadi kesalahan saat menghapus data';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            showAlert(message, 'error');
+        },
+        complete: function() {
+            // Reset button state
+            btn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function showAlert(message, type) {
+    // Remove ALL existing alerts and notifications
+    $('.alert').remove();
+    $('.loading-overlay').remove();
+    $('.alert-success, .alert-danger, .alert-warning, .alert-info').remove();
+    
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas ${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Insert alert as fixed notification
+    $('body').append(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut(function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+
+function updateBulkActions() {
+    const selected = $('.penduduk-checkbox:checked').length;
+    const container = $('#bulkActionsContainer');
+    const count = $('#bulkActionsCount');
+    const dropdown = $('#bulkActionsDropdown');
+    
+    // Always show container, but change style based on selection
+    count.text(selected);
+    
+    if (selected > 0) {
+        dropdown.removeClass('btn-outline-primary').addClass('btn-primary');
+        dropdown.find('i').removeClass('fa-tasks').addClass('fa-check');
+    } else {
+        dropdown.removeClass('btn-primary').addClass('btn-outline-primary');
+        dropdown.find('i').removeClass('fa-check').addClass('fa-tasks');
+    }
+    
+    // Update select all checkbox
+    const totalCheckboxes = $('.penduduk-checkbox').length;
+    const selectAll = $('#selectAll');
+    
+    if (selected === 0) {
+        selectAll.prop('indeterminate', false).prop('checked', false);
+    } else if (selected === totalCheckboxes) {
+        selectAll.prop('indeterminate', false).prop('checked', true);
+    } else {
+        selectAll.prop('indeterminate', true);
+    }
+}
+
+// Export/Import Functions
+function exportData() {
+    showLoading('Mengekspor data...');
+    // Get current filter parameters
+    const params = new URLSearchParams(window.location.search);
+    const exportUrl = '{% url "admin_panel:references_penduduk_export_csv" %}' + '?' + params.toString();
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'data_penduduk_' + new Date().toISOString().split('T')[0] + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('Data CSV berhasil diekspor');
+    }, 1000);
+}
+
+function exportExcel() {
+    showLoading('Mengekspor ke Excel...');
+    // Get current filter parameters
+    const params = new URLSearchParams(window.location.search);
+    const exportUrl = '{% url "admin_panel:references_penduduk_export_excel" %}' + '?' + params.toString();
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'data_penduduk_' + new Date().toISOString().split('T')[0] + '.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('File Excel berhasil dibuat');
+    }, 1000);
+}
+
+function exportPDF() {
+    showLoading('Mengekspor ke PDF...');
+    // Get current filter parameters
+    const params = new URLSearchParams(window.location.search);
+    const exportUrl = '{% url "admin_panel:references_penduduk_export_pdf" %}' + '?' + params.toString();
+    
+    // Open in new window for PDF
+    window.open(exportUrl, '_blank');
+    
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('File PDF berhasil dibuat');
+    }, 1000);
+}
+
+function downloadTemplate() {
+    showLoading('Mengunduh template...');
+    setTimeout(() => {
+        hideLoading();
+        showSuccess('Template berhasil diunduh');
+    }, 1000);
+}
+
+function executeBulkAction(action) {
+    const selected = $('.penduduk-checkbox:checked');
+    
+    if (selected.length === 0) {
+        showError('Pilih minimal satu data');
+        return;
+    }
+    
+    // Get selected IDs
+    const selectedIds = [];
+    selected.each(function() {
+        selectedIds.push($(this).val());
+    });
+    
+    // Action labels
+    const actionLabels = {
+        'activate': 'mengaktifkan',
+        'deactivate': 'menonaktifkan', 
+        'delete': 'menghapus'
+    };
+    
+    // Confirm for delete action
+    if (action === 'delete') {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} data penduduk?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`Apakah Anda yakin ingin ${actionLabels[action]} ${selectedIds.length} data penduduk?`)) {
+            return;
+        }
+    }
+    
+    showLoading(`Menjalankan aksi ${actionLabels[action]} pada ${selectedIds.length} data...`);
+    
+    // Execute the actual bulk action
+    if (action === 'delete') {
+        bulkDeletePenduduk(selectedIds);
+    } else if (action === 'activate') {
+        bulkActivatePenduduk(selectedIds);
+    } else if (action === 'deactivate') {
+        bulkDeactivatePenduduk(selectedIds);
+    }
+}
+
+function bulkDeletePenduduk(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_bulk_action" %}',
+        type: 'POST',
+        data: {
+            'model': 'penduduk',
+            'action': 'delete',
+            'items': ids.join(','),
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(response.message, 'success');
+                // Reload page to update list
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                let errorMessage = response.message || 'Gagal menghapus data penduduk';
+                if (response.errors && response.errors.length > 0) {
+                    errorMessage += '\n\nDetail error:\n' + response.errors.join('\n');
+                }
+                showAlert(errorMessage, 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            console.error('Bulk delete error:', xhr.responseText);
+            showAlert('Terjadi kesalahan saat menghapus data penduduk: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkActivatePenduduk(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_bulk_action" %}',
+        type: 'POST',
+        data: {
+            'model': 'penduduk',
+            'action': 'activate',
+            'items': ids.join(','),
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(response.message, 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal mengaktifkan data penduduk', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            showAlert('Terjadi kesalahan saat mengaktifkan data penduduk: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+function bulkDeactivatePenduduk(ids) {
+    $.ajax({
+        url: '{% url "admin_panel:references_bulk_action" %}',
+        type: 'POST',
+        data: {
+            'model': 'penduduk',
+            'action': 'deactivate',
+            'items': ids.join(','),
+            'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+        },
+        success: function(response) {
+            hideLoading();
+            if (response.success) {
+                showAlert(response.message, 'success');
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert(response.message || 'Gagal menonaktifkan data penduduk', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            hideLoading();
+            showAlert('Terjadi kesalahan saat menonaktifkan data penduduk: ' + xhr.responseText, 'error');
+        }
+    });
+}
+
+// Utility Functions
+function showLoading(message) {
+    // Remove existing loading overlays first
+    $('.loading-overlay').remove();
+    
+    const overlay = $('<div class="loading-overlay"><div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i><p>' + message + '</p></div></div>');
+    $('body').append(overlay);
+}
+
+function hideLoading() {
+    $('.loading-overlay').remove();
+}
+
+function showSuccess(message) {
+    // Remove existing notifications first
+    $('.alert').remove();
+    $('.loading-overlay').remove();
+    
+    const notification = $(`
+        <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas fa-check-circle mr-2"></i>${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `);
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.fadeOut(function() {
+            $(this).remove();
+        });
+    }, 3000);
+}
+
+function showError(message) {
+    // Remove existing notifications first
+    $('.alert').remove();
+    $('.loading-overlay').remove();
+    
+    const notification = $(`
+        <div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas fa-exclamation-circle mr-2"></i>${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `);
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.fadeOut(function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+
+// Import Modal Functions
+function showImportModal() {
+    $('#importModal').modal('show');
+}
+
+function importData() {
+    console.log('importData function called - version 2.0');
+    const fileInput = document.getElementById('importFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showAlert('Pilih file Excel terlebih dahulu', 'warning');
+        return;
+    }
+    
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        showAlert('File harus berformat Excel (.xlsx atau .xls)', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Show loading
+    $('#importBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Mengimport...');
+    
+        $.ajax({
+            url: '{% url "admin_panel:references_quick_import" "penduduk" %}?v=' + Date.now(),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            cache: false,
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+        success: function(response) {
+            console.log('Import response:', response);
+            console.log('Response type:', typeof response);
+            console.log('Response keys:', Object.keys(response));
+            console.log('success_count value:', response.success_count, 'type:', typeof response.success_count);
+            console.log('error_count value:', response.error_count, 'type:', typeof response.error_count);
+            
+            if (response.success) {
+                // Multiple fallback strategies for getting counts
+                let successCount = 0;
+                let errorCount = 0;
+                
+                // Strategy 1: Direct access
+                if (typeof response.success_count !== 'undefined') {
+                    successCount = parseInt(response.success_count) || 0;
+                }
+                if (typeof response.error_count !== 'undefined') {
+                    errorCount = parseInt(response.error_count) || 0;
+                }
+                
+                // Strategy 2: From message parsing
+                if (successCount === 0 && errorCount === 0 && response.message) {
+                    const message = response.message;
+                    const successMatch = message.match(/(\d+)\s+data\s+berhasil/);
+                    const errorMatch = message.match(/(\d+)\s+data\s+(error|gagal)/);
+                    
+                    if (successMatch) successCount = parseInt(successMatch[1]);
+                    if (errorMatch) errorCount = parseInt(errorMatch[1]);
+                }
+                
+                console.log('Final values - successCount:', successCount, 'errorCount:', errorCount);
+                showAlert(`Import berhasil: ${successCount} data berhasil, ${errorCount} data gagal`, 'success');
+                $('#importModal').modal('hide');
+                loadPendudukData();
+            } else {
+                showAlert(response.message || 'Import gagal', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            let message = 'Terjadi kesalahan saat mengimport data';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            showAlert(message, 'error');
+        },
+        complete: function() {
+            $('#importBtn').prop('disabled', false).html('<i class="fas fa-upload mr-1"></i>Import Data');
+        }
+    });
+}
+</script>
+
+<!-- Smart Import Modal -->
+<div class="modal fade" id="smartImportModal" tabindex="-1" role="dialog" aria-labelledby="smartImportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="smartImportModalLabel">
+                    <i class="fas fa-magic mr-2"></i>
+                    Smart Import Penduduk
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Step 1: Upload File -->
+                <div id="step1" class="import-step">
+                    <div class="alert alert-success">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>Smart Import Features:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Auto-detection:</strong> Sistem akan otomatis mendeteksi kolom berdasarkan header</li>
+                            <li><strong>Auto-create:</strong> Dusun, Lorong, RT, RW baru akan dibuat otomatis</li>
+                            <li><strong>Flexible format:</strong> Mendukung berbagai format header (Nama, nama, NAMA, dll)</li>
+                            <li><strong>Smart mapping:</strong> Mapping otomatis untuk NIK, alamat, telepon, dll</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="smartImportFile" class="form-label">
+                            <i class="fas fa-file mr-1"></i>
+                            Pilih File Data Penduduk <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" class="form-control" id="smartImportFile" accept=".xlsx,.xls,.csv" required>
+                        <small class="form-text text-muted">
+                            Format yang didukung: Excel (.xlsx, .xls), CSV (.csv) - Maksimal 10MB
+                        </small>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="btn-group mb-3" role="group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-download mr-1"></i>
+                                Download Template
+                            </button>
+                            <div class="dropdown-menu">
+                                <h6 class="dropdown-header">Pilih Template:</h6>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('penduduk')">
+                                    <i class="fas fa-users mr-2"></i>Template Penduduk
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('dusun')">
+                                    <i class="fas fa-home mr-2"></i>Template Dusun
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('keluarga')">
+                                    <i class="fas fa-family mr-2"></i>Template Keluarga
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('pelajar')">
+                                    <i class="fas fa-graduation-cap mr-2"></i>Template Pelajar
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('lorong')">
+                                    <i class="fas fa-road mr-2"></i>Template Lorong
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('rw')">
+                                    <i class="fas fa-building mr-2"></i>Template RW
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('rt')">
+                                    <i class="fas fa-home mr-2"></i>Template RT
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="downloadTemplate('disabilitas')">
+                                    <i class="fas fa-wheelchair mr-2"></i>Template Disabilitas
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-primary" href="#" onclick="downloadAllTemplates()">
+                                    <i class="fas fa-download mr-2"></i><strong>Download Semua Template</strong>
+                                </a>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="importBtn" onclick="startDirectImport()">
+                            <i class="fas fa-upload mr-1"></i>
+                            Import Data
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Import Result -->
+                <div id="step2" class="import-step" style="display: none;">
+                    <div id="importResult">
+                        <!-- Hasil import akan ditampilkan di sini -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Smart Import Functions - Simple version
+
+function downloadTemplate(modelName) {
+    // Download template Excel untuk model tertentu
+    window.open('{% url "admin_panel:references_get_template" "penduduk" %}'.replace('penduduk', modelName), '_blank');
+}
+
+function downloadAllTemplates() {
+    // Download semua template sekaligus
+    const models = ['penduduk', 'dusun', 'keluarga', 'pelajar', 'lorong', 'rw', 'rt', 'disabilitas'];
+    
+    // Tampilkan loading
+    showAlert('Sedang mempersiapkan download semua template...', 'info');
+    
+    // Download satu per satu dengan delay
+    models.forEach((model, index) => {
+        setTimeout(() => {
+            downloadTemplate(model);
+        }, index * 500); // Delay 500ms antar download
+    });
+    
+    // Tampilkan notifikasi selesai
+    setTimeout(() => {
+        showAlert('Semua template sedang didownload!', 'success');
+    }, models.length * 500);
+}
+
+function startDirectImport() {
+    const fileInput = document.getElementById('smartImportFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Pilih file terlebih dahulu!');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('model_name', 'penduduk');
+    
+    // Tampilkan loading
+    document.getElementById('importBtn').innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
+    document.getElementById('importBtn').disabled = true;
+    
+    // Langsung import tanpa preview
+    fetch('{% url "admin_panel:references_quick_import" "penduduk" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showImportResult(data);
+        } else {
+            showImportError(data.message || 'Import gagal');
+        }
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+        showImportError('Error saat import: ' + error.message);
+    })
+    .finally(() => {
+        document.getElementById('importBtn').innerHTML = '<i class="fas fa-upload mr-1"></i>Import Data';
+        document.getElementById('importBtn').disabled = false;
+    });
+}
+
+function showImportResult(data) {
+    // Pindah ke step 2 (result)
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    
+    let resultHtml = `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle mr-2"></i>
+            <strong>Import Berhasil!</strong>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-success">${data.imported || 0}</h3>
+                        <p class="mb-0">Data Berhasil Diimpor</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-info">${data.total_rows || 0}</h3>
+                        <p class="mb-0">Total Data Diproses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (data.auto_created && Object.keys(data.auto_created).length > 0) {
+        resultHtml += `
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle mr-2"></i>
+                <strong>Auto-created:</strong>
+                <ul class="mb-0 mt-2">
+        `;
+        for (const [key, value] of Object.entries(data.auto_created)) {
+            resultHtml += `<li>${key}: ${value} item(s)</li>`;
+        }
+        resultHtml += `
+                </ul>
+            </div>
+        `;
+    }
+    
+    resultHtml += `
+        <div class="text-center mt-3">
+            <button type="button" class="btn btn-primary" onclick="location.reload()">
+                <i class="fas fa-refresh mr-1"></i>
+                Refresh Halaman
+            </button>
+            <button type="button" class="btn btn-secondary ml-2" onclick="backToStep1()">
+                <i class="fas fa-arrow-left mr-1"></i>
+                Import Lagi
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('importResult').innerHTML = resultHtml;
+}
+
+function showImportError(message) {
+    // Pindah ke step 2 (result)
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    
+    const resultHtml = `
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <strong>Import Gagal!</strong>
+            <p class="mb-0 mt-2">${message}</p>
+        </div>
+        <div class="text-center mt-3">
+            <button type="button" class="btn btn-warning" onclick="backToStep1()">
+                <i class="fas fa-arrow-left mr-1"></i>
+                Coba Lagi
+            </button>
+            <button type="button" class="btn btn-secondary ml-2" onclick="$('#smartImportModal').modal('hide')">
+                <i class="fas fa-times mr-1"></i>
+                Tutup
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('importResult').innerHTML = resultHtml;
+}
+
+function backToStep1() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('smartImportFile').value = '';
+}
+
+// Fungsi yang sudah tidak diperlukan lagi dihapus untuk menyederhanakan kode
+
+// Reset modal when closed - Simple version
+$('#smartImportModal').on('hidden.bs.modal', function () {
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('smartImportFile').value = '';
+    document.getElementById('importResult').innerHTML = '';
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<script>
+// Set current model name for import/export
+window.currentModelName = 'penduduk';
+</script>
+
+{% endblock %}

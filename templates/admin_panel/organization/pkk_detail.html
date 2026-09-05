@@ -1,0 +1,498 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Detail Penggerak PKK{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        margin-bottom: 1rem;
+    }
+    
+    .profile-photo-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-title {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .info-card {
+        background: white;
+        border: 1px solid #e3e6f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .info-card-header {
+        border-bottom: 1px solid #e3e6f0;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #5a5c69;
+        margin: 0;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fc;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #5a5c69;
+        min-width: 120px;
+    }
+    
+    .info-value {
+        color: #6c757d;
+        text-align: right;
+        flex: 1;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 6px;
+    }
+    
+    .jabatan-badge {
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        font-weight: 600;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .contact-info {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .contact-icon {
+        width: 20px;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e3e6f0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.75rem;
+        top: 0.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #4e73df;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #e3e6f0;
+    }
+    
+    .timeline-content {
+        background: white;
+        border: 1px solid #e3e6f0;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .timeline-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .timeline-title {
+        font-weight: 600;
+        color: #5a5c69;
+        margin-bottom: 0.25rem;
+    }
+    
+    .timeline-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 1.5rem;
+        }
+        
+        .profile-photo,
+        .profile-photo-placeholder {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .profile-name {
+            font-size: 1.25rem;
+        }
+        
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .info-label {
+            min-width: auto;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            text-align: left;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                {% if pkk.foto_profil %}
+                    <img src="{{ pkk.foto_profil.url }}" alt="{{ pkk.penduduk.nama }}" class="profile-photo">
+                {% else %}
+                    <div class="profile-photo-placeholder">
+                        <i class="fas fa-female"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col">
+                <div class="profile-name">{{ pkk.penduduk.nama }}</div>
+                <div class="profile-title">{{ pkk.get_jabatan_display }}</div>
+                <div class="profile-badges">
+                    <span class="badge status-badge {% if pkk.status == 'aktif' %}bg-success{% else %}bg-secondary{% endif %}">
+                        {{ pkk.get_status_display }}
+                    </span>
+                    {% if pkk.tanggal_mulai_tugas %}
+                        <span class="badge bg-primary">
+                            {{ pkk.tanggal_mulai_tugas|timesince }} di posisi
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="action-buttons">
+                    <a href="{% url 'admin_panel:organization:admin_pkk_edit' pkk.id %}" class="action-btn btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'admin_panel:organization:admin_pkk_list' %}" class="action-btn btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Personal Information -->
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Informasi Personal</h5>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nama Lengkap</span>
+                    <span class="info-value">{{ pkk.penduduk.nama }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">NIK</span>
+                    <span class="info-value">{{ pkk.penduduk.nik }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Jabatan</span>
+                    <span class="info-value">
+                        <span class="badge jabatan-badge bg-primary">{{ pkk.get_jabatan_display }}</span>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span class="info-value">
+                        <span class="badge status-badge {% if pkk.status == 'aktif' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ pkk.get_status_display }}
+                        </span>
+                    </span>
+                </div>
+                {% if pkk.tanggal_mulai_tugas %}
+                <div class="info-item">
+                    <span class="info-label">Mulai Tugas</span>
+                    <span class="info-value">{{ pkk.tanggal_mulai_tugas|date:"d F Y" }}</span>
+                </div>
+                {% endif %}
+                {% if pkk.tanggal_selesai_tugas %}
+                <div class="info-item">
+                    <span class="info-label">Selesai Tugas</span>
+                    <span class="info-value">{{ pkk.tanggal_selesai_tugas|date:"d F Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Contact Information -->
+            {% if pkk.kontak_whatsapp or pkk.email_pribadi or pkk.alamat_lengkap %}
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Informasi Kontak</h5>
+                </div>
+                <div class="contact-info">
+                    {% if pkk.kontak_whatsapp %}
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp contact-icon"></i>
+                        <a href="https://wa.me/{{ pkk.kontak_whatsapp }}" target="_blank" class="text-decoration-none">
+                            {{ pkk.kontak_whatsapp }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if pkk.email_pribadi %}
+                    <div class="contact-item">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <a href="mailto:{{ pkk.email_pribadi }}" class="text-decoration-none">
+                            {{ pkk.email_pribadi }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if pkk.alamat_lengkap %}
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <span>{{ pkk.alamat_lengkap }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Organization Information -->
+        <div class="col-lg-6">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Informasi Organisasi</h5>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Lama Menjabat</span>
+                    <span class="info-value">
+                        {% if pkk.tanggal_mulai_tugas %}
+                            {{ pkk.tanggal_mulai_tugas|timesince }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+                {% if pkk.pendidikan_terakhir %}
+                <div class="info-item">
+                    <span class="info-label">Pendidikan Terakhir</span>
+                    <span class="info-value">{{ pkk.pendidikan_terakhir }}</span>
+                </div>
+                {% endif %}
+                {% if pkk.pekerjaan %}
+                <div class="info-item">
+                    <span class="info-label">Pekerjaan</span>
+                    <span class="info-value">{{ pkk.pekerjaan }}</span>
+                </div>
+                {% endif %}
+                {% if pkk.pengalaman_organisasi %}
+                <div class="info-item">
+                    <span class="info-label">Pengalaman Organisasi</span>
+                    <span class="info-value">{{ pkk.pengalaman_organisasi }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Skills and Experience -->
+            {% if pkk.bidang_keahlian or pkk.prestasi_individu or pkk.kontribusi %}
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Keahlian & Kontribusi</h5>
+                </div>
+                {% if pkk.bidang_keahlian %}
+                <div class="mb-3">
+                    <h6 class="mb-2">Bidang Keahlian</h6>
+                    <div>
+                        {% for skill in pkk.bidang_keahlian.split:',' %}
+                            <span class="badge bg-primary me-1">{{ skill.strip }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if pkk.prestasi_individu %}
+                <div class="mb-3">
+                    <h6 class="mb-2">Prestasi Individu</h6>
+                    <p class="text-muted">{{ pkk.prestasi_individu }}</p>
+                </div>
+                {% endif %}
+                {% if pkk.kontribusi %}
+                <div class="mb-3">
+                    <h6 class="mb-2">Kontribusi</h6>
+                    <p class="text-muted">{{ pkk.kontribusi }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="row">
+        <div class="col-12">
+            <div class="info-card">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">Riwayat Aktivitas</h5>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ pkk.created_at|date:"d F Y, H:i" }}</div>
+                            <div class="timeline-title">Data Penggerak Dibuat</div>
+                            <div class="timeline-description">Data penggerak PKK berhasil ditambahkan ke sistem</div>
+                        </div>
+                    </div>
+                    {% if pkk.tanggal_mulai_tugas %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ pkk.tanggal_mulai_tugas|date:"d F Y" }}</div>
+                            <div class="timeline-title">Mulai Menjabat</div>
+                            <div class="timeline-description">Mulai menjabat sebagai {{ pkk.get_jabatan_display }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if pkk.updated_at and pkk.updated_at != pkk.created_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <div class="timeline-date">{{ pkk.updated_at|date:"d F Y, H:i" }}</div>
+                            <div class="timeline-title">Data Diperbarui</div>
+                            <div class="timeline-description">Informasi penggerak terakhir diperbarui</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/organization.js' %}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize any interactive elements
+    console.log('PKK detail page loaded');
+    
+    // Initialize responsive features
+    orgAPI.initResponsive();
+});
+</script>
+{% endblock %}
+

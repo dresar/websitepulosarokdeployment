@@ -1,0 +1,260 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .typing-dot {
+        animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing {
+        0%, 80%, 100% {
+            transform: scale(0);
+        }
+        40% {
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white p-8 text-center">
+                <h2 class="text-2xl md:text-3xl font-bold mb-2">
+                    <i class="fas fa-comments mr-3"></i>Chat Layanan
+                </h2>
+                <p class="text-blue-100">Tim layanan desa siap membantu Anda 24/7</p>
+            </div>
+            
+            <!-- Chat Body -->
+            <div class="p-8">
+                <!-- Chat Info -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 mb-8 border-l-4 border-blue-500">
+                    <h6 class="text-blue-900 dark:text-blue-100 font-semibold mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>Informasi Chat
+                    </h6>
+                    <p class="text-blue-700 dark:text-blue-300 text-sm">
+                        Silakan ajukan pertanyaan Anda. Tim layanan akan merespons secepat mungkin. Anda juga dapat menggunakan pertanyaan cepat di bawah ini.
+                    </p>
+                </div>
+
+                <!-- Quick Questions -->
+                <div class="mb-8">
+                    <h5 class="text-gray-900 dark:text-white font-semibold mb-4 flex items-center">
+                        <i class="fas fa-lightning-bolt mr-2 text-yellow-500"></i>Pertanyaan Cepat
+                    </h5>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="sendQuickQuestion('Bagaimana cara mengajukan KTP?')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 border border-gray-200 dark:border-gray-600">
+                            Cara mengajukan KTP
+                        </button>
+                        <button onclick="sendQuickQuestion('Berapa lama proses pembuatan KK?')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 border border-gray-200 dark:border-gray-600">
+                            Lama proses KK
+                        </button>
+                        <button onclick="sendQuickQuestion('Jadwal posyandu kapan?')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 border border-gray-200 dark:border-gray-600">
+                            Jadwal posyandu
+                        </button>
+                        <button onclick="sendQuickQuestion('Cara mengajukan surat keterangan?')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 border border-gray-200 dark:border-gray-600">
+                            Surat keterangan
+                        </button>
+                        <button onclick="sendQuickQuestion('Kontak layanan desa?')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 border border-gray-200 dark:border-gray-600">
+                            Kontak layanan
+                        </button>
+                        <button onclick="sendQuickQuestion('Jam operasional kantor desa?')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 border border-gray-200 dark:border-gray-600">
+                            Jam operasional
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-2xl p-6 mb-8 max-h-96 overflow-y-auto" id="chatMessages">
+                    <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-comments text-4xl mb-4 opacity-50"></i>
+                        <h5 class="text-lg font-semibold mb-2">Selamat datang di Chat Layanan</h5>
+                        <p class="text-sm">Silakan ajukan pertanyaan Anda atau pilih pertanyaan cepat di atas</p>
+                    </div>
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="hidden items-center gap-3 text-gray-500 dark:text-gray-400 mb-4" id="typingIndicator">
+                    <i class="fas fa-robot"></i>
+                    <span class="italic">Tim layanan sedang mengetik</span>
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="flex gap-4 items-center">
+                    <input type="text" id="messageInput" placeholder="Ketik pesan Anda di sini..." 
+                           class="flex-1 px-6 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-300"
+                           autocomplete="off">
+                    <button class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg" 
+                            id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+let messageCount = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus on input
+    document.getElementById('messageInput').focus();
+    
+    // Send message on Enter key
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Auto-scroll to bottom
+    scrollToBottom();
+    
+    // Add initial bot message
+    setTimeout(() => {
+        if (document.querySelectorAll('#chatMessages .message').length === 0) {
+            addMessage('Halo! Selamat datang di Chat Layanan Desa Pulosarok. Saya siap membantu menjawab pertanyaan Anda.', 'bot');
+        }
+    }, 1000);
+});
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (message === '') return;
+    
+    // Disable input and button
+    input.disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    
+    // Add user message
+    addMessage(message, 'user');
+    
+    // Clear input
+    input.value = '';
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Send to server
+    fetch('{% url "layanan:api_chat_message" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `message=${encodeURIComponent(message)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideTypingIndicator();
+        
+        if (data.success) {
+            // Add bot response
+            setTimeout(() => {
+                addMessage(data.response, 'bot');
+            }, 1000);
+        } else {
+            addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.', 'bot');
+        }
+    })
+    .catch(error => {
+        hideTypingIndicator();
+        addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.', 'bot');
+    })
+    .finally(() => {
+        // Re-enable input and button
+        input.disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+    });
+}
+
+function sendQuickQuestion(question) {
+    document.getElementById('messageInput').value = question;
+    sendMessage();
+}
+
+function addMessage(message, sender) {
+    const messagesContainer = document.getElementById('chatMessages');
+    
+    // Remove empty state if exists
+    const emptyState = messagesContainer.querySelector('.text-center');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex items-start mb-4 ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = `w-10 h-10 rounded-full flex items-center justify-center text-white text-sm mx-2 ${
+        sender === 'user' 
+            ? 'bg-gradient-to-r from-blue-500 to-blue-600 order-2' 
+            : 'bg-gradient-to-r from-green-500 to-teal-500'
+    }`;
+    avatar.innerHTML = `<i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i>`;
+    
+    const content = document.createElement('div');
+    content.className = `max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+        sender === 'user'
+            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md'
+            : 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-500 rounded-bl-md shadow-sm'
+    }`;
+    
+    const messageText = document.createElement('div');
+    messageText.textContent = message;
+    
+    const timeText = document.createElement('div');
+    timeText.className = 'text-xs opacity-70 mt-1';
+    timeText.textContent = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
+    
+    content.appendChild(messageText);
+    content.appendChild(timeText);
+    
+    if (sender === 'user') {
+        messageDiv.appendChild(content);
+        messageDiv.appendChild(avatar);
+    } else {
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function showTypingIndicator() {
+    document.getElementById('typingIndicator').classList.remove('hidden');
+    document.getElementById('typingIndicator').classList.add('flex');
+    scrollToBottom();
+}
+
+function hideTypingIndicator() {
+    document.getElementById('typingIndicator').classList.add('hidden');
+    document.getElementById('typingIndicator').classList.remove('flex');
+}
+
+function scrollToBottom() {
+    const messagesContainer = document.getElementById('chatMessages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+</script>
+{% endblock extra_js %}

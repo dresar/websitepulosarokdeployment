@@ -1,0 +1,556 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .health-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+    }
+    .health-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+    .progress-ring-circle {
+        transition: stroke-dashoffset 0.35s;
+        transform-origin: 50% 50%;
+    }
+    .health-status-good { color: #10b981; }
+    .health-status-warning { color: #f59e0b; }
+    .health-status-danger { color: #ef4444; }
+    
+    /* Responsive fixes for percentage display */
+    .health-card {
+        min-height: 200px;
+    }
+    
+    .health-card .text-2xl {
+        font-size: 1.5rem;
+        line-height: 1.2;
+    }
+    
+    .health-card .text-xs {
+        font-size: 0.75rem;
+        word-break: break-word;
+    }
+    
+    /* Ensure progress bars don't overflow */
+    .w-full.bg-gray-200 {
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .health-card {
+            min-height: 180px;
+        }
+        
+        .health-card .text-2xl {
+            font-size: 1.25rem;
+        }
+        
+        .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="bg-gradient-to-br from-green-50 to-blue-100 dark:from-dark-800 dark:to-dark-900 min-h-screen">
+
+    <!-- Hero Section -->
+    <section class="relative py-12 md:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center" data-aos="fade-up">
+                <div class="inline-flex items-center px-4 py-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium mb-4">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Data Kesehatan
+                </div>
+                <h1 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                    Informasi <span class="text-green-600 dark:text-green-400">Kesehatan</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+                    Data dan statistik kesehatan masyarakat Desa Pulosarok
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Overview Cards -->
+    <section class="py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-aos="fade-up">
+                <!-- Total Balita -->
+                <div class="health-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-baby text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="total-balita">-</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Total Balita</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Anak usia 0-5 tahun</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Sehat</span>
+                            <span id="balita-sehat-pct">-%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" id="balita-sehat-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ibu Hamil -->
+                <div class="health-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-pink-100 dark:bg-pink-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-female text-pink-600 dark:text-pink-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="total-ibu-hamil">-</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ibu Hamil</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Sedang hamil</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Sehat</span>
+                            <span id="ibu-hamil-sehat-pct">-%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-pink-500 h-2 rounded-full" id="ibu-hamil-sehat-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stunting Cases -->
+                <div class="health-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-orange-100 dark:bg-orange-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-orange-600 dark:text-orange-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="total-stunting">-</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Kasus Stunting</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Perlu perhatian khusus</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Dari total balita</span>
+                            <span id="stunting-pct">-%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" id="stunting-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Immunization Coverage -->
+                <div class="health-card bg-white dark:bg-dark-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-syringe text-green-600 dark:text-green-400"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white" id="immunization-coverage">-%</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Cakupan Imunisasi</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Imunisasi lengkap</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            <span>Target 95%</span>
+                            <span id="immunization-target">95%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" id="immunization-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Charts Section -->
+    <section class="py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Growth Chart -->
+                <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6" data-aos="fade-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Grafik Pertumbuhan Balita</h3>
+                        <select id="growth-period" class="px-3 py-1 border border-gray-300 dark:border-dark-600 rounded-lg text-sm dark:bg-dark-700 dark:text-white">
+                            <option value="6">6 Bulan Terakhir</option>
+                            <option value="12">12 Bulan Terakhir</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="growth-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Nutrition Status -->
+                <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Status Gizi Balita</h3>
+                    <div class="space-y-6">
+                        <!-- Normal -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                                <span class="text-gray-900 dark:text-white font-medium">Gizi Baik</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-gray-600 dark:text-gray-300 mr-2" id="gizi-baik-count">-</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">(<span id="gizi-baik-pct">-%</span>)</span>
+                            </div>
+                        </div>
+
+                        <!-- Underweight -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-yellow-500 rounded-full mr-3"></div>
+                                <span class="text-gray-900 dark:text-white font-medium">Gizi Kurang</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-gray-600 dark:text-gray-300 mr-2" id="gizi-kurang-count">-</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">(<span id="gizi-kurang-pct">-%</span>)</span>
+                            </div>
+                        </div>
+
+                        <!-- Stunted -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-orange-500 rounded-full mr-3"></div>
+                                <span class="text-gray-900 dark:text-white font-medium">Stunting</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-gray-600 dark:text-gray-300 mr-2" id="stunting-count">-</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">(<span id="stunting-detail-pct">-%</span>)</span>
+                            </div>
+                        </div>
+
+                        <!-- Severely Stunted -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-red-500 rounded-full mr-3"></div>
+                                <span class="text-gray-900 dark:text-white font-medium">Stunting Berat</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-gray-600 dark:text-gray-300 mr-2" id="stunting-berat-count">-</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">(<span id="stunting-berat-pct">-%</span>)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mr-2"></i>
+                            <span class="text-sm text-blue-800 dark:text-blue-200 font-medium">Informasi</span>
+                        </div>
+                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-2">
+                            Data diperbarui setiap bulan berdasarkan hasil pemeriksaan posyandu
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Programs -->
+    <section class="py-8 md:py-12 bg-white dark:bg-dark-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Program <span class="text-green-600 dark:text-green-400">Kesehatan</span>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Program-program kesehatan yang sedang berjalan di desa
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Program 1 -->
+                <div class="bg-gray-50 dark:bg-dark-700 rounded-xl p-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="bg-green-100 dark:bg-green-900 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-apple-alt text-2xl text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Program Gizi Seimbang</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Edukasi dan pemberian makanan tambahan untuk balita dengan gizi kurang
+                    </p>
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-users mr-2"></i>
+                        <span id="program-gizi-peserta">- peserta</span>
+                    </div>
+                </div>
+
+                <!-- Program 2 -->
+                <div class="bg-gray-50 dark:bg-dark-700 rounded-xl p-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="bg-blue-100 dark:bg-blue-900 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-syringe text-2xl text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Imunisasi Rutin</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Program imunisasi lengkap untuk balita sesuai jadwal yang ditetapkan
+                    </p>
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-calendar mr-2"></i>
+                        <span>Setiap bulan</span>
+                    </div>
+                </div>
+
+                <!-- Program 3 -->
+                <div class="bg-gray-50 dark:bg-dark-700 rounded-xl p-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="bg-pink-100 dark:bg-pink-900 w-16 h-16 rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-heart text-2xl text-pink-600 dark:text-pink-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Kelas Ibu Hamil</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Edukasi kesehatan kehamilan dan persiapan persalinan untuk ibu hamil
+                    </p>
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-users mr-2"></i>
+                        <span id="program-ibu-hamil-peserta">- peserta</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Tips -->
+    <section class="py-8 md:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Tips <span class="text-blue-600 dark:text-blue-400">Kesehatan</span>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Tips kesehatan untuk menjaga kesehatan keluarga
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Tips for Children -->
+                <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-baby text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tips Kesehatan Balita</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Berikan ASI eksklusif hingga 6 bulan</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Lengkapi imunisasi sesuai jadwal</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Berikan makanan bergizi seimbang</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Rutin kontrol ke posyandu</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Jaga kebersihan lingkungan</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tips for Pregnant Women -->
+                <div class="bg-white dark:bg-dark-800 rounded-xl shadow-lg p-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-pink-100 dark:bg-pink-900 w-12 h-12 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-female text-pink-600 dark:text-pink-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tips Ibu Hamil</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Konsumsi makanan bergizi tinggi</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Rutin kontrol kehamilan</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Minum tablet tambah darah</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Hindari rokok dan alkohol</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mr-3 mt-1"></i>
+                            <span class="text-gray-600 dark:text-gray-300">Istirahat yang cukup</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+// Load health statistics
+fetch('/posyandu/api/health-stats/')
+    .then(response => response.json())
+    .then(data => {
+        // Update overview cards
+        document.getElementById('total-balita').textContent = data.total_balita || '0';
+        document.getElementById('total-ibu-hamil').textContent = data.total_ibu_hamil || '0';
+        document.getElementById('total-stunting').textContent = data.total_stunting || '0';
+        
+        // Calculate percentages with proper handling for zero division
+        const totalBalita = data.total_balita || 0;
+        const totalIbuHamil = data.total_ibu_hamil || 0;
+        
+        // Helper function to cap percentages at 999%
+        function capPercentage(value) {
+            return Math.min(Math.max(value, 0), 999);
+        }
+        
+        const balitaSehatPct = totalBalita > 0 ? capPercentage(Math.round((data.balita_sehat / totalBalita) * 100)) : 0;
+        const ibuHamilSehatPct = totalIbuHamil > 0 ? capPercentage(Math.round((data.ibu_hamil_sehat / totalIbuHamil) * 100)) : 0;
+        const stuntingPct = totalBalita > 0 ? capPercentage(Math.round((data.total_stunting / totalBalita) * 100)) : 0;
+        const immunizationCoverage = capPercentage(data.immunization_coverage || 0);
+        
+        // Update percentage displays
+        document.getElementById('balita-sehat-pct').textContent = balitaSehatPct + '%';
+        document.getElementById('ibu-hamil-sehat-pct').textContent = ibuHamilSehatPct + '%';
+        document.getElementById('stunting-pct').textContent = stuntingPct + '%';
+        document.getElementById('immunization-coverage').textContent = immunizationCoverage + '%';
+        
+        // Update progress bars
+        document.getElementById('balita-sehat-bar').style.width = balitaSehatPct + '%';
+        document.getElementById('ibu-hamil-sehat-bar').style.width = ibuHamilSehatPct + '%';
+        document.getElementById('stunting-bar').style.width = stuntingPct + '%';
+        document.getElementById('immunization-bar').style.width = immunizationCoverage + '%';
+        
+        // Update nutrition status
+        document.getElementById('gizi-baik-count').textContent = data.gizi_baik || '0';
+        document.getElementById('gizi-kurang-count').textContent = data.gizi_kurang || '0';
+        document.getElementById('stunting-count').textContent = data.total_stunting || '0';
+        document.getElementById('stunting-berat-count').textContent = data.stunting_berat || '0';
+        
+        const giziBaikPct = totalBalita > 0 ? capPercentage(Math.round((data.gizi_baik / totalBalita) * 100)) : 0;
+        const giziKurangPct = totalBalita > 0 ? capPercentage(Math.round((data.gizi_kurang / totalBalita) * 100)) : 0;
+        const stuntingDetailPct = totalBalita > 0 ? capPercentage(Math.round((data.total_stunting / totalBalita) * 100)) : 0;
+        const stuntingBeratPct = totalBalita > 0 ? capPercentage(Math.round((data.stunting_berat / totalBalita) * 100)) : 0;
+        
+        document.getElementById('gizi-baik-pct').textContent = giziBaikPct + '%';
+        document.getElementById('gizi-kurang-pct').textContent = giziKurangPct + '%';
+        document.getElementById('stunting-detail-pct').textContent = stuntingDetailPct + '%';
+        document.getElementById('stunting-berat-pct').textContent = stuntingBeratPct + '%';
+        
+        // Update program participants
+        document.getElementById('program-gizi-peserta').textContent = (data.program_gizi_peserta || 0) + ' peserta';
+        document.getElementById('program-ibu-hamil-peserta').textContent = (data.program_ibu_hamil_peserta || 0) + ' peserta';
+    })
+    .catch(error => {
+        console.error('Error loading health stats:', error);
+        // Set default values on error
+        document.querySelectorAll('[id$="-count"], [id$="-pct"], [id^="total-"]').forEach(el => {
+            if (el.textContent === '-' || el.textContent === '-%') {
+                el.textContent = el.id.includes('pct') ? '0%' : '0';
+            }
+        });
+    });
+
+// Simple chart implementation (you can replace with Chart.js for more advanced charts)
+function createSimpleChart() {
+    const canvas = document.getElementById('growth-chart');
+    const ctx = canvas.getContext('2d');
+    
+    // Sample data - replace with real data from API
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
+    const data = [45, 48, 52, 55, 58, 60];
+    
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 300;
+    
+    const padding = 40;
+    const chartWidth = canvas.width - 2 * padding;
+    const chartHeight = canvas.height - 2 * padding;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw axes
+    ctx.strokeStyle = '#e5e7eb';
+    ctx.lineWidth = 1;
+    
+    // Y-axis
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.stroke();
+    
+    // X-axis
+    ctx.beginPath();
+    ctx.moveTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.stroke();
+    
+    // Draw data line
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    
+    const stepX = chartWidth / (data.length - 1);
+    const maxValue = Math.max(...data);
+    const minValue = Math.min(...data);
+    const range = maxValue - minValue;
+    
+    data.forEach((value, index) => {
+        const x = padding + index * stepX;
+        const y = canvas.height - padding - ((value - minValue) / range) * chartHeight;
+        
+        if (index === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+        
+        // Draw data points
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+    
+    ctx.stroke();
+    
+    // Draw labels
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    
+    months.forEach((month, index) => {
+        const x = padding + index * stepX;
+        ctx.fillText(month, x, canvas.height - 10);
+    });
+}
+
+// Initialize chart when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(createSimpleChart, 1000); // Delay to ensure canvas is ready
+});
+
+// Redraw chart on window resize
+window.addEventListener('resize', createSimpleChart);
+
+</script>
+{% endblock content %}

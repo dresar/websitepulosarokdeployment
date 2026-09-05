@@ -1,0 +1,345 @@
+{% extends 'public/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .service-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .service-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .quick-access-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .quick-access-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .dark .quick-access-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-16 md:py-24 overflow-hidden">
+    {% if hero_image_url %}
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ hero_image_url }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/80 via-purple-600/80 to-indigo-700/80"></div>
+    {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700"></div>
+    {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center text-white">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Layanan Desa</h1>
+            <p class="text-xl md:text-2xl opacity-90 mb-8 max-w-3xl mx-auto">
+                Kami menyediakan berbagai layanan untuk memenuhi kebutuhan masyarakat Desa Pulosarok
+            </p>
+            <a href="#services" class="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-300 hover:transform hover:-translate-y-1 shadow-lg">
+                <i class="fas fa-arrow-down mr-2"></i>Lihat Layanan
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="services" class="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Layanan Tersedia</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Pilih layanan yang Anda butuhkan</p>
+        </div>
+        
+        <!-- True 2x2 Grid Layout for Services -->
+        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+            <!-- Document Services -->
+            <a href="{% url 'layanan:document_services' %}" class="service-card bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all duration-300">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <i class="fas fa-file-alt text-white text-sm sm:text-lg"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2 text-center">Layanan Dokumen</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-300 text-center mb-2 leading-tight">
+                    Dokumen kependudukan
+                </p>
+                <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center"><i class="fas fa-clock mr-1"></i>1-3 Hari</span>
+                    <span class="flex items-center"><i class="fas fa-check-circle mr-1"></i>Online</span>
+                </div>
+            </a>
+
+            <!-- Health Services -->
+            <a href="{% url 'layanan:posyandu_services' %}" class="service-card bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 hover:border-red-500 transition-all duration-300">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <i class="fas fa-heartbeat text-white text-sm sm:text-lg"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2 text-center">Layanan Kesehatan</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-300 text-center mb-2 leading-tight">
+                    Posyandu & imunisasi
+                </p>
+                <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center"><i class="fas fa-calendar mr-1"></i>Jadwal</span>
+                    <span class="flex items-center"><i class="fas fa-map-marker-alt mr-1"></i>Posyandu</span>
+                </div>
+            </a>
+
+            <!-- Business Services -->
+            <a href="{% url 'layanan:business_services' %}" class="service-card bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 hover:border-yellow-500 transition-all duration-300">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <i class="fas fa-briefcase text-white text-sm sm:text-lg"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2 text-center">Layanan Bisnis</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-300 text-center mb-2 leading-tight">
+                    Dukungan UMKM
+                </p>
+                <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center"><i class="fas fa-users mr-1"></i>Konsultasi</span>
+                    <span class="flex items-center"><i class="fas fa-handshake mr-1"></i>Bantuan</span>
+                </div>
+            </a>
+
+            <!-- Tourism Services -->
+            <a href="{% url 'layanan:tourism_services' %}" class="service-card bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 hover:border-cyan-500 transition-all duration-300">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <i class="fas fa-mountain text-white text-sm sm:text-lg"></i>
+                </div>
+                <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2 text-center">Pariwisata</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-300 text-center mb-2 leading-tight">
+                    Destinasi wisata
+                </p>
+                <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center"><i class="fas fa-camera mr-1"></i>Destinasi</span>
+                    <span class="flex items-center"><i class="fas fa-calendar-alt mr-1"></i>Event</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Additional Services - Smaller Cards -->
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">Layanan Tambahan</h3>
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <!-- Chat Services -->
+                <a href="{% url 'layanan:chat_layanan' %}" class="service-card bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 hover:border-purple-500 transition-all duration-300">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i class="fas fa-comments text-white text-xs sm:text-sm"></i>
+                    </div>
+                    <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 text-center">Chat Layanan</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-300 text-center mb-2 leading-tight">
+                        Tanya jawab
+                    </p>
+                    <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center"><i class="fas fa-clock mr-1"></i>24/7</span>
+                        <span class="flex items-center"><i class="fas fa-robot mr-1"></i>AI</span>
+                    </div>
+                </a>
+
+                <!-- Contact Services -->
+                <a href="#contact" class="service-card bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all duration-300">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <i class="fas fa-phone text-white text-xs sm:text-sm"></i>
+                    </div>
+                    <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1 text-center">Kontak Layanan</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-300 text-center mb-2 leading-tight">
+                        Hubungi tim
+                    </p>
+                    <div class="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center"><i class="fas fa-phone mr-1"></i>Telepon</span>
+                        <span class="flex items-center"><i class="fas fa-envelope mr-1"></i>Email</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-16 md:py-24 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Statistik Layanan</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Pencapaian layanan desa</p>
+        </div>
+        
+        <!-- 2x2 Grid Layout for Statistics -->
+        <div class="grid grid-cols-2 gap-4 sm:gap-6">
+            <div class="text-center bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <div class="text-2xl sm:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">{{ document_types_count }}</div>
+                <div class="text-sm sm:text-lg text-gray-600 dark:text-gray-300 font-medium">Jenis Dokumen</div>
+            </div>
+            <div class="text-center bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <div class="text-2xl sm:text-4xl font-bold text-green-600 dark:text-green-400 mb-2">{{ business_services_count }}</div>
+                <div class="text-sm sm:text-lg text-gray-600 dark:text-gray-300 font-medium">Layanan Bisnis</div>
+            </div>
+            <div class="text-center bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <div class="text-2xl sm:text-4xl font-bold text-red-600 dark:text-red-400 mb-2">{{ posyandu_locations_count }}</div>
+                <div class="text-sm sm:text-lg text-gray-600 dark:text-gray-300 font-medium">Posyandu Aktif</div>
+            </div>
+            <div class="text-center bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg">
+                <div class="text-2xl sm:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">{{ tourism_locations_count }}</div>
+                <div class="text-sm sm:text-lg text-gray-600 dark:text-gray-300 font-medium">Destinasi Wisata</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Access Section -->
+<section class="py-16 md:py-24 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Akses Cepat</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Layanan yang sering digunakan</p>
+        </div>
+        
+        <!-- 2x2 Grid Layout for Quick Access -->
+        <div class="grid grid-cols-2 gap-4 sm:gap-6">
+            <a href="{% url 'layanan:document_request' %}" class="quick-access-card bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:border-green-500 transition-all duration-300 text-center">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <i class="fas fa-file-plus text-white text-lg sm:text-xl"></i>
+                </div>
+                <h4 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">Ajukan Dokumen</h4>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Pengajuan online</p>
+            </a>
+            
+            <a href="{% url 'layanan:request_status' %}" class="quick-access-card bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:border-yellow-500 transition-all duration-300 text-center">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <i class="fas fa-search text-white text-lg sm:text-xl"></i>
+                </div>
+                <h4 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">Cek Status</h4>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Status pengajuan</p>
+            </a>
+            
+            <a href="{% url 'layanan:chat_layanan' %}" class="quick-access-card bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:border-purple-500 transition-all duration-300 text-center">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <i class="fas fa-comments text-white text-lg sm:text-xl"></i>
+                </div>
+                <h4 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">Chat Layanan</h4>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Tanya jawab</p>
+            </a>
+            
+            <a href="#contact" class="quick-access-card bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all duration-300 text-center">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <i class="fas fa-phone text-white text-lg sm:text-xl"></i>
+                </div>
+                <h4 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">Kontak Kami</h4>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Hubungi tim</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Announcements Section -->
+{% if recent_announcements %}
+<section class="py-16 md:py-24 bg-white dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Pengumuman Terbaru</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Informasi penting dari desa</p>
+        </div>
+        
+        <div class="max-w-4xl mx-auto">
+            {% for announcement in recent_announcements %}
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 mb-4 border-l-4 border-blue-500">
+                <h5 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ announcement.title }}</h5>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-calendar mr-2"></i>{{ announcement.created_at|date:"d F Y" }}
+                    {% if announcement.author %}
+                    <span class="ml-4"><i class="fas fa-user mr-2"></i>{{ announcement.author }}</span>
+                    {% endif %}
+                </p>
+            </div>
+            {% endfor %}
+            <div class="text-center mt-8">
+                <a href="{% url 'news:announcements' %}" class="inline-flex items-center px-6 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-600 hover:text-white transition-all duration-300">
+                    <i class="fas fa-list mr-2"></i>Lihat Semua Pengumuman
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Contact Section -->
+<section id="contact" class="py-16 md:py-24 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Hubungi Kami</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300">Tim layanan siap membantu Anda</p>
+        </div>
+        
+        <div class="max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-phone text-white text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Telepon</h4>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">Hubungi kami untuk konsultasi langsung</p>
+                    <a href="tel:+6281234567890" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-phone mr-2"></i>+62 812-3456-7890
+                    </a>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-envelope text-white text-xl"></i>
+                    </div>
+                    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Email</h4>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">Kirim pertanyaan melalui email</p>
+                    <a href="mailto:layanan@pulosarok.desa.id" class="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors">
+                        <i class="fas fa-envelope mr-2"></i>layanan@pulosarok.desa.id
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Add animation to service cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-in-up');
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all service cards
+    document.querySelectorAll('.service-card, .quick-access-card').forEach(card => {
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock extra_js %}

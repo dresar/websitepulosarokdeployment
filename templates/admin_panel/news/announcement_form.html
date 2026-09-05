@@ -1,0 +1,931 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block page_title %}{% if announcement %}Edit Pengumuman{% else %}Tambah Pengumuman{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .form-section h5 {
+        color: #333;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #007bff;
+    }
+    .required-field::after {
+        content: " *";
+        color: red;
+    }
+    .priority-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    .priority-low { background-color: #6c757d; }
+    .priority-normal { background-color: #17a2b8; }
+    .priority-high { background-color: #ffc107; }
+    .priority-urgent { background-color: #dc3545; }
+    .type-indicator {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .type-info { background-color: #d1ecf1; color: #0c5460; }
+    .type-warning { background-color: #fff3cd; color: #856404; }
+    .type-urgent { background-color: #f8d7da; color: #721c24; }
+    .type-schedule { background-color: #d4edda; color: #155724; }
+    .type-event { background-color: #e2e3e5; color: #383d41; }
+    .type-service { background-color: #cce5ff; color: #004085; }
+    .preview-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-top: 2rem;
+        border: 2px solid #e9ecef;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .preview-section h5 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid #007bff;
+        font-weight: 700;
+    }
+    .preview-content {
+        max-height: 500px;
+        overflow-y: auto;
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #dee2e6;
+    }
+    .preview-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    .preview-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    .preview-content::-webkit-scrollbar-thumb {
+        background: #007bff;
+        border-radius: 4px;
+    }
+    .preview-content::-webkit-scrollbar-thumb:hover {
+        background: #0056b3;
+    }
+    .datetime-input {
+        position: relative;
+    }
+    .datetime-input .form-control {
+        padding-right: 2.5rem;
+    }
+    .datetime-input .input-icon {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+    }
+    .form-check-custom {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .form-check-custom .form-check-input {
+        margin-top: 0.25rem;
+    }
+    .form-check-custom .form-check-label {
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{% if announcement %}Edit Pengumuman{% else %}Tambah Pengumuman{% endif %}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group mr-2">
+                <a href="{% url 'admin_panel:announcements_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                {% if announcement %}
+                <a href="{% url 'admin_panel:announcement_detail' announcement.pk %}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye"></i> Lihat
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="announcementForm" 
+          data-announcement-id="{% if announcement %}{{ announcement.id|escapejs }}{% else %}new{% endif %}">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h5><i class="fas fa-info-circle"></i> Informasi Dasar</h5>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group mb-3">
+                        <label for="title" class="form-label required-field">Judul Pengumuman</label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               value="{% if announcement %}{{ announcement.title }}{% endif %}" required>
+                        <div class="help-text">Judul yang jelas dan informatif</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="announcement_type" class="form-label required-field">Jenis Pengumuman</label>
+                        <select class="form-control" id="announcement_type" name="announcement_type" required>
+                            <option value="">Pilih Jenis</option>
+                            <option value="info" {% if announcement and announcement.announcement_type == 'info' %}selected{% endif %}>Informasi</option>
+                            <option value="warning" {% if announcement and announcement.announcement_type == 'warning' %}selected{% endif %}>Peringatan</option>
+                            <option value="urgent" {% if announcement and announcement.announcement_type == 'urgent' %}selected{% endif %}>Mendesak</option>
+                            <option value="schedule" {% if announcement and announcement.announcement_type == 'schedule' %}selected{% endif %}>Jadwal</option>
+                            <option value="event" {% if announcement and announcement.announcement_type == 'event' %}selected{% endif %}>Acara</option>
+                            <option value="service" {% if announcement and announcement.announcement_type == 'service' %}selected{% endif %}>Layanan</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="content" class="form-label required-field">Isi Pengumuman</label>
+                <textarea class="form-control" id="content" name="content" rows="6" required>{% if announcement %}{{ announcement.content }}{% endif %}</textarea>
+                <div class="help-text">Gunakan format yang jelas dan mudah dibaca</div>
+            </div>
+        </div>
+
+        <!-- Schedule & Duration -->
+        <div class="form-section">
+            <h5><i class="fas fa-calendar"></i> Jadwal & Durasi</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="start_date" class="form-label required-field">Tanggal Mulai</label>
+                        <div class="datetime-input">
+                            <input type="datetime-local" class="form-control" id="start_date" name="start_date" 
+                                   value="{% if announcement and announcement.start_date %}{{ announcement.start_date|date:'Y-m-d\TH:i' }}{% else %}{{ now|date:'Y-m-d\TH:i' }}{% endif %}" required>
+                            <i class="fas fa-calendar input-icon"></i>
+                        </div>
+                        <div class="help-text">Kapan pengumuman mulai ditampilkan</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="end_date" class="form-label">Tanggal Akhir</label>
+                        <div class="datetime-input">
+                            <input type="datetime-local" class="form-control" id="end_date" name="end_date" 
+                                   value="{% if announcement and announcement.end_date %}{{ announcement.end_date|date:'Y-m-d\TH:i' }}{% endif %}">
+                            <i class="fas fa-calendar-times input-icon"></i>
+                        </div>
+                        <div class="help-text">Kapan pengumuman berakhir (opsional)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority & Settings -->
+        <div class="form-section">
+            <h5><i class="fas fa-cog"></i> Prioritas & Pengaturan</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="priority" class="form-label">Prioritas</label>
+                        <select class="form-control" id="priority" name="priority">
+                            <option value="low" {% if announcement and announcement.priority == 'low' %}selected{% endif %}>Rendah</option>
+                            <option value="normal" {% if announcement and announcement.priority == 'normal' %}selected{% endif %}>Normal</option>
+                            <option value="high" {% if announcement and announcement.priority == 'high' %}selected{% endif %}>Tinggi</option>
+                            <option value="urgent" {% if announcement and announcement.priority == 'urgent' %}selected{% endif %}>Mendesak</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="target_audience" class="form-label">Target Audiens</label>
+                        <input type="text" class="form-control" id="target_audience" name="target_audience" 
+                               value="{% if announcement %}{{ announcement.target_audience }}{% endif %}" 
+                               placeholder="Contoh: Semua Warga, RT 01, dll">
+                        <div class="help-text">Siapa yang menjadi target pengumuman ini</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="location" class="form-label">Lokasi</label>
+                        <input type="text" class="form-control" id="location" name="location" 
+                               value="{% if announcement %}{{ announcement.location }}{% endif %}" 
+                               placeholder="Tempat acara atau lokasi terkait">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="contact_person" class="form-label">Narahubung</label>
+                        <input type="text" class="form-control" id="contact_person" name="contact_person" 
+                               value="{% if announcement %}{{ announcement.contact_person }}{% endif %}" 
+                               placeholder="Nama penanggung jawab">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="contact_phone" class="form-label">No. Telepon</label>
+                        <input type="text" class="form-control" id="contact_phone" name="contact_phone" 
+                               value="{% if announcement %}{{ announcement.contact_phone }}{% endif %}" 
+                               placeholder="Nomor telepon narahubung">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Display Settings -->
+        <div class="form-section">
+            <h5><i class="fas fa-eye"></i> Pengaturan Tampilan</h5>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-check-custom">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                               {% if announcement and announcement.status == 'published' %}checked{% elif not announcement %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">
+                            <i class="fas fa-play text-success"></i> Aktif
+                        </label>
+                        <div class="help-text">Pengumuman akan ditampilkan kepada pengguna</div>
+                    </div>
+                    
+                    <div class="form-check-custom">
+                        <input type="checkbox" class="form-check-input" id="is_pinned" name="is_pinned" 
+                               {% if announcement and announcement.is_pinned %}checked{% endif %}>
+                        <label class="form-check-label" for="is_pinned">
+                            <i class="fas fa-thumbtack text-warning"></i> Pin di Atas
+                        </label>
+                        <div class="help-text">Pengumuman akan selalu ditampilkan di bagian atas</div>
+                    </div>
+                    
+                    <div class="form-check-custom">
+                        <input type="checkbox" class="form-check-input" id="is_popup" name="is_popup" 
+                               {% if announcement and announcement.is_popup %}checked{% endif %}>
+                        <label class="form-check-label" for="is_popup">
+                            <i class="fas fa-external-link-alt text-info"></i> Tampilkan sebagai Popup
+                        </label>
+                        <div class="help-text">Pengumuman akan muncul sebagai popup saat halaman dimuat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <h5><i class="fas fa-eye"></i> Preview</h5>
+            <div class="preview-content" id="previewContent">
+                <div class="text-muted">Preview akan muncul di sini...</div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-section">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button type="button" class="btn btn-outline-secondary" onclick="saveDraft()">
+                        <i class="fas fa-save"></i> Simpan Draft
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="previewAnnouncement()">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                </div>
+                <div>
+                    <a href="{% url 'admin_panel:announcements_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> {% if announcement %}Update Pengumuman{% else %}Buat Pengumuman{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Update preview
+function updatePreview() {
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+    const announcementType = document.getElementById('announcement_type').value;
+    const priority = document.getElementById('priority').value;
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const isActive = document.getElementById('is_active').checked;
+    const isPinned = document.getElementById('is_pinned').checked;
+    const isPopup = document.getElementById('is_popup').checked;
+    const targetAudience = document.getElementById('target_audience').value;
+    const location = document.getElementById('location').value;
+    const contactPerson = document.getElementById('contact_person').value;
+    
+    let previewHtml = `
+        <div class="preview-announcement">
+            <style>
+                .preview-announcement {
+                    font-family: 'Poppins', sans-serif;
+                    line-height: 1.6;
+                }
+                .preview-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 2rem;
+                    border-radius: 15px;
+                    margin-bottom: 2rem;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .preview-header::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+                    opacity: 0.3;
+                }
+                .preview-title {
+                    font-size: 2rem;
+                    font-weight: 700;
+                    margin: 0 0 1rem 0;
+                    position: relative;
+                    z-index: 1;
+                }
+                .preview-meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                    align-items: center;
+                    position: relative;
+                    z-index: 1;
+                }
+                .preview-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem 1rem;
+                    border-radius: 25px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                    background: rgba(255,255,255,0.2);
+                    border: 1px solid rgba(255,255,255,0.3);
+                }
+                .preview-content {
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 15px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                    margin-bottom: 1.5rem;
+                }
+                .preview-info {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+                .preview-info-item {
+                    background: #f8f9fa;
+                    padding: 1rem;
+                    border-radius: 10px;
+                    border-left: 4px solid #007bff;
+                }
+                .preview-info-label {
+                    font-size: 0.8rem;
+                    color: #6c757d;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                }
+                .preview-info-value {
+                    color: #2c3e50;
+                    font-weight: 500;
+                }
+                .preview-status {
+                    display: flex;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                    margin-top: 1rem;
+                }
+                .preview-status-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem 1rem;
+                    border-radius: 20px;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                }
+                .preview-status-active { background: #d4edda; color: #155724; }
+                .preview-status-inactive { background: #f8d7da; color: #721c24; }
+                .preview-status-pinned { background: #fff3cd; color: #856404; }
+                .preview-status-popup { background: #d1ecf1; color: #0c5460; }
+            </style>
+    `;
+    
+    if (title) {
+        previewHtml += `
+            <div class="preview-header">
+                <h1 class="preview-title">${title}</h1>
+                <div class="preview-meta">
+        `;
+        
+        if (announcementType) {
+            const typeLabels = {
+                'info': '📢 Informasi',
+                'warning': '⚠️ Peringatan',
+                'urgent': '🚨 Mendesak',
+                'schedule': '📅 Jadwal',
+                'event': '🎉 Acara',
+                'service': '🔧 Layanan'
+            };
+            previewHtml += `<span class="preview-badge">${typeLabels[announcementType] || announcementType}</span>`;
+        }
+        
+        if (priority) {
+            const priorityLabels = {
+                'low': '🟢 Rendah',
+                'normal': '🔵 Normal',
+                'high': '🟡 Tinggi',
+                'urgent': '🔴 Mendesak'
+            };
+            previewHtml += `<span class="preview-badge">${priorityLabels[priority] || priority}</span>`;
+        }
+        
+        previewHtml += `</div></div>`;
+    }
+    
+    previewHtml += `<div class="preview-content">`;
+    
+    if (content) {
+        previewHtml += `<div style="font-size: 1.1rem; line-height: 1.8; color: #2c3e50;">${content.replace(/\n/g, '<br>')}</div>`;
+    }
+    
+    previewHtml += `</div>`;
+    
+    // Info section
+    if (targetAudience || location || contactPerson || startDate || endDate) {
+        previewHtml += `<div class="preview-info">`;
+        
+        if (targetAudience) {
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Target Audiens</div>
+                    <div class="preview-info-value">${targetAudience}</div>
+                </div>
+            `;
+        }
+        
+        if (location) {
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Lokasi</div>
+                    <div class="preview-info-value">${location}</div>
+                </div>
+            `;
+        }
+        
+        if (contactPerson) {
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Narahubung</div>
+                    <div class="preview-info-value">${contactPerson}</div>
+                </div>
+            `;
+        }
+        
+        if (startDate) {
+            const startDateObj = new Date(startDate);
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Tanggal Mulai</div>
+                    <div class="preview-info-value">📅 ${startDateObj.toLocaleString('id-ID')}</div>
+                </div>
+            `;
+        }
+        
+        if (endDate) {
+            const endDateObj = new Date(endDate);
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Tanggal Berakhir</div>
+                    <div class="preview-info-value">📅 ${endDateObj.toLocaleString('id-ID')}</div>
+                </div>
+            `;
+        }
+        
+        previewHtml += `</div>`;
+    }
+    
+    // Status section
+    previewHtml += `<div class="preview-status">`;
+    
+    if (isActive) {
+        previewHtml += `<div class="preview-status-item preview-status-active">✅ Aktif</div>`;
+    } else {
+        previewHtml += `<div class="preview-status-item preview-status-inactive">⏸️ Tidak Aktif</div>`;
+    }
+    
+    if (isPinned) {
+        previewHtml += `<div class="preview-status-item preview-status-pinned">📌 Dipin</div>`;
+    }
+    
+    if (isPopup) {
+        previewHtml += `<div class="preview-status-item preview-status-popup">🔗 Popup</div>`;
+    }
+    
+    previewHtml += `</div></div>`;
+    
+    if (!title && !content) {
+        previewHtml = `
+            <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">👀</div>
+                <h5>Preview akan muncul di sini...</h5>
+                <p>Mulai mengetik judul dan isi pengumuman untuk melihat preview</p>
+            </div>
+        `;
+    }
+    
+    document.getElementById('previewContent').innerHTML = previewHtml;
+}
+
+// Update preview when fields change
+['title', 'content', 'announcement_type', 'priority', 'start_date', 'end_date', 'is_active', 'is_pinned', 'is_popup', 'target_audience', 'location', 'contact_person'].forEach(fieldId => {
+    const element = document.getElementById(fieldId);
+    if (element) {
+        element.addEventListener('input', updatePreview);
+        element.addEventListener('change', updatePreview);
+    }
+});
+
+// Save as draft
+function saveDraft() {
+    const title = document.getElementById('title').value.trim();
+    
+    if (!title) {
+        alert('Judul pengumuman harus diisi untuk menyimpan draft');
+        return;
+    }
+    
+    // Show loading state
+    const draftBtn = document.querySelector('button[onclick="saveDraft()"]');
+    const originalText = draftBtn.innerHTML;
+    draftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan Draft...';
+    draftBtn.disabled = true;
+    
+    document.getElementById('announcementForm').submit();
+}
+
+// Preview announcement
+function previewAnnouncement() {
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+    const announcementType = document.getElementById('announcement_type').value;
+    const priority = document.getElementById('priority').value;
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const isActive = document.getElementById('is_active').checked;
+    const isPinned = document.getElementById('is_pinned').checked;
+    const isPopup = document.getElementById('is_popup').checked;
+    const targetAudience = document.getElementById('target_audience').value;
+    const location = document.getElementById('location').value;
+    const contactPerson = document.getElementById('contact_person').value;
+    
+    if (!title && !content) {
+        alert('Judul dan isi pengumuman harus diisi untuk preview');
+        return;
+    }
+    
+    let previewHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Preview Pengumuman</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+            <style>
+                body { 
+                    font-family: 'Poppins', sans-serif; 
+                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                    margin: 0;
+                    padding: 2rem;
+                }
+                .preview-container { 
+                    max-width: 900px; 
+                    margin: 0 auto; 
+                    background: white;
+                    border-radius: 20px;
+                    overflow: hidden;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                }
+                .preview-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 3rem;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .preview-header::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+                    opacity: 0.3;
+                }
+                .preview-title {
+                    font-size: 2.5rem;
+                    font-weight: 700;
+                    margin: 0 0 1.5rem 0;
+                    position: relative;
+                    z-index: 1;
+                }
+                .preview-meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1rem;
+                    align-items: center;
+                    position: relative;
+                    z-index: 1;
+                }
+                .preview-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                    background: rgba(255,255,255,0.2);
+                    border: 1px solid rgba(255,255,255,0.3);
+                }
+                .preview-content {
+                    padding: 3rem;
+                    font-size: 1.2rem;
+                    line-height: 1.8;
+                    color: #2c3e50;
+                }
+                .preview-info {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 1.5rem;
+                    margin: 2rem 0;
+                    padding: 0 3rem;
+                }
+                .preview-info-item {
+                    background: #f8f9fa;
+                    padding: 1.5rem;
+                    border-radius: 15px;
+                    border-left: 5px solid #007bff;
+                }
+                .preview-info-label {
+                    font-size: 0.9rem;
+                    color: #6c757d;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                    margin-bottom: 0.75rem;
+                }
+                .preview-info-value {
+                    color: #2c3e50;
+                    font-weight: 500;
+                    font-size: 1.1rem;
+                }
+                .preview-status {
+                    display: flex;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                    margin: 2rem 0;
+                    padding: 0 3rem;
+                }
+                .preview-status-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 500;
+                }
+                .preview-status-active { background: #d4edda; color: #155724; }
+                .preview-status-inactive { background: #f8d7da; color: #721c24; }
+                .preview-status-pinned { background: #fff3cd; color: #856404; }
+                .preview-status-popup { background: #d1ecf1; color: #0c5460; }
+            </style>
+        </head>
+        <body>
+            <div class="preview-container">
+    `;
+    
+    if (title) {
+        previewHtml += `
+            <div class="preview-header">
+                <h1 class="preview-title">${title}</h1>
+                <div class="preview-meta">
+        `;
+        
+        if (announcementType) {
+            const typeLabels = {
+                'info': '📢 Informasi',
+                'warning': '⚠️ Peringatan',
+                'urgent': '🚨 Mendesak',
+                'schedule': '📅 Jadwal',
+                'event': '🎉 Acara',
+                'service': '🔧 Layanan'
+            };
+            previewHtml += `<span class="preview-badge">${typeLabels[announcementType] || announcementType}</span>`;
+        }
+        
+        if (priority) {
+            const priorityLabels = {
+                'low': '🟢 Rendah',
+                'normal': '🔵 Normal',
+                'high': '🟡 Tinggi',
+                'urgent': '🔴 Mendesak'
+            };
+            previewHtml += `<span class="preview-badge">${priorityLabels[priority] || priority}</span>`;
+        }
+        
+        previewHtml += `</div></div>`;
+    }
+    
+    if (content) {
+        previewHtml += `<div class="preview-content">${content.replace(/\n/g, '<br>')}</div>`;
+    }
+    
+    // Info section
+    if (targetAudience || location || contactPerson || startDate || endDate) {
+        previewHtml += `<div class="preview-info">`;
+        
+        if (targetAudience) {
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Target Audiens</div>
+                    <div class="preview-info-value">${targetAudience}</div>
+                </div>
+            `;
+        }
+        
+        if (location) {
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Lokasi</div>
+                    <div class="preview-info-value">${location}</div>
+                </div>
+            `;
+        }
+        
+        if (contactPerson) {
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Narahubung</div>
+                    <div class="preview-info-value">${contactPerson}</div>
+                </div>
+            `;
+        }
+        
+        if (startDate) {
+            const startDateObj = new Date(startDate);
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Tanggal Mulai</div>
+                    <div class="preview-info-value">📅 ${startDateObj.toLocaleString('id-ID')}</div>
+                </div>
+            `;
+        }
+        
+        if (endDate) {
+            const endDateObj = new Date(endDate);
+            previewHtml += `
+                <div class="preview-info-item">
+                    <div class="preview-info-label">Tanggal Berakhir</div>
+                    <div class="preview-info-value">📅 ${endDateObj.toLocaleString('id-ID')}</div>
+                </div>
+            `;
+        }
+        
+        previewHtml += `</div>`;
+    }
+    
+    // Status section
+    previewHtml += `<div class="preview-status">`;
+    
+    if (isActive) {
+        previewHtml += `<div class="preview-status-item preview-status-active">✅ Aktif</div>`;
+    } else {
+        previewHtml += `<div class="preview-status-item preview-status-inactive">⏸️ Tidak Aktif</div>`;
+    }
+    
+    if (isPinned) {
+        previewHtml += `<div class="preview-status-item preview-status-pinned">📌 Dipin</div>`;
+    }
+    
+    if (isPopup) {
+        previewHtml += `<div class="preview-status-item preview-status-popup">🔗 Popup</div>`;
+    }
+    
+    previewHtml += `</div></div></body></html>`;
+    
+    const previewWindow = window.open('', '_blank', 'width=1200,height=800');
+    if (previewWindow) {
+        previewWindow.document.write(previewHtml);
+        previewWindow.document.close();
+    } else {
+        alert('Tidak dapat membuka jendela preview. Pastikan popup blocker dinonaktifkan.');
+    }
+}
+
+// Form validation
+document.getElementById('announcementForm').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    
+    if (!title) {
+        alert('Judul pengumuman harus diisi');
+        e.preventDefault();
+        return;
+    }
+    
+    if (!content) {
+        alert('Isi pengumuman harus diisi');
+        e.preventDefault();
+        return;
+    }
+    
+    if (!startDate) {
+        alert('Tanggal mulai harus diisi');
+        e.preventDefault();
+        return;
+    }
+    
+    if (endDate && startDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (end <= start) {
+            alert('Tanggal akhir harus lebih besar dari tanggal mulai');
+            e.preventDefault();
+            return;
+        }
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    submitBtn.disabled = true;
+    
+    // Re-enable button after 5 seconds as fallback
+    setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 5000);
+});
+
+// Set default start date to now
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const startDateInput = document.getElementById('start_date');
+    if (startDateInput && !startDateInput.value) {
+        startDateInput.value = now.toISOString().slice(0, 16);
+    }
+    
+    // Initialize preview
+    updatePreview();
+});
+</script>
+{% endblock %}

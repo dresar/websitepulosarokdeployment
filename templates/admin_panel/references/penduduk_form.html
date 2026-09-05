@@ -1,0 +1,1532 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block page_title %}{{ form_title|default:"Tambah Penduduk" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/references.css' %}">
+<style>
+/* Form Layout Improvements */
+.container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Card Improvements */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px 12px 0 0 !important;
+    border: none;
+    padding: 1.5rem;
+}
+
+.card-header h6 {
+    color: white !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Form Field Improvements */
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    min-height: 45px;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-1px);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Textarea specific */
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Select dropdown improvements */
+select.form-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Button Improvements */
+.btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Photo Upload Section */
+.beneficiary-photo-large {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.beneficiary-photo-large:hover {
+    border-color: #667eea;
+    transform: scale(1.02);
+}
+
+.beneficiary-photo-placeholder-large {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #6c757d;
+}
+
+/* Status Switch */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* Responsive Improvements */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0 10px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .form-control {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .beneficiary-photo-large {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Grid improvements */
+.row {
+    margin: 0 -10px;
+}
+
+.col-lg-8, .col-lg-4, .col-md-6, .col-md-3, .col-12 {
+    padding: 0 10px;
+}
+
+/* Breadcrumb improvements */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* Page header improvements */
+.h3 {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Invalid feedback */
+.invalid-feedback {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Loading states */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center">
+                <div class="mb-3 mb-lg-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-2">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_penduduk_list' %}">Penduduk</a>
+                            </li>
+                            <li class="breadcrumb-item active">{{ form_title|default:"Tambah" }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h2 mb-2 text-dark font-weight-bold">
+                        <i class="fas fa-{{ form_icon|default:'plus' }} text-primary mr-2"></i>
+                        {{ form_title|default:"Tambah Penduduk" }}
+                    </h1>
+                    <p class="text-muted mb-0">{{ form_subtitle|default:"Lengkapi data penduduk baru" }}</p>
+                </div>
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                    <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-outline-info">
+                        <i class="fas fa-file-import mr-1"></i>
+                        Import Data
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="exportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download mr-1"></i>
+                            Export
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdown">
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_csv' %}">
+                                <i class="fas fa-file-csv mr-2"></i>Export CSV
+                            </a>
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_excel' %}">
+                                <i class="fas fa-file-excel mr-2"></i>Export Excel
+                            </a>
+                            <a class="dropdown-item" href="{% url 'admin_panel:references_penduduk_export_pdf' %}">
+                                <i class="fas fa-file-pdf mr-2"></i>Export PDF
+                            </a>
+                        </div>
+                    </div>
+                    <button type="submit" form="pendudukForm" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i>
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="pendudukForm" method="post" action="{% url 'admin_panel:references_penduduk_save' %}" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% if penduduk.id %}
+            <input type="hidden" name="penduduk_id" value="{{ penduduk.id }}">
+        {% endif %}
+        
+        <div class="row">
+            <!-- Main Form -->
+            <div class="col-xl-9 col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-user mr-2"></i>
+                            Informasi Personal
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- NIK -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="nik" class="form-label">
+                                    NIK <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nik" name="nik" 
+                                       value="{{ penduduk.nik|default:'' }}" required 
+                                       maxlength="16" pattern="[0-9]{16}" 
+                                       title="NIK harus terdiri dari 16 digit angka">
+                                <div class="invalid-feedback">
+                                    NIK harus diisi dan terdiri dari 16 digit angka.
+                                </div>
+                            </div>
+
+                            <!-- Nama Lengkap -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="nama_lengkap" class="form-label">
+                                    Nama Lengkap <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" 
+                                       value="{{ penduduk.name|default:'' }}" required 
+                                       minlength="2" maxlength="100" 
+                                       pattern="[a-zA-Z\s.\-']+" 
+                                       title="Nama lengkap minimal 2 karakter, hanya huruf, spasi, titik, tanda hubung, dan apostrof">
+                                <div class="invalid-feedback">
+                                    Nama lengkap harus diisi.
+                                </div>
+                            </div>
+
+                            <!-- Tempat Lahir -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="tempat_lahir" class="form-label">
+                                    Tempat Lahir <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="tempat_lahir" name="tempat_lahir" 
+                                       value="{{ penduduk.birth_place|default:'' }}" required 
+                                       minlength="2" maxlength="100" 
+                                       pattern="[a-zA-Z\s.\-']+" 
+                                       title="Tempat lahir minimal 2 karakter, hanya huruf, spasi, titik, tanda hubung, dan apostrof">
+                                <div class="invalid-feedback">
+                                    Tempat lahir harus diisi.
+                                </div>
+                            </div>
+
+                            <!-- Tanggal Lahir -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="tanggal_lahir" class="form-label">
+                                    Tanggal Lahir <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" 
+                                       value="{{ penduduk.birth_date|date:'Y-m-d'|default:'' }}" required>
+                                <div class="invalid-feedback">
+                                    Tanggal lahir harus diisi.
+                                </div>
+                            </div>
+
+                            <!-- Jenis Kelamin -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="jenis_kelamin" class="form-label">
+                                    Jenis Kelamin <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="jenis_kelamin" name="jenis_kelamin" required>
+                                    <option value="">Pilih Jenis Kelamin</option>
+                                    {% for value, label in gender_choices %}
+                                        <option value="{{ value }}" {% if penduduk.gender == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Jenis kelamin harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- Agama -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="agama" class="form-label">
+                                    Agama <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="agama" name="agama" required>
+                                    <option value="">Pilih Agama</option>
+                                    {% for value, label in religion_choices %}
+                                        <option value="{{ value }}" {% if penduduk.religion == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Agama harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- Status Perkawinan -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="status_perkawinan" class="form-label">
+                                    Status Perkawinan <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="status_perkawinan" name="status_perkawinan" required>
+                                    <option value="">Pilih Status</option>
+                                    {% for value, label in marital_status_choices %}
+                                        <option value="{{ value }}" {% if penduduk.marital_status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Status perkawinan harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- Pekerjaan -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="pekerjaan" class="form-label">
+                                    Pekerjaan
+                                </label>
+                                <input type="text" class="form-control" id="pekerjaan" name="pekerjaan" 
+                                       value="{{ penduduk.occupation|default:'' }}">
+                            </div>
+
+                            <!-- Pendidikan Terakhir -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="education" class="form-label">
+                                    Pendidikan Terakhir
+                                </label>
+                                <select class="form-control" id="education" name="education">
+                                    <option value="">Pilih Pendidikan</option>
+                                    {% for value, label in education_choices %}
+                                        <option value="{{ value }}" {% if penduduk.education == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="col-12 mb-3">
+                                <label for="alamat" class="form-label">
+                                    Alamat Lengkap <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="alamat" name="alamat" rows="3" required>{{ penduduk.address|default:'' }}</textarea>
+                                <div class="invalid-feedback">
+                                    Alamat harus diisi.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alamat Detail -->
+                <div class="card shadow mt-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Alamat Detail
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Dusun -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="dusun" class="form-label">
+                                    Dusun <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="dusun" name="dusun" required>
+                                    <option value="">Pilih Dusun</option>
+                                    <!-- Options will be populated via JavaScript -->
+                                </select>
+                                <div class="invalid-feedback">
+                                    Dusun harus dipilih.
+                                </div>
+                            </div>
+
+                            <!-- Lorong -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="lorong" class="form-label">
+                                    Lorong
+                                </label>
+                                <select class="form-control" id="lorong" name="lorong">
+                                    <option value="">Pilih Lorong</option>
+                                    <!-- Options will be populated via JavaScript -->
+                                </select>
+                            </div>
+
+                            <!-- RW -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="rw" class="form-label">
+                                    RW
+                                </label>
+                                <select class="form-control" id="rw" name="rw">
+                                    <option value="">Pilih RW</option>
+                                    <!-- Options will be populated via JavaScript -->
+                                </select>
+                            </div>
+
+                            <!-- RT -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="rt" class="form-label">
+                                    RT
+                                </label>
+                                <select class="form-control" id="rt" name="rt">
+                                    <option value="">Pilih RT</option>
+                                    <!-- Options will be populated via JavaScript -->
+                                </select>
+                            </div>
+
+                            <!-- RT Number (Manual Input) -->
+                            <div class="col-lg-3 col-md-3 mb-3">
+                                <label for="rt_number" class="form-label">Nomor RT</label>
+                                <input type="text" class="form-control" id="rt_number" name="rt_number" 
+                                       value="{{ penduduk.rt_number|default:'' }}" maxlength="3" readonly>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Otomatis terisi dari pilihan RT
+                                </small>
+                            </div>
+
+                            <!-- RW Number (Manual Input) -->
+                            <div class="col-lg-3 col-md-3 mb-3">
+                                <label for="rw_number" class="form-label">Nomor RW</label>
+                                <input type="text" class="form-control" id="rw_number" name="rw_number" 
+                                       value="{{ penduduk.rw_number|default:'' }}" maxlength="3" readonly>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Otomatis terisi dari pilihan RW
+                                </small>
+                            </div>
+
+                            <!-- Nomor Rumah -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="house_number" class="form-label">Nomor Rumah</label>
+                                <input type="text" class="form-control" id="house_number" name="house_number" 
+                                       value="{{ penduduk.house_number|default:'' }}" maxlength="10">
+                            </div>
+
+                            <!-- Kode Pos -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="postal_code" class="form-label">Kode Pos</label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" 
+                                       value="{{ penduduk.postal_code|default:'' }}" maxlength="5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Kontak -->
+                <div class="card shadow mt-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-phone mr-2"></i>
+                            Informasi Kontak
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Nomor Telepon -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="phone_number" class="form-label">Nomor Telepon</label>
+                                <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                       value="{{ penduduk.phone_number|default:'' }}" maxlength="15" 
+                                       pattern="[\d\-+()\s]+" 
+                                       title="Nomor telepon hanya boleh mengandung angka, spasi, tanda hubung, tanda plus, dan kurung">
+                            </div>
+
+                            <!-- Nomor HP -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="mobile_number" class="form-label">Nomor HP</label>
+                                <input type="tel" class="form-control" id="mobile_number" name="mobile_number" 
+                                       value="{{ penduduk.mobile_number|default:'' }}" maxlength="15" 
+                                       pattern="[\d\-+()\s]+" 
+                                       title="Nomor HP hanya boleh mengandung angka, spasi, tanda hubung, tanda plus, dan kurung">
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ penduduk.email|default:'' }}">
+                            </div>
+
+                            <!-- Golongan Darah -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="blood_type" class="form-label">Golongan Darah</label>
+                                <select class="form-control" id="blood_type" name="blood_type">
+                                    <option value="">Pilih Golongan Darah</option>
+                                    {% for value, label in blood_type_choices %}
+                                        <option value="{{ value }}" {% if penduduk.blood_type == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informasi Keluarga -->
+                <div class="card shadow mt-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-users mr-2"></i>
+                            Informasi Keluarga
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Nomor KK -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="kk_number" class="form-label">Nomor Kartu Keluarga</label>
+                                <input type="text" class="form-control" id="kk_number" name="kk_number" 
+                                       value="{{ penduduk.kk_number|default:'' }}" maxlength="16" 
+                                       pattern="[0-9]{16}" title="Nomor KK harus terdiri dari 16 digit angka">
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Jika memilih "Kepala Keluarga", nomor KK akan digunakan untuk membuat data keluarga baru
+                                </small>
+                            </div>
+
+                            <!-- Hubungan dengan Kepala Keluarga -->
+                            <div class="col-lg-6 col-md-6 mb-3">
+                                <label for="relationship_to_head" class="form-label">Hubungan dengan Kepala Keluarga</label>
+                                <select class="form-control" id="relationship_to_head" name="relationship_to_head">
+                                    <option value="">Pilih Hubungan</option>
+                                    {% for value, label in relationship_choices %}
+                                        <option value="{{ value }}" {% if penduduk.relationship_to_head == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-xl-3 col-lg-4">
+                <!-- Photo Upload -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-camera mr-2"></i>
+                            Foto Profil
+                        </h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="beneficiary-photo-large mb-3" id="photoPreview">
+                            {% if penduduk.photo and penduduk.photo.url %}
+                                <img src="{{ penduduk.photo.url }}" alt="{{ penduduk.name }}" class="img-fluid rounded">
+                            {% else %}
+                                <div class="beneficiary-photo-placeholder-large">
+                                    <i class="fas fa-user fa-3x"></i>
+                                    <p class="mt-2 text-muted">Belum ada foto</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <input type="file" class="form-control-file d-none" id="photo" name="photo" accept="image/*">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('photo').click()">
+                            <i class="fas fa-upload mr-1"></i>
+                            Pilih Foto
+                        </button>
+                        <small class="form-text text-muted">
+                            Format: JPG, PNG. Maksimal 2MB
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-toggle-on mr-2"></i>
+                            Status
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" 
+                                       {% if penduduk.is_active %}checked{% endif %}>
+                                <label class="custom-control-label" for="is_active">
+                                    Data Aktif
+                                </label>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            Data yang tidak aktif tidak akan muncul dalam laporan.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i>
+                                Simpan Data
+                            </button>
+                            <a href="{% url 'admin_panel:references_penduduk_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times mr-1"></i>
+                                Batal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('Document ready, loading dusun options...');
+    loadDusunOptions();
+    
+    // Initialize relationship change handler
+    handleRelationshipChange();
+    
+    // Form validation
+    $('#pendudukForm').on('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+        
+        // Re-enable button after 5 seconds as fallback
+        setTimeout(function() {
+            submitBtn.prop('disabled', false).html(originalText);
+        }, 5000);
+    });
+    
+    // Photo preview and upload
+    $('#photo').change(function() {
+        previewPhoto(this);
+        uploadPhoto(this);
+    });
+    
+    // NIK validation
+    $('#nik').on('input', function() {
+        validateNIK(this);
+    });
+    
+    // KK validation
+    $('#kk_number').on('input', function() {
+        validateKK(this);
+    });
+    
+    // Nama lengkap validation
+    $('#nama_lengkap').on('input', function() {
+        validateNamaLengkap(this);
+    });
+    
+    // Tempat lahir validation
+    $('#tempat_lahir').on('input', function() {
+        validateTempatLahir(this);
+    });
+    
+    // Email validation
+    $('#email').on('input', function() {
+        validateEmail(this);
+    });
+    
+    // Phone validation
+    $('#phone_number, #mobile_number').on('input', function() {
+        validatePhone(this);
+    });
+    
+    // RT/RW validation
+    $('#rt_number, #rw_number').on('input', function() {
+        validateRT_RW(this);
+    });
+    
+    // Postal code validation
+    $('#postal_code').on('input', function() {
+        validatePostalCode(this);
+    });
+    
+    // House number validation
+    $('#house_number').on('input', function() {
+        validateHouseNumber(this);
+    });
+    
+    // Pekerjaan validation
+    $('#pekerjaan').on('input', function() {
+        validatePekerjaan(this);
+    });
+    
+    // Alamat validation
+    $('#alamat').on('input', function() {
+        validateAlamat(this);
+    });
+    
+    // Relationship to head change event
+    $('#relationship_to_head').on('change', function() {
+        handleRelationshipChange();
+    });
+    
+    // Dusun change event
+    $('#dusun').on('change', function() {
+        console.log('Dusun changed to:', $(this).val());
+        loadLorongOptions();
+        loadRWOptions();
+    });
+    
+    // RW change event
+    $('#rw').on('change', function() {
+        console.log('RW changed to:', $(this).val());
+        loadRTOptions();
+        updateRWNumber();
+    });
+    
+    // RT change event
+    $('#rt').on('change', function() {
+        console.log('RT changed to:', $(this).val());
+        updateRTNumber();
+    });
+});
+
+function loadDusunOptions() {
+    // Show loading state
+    const select = $('#dusun');
+    select.empty().append('<option value="">Memuat dusun...</option>');
+    
+    // Load dusun options from backend
+    fetch('{% url "admin_panel:api_references_dusun_list" %}')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Dusun API response:', data);
+            if (data.success && data.data && Array.isArray(data.data)) {
+                select.empty().append('<option value="">Pilih Dusun</option>');
+                
+                data.data.forEach(function(dusun) {
+                    const selected = '{{ penduduk.dusun.id|default:"" }}' == dusun.id ? 'selected' : '';
+                    select.append(`<option value="${dusun.id}" ${selected}>${dusun.nama || dusun.name}</option>`);
+                });
+                
+                // Load lorong and RW options after dusun is loaded
+                loadLorongOptions();
+                loadRWOptions();
+                
+                // If editing and dusun is selected, load RT options too
+                if ('{{ penduduk.dusun.id|default:"" }}') {
+                    setTimeout(function() {
+                        loadRTOptions();
+                    }, 500);
+                }
+            } else {
+                console.error('API returned success: false or no data:', data);
+                select.empty().append('<option value="">Error loading dusun</option>');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading dusun options:', error);
+            select.empty().append('<option value="">Error loading dusun</option>');
+        });
+}
+
+function loadLorongOptions() {
+    const dusunId = $('#dusun').val();
+    const select = $('#lorong');
+    
+    if (!dusunId) {
+        select.empty().append('<option value="">Pilih Lorong</option>');
+        return;
+    }
+    
+    // Show loading state
+    select.empty().append('<option value="">Memuat lorong...</option>');
+    
+    // Load lorong options based on selected dusun
+    fetch(`{% url "admin_panel:api_references_lorong_by_dusun" %}?dusun_id=${dusunId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Lorong API response:', data);
+            if (data.success && data.data) {
+                select.empty().append('<option value="">Pilih Lorong</option>');
+                
+                data.data.forEach(function(lorong) {
+                    const selected = '{{ penduduk.lorong.id|default:"" }}' == lorong.id ? 'selected' : '';
+                    select.append(`<option value="${lorong.id}" ${selected}>${lorong.nama_lorong}</option>`);
+                });
+            } else {
+                console.error('Lorong API returned success: false or no data');
+                select.empty().append('<option value="">Tidak ada lorong</option>');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading lorong options:', error);
+            select.empty().append('<option value="">Error loading lorong</option>');
+        });
+}
+
+function loadRWOptions() {
+    const dusunId = $('#dusun').val();
+    const select = $('#rw');
+    
+    if (!dusunId) {
+        select.empty().append('<option value="">Pilih RW</option>');
+        return;
+    }
+    
+    // Show loading state
+    select.empty().append('<option value="">Memuat RW...</option>');
+    
+    // Load RW options based on selected dusun
+    fetch(`/admin-panel/api/references/rw/by-dusun/${dusunId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('RW API response:', data);
+            if (data.success && data.data) {
+                select.empty().append('<option value="">Pilih RW</option>');
+                
+                data.data.forEach(function(rw) {
+                    const selected = '{{ rw_data.id|default:"" }}' == rw.id ? 'selected' : '';
+                    select.append(`<option value="${rw.id}" ${selected}>RW ${rw.rw_number}</option>`);
+                });
+                
+                // If editing and RW is selected, load RT options
+                if ('{{ rw_data.id|default:"" }}') {
+                    setTimeout(function() {
+                        loadRTOptions();
+                    }, 300);
+                }
+            } else {
+                console.error('RW API returned success: false or no data');
+                select.empty().append('<option value="">Tidak ada RW</option>');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading RW options:', error);
+            select.empty().append('<option value="">Error loading RW</option>');
+        });
+}
+
+function loadRTOptions() {
+    const rwId = $('#rw').val();
+    const select = $('#rt');
+    
+    if (!rwId) {
+        select.empty().append('<option value="">Pilih RT</option>');
+        return;
+    }
+    
+    // Show loading state
+    select.empty().append('<option value="">Memuat RT...</option>');
+    
+    // Load RT options based on selected RW
+    fetch(`/admin-panel/api/references/rt/by-rw/${rwId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('RT API response:', data);
+            if (data.success && data.data) {
+                select.empty().append('<option value="">Pilih RT</option>');
+                
+                data.data.forEach(function(rt) {
+                    const selected = '{{ rt_data.id|default:"" }}' == rt.id ? 'selected' : '';
+                    select.append(`<option value="${rt.id}" ${selected}>RT ${rt.rt_number}</option>`);
+                });
+                
+                // If editing and RT is selected, update RT number
+                if ('{{ rt_data.id|default:"" }}') {
+                    setTimeout(function() {
+                        updateRTNumber();
+                        updateRWNumber();
+                    }, 100);
+                }
+            } else {
+                console.error('RT API returned success: false or no data');
+                select.empty().append('<option value="">Tidak ada RT</option>');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading RT options:', error);
+            select.empty().append('<option value="">Error loading RT</option>');
+        });
+}
+
+function updateRWNumber() {
+    const rwSelect = $('#rw');
+    const rwNumberInput = $('#rw_number');
+    
+    if (rwSelect.val()) {
+        const selectedText = rwSelect.find('option:selected').text();
+        const rwNumber = selectedText.replace('RW ', '');
+        rwNumberInput.val(rwNumber);
+    } else {
+        rwNumberInput.val('');
+    }
+}
+
+function updateRTNumber() {
+    const rtSelect = $('#rt');
+    const rtNumberInput = $('#rt_number');
+    
+    if (rtSelect.val()) {
+        const selectedText = rtSelect.find('option:selected').text();
+        const rtNumber = selectedText.replace('RT ', '');
+        rtNumberInput.val(rtNumber);
+    } else {
+        rtNumberInput.val('');
+    }
+}
+
+function validateForm() {
+    let isValid = true;
+    const form = document.getElementById('pendudukForm');
+    
+    // Clear previous validation
+    form.classList.remove('was-validated');
+    
+    // Required fields
+    const requiredFields = ['nik', 'nama_lengkap', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'agama', 'status_perkawinan', 'alamat', 'dusun'];
+    
+    // Check if KK is required (for kepala keluarga)
+    const relationship = document.getElementById('relationship_to_head').value;
+    if (relationship === 'KEPALA_KELUARGA') {
+        requiredFields.push('kk_number');
+    }
+    
+    // Update RW and RT numbers from dropdown selections
+    updateRWNumber();
+    updateRTNumber();
+    
+    requiredFields.forEach(function(fieldName) {
+        const field = document.getElementById(fieldName);
+        if (!field.value.trim()) {
+            field.setCustomValidity('Field ini harus diisi');
+            isValid = false;
+        } else {
+            field.setCustomValidity('');
+        }
+    });
+    
+    // NIK validation (16 digit angka)
+    const nik = document.getElementById('nik');
+    if (nik.value) {
+        if (!/^\d{16}$/.test(nik.value)) {
+            nik.setCustomValidity('NIK harus terdiri dari 16 digit angka');
+            isValid = false;
+        } else {
+            nik.setCustomValidity('');
+        }
+    }
+    
+    // KK validation (16 digit angka)
+    const kk = document.getElementById('kk_number');
+    if (kk.value) {
+        if (!/^\d{16}$/.test(kk.value)) {
+            kk.setCustomValidity('Nomor KK harus terdiri dari 16 digit angka');
+            isValid = false;
+        } else {
+            kk.setCustomValidity('');
+        }
+    }
+    
+    // Nama lengkap validation (min 2 karakter, hanya huruf dan spasi)
+    const namaLengkap = document.getElementById('nama_lengkap');
+    if (namaLengkap.value) {
+        if (namaLengkap.value.length < 2) {
+            namaLengkap.setCustomValidity('Nama lengkap minimal 2 karakter');
+            isValid = false;
+        } else if (!/^[a-zA-Z\s\.\-\']+$/.test(namaLengkap.value)) {
+            namaLengkap.setCustomValidity('Nama lengkap hanya boleh mengandung huruf, spasi, titik, tanda hubung, dan apostrof');
+            isValid = false;
+        } else {
+            namaLengkap.setCustomValidity('');
+        }
+    }
+    
+    // Tempat lahir validation (min 2 karakter, hanya huruf dan spasi)
+    const tempatLahir = document.getElementById('tempat_lahir');
+    if (tempatLahir.value) {
+        if (tempatLahir.value.length < 2) {
+            tempatLahir.setCustomValidity('Tempat lahir minimal 2 karakter');
+            isValid = false;
+        } else if (!/^[a-zA-Z\s\.\-\']+$/.test(tempatLahir.value)) {
+            tempatLahir.setCustomValidity('Tempat lahir hanya boleh mengandung huruf, spasi, titik, tanda hubung, dan apostrof');
+            isValid = false;
+        } else {
+            tempatLahir.setCustomValidity('');
+        }
+    }
+    
+    // Date validation
+    const tanggalLahir = document.getElementById('tanggal_lahir');
+    if (tanggalLahir.value) {
+        const birthDate = new Date(tanggalLahir.value);
+        const today = new Date();
+        const minDate = new Date('1900-01-01');
+        
+        if (birthDate >= today) {
+            tanggalLahir.setCustomValidity('Tanggal lahir harus sebelum hari ini');
+            isValid = false;
+        } else if (birthDate < minDate) {
+            tanggalLahir.setCustomValidity('Tanggal lahir tidak boleh sebelum tahun 1900');
+            isValid = false;
+        } else {
+            tanggalLahir.setCustomValidity('');
+        }
+    }
+    
+    // Phone number validation
+    const phoneNumber = document.getElementById('phone_number');
+    if (phoneNumber.value) {
+        if (!/^[\d\-\+\(\)\s]+$/.test(phoneNumber.value)) {
+            phoneNumber.setCustomValidity('Nomor telepon hanya boleh mengandung angka, spasi, tanda hubung, tanda plus, dan kurung');
+            isValid = false;
+        } else {
+            phoneNumber.setCustomValidity('');
+        }
+    }
+    
+    // Mobile number validation
+    const mobileNumber = document.getElementById('mobile_number');
+    if (mobileNumber.value) {
+        if (!/^[\d\-\+\(\)\s]+$/.test(mobileNumber.value)) {
+            mobileNumber.setCustomValidity('Nomor HP hanya boleh mengandung angka, spasi, tanda hubung, tanda plus, dan kurung');
+            isValid = false;
+        } else {
+            mobileNumber.setCustomValidity('');
+        }
+    }
+    
+    // Email validation
+    const email = document.getElementById('email');
+    if (email.value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.value)) {
+            email.setCustomValidity('Format email tidak valid');
+            isValid = false;
+        } else {
+            email.setCustomValidity('');
+        }
+    }
+    
+    // RT validation (1-3 digit angka)
+    const rt = document.getElementById('rt_number');
+    if (rt.value) {
+        if (!/^\d{1,3}$/.test(rt.value)) {
+            rt.setCustomValidity('RT harus berupa 1-3 digit angka');
+            isValid = false;
+        } else if (parseInt(rt.value) < 1 || parseInt(rt.value) > 999) {
+            rt.setCustomValidity('RT harus antara 1-999');
+            isValid = false;
+        } else {
+            rt.setCustomValidity('');
+        }
+    }
+    
+    // RW validation (1-3 digit angka)
+    const rw = document.getElementById('rw_number');
+    if (rw.value) {
+        if (!/^\d{1,3}$/.test(rw.value)) {
+            rw.setCustomValidity('RW harus berupa 1-3 digit angka');
+            isValid = false;
+        } else if (parseInt(rw.value) < 1 || parseInt(rw.value) > 999) {
+            rw.setCustomValidity('RW harus antara 1-999');
+            isValid = false;
+        } else {
+            rw.setCustomValidity('');
+        }
+    }
+    
+    // Postal code validation (5 digit angka)
+    const postalCode = document.getElementById('postal_code');
+    if (postalCode.value) {
+        if (!/^\d{5}$/.test(postalCode.value)) {
+            postalCode.setCustomValidity('Kode pos harus berupa 5 digit angka');
+            isValid = false;
+        } else {
+            postalCode.setCustomValidity('');
+        }
+    }
+    
+    // House number validation (max 10 karakter, alfanumerik)
+    const houseNumber = document.getElementById('house_number');
+    if (houseNumber.value) {
+        if (!/^[a-zA-Z0-9\-\/]+$/.test(houseNumber.value)) {
+            houseNumber.setCustomValidity('Nomor rumah hanya boleh mengandung huruf, angka, tanda hubung, dan garis miring');
+            isValid = false;
+        } else {
+            houseNumber.setCustomValidity('');
+        }
+    }
+    
+    // Pekerjaan validation (min 2 karakter)
+    const pekerjaan = document.getElementById('pekerjaan');
+    if (pekerjaan.value) {
+        if (pekerjaan.value.length < 2) {
+            pekerjaan.setCustomValidity('Pekerjaan minimal 2 karakter');
+            isValid = false;
+        } else {
+            pekerjaan.setCustomValidity('');
+        }
+    }
+    
+    // Alamat validation (min 10 karakter)
+    const alamat = document.getElementById('alamat');
+    if (alamat.value) {
+        if (alamat.value.length < 10) {
+            alamat.setCustomValidity('Alamat minimal 10 karakter');
+            isValid = false;
+        } else {
+            alamat.setCustomValidity('');
+        }
+    }
+    
+    if (!isValid) {
+        form.classList.add('was-validated');
+    }
+    
+    return isValid;
+}
+
+function validateNIK(input) {
+    const nik = input.value;
+    if (nik && !/^\d{16}$/.test(nik)) {
+        input.setCustomValidity('NIK harus terdiri dari 16 digit angka');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateKK(input) {
+    const kk = input.value;
+    if (kk && !/^\d{16}$/.test(kk)) {
+        input.setCustomValidity('Nomor KK harus terdiri dari 16 digit angka');
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateNamaLengkap(input) {
+    const nama = input.value;
+    if (nama) {
+        if (nama.length < 2) {
+            input.setCustomValidity('Nama lengkap minimal 2 karakter');
+        } else if (!/^[a-zA-Z\s\.\-\']+$/.test(nama)) {
+            input.setCustomValidity('Nama lengkap hanya boleh mengandung huruf, spasi, titik, tanda hubung, dan apostrof');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateTempatLahir(input) {
+    const tempat = input.value;
+    if (tempat) {
+        if (tempat.length < 2) {
+            input.setCustomValidity('Tempat lahir minimal 2 karakter');
+        } else if (!/^[a-zA-Z\s\.\-\']+$/.test(tempat)) {
+            input.setCustomValidity('Tempat lahir hanya boleh mengandung huruf, spasi, titik, tanda hubung, dan apostrof');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateEmail(input) {
+    const email = input.value;
+    if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            input.setCustomValidity('Format email tidak valid');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validatePhone(input) {
+    const phone = input.value;
+    if (phone) {
+        if (!/^[\d\-\+\(\)\s]+$/.test(phone)) {
+            input.setCustomValidity('Nomor telepon hanya boleh mengandung angka, spasi, tanda hubung, tanda plus, dan kurung');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateRT_RW(input) {
+    const value = input.value;
+    if (value) {
+        if (!/^\d{1,3}$/.test(value)) {
+            input.setCustomValidity('Harus berupa 1-3 digit angka');
+        } else if (parseInt(value) < 1 || parseInt(value) > 999) {
+            input.setCustomValidity('Harus antara 1-999');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validatePostalCode(input) {
+    const postal = input.value;
+    if (postal) {
+        if (!/^\d{5}$/.test(postal)) {
+            input.setCustomValidity('Kode pos harus berupa 5 digit angka');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateHouseNumber(input) {
+    const house = input.value;
+    if (house) {
+        if (!/^[a-zA-Z0-9\-\/]+$/.test(house)) {
+            input.setCustomValidity('Nomor rumah hanya boleh mengandung huruf, angka, tanda hubung, dan garis miring');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validatePekerjaan(input) {
+    const pekerjaan = input.value;
+    if (pekerjaan) {
+        if (pekerjaan.length < 2) {
+            input.setCustomValidity('Pekerjaan minimal 2 karakter');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function validateAlamat(input) {
+    const alamat = input.value;
+    if (alamat) {
+        if (alamat.length < 10) {
+            input.setCustomValidity('Alamat minimal 10 karakter');
+        } else {
+            input.setCustomValidity('');
+        }
+    } else {
+        input.setCustomValidity('');
+    }
+}
+
+function handleRelationshipChange() {
+    const relationship = $('#relationship_to_head').val();
+    const kkField = $('#kk_number');
+    const kkLabel = kkField.closest('.col-lg-6').find('.form-label');
+    
+    if (relationship === 'KEPALA_KELUARGA') {
+        // Jika kepala keluarga, KK menjadi required
+        kkField.prop('required', true);
+        kkLabel.html('Nomor Kartu Keluarga <span class="text-danger">*</span>');
+        
+        // Tampilkan pesan info
+        showInfoMessage('Sebagai Kepala Keluarga, nomor KK wajib diisi dan akan digunakan untuk identifikasi keluarga.');
+    } else {
+        // Jika bukan kepala keluarga, KK tidak required
+        kkField.prop('required', false);
+        kkLabel.html('Nomor Kartu Keluarga');
+        
+        // Sembunyikan pesan info
+        hideInfoMessage();
+    }
+}
+
+function showInfoMessage(message) {
+    // Hapus pesan info yang ada
+    $('.relationship-info').remove();
+    
+    // Tambahkan pesan info baru
+    const infoHtml = `
+        <div class="relationship-info alert alert-info alert-dismissible fade show mt-2" role="alert">
+            <i class="fas fa-info-circle mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `;
+    
+    $('#relationship_to_head').closest('.col-lg-6').after(`<div class="col-12">${infoHtml}</div>`);
+}
+
+function hideInfoMessage() {
+    $('.relationship-info').remove();
+}
+
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#photoPreview').html(`
+                <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="width: 100%; height: 100%; object-fit: cover;">
+            `);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function uploadPhoto(input) {
+    if (input.files && input.files[0]) {
+        const formData = new FormData();
+        formData.append('photo', input.files[0]);
+        formData.append('penduduk_id', '{{ penduduk.id|default:"" }}');
+        
+        // Show loading state
+        const uploadBtn = $('button[onclick*="photo"]');
+        const originalText = uploadBtn.html();
+        uploadBtn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Uploading...');
+        uploadBtn.prop('disabled', true);
+        
+        // Upload photo - only if editing existing penduduk
+        {% if penduduk.id %}
+        fetch('{% url "admin_panel:references_penduduk_upload_photo" penduduk.id %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showNotification('Foto berhasil diupload!', 'success');
+                
+                // Update photo preview with server URL
+                if (data.photo_url) {
+                    $('#photoPreview').html(`
+                        <img src="${data.photo_url}" alt="Uploaded Photo" class="img-fluid rounded" style="width: 100%; height: 100%; object-fit: cover;">
+                    `);
+                }
+            } else {
+                showNotification(data.message || 'Gagal upload foto', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            showNotification('Error upload foto: ' + error.message, 'error');
+        })
+        .finally(() => {
+            // Restore button state
+            uploadBtn.html(originalText);
+            uploadBtn.prop('disabled', false);
+        });
+        {% else %}
+        // For new penduduk, just show preview
+        showNotification('Foto akan disimpan setelah data penduduk disimpan', 'info');
+        uploadBtn.html(originalText);
+        uploadBtn.prop('disabled', false);
+        {% endif %}
+    }
+}
+
+function showNotification(message, type) {
+    // Remove existing notifications
+    $('.notification').remove();
+    
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const notification = $(`
+        <div class="notification alert ${alertClass} alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas ${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(function() {
+        notification.alert('close');
+    }, 5000);
+}
+</script>
+{% endblock %}

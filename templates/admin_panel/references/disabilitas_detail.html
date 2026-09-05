@@ -1,0 +1,437 @@
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+{% load role_permissions %}
+
+{% block title %}Detail Disabilitas - Admin Panel{% endblock %}
+
+{% block page_title %}Detail Disabilitas{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Minimalist Design */
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+}
+
+.info-item {
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    border-left: 3px solid #007bff;
+}
+
+.info-label {
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    color: #212529;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.photo-container {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.photo-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+}
+
+.photo-placeholder-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #007bff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .info-item {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="detail-container">
+    <div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div class="mb-3 mb-md-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_dashboard' %}">Referensi</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'admin_panel:references_disabilitas_list' %}">Disabilitas</a>
+                            </li>
+                            <li class="breadcrumb-item active">Detail</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-1 text-dark font-weight-bold mt-2">
+                        <i class="fas fa-wheelchair text-primary mr-2"></i>
+                        Detail Disabilitas
+                    </h1>
+                    <p class="text-muted mb-0">Informasi lengkap data disabilitas</p>
+                </div>
+                <div class="d-flex">
+                    <a href="{% url 'admin_panel:references_disabilitas_list' %}" class="btn btn-outline-secondary mr-2">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Kembali
+                    </a>
+                    {% if user|can_change:"references" %}
+                    <a href="{% url 'admin_panel:references_disabilitas_edit' disabilitas.id %}" class="btn btn-warning mr-2">
+                        <i class="fas fa-edit mr-1"></i>
+                        Edit
+                    </a>
+                    {% endif %}
+                    {% if user|can_export:"references" %}
+                    <button class="btn btn-outline-info" onclick="exportData()">
+                        <i class="fas fa-download mr-1"></i>
+                        Export
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <!-- Photo and Basic Info -->
+        <div class="detail-card">
+            <div class="card-body">
+                <div class="photo-container">
+                    {% if disabilitas.penduduk.photo and disabilitas.penduduk.photo.url %}
+                        <img src="{{ disabilitas.penduduk.photo.url }}" alt="{{ disabilitas.penduduk.name }}" class="photo-large">
+                    {% else %}
+                        <div class="photo-placeholder-large">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                    <h5 class="mb-1">{{ disabilitas.penduduk.name }}</h5>
+                    <p class="text-muted mb-0">{{ disabilitas.penduduk.nik }}</p>
+                    {% if disabilitas.severity %}
+                        <span class="badge badge-{% if disabilitas.severity == 'ringan' %}success{% elif disabilitas.severity == 'sedang' %}warning{% else %}danger{% endif %} mt-2">
+                            {{ disabilitas.get_severity_display }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Aksi Cepat</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'admin_panel:references_penduduk_detail' disabilitas.penduduk.id %}" class="btn btn-info btn-custom">
+                        <i class="fas fa-user mr-2"></i>Lihat Data Penduduk
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- Disability Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-wheelchair mr-2"></i>Informasi Disabilitas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Jenis Disabilitas</div>
+                            <div class="info-value">
+                                <span class="badge badge-warning">{{ disabilitas.disability_type.name|default:"-" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Tingkat Keparahan</div>
+                            <div class="info-value">
+                                {% if disabilitas.severity %}
+                                    <span class="badge badge-{% if disabilitas.severity == 'ringan' %}success{% elif disabilitas.severity == 'sedang' %}warning{% else %}danger{% endif %}">
+                                        {{ disabilitas.get_severity_display }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Membutuhkan Bantuan</div>
+                            <div class="info-value">
+                                {% if disabilitas.needs_assistance %}
+                                    <span class="badge badge-warning">Ya</span>
+                                {% else %}
+                                    <span class="badge badge-success">Tidak</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                {% if disabilitas.is_active %}
+                                    <span class="badge badge-success">Aktif</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Tidak Aktif</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Deskripsi</div>
+                    <div class="info-value">{{ disabilitas.description|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-user mr-2"></i>Informasi Pribadi Lengkap
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nama Lengkap</div>
+                            <div class="info-value">{{ disabilitas.penduduk.name|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">NIK</div>
+                            <div class="info-value">{{ disabilitas.penduduk.nik|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Jenis Kelamin</div>
+                            <div class="info-value">
+                                <span class="badge badge-{% if disabilitas.penduduk.gender == 'L' %}primary{% else %}danger{% endif %}">
+                                    {{ disabilitas.penduduk.get_gender_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Umur</div>
+                            <div class="info-value">{{ disabilitas.penduduk.age }} tahun</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Tanggal Lahir</div>
+                            <div class="info-value">
+                                {% if disabilitas.penduduk.birth_date %}
+                                    {{ disabilitas.penduduk.birth_date|date:"d M Y" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Tempat Lahir</div>
+                            <div class="info-value">{{ disabilitas.penduduk.birth_place|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Agama</div>
+                            <div class="info-value">{{ disabilitas.penduduk.religion|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Pendidikan</div>
+                            <div class="info-value">{{ disabilitas.penduduk.get_education_display|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Pekerjaan</div>
+                            <div class="info-value">{{ disabilitas.penduduk.occupation|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Status Perkawinan</div>
+                            <div class="info-value">{{ disabilitas.penduduk.get_marital_status_display|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nomor Telepon</div>
+                            <div class="info-value">{{ disabilitas.penduduk.phone_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Dusun</div>
+                            <div class="info-value">
+                                {% if disabilitas.penduduk.dusun %}
+                                    <span class="badge badge-info">{{ disabilitas.penduduk.dusun.name }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">RT/RW</div>
+                            <div class="info-value">
+                                {% if disabilitas.penduduk.rt_number and disabilitas.penduduk.rw_number %}
+                                    RT {{ disabilitas.penduduk.rt_number }}/RW {{ disabilitas.penduduk.rw_number }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nomor Rumah</div>
+                            <div class="info-value">{{ disabilitas.penduduk.house_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Alamat Lengkap</div>
+                    <div class="info-value">{{ disabilitas.penduduk.full_address|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Family Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-users mr-2"></i>Informasi Keluarga
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nomor KK</div>
+                            <div class="info-value">{{ disabilitas.penduduk.kk_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Hubungan dengan Kepala Keluarga</div>
+                            <div class="info-value">{{ disabilitas.penduduk.get_relationship_to_head_display|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if disabilitas.penduduk.family %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Kepala Keluarga</div>
+                            <div class="info-value">{{ disabilitas.penduduk.family.head_of_family.name|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Jumlah Anggota Keluarga</div>
+                            <div class="info-value">{{ disabilitas.penduduk.family.members.count }} orang</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportData() {
+    // Implementasi export data
+    alert('Fitur export akan segera tersedia');
+}
+</script>
+{% endblock extra_js %}
